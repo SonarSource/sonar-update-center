@@ -121,13 +121,13 @@ public final class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
-      description = manifest.getDescription();
-      organization = manifest.getOrganization();
-      organizationUrl = manifest.getOrganizationUrl();
-      issueTrackerUrl = manifest.getIssueTrackerUrl();
-      license = manifest.getLicense();
-      homepageUrl = manifest.getHomepage();
-      termsConditionsUrl = manifest.getTermsConditionsUrl();
+      description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
+      organization = StringUtils.defaultIfEmpty(organization, manifest.getOrganization());
+      organizationUrl = StringUtils.defaultIfEmpty(organizationUrl, manifest.getOrganizationUrl());
+      issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
+      license = StringUtils.defaultIfEmpty(license, manifest.getLicense());
+      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
+      termsConditionsUrl = StringUtils.defaultIfEmpty(termsConditionsUrl, manifest.getTermsConditionsUrl());
     }
     return this;
   }
