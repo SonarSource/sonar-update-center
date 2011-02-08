@@ -142,8 +142,9 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
 
   /**
    * @parameter
+   * @since 1.1
    */
-  private String extendPlugin;
+  private String basePlugin;
 
   /**
    * @parameter expression="${sonar.skipDependenciesPackaging}"
@@ -209,8 +210,8 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return useChildFirstClassLoader;
   }
 
-  public String getExtendPlugin() {
-    return extendPlugin;
+  public String getBasePlugin() {
+    return basePlugin;
   }
 
   protected boolean isSkipDependenciesPackaging() {

@@ -183,8 +183,8 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
         archive.addManifestEntry(PluginManifest.USE_CHILD_FIRST_CLASSLOADER, "true");
       }
 
-      if (StringUtils.isNotBlank(getExtendPlugin())) {
-        archive.addManifestEntry(PluginManifest.EXTEND_PLUGIN, getExtendPlugin());
+      if (StringUtils.isNotBlank(getBasePlugin())) {
+        archive.addManifestEntry(PluginManifest.BASE_PLUGIN, getBasePlugin());
       }
 
       if (isSkipDependenciesPackaging()) {

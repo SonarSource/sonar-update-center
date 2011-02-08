@@ -59,7 +59,7 @@ public final class PluginManifest {
   /**
    * @since 1.1
    */
-  public static final String EXTEND_PLUGIN = "Extend-Plugin";
+  public static final String BASE_PLUGIN = "Plugin-Base";
 
   private String key;
   private String name;
@@ -76,7 +76,7 @@ public final class PluginManifest {
   private Date buildDate;
   private String issueTrackerUrl;
   private boolean useChildFirstClassLoader = false;
-  private String extendPlugin;
+  private String basePlugin;
 
   /**
    * Load the manifest from a JAR file.
@@ -123,7 +123,7 @@ public final class PluginManifest {
     this.issueTrackerUrl = attributes.getValue(ISSUE_TRACKER_URL);
     this.buildDate = toDate(attributes.getValue(BUILD_DATE), true);
     this.useChildFirstClassLoader = StringUtils.equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER), "true");
-    this.extendPlugin = attributes.getValue(EXTEND_PLUGIN);
+    this.basePlugin = attributes.getValue(BASE_PLUGIN);
 
     String deps = attributes.getValue(DEPENDENCIES);
     this.dependencies = StringUtils.split(StringUtils.defaultString(deps), ' ');
@@ -273,15 +273,15 @@ public final class PluginManifest {
   /**
    * @since 1.1
    */
-  public String getExtendPlugin() {
-    return extendPlugin;
+  public String getBasePlugin() {
+    return basePlugin;
   }
 
   /**
    * @since 1.1
    */
-  public PluginManifest setExtendPlugin(String extendPlugin) {
-    this.extendPlugin = extendPlugin;
+  public PluginManifest setBasePlugin(String key) {
+    this.basePlugin = basePlugin;
     return this;
   }
 
