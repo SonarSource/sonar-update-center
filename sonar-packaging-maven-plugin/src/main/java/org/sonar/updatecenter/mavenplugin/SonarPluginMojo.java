@@ -169,6 +169,17 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Description", PluginManifest.DESCRIPTION, getPluginDescription());
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
+
+      if (isUseChildFirstClassLoader()) {
+        getLog().info("    Uses child-first class loading strategy");
+        archive.addManifestEntry(PluginManifest.USE_CHILD_FIRST_CLASSLOADER, "true");
+      }
+
+      if (StringUtils.isNotBlank(getBasePlugin())) {
+        getLog().info("    Base plugin: " + getBasePlugin());
+        archive.addManifestEntry(PluginManifest.BASE_PLUGIN, getBasePlugin());
+      }
+
       addManifestProperty("Homepage", PluginManifest.HOMEPAGE, getPluginUrl());
       addManifestProperty("Sonar version", PluginManifest.SONAR_VERSION, getSonarPluginApiArtifact().getVersion());
       addManifestProperty("License", PluginManifest.LICENSE, getPluginLicense());
@@ -178,14 +189,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Issue Tracker URL", PluginManifest.ISSUE_TRACKER_URL, getPluginIssueTrackerUrl());
       addManifestProperty("Build date", PluginManifest.BUILD_DATE, FormatUtils.toString(new Date(), true));
       getLog().info("-------------------------------------------------------");
-
-      if (isUseChildFirstClassLoader()) {
-        archive.addManifestEntry(PluginManifest.USE_CHILD_FIRST_CLASSLOADER, "true");
-      }
-
-      if (StringUtils.isNotBlank(getBasePlugin())) {
-        archive.addManifestEntry(PluginManifest.BASE_PLUGIN, getBasePlugin());
-      }
 
       if (isSkipDependenciesPackaging()) {
         getLog().info("Skip packaging of dependencies");
