@@ -14,6 +14,7 @@ org.codehaus.sonar-plugins:sonar-flex-plugin
 org.codehaus.sonar-plugins:sonar-greenpepper-plugin
 org.codehaus.sonar-plugins:sonar-jacoco-plugin
 org.codehaus.sonar-plugins:sonar-jira-plugin
+org.codehaus.sonar-plugins:sonar-jmeter-plugin
 org.codehaus.sonar-plugins:sonar-ldap-plugin
 org.codehaus.sonar-plugins:sonar-motion-chart-plugin
 org.codehaus.sonar-plugins.pdf-report:sonar-pdfreport-plugin
