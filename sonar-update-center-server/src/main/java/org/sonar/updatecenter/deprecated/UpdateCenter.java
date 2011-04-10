@@ -156,7 +156,7 @@ public class UpdateCenter {
                 formatDevelopers(latest.getDevelopers())
             }
         );
-        FileUtils.writeStringToFile(new File(outputDirectory, "plugins/" +  latest.getKey() + ".html"), pluginInfoWidget);
+        FileUtils.writeStringToFile(new File(outputDirectory, "plugins/" +  latest.getKey() + ".html"), pluginInfoWidget, "UTF-8");
       }
 
       // TODO use logger
