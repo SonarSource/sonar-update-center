@@ -32,6 +32,7 @@ org.codehaus.sonar-plugins:sonar-radiator-plugin
 org.codehaus.sonar-plugins:sonar-rulesmeter-plugin
 org.codehaus.sonar-plugins:sonar-security-rules-plugin
 org.codehaus.sonar-plugins:sonar-sigmm-plugin
+org.codehaus.sonar-plugins:sonar-switch-off-violations-plugin
 org.codehaus.sonar-plugins:sonar-sonarj-plugin
 org.codehaus.sonar-plugins:sonar-taglist-plugin
 org.codehaus.sonar-plugins:sonar-technicaldebt-plugin
