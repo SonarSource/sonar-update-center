@@ -281,7 +281,7 @@ public final class PluginManifest {
    * @since 1.1
    */
   public PluginManifest setBasePlugin(String key) {
-    this.basePlugin = basePlugin;
+    this.basePlugin = key;
     return this;
   }
 
