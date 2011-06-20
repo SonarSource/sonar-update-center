@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -97,7 +98,7 @@ public class Plugin implements Versioned {
   }
 
   public String getReleaseDate() {
-    return (new SimpleDateFormat("d MMM yyyy")).format(new Date(timestamp));
+    return (new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)).format(new Date(timestamp));
   }
 
   private void setDate(long timestamp) {
