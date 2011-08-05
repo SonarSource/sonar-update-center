@@ -89,7 +89,7 @@ public class UpdateCenter {
     remoteRepositories = Collections.singletonList( // TODO add SonarSource repository with commercial plugins
         artifactRepositoryFactory.createArtifactRepository(
             "codehaus",
-            "https://nexus.codehaus.org/content/groups/public/",
+            "http://repository.codehaus.org",
             new DefaultRepositoryLayout(),
             policy,
             policy
@@ -103,16 +103,7 @@ public class UpdateCenter {
         policy,
         policy
     );
-    // Do work
-    JSONObject obj = new JSONObject();
-
-    obj.put("version", "1"); // We can bump this version, when we make incompatible changes
-    obj.put("plugins", resolvePlugins());
-    obj.put("sonar", resolveSonar());
-
-    if (outputDirectory != null) {
-      FileUtils.writeStringToFile(new File(outputDirectory, "update-center.json"), obj.toJSONString());
-    }
+    resolvePlugins();
   }
 
   private JSONArray resolvePlugins() throws Exception {
@@ -182,26 +173,6 @@ public class UpdateCenter {
 
   private String formatLink(String url) {
     return StringUtils.isBlank(url) ? "Unknown" : "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>";
-  }
-
-  private JSONObject resolveSonar() throws Exception {
-    Artifact artifact = artifactFactory.createArtifact(
-        "org.codehaus.sonar",
-        "sonar-plugin-api",
-        Artifact.LATEST_VERSION,
-        Artifact.SCOPE_COMPILE,
-        ARTIFACT_JAR_TYPE
-    );
-
-    List<ArtifactVersion> versions = filterSnapshots(
-        metadataSource.retrieveAvailableVersions(artifact, localRepository, remoteRepositories)
-    );
-    History<Sonar> history = new History<Sonar>();
-    for (ArtifactVersion version : versions) {
-      history.addArtifact(version, new Sonar(version.toString()));
-    }
-
-    return history.latest().toJsonObject();
   }
 
   private String getPluginDownloadUrl(String groupId, String artifactId, String version) {
