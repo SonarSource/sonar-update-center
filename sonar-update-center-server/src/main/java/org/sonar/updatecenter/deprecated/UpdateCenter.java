@@ -89,7 +89,7 @@ public class UpdateCenter {
     remoteRepositories = Collections.singletonList( // TODO add SonarSource repository with commercial plugins
         artifactRepositoryFactory.createArtifactRepository(
             "codehaus",
-            "http://repository.codehaus.org/",
+            "https://nexus.codehaus.org/content/groups/public/",
             new DefaultRepositoryLayout(),
             policy,
             policy
@@ -204,7 +204,7 @@ public class UpdateCenter {
     return history.latest().toJsonObject();
   }
 
-  private String getDownloadUrl(String groupId, String artifactId, String version) {
+  private String getPluginDownloadUrl(String groupId, String artifactId, String version) {
     // FIXME dirty hack
     return "http://repository.codehaus.org/"
         + StringUtils.replace(groupId, ".", "/") + "/"
@@ -252,7 +252,7 @@ public class UpdateCenter {
         plugin.setRequiredSonarVersion(sonarVersion);
         plugin.setHomepage(project.getUrl());
       }
-      plugin.setDownloadUrl(getDownloadUrl(groupId, artifactId, plugin.getVersion()));
+      plugin.setDownloadUrl(getPluginDownloadUrl(groupId, artifactId, plugin.getVersion()));
       // There is no equivalent for following properties in MANIFEST.MF
       if (project.getIssueManagement() != null) {
         plugin.setIssueTracker(project.getIssueManagement().getUrl());
