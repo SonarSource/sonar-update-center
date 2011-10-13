@@ -83,7 +83,7 @@ public class UpdateCenter {
     // Init repositories
     ArtifactRepositoryPolicy policy = new ArtifactRepositoryPolicy(
         true,
-        ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY,
+        ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS,
         ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
     );
     remoteRepositories = Collections.singletonList( // TODO add SonarSource repository with commercial plugins
