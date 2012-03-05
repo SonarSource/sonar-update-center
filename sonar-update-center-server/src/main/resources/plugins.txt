@@ -29,6 +29,7 @@ org.codehaus.sonar-plugins.pdf-report:sonar-pdfreport-plugin
 org.codehaus.sonar-plugins.php:sonar-php-plugin
 org.codehaus.sonar-plugins:sonar-piwik-plugin
 org.codehaus.sonar-plugins:sonar-plugin-taglist
+org.codehaus.sonar-plugins:sonar-python-plugin
 org.codehaus.sonar-plugins:sonar-quality-index-plugin
 org.codehaus.sonar-plugins:sonar-radiator-plugin
 org.codehaus.sonar-plugins:sonar-rulesmeter-plugin
