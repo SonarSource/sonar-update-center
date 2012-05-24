@@ -11,6 +11,7 @@ org.codehaus.sonar-plugins:sonar-clover-plugin
 org.codehaus.sonar-plugins:sonar-cutoff-plugin
 org.codehaus.sonar-plugins:sonar-crowd-plugin
 org.codehaus.sonar-plugins:sonar-csv-export-plugin
+org.codehaus.sonar-plugins:sonar-cxx-plugin
 org.codehaus.sonar-plugins:sonar-delphi-plugin
 org.codehaus.sonar-plugins:sonar-email-plugin
 org.codehaus.sonar-plugins:sonar-emma-plugin
