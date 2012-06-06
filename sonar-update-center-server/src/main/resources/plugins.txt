@@ -40,6 +40,7 @@ org.codehaus.sonar-plugins:sonar-switch-off-violations-plugin
 org.codehaus.sonar-plugins:sonar-sonarj-plugin
 org.codehaus.sonar-plugins:sonar-taglist-plugin
 org.codehaus.sonar-plugins:sonar-technicaldebt-plugin
+org.codehaus.sonar-plugins:sonar-thucydides-plugin
 org.codehaus.sonar-plugins:sonar-timeline-plugin
 org.codehaus.sonar-plugins:sonar-total-quality-plugin
 org.codehaus.sonar-plugins:sonar-trac-plugin
