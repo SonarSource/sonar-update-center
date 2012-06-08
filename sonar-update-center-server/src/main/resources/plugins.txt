@@ -19,7 +19,7 @@ org.codehaus.sonar-plugins:sonar-fb-contrib-plugin
 org.codehaus.sonar-plugins:sonar-flex-plugin
 org.codehaus.sonar-plugins:sonar-greenpepper-plugin
 org.codehaus.sonar-plugins:sonar-jacoco-plugin
-org.codehaus.sonar-plugins:sonar-javascript-plugin
+org.codehaus.sonar-plugins.javascript:sonar-javascript-plugin
 org.codehaus.sonar-plugins:sonar-jira-plugin
 org.codehaus.sonar-plugins.jmeter:sonar-jmeter-plugin
 org.codehaus.sonar-plugins:sonar-ldap-plugin
