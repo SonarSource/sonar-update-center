@@ -51,6 +51,7 @@ org.codehaus.sonar-plugins:sonar-web-plugin
 org.codehaus.sonar-plugins:sonar-useless-code-tracker-plugin
 org.codehaus.sonar-plugins:sonar-xml-plugin
 org.codehaus.sonar-plugins:sonar-google-calendar-plugin
+org.codehaus.sonar-plugins:sonar-googleanalytics-plugin
 org.codehaus.sonar-plugins:sonar-violationdensity-plugin
 org.codehaus.sonar-plugins.l10n:sonar-l10n-fr-plugin
 org.codehaus.sonar-plugins.l10n:sonar-l10n-es-plugin
