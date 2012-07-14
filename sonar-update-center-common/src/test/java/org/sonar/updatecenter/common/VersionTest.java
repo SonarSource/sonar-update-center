@@ -19,19 +19,39 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.junit.Test;
+
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.OrderingComparisons.greaterThan;
+import static org.hamcrest.number.OrderingComparisons.lessThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class VersionTest {
 
   @Test
-  public void testCompare() {
+  public void test_fields_of_snapshot_versions() {
+    Version version = Version.create("1.2.3-SNAPSHOT");
+    assertThat(version.getMajor(), is("1"));
+    assertThat(version.getMinor(), is("2"));
+    assertThat(version.getPatch(), is("3"));
+    assertThat(version.getPatch2(), is("0"));
+    assertThat(version.getQualifier(), is("SNAPSHOT"));
+  }
+
+  @Test
+  public void test_fields_of_releases() {
+    Version version = Version.create("1.2");
+    assertThat(version.getMajor(), is("1"));
+    assertThat(version.getMinor(), is("2"));
+    assertThat(version.getPatch(), is("0"));
+    assertThat(version.getPatch2(), is("0"));
+    assertThat(version.getQualifier(), is(""));
+  }
+
+  @Test
+  public void compare_releases() {
     Version version12 = Version.create("1.2");
     Version version121 = Version.create("1.2.1");
 
@@ -44,28 +64,30 @@ public class VersionTest {
   }
 
   @Test
-  @Ignore("TODO : support alpha, beta, snapshot versions")
-  public void testCompareReleaseAndSnapshot() {
+  public void compare_snapshots() {
     Version version12 = Version.create("1.2");
-    Version version12SNAPSHOT = Version.create("1.2-SNAPSHOT");
-
-    assertThat(version12.compareTo(version12SNAPSHOT), greaterThan(0));
-  }
-
-  @Test
-  public void snapshotEqualToRelease() {
-    Version version12 = Version.create("1.2");
-    Version version12SNAPSHOT = Version.create("1.2-SNAPSHOT");
-
-    assertThat(version12.compareTo(version12SNAPSHOT), is(0));
-  }
-
-  @Test
-  public void releaseCandidateEqualToRelease() {
-    Version version12 = Version.create("1.2");
+    Version version12Snapshot = Version.create("1.2-SNAPSHOT");
+    Version version121Snapshot = Version.create("1.2.1-SNAPSHOT");
     Version version12RC = Version.create("1.2-RC1");
 
-    assertThat(version12.compareTo(version12RC), is(0));
+    assertThat(version12.compareTo(version12Snapshot), greaterThan(0));
+    assertThat(version12Snapshot.compareTo(version12Snapshot), is(0));
+    assertThat(version121Snapshot.compareTo(version12Snapshot), greaterThan(0));
+    assertThat(version12Snapshot.compareTo(version12RC), greaterThan(0));
+  }
+
+  @Test
+  public void compare_release_candidates() {
+    Version version12 = Version.create("1.2");
+    Version version12Snapshot = Version.create("1.2-SNAPSHOT");
+    Version version12RC1 = Version.create("1.2-RC1");
+    Version version12RC2 = Version.create("1.2-RC2");
+
+    assertThat(version12RC1.compareTo(version12Snapshot), lessThan(0));
+    assertThat(version12RC1.compareTo(version12RC1), is(0));
+    assertThat(version12RC1.compareTo(version12RC2), lessThan(0));
+    assertThat(version12RC1.compareTo(version12), lessThan(0));
+
   }
 
   @Test
@@ -117,5 +139,15 @@ public class VersionTest {
     assertTrue(version.equals(version));
     assertTrue(version.equals(Version.create("1.2.3.4")));
     assertFalse(version.equals(Version.create("1.2.3.5")));
+  }
+
+  @Test
+  public void createRelease() {
+    Version version = Version.createRelease("1.2.3-SNAPSHOT");
+
+    assertThat(version.getMajor(), is("1"));
+    assertThat(version.getMinor(), is("2"));
+    assertThat(version.getPatch(), is("3"));
+    assertThat(version.getQualifier(), is(""));
   }
 }

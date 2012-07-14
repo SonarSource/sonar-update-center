@@ -31,12 +31,14 @@ public class Version implements Comparable<Version> {
   private String minor = "0";
   private String patch = "0";
   private String patch2 = "0";
+  private String qualifier;
   private String name;
 
   private Version(String version) {
     this.name = StringUtils.trimToEmpty(version);
-    this.name = StringUtils.substringBefore(this.name, "-"); // we don't care about snapshots and RCs for now
-    String[] split = StringUtils.split(name, '.');
+    this.qualifier = StringUtils.substringAfter(this.name, "-");
+    String numbers = StringUtils.substringBefore(this.name, "-");
+    String[] split = StringUtils.split(numbers, '.');
     if (split.length >= 1) {
       major = split[0];
       normalizedMajor = normalizePart(major);
@@ -79,6 +81,10 @@ public class Version implements Comparable<Version> {
     return name;
   }
 
+  public String getQualifier() {
+    return qualifier;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -87,18 +93,20 @@ public class Version implements Comparable<Version> {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
-    Version version = (Version) o;
-    if ( !normalizedMajor.equals(version.normalizedMajor)) {
+    Version other = (Version) o;
+    if (!normalizedMajor.equals(other.normalizedMajor)) {
       return false;
     }
-    if ( !normalizedMinor.equals(version.normalizedMinor)) {
+    if (!normalizedMinor.equals(other.normalizedMinor)) {
       return false;
     }
-    if ( !normalizedPatch.equals(version.normalizedPatch)) {
+    if (!normalizedPatch.equals(other.normalizedPatch)) {
       return false;
     }
-    if ( !normalizedPatch2.equals(version.normalizedPatch2)) {
+    if (!normalizedPatch2.equals(other.normalizedPatch2)) {
+      return false;
+    }
+    if (!qualifier.equals(other.qualifier)) {
       return false;
     }
     return true;
@@ -110,11 +118,11 @@ public class Version implements Comparable<Version> {
     result = 31 * result + normalizedMinor.hashCode();
     result = 31 * result + normalizedPatch.hashCode();
     result = 31 * result + normalizedPatch2.hashCode();
+    result = 31 * result + qualifier.hashCode();
     return result;
   }
 
   public int compareTo(Version other) {
-    // TODO : manage RC, alpha, ...
     int c = normalizedMajor.compareTo(other.normalizedMajor);
     if (c == 0) {
       c = normalizedMinor.compareTo(other.normalizedMinor);
@@ -123,6 +131,15 @@ public class Version implements Comparable<Version> {
         if (c == 0) {
           c = normalizedPatch2.compareTo(other.normalizedPatch2);
         }
+      }
+    }
+    if (c == 0) {
+      if ("".equals(qualifier)) {
+        c = ("".equals(other.qualifier) ? 0 : 1);
+      } else if ("".equals(other.qualifier)) {
+        c = -1;
+      } else {
+        c = qualifier.compareTo(other.qualifier);
       }
     }
     return c;
@@ -135,5 +152,13 @@ public class Version implements Comparable<Version> {
 
   public static Version create(String version) {
     return new Version(version);
+  }
+
+  /**
+   * Creates a version without the qualifier part. For example 1.2.3-SNAPSHOT
+   * and 2.0-RC1 are converted to 1.2.3 and 2.0.
+   */
+  public static Version createRelease(String version) {
+    return new Version(StringUtils.substringBefore(version, "-"));
   }
 }

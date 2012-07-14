@@ -103,7 +103,7 @@ public final class UpdateCenterSerializer {
       toProperties(sonar).store(output, "Generated file");
 
     } catch (IOException e) {
-      throw new RuntimeException("Fail to store Sonar properties to: " + toFile.getAbsolutePath(), e);
+      throw new IllegalStateException("Fail to store update center properties to: " + toFile.getAbsolutePath(), e);
 
     } finally {
       IOUtils.closeQuietly(output);

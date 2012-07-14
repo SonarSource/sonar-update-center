@@ -39,16 +39,6 @@ public abstract class Artifact implements Comparable<Artifact> {
     return this;
   }
 
-  public final Artifact setReleases(Collection<Release> releases) {
-    this.releases.clear();
-    if (releases != null) {
-      for (Release release : releases) {
-        addRelease(release);
-      }
-    }
-    return this;
-  }
-
   public final Release addRelease(Release release) {
     releases.add(release);
     return release;

@@ -21,15 +21,10 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.fest.assertions.Assertions.assertThat;
+
 
 public class ArtifactTest {
 
@@ -41,9 +36,9 @@ public class ArtifactTest {
 
     List<Artifact> list = Arrays.asList(b, a, c);
     Collections.sort(list);
-    assertThat(list.get(0), is(a));
-    assertThat(list.get(1), is(b));
-    assertThat(list.get(2), is(c));
+    assertThat(list.get(0)).isEqualTo(a);
+    assertThat(list.get(1)).isEqualTo(b);
+    assertThat(list.get(2)).isEqualTo(c);
   }
 
   @Test
@@ -54,17 +49,28 @@ public class ArtifactTest {
     artifact.addRelease(Version.create("1.5"));
 
     Iterator<Release> it = artifact.getReleases().iterator();
-    assertThat(it.next().getVersion().getName(), is("1.1"));
-    assertThat(it.next().getVersion().getName(), is("1.5"));
-    assertThat(it.next().getVersion().getName(), is("2.0"));
+    assertThat(it.next().getVersion().getName()).isEqualTo("1.1");
+    assertThat(it.next().getVersion().getName()).isEqualTo("1.5");
+    assertThat(it.next().getVersion().getName()).isEqualTo("2.0");
   }
 
   @Test
   public void equals() {
     FakeArtifact foo = new FakeArtifact("foo");
-    assertTrue(foo.equals(new FakeArtifact("foo")));
-    assertTrue(foo.equals(foo));
-    assertFalse(foo.equals(new FakeArtifact("bar")));
+    assertThat(foo.equals(new FakeArtifact("foo"))).isTrue();
+    assertThat(foo.equals(foo)).isTrue();
+    assertThat(foo.equals(new FakeArtifact("bar"))).isFalse();
+  }
+
+  @Test
+  public void getReleasesGreaterThan() {
+    FakeArtifact artifact = new FakeArtifact("fake");
+    artifact.addRelease(Version.create("2.0"));
+    artifact.addRelease(Version.create("1.1"));
+    artifact.addRelease(Version.create("1.5"));
+
+    SortedSet<Release> greaterReleases = artifact.getReleasesGreaterThan("1.2");
+    assertThat(greaterReleases).onProperty("version").containsOnly(Version.create("1.5"), Version.create("2.0"));
   }
 }
 
