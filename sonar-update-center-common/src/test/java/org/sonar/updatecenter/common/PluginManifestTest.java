@@ -26,10 +26,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.hamcrest.number.OrderingComparisons.greaterThan;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class PluginManifestTest {
 
@@ -41,26 +38,30 @@ public class PluginManifestTest {
   @Test
   public void testCreateManifest() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/checkstyle-plugin.jar");
+
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
-    assertThat(manifest.getKey(), is("checkstyle"));
-    assertThat(manifest.getName(), is("Checkstyle"));
-    assertThat(manifest.getMainClass(), is("org.sonar.plugins.checkstyle.CheckstylePlugin"));
-    assertThat(manifest.getVersion().length(), greaterThan(1));
-    assertThat(manifest.isUseChildFirstClassLoader(), is(false));
-    assertThat(manifest.getDependencies().length, is(4));
-    assertThat(manifest.getDependencies()[0], is("META-INF/lib/antlr-2.7.6.jar"));
+    assertThat(manifest.getKey()).isEqualTo("checkstyle");
+    assertThat(manifest.getName()).isEqualTo("Checkstyle");
+    assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
+    assertThat(manifest.getVersion().length()).isGreaterThan(1);
+    assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
+    assertThat(manifest.getDependencies()).hasSize(2);
+    assertThat(manifest.getDependencies()).containsOnly("META-INF/lib/antlr-2.7.7.jar", "META-INF/lib/checkstyle-5.5.jar");
+    assertThat(manifest.getImplementationBuild()).isEqualTo("b9283404030db9ce1529b1fadfb98331686b116d");
   }
 
   @Test
   public void doNotFailWhenNoOldPluginManifest() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/old-plugin.jar");
+
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
-    assertThat(manifest.getKey(), nullValue());
-    assertThat(manifest.getName(), nullValue());
-    assertThat(manifest.getMainClass(), is("org.sonar.plugins.checkstyle.CheckstylePlugin"));
-    assertThat(manifest.isUseChildFirstClassLoader(), is(false));
-    assertThat(manifest.getDependencies().length, is(0));
+    assertThat(manifest.getKey()).isNull();
+    assertThat(manifest.getName()).isNull();
+    assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
+    assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
+    assertThat(manifest.getDependencies()).isEmpty();
+    assertThat(manifest.getImplementationBuild()).isNull();
   }
 }

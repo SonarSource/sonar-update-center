@@ -61,6 +61,11 @@ public final class PluginManifest {
    */
   public static final String BASE_PLUGIN = "Plugin-Base";
 
+  /**
+   * @since 1.3
+   */
+  public static final String IMPLEMENTATION_BUILD = "Implementation-Build";
+
   private String key;
   private String name;
   private String mainClass;
@@ -77,6 +82,7 @@ public final class PluginManifest {
   private String issueTrackerUrl;
   private boolean useChildFirstClassLoader = false;
   private String basePlugin;
+  private String implementationBuild;
 
   /**
    * Load the manifest from a JAR file.
@@ -124,6 +130,7 @@ public final class PluginManifest {
     this.buildDate = toDate(attributes.getValue(BUILD_DATE), true);
     this.useChildFirstClassLoader = StringUtils.equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER), "true");
     this.basePlugin = attributes.getValue(BASE_PLUGIN);
+    this.implementationBuild = attributes.getValue(IMPLEMENTATION_BUILD);
 
     String deps = attributes.getValue(DEPENDENCIES);
     this.dependencies = StringUtils.split(StringUtils.defaultString(deps), ' ');
@@ -282,6 +289,21 @@ public final class PluginManifest {
    */
   public PluginManifest setBasePlugin(String key) {
     this.basePlugin = key;
+    return this;
+  }
+
+  /**
+   * @since 1.3
+   */
+  public String getImplementationBuild() {
+    return implementationBuild;
+  }
+
+  /**
+   * @since 1.3
+   */
+  public PluginManifest setImplementationBuild(String implementationBuild) {
+    this.implementationBuild = implementationBuild;
     return this;
   }
 
