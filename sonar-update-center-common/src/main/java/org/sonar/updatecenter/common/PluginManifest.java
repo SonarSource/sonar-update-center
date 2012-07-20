@@ -95,7 +95,7 @@ public final class PluginManifest {
         loadManifest(jar.getManifest());
       }
     } catch (Exception e) {
-      throw new RuntimeException("Unable to read plugin manifest from jar : " + file.getAbsolutePath(), e);
+      throw new IllegalStateException("Unable to read plugin manifest from jar : " + file.getAbsolutePath(), e);
     } finally {
       if (jar != null) {
         jar.close();

@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public final class Server {
-  private static Logger LOG = LoggerFactory.getLogger(Server.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Server.class);
 
   public void start() throws IOException, URISyntaxException {
     Configuration conf = new Configuration(System.getProperties());
@@ -52,7 +52,7 @@ public final class Server {
       for (Release release : plugin.getReleases()) {
         if (StringUtils.isNotBlank(release.getDownloadUrl())) {
           File jar = downloader.download(release.getDownloadUrl(), false);
-          if (jar!= null && jar.exists()) {
+          if (jar != null && jar.exists()) {
             masterJar = jar;
           } else {
             release.setDownloadUrl(null);

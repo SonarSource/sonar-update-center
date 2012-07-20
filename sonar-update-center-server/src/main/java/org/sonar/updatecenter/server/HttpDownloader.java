@@ -38,7 +38,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class HttpDownloader {
-  private static Logger LOG = LoggerFactory.getLogger(HttpDownloader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HttpDownloader.class);
 
   private File outputDir;
 
@@ -91,7 +91,7 @@ public class HttpDownloader {
     public byte[] handleResponse(HttpResponse response) throws IOException {
       HttpEntity entity = response.getEntity();
       if (response.getStatusLine().getStatusCode()!=200) {
-        throw new RuntimeException("Unvalid HTTP response: " + response.getStatusLine());
+        throw new IllegalStateException("Unvalid HTTP response: " + response.getStatusLine());
       }
       if (entity != null) {
         return EntityUtils.toByteArray(entity);

@@ -44,15 +44,11 @@ public final class MetadataFile {
         file = new File(conf.getSourcePath());
       }
       if (!file.exists()) {
-        throw new RuntimeException("The metadata file does not exist: " + file.getPath());
+        throw new IllegalStateException("The metadata file does not exist: " + file.getPath());
       }
       return file;
-
-    } catch (RuntimeException e) {
-      throw e;
-
     } catch (Exception e) {
-      throw new RuntimeException("Can not open the metadata file: " + conf.getSourcePath(), e);
+      throw new IllegalStateException("Can not open the metadata file: " + conf.getSourcePath(), e);
     }
   }
 
@@ -62,7 +58,7 @@ public final class MetadataFile {
       return UpdateCenterDeserializer.fromProperties(file);
 
     } catch (IOException e) {
-      throw new RuntimeException("Can not read properties from: " + file.getPath(), e);
+      throw new IllegalStateException("Can not read properties from: " + file.getPath(), e);
     }
   }
 

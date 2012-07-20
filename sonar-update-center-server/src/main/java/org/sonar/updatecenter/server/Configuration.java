@@ -36,7 +36,7 @@ public class Configuration {
   public static final String SOURCE_LOGIN = "login";
   public static final String SOURCE_PASSWORD = "password";
 
-  private static Logger LOG = LoggerFactory.getLogger(Configuration.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
   private Properties props;
   private File workingDir = null;  
 
@@ -66,7 +66,7 @@ public class Configuration {
         FileUtils.forceMkdir(workingDir);
 
       } catch (IOException e) {
-        throw new RuntimeException("Fail to create the working directory: " + workingDir.getAbsolutePath(), e);
+        throw new IllegalStateException("Fail to create the working directory: " + workingDir.getAbsolutePath(), e);
       }
     }
     return workingDir;
