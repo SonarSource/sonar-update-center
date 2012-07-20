@@ -17,25 +17,26 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.deprecated;
+package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.fest.assertions.Assertions.assertThat;
 
-/**
- * @author Evgeny Mandrikov
- */
 public class SonarTest {
   @Test
-  public void testToJsonObject() throws Exception {
-    /*
-    assertEquals(
-        "{\"downloadUrl\":\"http:\\/\\/dist.sonar.codehaus.org\\/sonar-2.0.zip\"" +
-            ",\"version\":\"2.0\"" +
-            "}",
-        new Sonar("2.0").toJsonObject().toJSONString()
-    );
-    */
+  public void setReleases() {
+    Sonar sonar = new Sonar().setReleases(new String[]{"3.1", "3.2"});
+
+    assertThat(sonar.getReleases()).containsOnly(new Release(sonar, "3.1"), new Release(sonar, "3.2"));
+    assertThat(sonar.getRelease(Version.create("3.1"))).isNotNull();
+    assertThat(sonar.getRelease(Version.create("3.2"))).isNotNull();
+    assertThat(sonar.getRelease(Version.create("3.3"))).isNull();
+    assertThat(sonar.getVersions()).containsOnly(Version.create("3.1"), Version.create("3.2"));
+  }
+
+  @Test
+  public void sonar_key() {
+    assertThat(new Sonar().getKey()).isEqualTo("sonar");
   }
 }

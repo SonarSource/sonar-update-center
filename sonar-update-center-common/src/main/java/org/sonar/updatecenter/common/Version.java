@@ -21,7 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.apache.commons.lang.StringUtils;
 
-public class Version implements Comparable<Version> {
+public final class Version implements Comparable<Version> {
 
   private String normalizedMajor = normalizePart("0");
   private String normalizedMinor = normalizePart("0");
@@ -106,10 +106,7 @@ public class Version implements Comparable<Version> {
     if (!normalizedPatch2.equals(other.normalizedPatch2)) {
       return false;
     }
-    if (!qualifier.equals(other.qualifier)) {
-      return false;
-    }
-    return true;
+    return qualifier.equals(other.qualifier);
   }
 
   @Override

@@ -21,33 +21,28 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertTrue;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.number.OrderingComparisons.greaterThan;
-import static org.hamcrest.number.OrderingComparisons.lessThan;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class VersionTest {
 
   @Test
   public void test_fields_of_snapshot_versions() {
     Version version = Version.create("1.2.3-SNAPSHOT");
-    assertThat(version.getMajor(), is("1"));
-    assertThat(version.getMinor(), is("2"));
-    assertThat(version.getPatch(), is("3"));
-    assertThat(version.getPatch2(), is("0"));
-    assertThat(version.getQualifier(), is("SNAPSHOT"));
+    assertThat(version.getMajor()).isEqualTo("1");
+    assertThat(version.getMinor()).isEqualTo("2");
+    assertThat(version.getPatch()).isEqualTo("3");
+    assertThat(version.getPatch2()).isEqualTo("0");
+    assertThat(version.getQualifier()).isEqualTo("SNAPSHOT");
   }
 
   @Test
   public void test_fields_of_releases() {
     Version version = Version.create("1.2");
-    assertThat(version.getMajor(), is("1"));
-    assertThat(version.getMinor(), is("2"));
-    assertThat(version.getPatch(), is("0"));
-    assertThat(version.getPatch2(), is("0"));
-    assertThat(version.getQualifier(), is(""));
+    assertThat(version.getMajor()).isEqualTo("1");
+    assertThat(version.getMinor()).isEqualTo("2");
+    assertThat(version.getPatch()).isEqualTo("0");
+    assertThat(version.getPatch2()).isEqualTo("0");
+    assertThat(version.getQualifier()).isEqualTo("");
   }
 
   @Test
@@ -55,12 +50,12 @@ public class VersionTest {
     Version version12 = Version.create("1.2");
     Version version121 = Version.create("1.2.1");
 
-    assertThat(version12.toString(), is("1.2"));
-    assertThat(version12.compareTo(version12), is(0));
-    assertThat(version121.compareTo(version121), is(0));
+    assertThat(version12.toString()).isEqualTo("1.2");
+    assertThat(version12.compareTo(version12)).isEqualTo(0);
+    assertThat(version121.compareTo(version121)).isEqualTo(0);
 
-    assertTrue(version121.compareTo(version12) > 0);
-    assertTrue(version12.compareTo(version121) < 0);
+    assertThat(version121.compareTo(version12) > 0).isTrue();
+    assertThat(version12.compareTo(version121) < 0).isTrue();
   }
 
   @Test
@@ -70,10 +65,10 @@ public class VersionTest {
     Version version121Snapshot = Version.create("1.2.1-SNAPSHOT");
     Version version12RC = Version.create("1.2-RC1");
 
-    assertThat(version12.compareTo(version12Snapshot), greaterThan(0));
-    assertThat(version12Snapshot.compareTo(version12Snapshot), is(0));
-    assertThat(version121Snapshot.compareTo(version12Snapshot), greaterThan(0));
-    assertThat(version12Snapshot.compareTo(version12RC), greaterThan(0));
+    assertThat(version12.compareTo(version12Snapshot)).isGreaterThan(0);
+    assertThat(version12Snapshot.compareTo(version12Snapshot)).isEqualTo(0);
+    assertThat(version121Snapshot.compareTo(version12Snapshot)).isGreaterThan(0);
+    assertThat(version12Snapshot.compareTo(version12RC)).isGreaterThan(0);
   }
 
   @Test
@@ -83,10 +78,10 @@ public class VersionTest {
     Version version12RC1 = Version.create("1.2-RC1");
     Version version12RC2 = Version.create("1.2-RC2");
 
-    assertThat(version12RC1.compareTo(version12Snapshot), lessThan(0));
-    assertThat(version12RC1.compareTo(version12RC1), is(0));
-    assertThat(version12RC1.compareTo(version12RC2), lessThan(0));
-    assertThat(version12RC1.compareTo(version12), lessThan(0));
+    assertThat(version12RC1.compareTo(version12Snapshot)).isLessThan(0);
+    assertThat(version12RC1.compareTo(version12RC1)).isEqualTo(0);
+    assertThat(version12RC1.compareTo(version12RC2)).isLessThan(0);
+    assertThat(version12RC1.compareTo(version12)).isLessThan(0);
 
   }
 
@@ -94,8 +89,8 @@ public class VersionTest {
   public void testTrim() {
     Version version12 = Version.create("   1.2  ");
 
-    assertThat(version12.getName(), is("1.2"));
-    assertTrue(version12.equals(Version.create("1.2")));
+    assertThat(version12.getName()).isEqualTo("1.2");
+    assertThat(version12.equals(Version.create("1.2"))).isTrue();
   }
 
   @Test
@@ -103,8 +98,8 @@ public class VersionTest {
     Version version12 = Version.create("1.2");
     Version version120 = Version.create("1.2.0");
 
-    assertTrue(version12.equals(version120));
-    assertTrue(version120.equals(version12));
+    assertThat(version12.equals(version120)).isTrue();
+    assertThat(version120.equals(version12)).isTrue();
   }
 
   @Test
@@ -113,41 +108,41 @@ public class VersionTest {
     Version version1dot1 = Version.create("1.1");
     Version version1dot9 = Version.create("1.9");
 
-    assertTrue(version1dot10.compareTo(version1dot1) > 0);
-    assertTrue(version1dot10.compareTo(version1dot9) > 0);
+    assertThat(version1dot10.compareTo(version1dot1) > 0).isTrue();
+    assertThat(version1dot10.compareTo(version1dot9) > 0).isTrue();
   }
 
   @Test
   public void testFields() {
     Version version = Version.create("1.10.2");
 
-    assertThat(version.getName(), is("1.10.2"));
-    assertThat(version.toString(), is("1.10.2"));
-    assertThat(version.getMajor(), is("1"));
-    assertThat(version.getMinor(), is("10"));
-    assertThat(version.getPatch(), is("2"));
-    assertThat(version.getPatch2(), is("0"));
+    assertThat(version.getName()).isEqualTo("1.10.2");
+    assertThat(version.toString()).isEqualTo("1.10.2");
+    assertThat(version.getMajor()).isEqualTo("1");
+    assertThat(version.getMinor()).isEqualTo("10");
+    assertThat(version.getPatch()).isEqualTo("2");
+    assertThat(version.getPatch2()).isEqualTo("0");
   }
 
   @Test
   public void testPatchFields() {
     Version version = Version.create("1.2.3.4");
 
-    assertThat(version.getPatch(), is("3"));
-    assertThat(version.getPatch2(), is("4"));
+    assertThat(version.getPatch()).isEqualTo("3");
+    assertThat(version.getPatch2()).isEqualTo("4");
 
-    assertTrue(version.equals(version));
-    assertTrue(version.equals(Version.create("1.2.3.4")));
-    assertFalse(version.equals(Version.create("1.2.3.5")));
+    assertThat(version.equals(version)).isTrue();
+    assertThat(version.equals(Version.create("1.2.3.4"))).isTrue();
+    assertThat(version.equals(Version.create("1.2.3.5"))).isFalse();
   }
 
   @Test
   public void createRelease() {
     Version version = Version.createRelease("1.2.3-SNAPSHOT");
 
-    assertThat(version.getMajor(), is("1"));
-    assertThat(version.getMinor(), is("2"));
-    assertThat(version.getPatch(), is("3"));
-    assertThat(version.getQualifier(), is(""));
+    assertThat(version.getMajor()).isEqualTo("1");
+    assertThat(version.getMinor()).isEqualTo("2");
+    assertThat(version.getPatch()).isEqualTo("3");
+    assertThat(version.getQualifier()).isEqualTo("");
   }
 }

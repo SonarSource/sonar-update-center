@@ -41,7 +41,6 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
@@ -82,26 +81,26 @@ public class UpdateCenter {
     ArtifactRepositoryFactory artifactRepositoryFactory = plexus.lookup(ArtifactRepositoryFactory.class);
     // Init repositories
     ArtifactRepositoryPolicy policy = new ArtifactRepositoryPolicy(
-        true,
-        ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS,
-        ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
+      true,
+      ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS,
+      ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN
     );
     remoteRepositories = Collections.singletonList( // TODO add SonarSource repository with commercial plugins
-        artifactRepositoryFactory.createArtifactRepository(
-            "codehaus",
-            "http://repository.codehaus.org",
-            new DefaultRepositoryLayout(),
-            policy,
-            policy
-        )
-    );
-    File localRepo = new File(new File(System.getProperty("user.home")), ".m2/repository");
-    localRepository = artifactRepositoryFactory.createArtifactRepository(
-        "local",
-        localRepo.toURI().toURL().toExternalForm(),
+      artifactRepositoryFactory.createArtifactRepository(
+        "codehaus",
+        "http://repository.codehaus.org",
         new DefaultRepositoryLayout(),
         policy,
         policy
+      )
+    );
+    File localRepo = new File(new File(System.getProperty("user.home")), ".m2/repository");
+    localRepository = artifactRepositoryFactory.createArtifactRepository(
+      "local",
+      localRepo.toURI().toURL().toExternalForm(),
+      new DefaultRepositoryLayout(),
+      policy,
+      policy
     );
     resolvePlugins();
   }
@@ -110,7 +109,7 @@ public class UpdateCenter {
     List<String> plugins = FileUtils.readLines(FileUtils.toFile(getClass().getResource("/plugins.txt")));
 
     String pluginInfoWidgetTemplate = FileUtils.readFileToString(
-        FileUtils.toFile(getClass().getResource("/plugin-info-widget-template.html"))
+      FileUtils.toFile(getClass().getResource("/plugin-info-widget-template.html"))
     );
     if (outputDirectory != null) {
       FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "plugins/style.css"));
@@ -133,21 +132,21 @@ public class UpdateCenter {
 
       if (outputDirectory != null) {
         String pluginInfoWidget = StringUtils.replaceEach(
-            pluginInfoWidgetTemplate,
-            new String[]{"%name%", "%version%", "%date%", "%downloadUrl%", "%sonarVersion%", "%issueTracker%", "%sources%", "%license%", "%developers%"},
-            new String[]{
-                latest.getName(),
-                latest.getVersion(),
-                latest.getReleaseDate(),
-                latest.getDownloadUrl(),
-                latest.getRequiredSonarVersion(),
-                formatLink(latest.getIssueTracker()),
-                formatLink(latest.getSources()),
-                latest.getLicense() == null ? "Unknown" : latest.getLicense(),
-                formatDevelopers(latest.getDevelopers())
-            }
+          pluginInfoWidgetTemplate,
+          new String[]{"%name%", "%version%", "%date%", "%downloadUrl%", "%sonarVersion%", "%issueTracker%", "%sources%", "%license%", "%developers%"},
+          new String[]{
+            latest.getName(),
+            latest.getVersion(),
+            latest.getReleaseDate(),
+            latest.getDownloadUrl(),
+            latest.getRequiredSonarVersion(),
+            formatLink(latest.getIssueTracker()),
+            formatLink(latest.getSources()),
+            latest.getLicense() == null ? "Unknown" : latest.getLicense(),
+            formatDevelopers(latest.getDevelopers())
+          }
         );
-        FileUtils.writeStringToFile(new File(outputDirectory, "plugins/" +  latest.getKey() + ".html"), pluginInfoWidget, "UTF-8");
+        FileUtils.writeStringToFile(new File(outputDirectory, "plugins/" + latest.getKey() + ".html"), pluginInfoWidget, "UTF-8");
       }
 
       // TODO use logger
@@ -178,10 +177,10 @@ public class UpdateCenter {
   private String getPluginDownloadUrl(String groupId, String artifactId, String version) {
     // FIXME dirty hack
     return "http://repository.codehaus.org/"
-        + StringUtils.replace(groupId, ".", "/") + "/"
-        + artifactId + "/"
-        + version + "/"
-        + artifactId + "-" + version + "." + ARTIFACT_JAR_TYPE;
+      + StringUtils.replace(groupId, ".", "/") + "/"
+      + artifactId + "/"
+      + version + "/"
+      + artifactId + "-" + version + "." + ARTIFACT_JAR_TYPE;
   }
 
   private History<Plugin> resolvePluginHistory(String id) throws Exception {
@@ -189,11 +188,11 @@ public class UpdateCenter {
     String artifactId = StringUtils.substringAfter(id, ":");
 
     Artifact artifact = artifactFactory.createArtifact(
-        groupId, artifactId, Artifact.LATEST_VERSION, Artifact.SCOPE_COMPILE, ARTIFACT_JAR_TYPE
+      groupId, artifactId, Artifact.LATEST_VERSION, Artifact.SCOPE_COMPILE, ARTIFACT_JAR_TYPE
     );
 
     List<ArtifactVersion> versions = filterSnapshots(
-        metadataSource.retrieveAvailableVersions(artifact, localRepository, remoteRepositories)
+      metadataSource.retrieveAvailableVersions(artifact, localRepository, remoteRepositories)
     );
 
     History<Plugin> history = new History<Plugin>();
@@ -202,9 +201,9 @@ public class UpdateCenter {
       history.addArtifact(version, plugin);
 
       MavenProject project = mavenProjectBuilder.buildFromRepository(
-          artifactFactory.createArtifact(groupId, artifactId, version.toString(), Artifact.SCOPE_COMPILE, ARTIFACT_POM_TYPE),
-          remoteRepositories,
-          localRepository
+        artifactFactory.createArtifact(groupId, artifactId, version.toString(), Artifact.SCOPE_COMPILE, ARTIFACT_POM_TYPE),
+        remoteRepositories,
+        localRepository
       );
 
       if (plugin.getVersion() == null) {
@@ -271,10 +270,10 @@ public class UpdateCenter {
   private File resolve(String groupId, String artifactId, String version, String type) throws Exception {
     Artifact artifact = artifactFactory.createArtifact(groupId, artifactId, version, Artifact.SCOPE_COMPILE, type);
     ArtifactResolutionRequest request = new ArtifactResolutionRequest()
-        .setArtifact(artifact)
-        .setResolveTransitively(false)
-        .setLocalRepository(localRepository)
-        .setRemoteRepositories(remoteRepositories);
+      .setArtifact(artifact)
+      .setResolveTransitively(false)
+      .setLocalRepository(localRepository)
+      .setRemoteRepositories(remoteRepositories);
     artifactResolver.resolve(request);
     return artifact.getFile();
   }

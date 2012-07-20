@@ -42,7 +42,7 @@ public final class FormatUtils {
       return null;
 
     } catch (ParseException e) {
-      throw new RuntimeException("The following value does not respect the date pattern " + pattern + ": " + s, e);
+      throw new IllegalArgumentException("The following value does not respect the date pattern " + pattern + ": " + s, e);
     }
   }
 

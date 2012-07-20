@@ -33,6 +33,9 @@ import java.util.Properties;
 
 public final class UpdateCenterSerializer {
 
+  private UpdateCenterSerializer() {
+  }
+
   private static void set(Properties props, String key, String value) {
     if (StringUtils.isNotBlank(value)) {
       props.setProperty(key, value);

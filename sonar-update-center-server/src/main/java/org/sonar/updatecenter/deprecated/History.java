@@ -22,6 +22,7 @@ package org.sonar.updatecenter.deprecated;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -31,7 +32,7 @@ import java.util.TreeMap;
  */
 public class History<M extends Versioned> {
 
-  private TreeMap<ArtifactVersion, M> artifacts = new TreeMap<ArtifactVersion, M>();
+  private SortedMap<ArtifactVersion, M> artifacts = new TreeMap<ArtifactVersion, M>();
 
   public History() {
   }
@@ -44,7 +45,7 @@ public class History<M extends Versioned> {
    * @return latest version of plugin
    */
   public M latest() {
-    if (artifacts.size() == 0) {
+    if (artifacts.isEmpty()) {
       return null;
     }
     return artifacts.get(artifacts.lastKey());

@@ -48,7 +48,6 @@ public class Plugin implements Versioned {
   private String homepage;
   private long timestamp;
 
-  private String pluginClass;
   private String issueTracker;
   private String sources;
   private String license;
