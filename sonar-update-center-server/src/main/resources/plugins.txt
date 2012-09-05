@@ -63,3 +63,4 @@ org.codehaus.sonar-plugins.l10n:sonar-l10n-ja-plugin
 org.codehaus.sonar-plugins.l10n:sonar-l10n-zh-plugin
 org.codehaus.sonar-plugins:sonar-tab-metrics-plugin
 org.codehaus.sonar-plugins:sonar-widget-lab-plugin
+org.codehaus.sonar-plugins:sonar-doxygen-plugin
