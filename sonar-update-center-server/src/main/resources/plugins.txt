@@ -49,6 +49,7 @@ org.codehaus.sonar-plugins:sonar-total-quality-plugin
 org.codehaus.sonar-plugins:sonar-trac-plugin
 org.codehaus.sonar-plugins:sonar-twitter-plugin
 org.codehaus.sonar-plugins.scm-activity:sonar-scm-activity-plugin
+org.codehaus.sonar-plugins:sonar-scm-stats-plugin
 org.codehaus.sonar-plugins:sonar-groovy-plugin
 org.codehaus.sonar-plugins:sonar-web-plugin
 org.codehaus.sonar-plugins:sonar-useless-code-tracker-plugin
