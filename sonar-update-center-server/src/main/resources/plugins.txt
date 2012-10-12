@@ -7,6 +7,7 @@ org.codehaus.sonar-plugins:sonar-branding-plugin
 org.codehaus.sonar-plugins:sonar-build-breaker-plugin
 org.codehaus.sonar-plugins:sonar-build-stability-plugin
 org.codehaus.sonar-plugins:sonar-c-rules-plugin
+org.codehaus.sonar-plugins:sonar-cas-plugin
 org.codehaus.sonar-plugins:sonar-clirr-plugin
 org.codehaus.sonar-plugins:sonar-clover-plugin
 org.codehaus.sonar-plugins:sonar-cutoff-plugin
