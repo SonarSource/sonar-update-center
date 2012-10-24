@@ -19,6 +19,7 @@ org.codehaus.sonar-plugins:sonar-drools-plugin
 org.codehaus.sonar-plugins:sonar-email-plugin
 org.codehaus.sonar-plugins:sonar-emma-plugin
 org.codehaus.sonar-plugins:sonar-fb-contrib-plugin
+org.codehaus.sonar-plugins:sonar-fortify-plugin
 org.codehaus.sonar-plugins.flex:sonar-flex-plugin
 org.codehaus.sonar-plugins:sonar-greenpepper-plugin
 org.codehaus.sonar-plugins:sonar-jacoco-plugin
