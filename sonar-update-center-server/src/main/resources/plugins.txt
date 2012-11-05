@@ -68,3 +68,4 @@ org.codehaus.sonar-plugins:sonar-tab-metrics-plugin
 org.codehaus.sonar-plugins:sonar-widget-lab-plugin
 org.codehaus.sonar-plugins:sonar-doxygen-plugin
 org.codehaus.sonar-plugins.plsqltoad:sonar-plsql-toad-plugin
+org.codehaus.sonar-plugins:sonar-toxicity-chart-plugin
