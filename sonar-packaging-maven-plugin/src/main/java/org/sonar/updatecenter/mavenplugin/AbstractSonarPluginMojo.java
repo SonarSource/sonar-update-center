@@ -120,12 +120,12 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
   private String pluginName;
 
   /**
-   * @parameter default-value="${project.description}"
+   * @parameter expression="${sonar.pluginDescription}" default-value="${project.description}"
    */
   private String pluginDescription;
 
   /**
-   * @parameter default-value="${project.url}"
+   * @parameter expression="${sonar.pluginUrl}" default-value="${project.url}"
    */
   private String pluginUrl;
 

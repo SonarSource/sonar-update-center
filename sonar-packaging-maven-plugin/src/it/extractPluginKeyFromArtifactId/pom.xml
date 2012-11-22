@@ -8,6 +8,7 @@
   <version>1.0</version>
   <packaging>sonar-plugin</packaging>
   <name>Package dependencies</name>
+  <description>Package dependencies</description>
 
   <dependencies>
     <dependency>

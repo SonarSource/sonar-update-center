@@ -9,6 +9,7 @@
   <packaging>sonar-plugin</packaging>
 
   <name>Do not package dependencies provided by Sonar</name>
+  <description>Do not package dependencies provided by Sonar</description>
 
   <dependencies>
     <dependency>

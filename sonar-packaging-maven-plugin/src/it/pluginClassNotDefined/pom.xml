@@ -9,6 +9,7 @@
   <packaging>sonar-plugin</packaging>
 
   <name>PluginClass not defined</name>
+  <description>PluginClass not defined</description>
 
   <dependencies>
     <dependency>

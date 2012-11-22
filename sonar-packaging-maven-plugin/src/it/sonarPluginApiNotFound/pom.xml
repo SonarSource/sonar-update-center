@@ -9,6 +9,7 @@
   <packaging>sonar-plugin</packaging>
 
   <name>sonar-plugin-api not found</name>
+  <description>sonar-plugin-api not found</description>
 
   <dependencies>
     <!-- MISSING

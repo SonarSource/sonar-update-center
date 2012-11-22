@@ -44,7 +44,11 @@ import org.sonar.updatecenter.common.PluginManifest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Build a Sonar Plugin from the current project.
@@ -141,8 +145,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private boolean addMavenDescriptor = true;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
-    checkPluginKey();
-    checkPluginClass();
+    checkMandatoryAttributes();
 
     File jarFile = createArchive();
     String classifier = getClassifier();
@@ -152,6 +155,24 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       getProject().getArtifact().setFile(jarFile);
     }
   }
+
+  private void checkMandatoryAttributes() throws MojoExecutionException {
+    if (StringUtils.isBlank(getPluginName())) {
+      throw new MojoExecutionException("Plugin name is missing. "
+        + "Please add the field <name> or the property sonar.pluginName.");
+    }
+    if (StringUtils.isBlank(getPluginDescription())) {
+      throw new MojoExecutionException("Plugin description is missing. "
+        + "Please add the field <description> or the property sonar.pluginDescription.");
+    }
+    if (StringUtils.isNotBlank(getExplicitPluginKey()) && !PluginKeyUtils.isValid(getExplicitPluginKey())) {
+      throw new MojoExecutionException("Plugin key is badly formatted. Please use ascii letters and digits only: " + getExplicitPluginKey());
+    }
+    if (!new File(getClassesDirectory(), getPluginClass().replace('.', '/') + ".class").exists()) {
+      throw new MojoExecutionException("Plugin class not found: '" + getPluginClass());
+    }
+  }
+
 
   public File createArchive() throws MojoExecutionException {
     File jarFile = getJarFile(getOutputDirectory(), getFinalName(), getClassifier());
@@ -239,18 +260,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       return getProject().getOrganization().getUrl();
     }
     return null;
-  }
-
-  private void checkPluginKey() throws MojoExecutionException {
-    if (StringUtils.isNotBlank(getExplicitPluginKey()) && !PluginKeyUtils.isValid(getExplicitPluginKey())) {
-      throw new MojoExecutionException("Plugin key is badly formatted. Please use ascii letters and digits only. Value: " + getExplicitPluginKey());
-    }
-  }
-
-  private void checkPluginClass() throws MojoExecutionException {
-    if (!new File(getClassesDirectory(), getPluginClass().replace('.', '/') + ".class").exists()) {
-      throw new MojoExecutionException("Error assembling Sonar-plugin: Plugin-Class '" + getPluginClass() + "' not found");
-    }
   }
 
   private String getPluginKey() {

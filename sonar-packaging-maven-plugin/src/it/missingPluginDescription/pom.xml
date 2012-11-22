@@ -8,15 +8,32 @@
   <version>1.0</version>
   <packaging>sonar-plugin</packaging>
 
-  <name>PluginClass not found</name>
-  <description>PluginClass not found</description>
+  <name>Missing plugin description</name>
+
+  <properties>
+    <sonar.version>@sonar.version@</sonar.version>
+
+    <!-- sonar.pluginKey = project.artifactId by default -->
+    <sonar.pluginKey>test</sonar.pluginKey>
+    <!-- sonar.pluginName = project.name by default -->
+    <sonar.pluginName>Test Plugin</sonar.pluginName>
+    <sonar.pluginCategory>Test</sonar.pluginCategory>
+    <sonar.pluginClass>org.sonar.plugins.sample.SamplePlugin</sonar.pluginClass>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.codehaus.sonar</groupId>
       <artifactId>sonar-plugin-api</artifactId>
-      <version>@sonar.version@</version>
-      <scope>provided</scope>
+      <version>${sonar.version}</version>
+    </dependency>
+
+    <!-- unit tests -->
+    <dependency>
+      <groupId>org.codehaus.sonar</groupId>
+      <artifactId>sonar-testing-harness</artifactId>
+      <version>${sonar.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -27,9 +44,6 @@
         <artifactId>@project.artifactId@</artifactId>
         <version>@project.version@</version>
         <extensions>true</extensions>
-        <configuration>
-          <pluginClass>org.sonar.plugins.sample.SamplePlugin</pluginClass>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -38,5 +52,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
