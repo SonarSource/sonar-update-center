@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public final class Server {
+
   private static final Logger LOG = LoggerFactory.getLogger(Server.class);
 
   public void start() throws IOException, URISyntaxException {
