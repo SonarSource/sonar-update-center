@@ -22,11 +22,17 @@ package org.sonar.updatecenter.server;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonar.updatecenter.common.*;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.PluginManifest;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.UpdateCenterSerializer;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
+import static org.apache.commons.io.FileUtils.forceMkdir;
 
 public final class Server {
 
@@ -39,6 +45,7 @@ public final class Server {
     UpdateCenter center = buildFromPartialMetadata(conf, downloader);
     downloadReleases(downloader, center);
     generateMetadata(conf, center);
+    generateHtmlHeader(conf, center);
   }
 
   private UpdateCenter buildFromPartialMetadata(Configuration conf, HttpDownloader downloader) {
@@ -75,6 +82,17 @@ public final class Server {
   private void generateMetadata(Configuration conf, UpdateCenter center) {
     LOG.info("Generate output: " + conf.getOutputFile());
     UpdateCenterSerializer.toProperties(center, conf.getOutputFile());
+  }
+
+  private void generateHtmlHeader(Configuration conf, UpdateCenter center) throws IOException {
+    File htmlOutputDir = new File(conf.getWorkingDir(), "html");
+    try {
+      forceMkdir(htmlOutputDir);
+    } catch (IOException e) {
+      throw new IllegalStateException("Fail to create the working directory: " + htmlOutputDir.getAbsolutePath(), e);
+    }
+    PluginsHtmlHeader pluginsHtmlHeader = new PluginsHtmlHeader(center, htmlOutputDir);
+    pluginsHtmlHeader.start();
   }
 
   public static void main(String[] args) throws IOException, URISyntaxException {

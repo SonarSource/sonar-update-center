@@ -65,13 +65,12 @@ public class PluginsHtmlHeader {
     init();
 
     Set<Plugin> plugins = center.getPlugins();
-    LOG.info("Starting importing plugins : " + plugins.size());
+    LOG.info("Start generating html for " + plugins.size() + " plugins in folder :"+ outputDirectory);
 
     for (Plugin plugin : plugins) {
-      LOG.info("Load plugin: " + plugin.getKey());
       String pluginInfoWidget = generatePluginWidgetTemplate(plugin);
       File file = new File(outputDirectory, plugin.getKey() + ".html");
-      LOG.info("Generate html : " + file);
+      LOG.info("Generate html for plugin : " + plugin.getKey() + " in file : "+ file);
       FileUtils.writeStringToFile(file, pluginInfoWidget, "UTF-8");
     }
   }
@@ -104,17 +103,10 @@ public class PluginsHtmlHeader {
   }
 
   private String formatDevelopers(List<String> developers) {
-    if (developers.isEmpty()) {
+    if (developers == null) {
       return "Unknown";
     }
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < developers.size(); i++) {
-      if (i > 0) {
-        sb.append(", ");
-      }
-      sb.append(developers.get(i));
-    }
-    return sb.toString();
+    return StringUtils.join(developers, ", ");
   }
 
 }

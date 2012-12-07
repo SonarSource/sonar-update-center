@@ -13,7 +13,6 @@ import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -46,7 +45,7 @@ public class PluginsHtmlHeaderTest {
   }
 
   @Test
-  public void shouldGenerateHtmlForOnePlugin() throws Exception {
+     public void shouldGenerateHtml() throws Exception {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
@@ -68,6 +67,31 @@ public class PluginsHtmlHeaderTest {
     assertThat(outputFolder.list()[0]).contains("key.html");
     File file = outputFolder.listFiles()[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
+  }
+
+  @Test
+  public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
+    Plugin plugin = new Plugin("key");
+    Version version = Version.create("1.0");
+    Release release = new Release(plugin, version);
+    release.setDate(getDate());
+    release.setDownloadUrl("download_url");
+    release.setSourcesUrl("sources_url");
+    release.addRequiredSonarVersions("3.0");
+    release.setDevelopers(newArrayList("dev1", "dev2"));
+    plugin.addRelease(release);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+
+    center.setPlugins(newArrayList(plugin));
+
+    pluginsHtmlHeader.start();
+
+    assertThat(outputFolder.list()).hasSize(2);
+    assertThat(outputFolder.list()[0]).contains("key.html");
+    File file = outputFolder.listFiles()[0];
+    assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
   }
 
   @Test
@@ -129,7 +153,7 @@ public class PluginsHtmlHeaderTest {
     release.setDownloadUrl("download_url");
     release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(Collections.<String>emptyList());
+    release.setDevelopers(null);
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl("issue_url");
