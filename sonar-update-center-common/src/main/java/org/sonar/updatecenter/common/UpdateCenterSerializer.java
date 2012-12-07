@@ -92,6 +92,8 @@ public final class UpdateCenterSerializer {
         set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
         set(p, plugin, release.getVersion() + ".description", release.getDescription());
         set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
+        set(p, plugin, release.getVersion() + ".scm", release.getSourcesUrl());
+        set(p, plugin, release.getVersion() + ".developers", StringUtils.join(release.getDevelopers(), ","));
       }
       set(p, plugin, "versions", releaseKeys);
     }

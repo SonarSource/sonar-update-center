@@ -89,9 +89,9 @@ public class PluginsHtmlHeader {
             lastRelease.getDownloadUrl(),
             lastRelease.getMinimumRequiredSonarVersion().getName(),
             formatLink(plugin.getIssueTrackerUrl()),
-            formatLink(lastRelease.getSourcesUrl()),  // TODO add sources url in plugin manifest
+            formatLink(lastRelease.getSourcesUrl()),
             plugin.getLicense() == null ? "Unknown" : plugin.getLicense(),
-            formatDevelopers(lastRelease.getDevelopers()) // TODO add developers in plugin manifest
+            formatDevelopers(lastRelease.getDevelopers())
         }
     );
   }
@@ -105,7 +105,7 @@ public class PluginsHtmlHeader {
   }
 
   private String formatDevelopers(List<String> developers) {
-    if (developers == null) {
+    if (developers == null || developers.isEmpty()) {
       return "Unknown";
     }
     return StringUtils.join(developers, ", ");

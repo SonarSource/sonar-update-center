@@ -38,7 +38,9 @@ public final class Release implements Comparable<Release> {
   private String sourcesUrl;
   private List<String> developers;
 
-  /** from oldest to newest sonar versions */
+  /**
+   * from oldest to newest sonar versions
+   */
   private SortedSet<Version> requiredSonarVersions = new TreeSet<Version>();
   private Date date;
 
@@ -87,14 +89,14 @@ public final class Release implements Comparable<Release> {
   }
 
   public Release addRequiredSonarVersions(Version... versions) {
-    if (versions!=null) {
+    if (versions != null) {
       requiredSonarVersions.addAll(Arrays.asList(versions));
     }
     return this;
   }
 
   public Release addRequiredSonarVersions(String... versions) {
-    if (versions!=null) {
+    if (versions != null) {
       for (String v : versions) {
         requiredSonarVersions.add(Version.create(v));
       }
@@ -103,14 +105,14 @@ public final class Release implements Comparable<Release> {
   }
 
   public Version getLastRequiredSonarVersion() {
-    if (requiredSonarVersions!=null && !requiredSonarVersions.isEmpty()) {
+    if (requiredSonarVersions != null && !requiredSonarVersions.isEmpty()) {
       return requiredSonarVersions.last();
     }
     return null;
   }
 
   public Version getMinimumRequiredSonarVersion() {
-    if (requiredSonarVersions!=null && !requiredSonarVersions.isEmpty()) {
+    if (requiredSonarVersions != null && !requiredSonarVersions.isEmpty()) {
       return requiredSonarVersions.first();
     }
     return null;
@@ -129,32 +131,36 @@ public final class Release implements Comparable<Release> {
     return description;
   }
 
-  public void setDescription(String description) {
+  public Release setDescription(String description) {
     this.description = description;
+    return this;
   }
 
   public String getChangelogUrl() {
     return changelogUrl;
   }
 
-  public void setChangelogUrl(String changelogUrl) {
+  public Release setChangelogUrl(String changelogUrl) {
     this.changelogUrl = changelogUrl;
+    return this;
   }
 
   public String getSourcesUrl() {
     return sourcesUrl;
   }
 
-  public void setSourcesUrl(String sourcesUrl) {
+  public Release setSourcesUrl(String sourcesUrl) {
     this.sourcesUrl = sourcesUrl;
+    return this;
   }
 
   public List<String> getDevelopers() {
     return developers;
   }
 
-  public void setDevelopers(List<String> developers) {
+  public Release setDevelopers(List<String> developers) {
     this.developers = developers;
+    return this;
   }
 
   @Override

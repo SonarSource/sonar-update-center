@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterSerializerTest {
 
@@ -42,7 +42,10 @@ public class UpdateCenterSerializerTest {
     barPlugin.addRelease(
         new Release(barPlugin, Version.create("1.2"))
             .addRequiredSonarVersions(Version.create("2.0"))
-            .addRequiredSonarVersions(Version.create("2.1")));
+            .addRequiredSonarVersions(Version.create("2.1"))
+            .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2"))
+        .setDevelopers(newArrayList("dev1", "dev2"))
+    ;
 
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
@@ -53,9 +56,11 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "bar.versions", "1.2");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
+    assertProperty(properties, "bar.1.2.developers", "dev1,dev2");
   }
 
   private void assertProperty(Properties props, String key, String value) {
-    assertThat(props.getProperty(key), is(value));
+    assertThat(props.getProperty(key)).isEqualTo(value);
   }
 }

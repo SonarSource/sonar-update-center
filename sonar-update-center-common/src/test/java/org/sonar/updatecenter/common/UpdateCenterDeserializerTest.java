@@ -26,9 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.internal.matchers.IsCollectionContaining.hasItems;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterDeserializerTest {
 
@@ -40,14 +38,19 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
-      assertThat(center.getSonar().getVersions(), hasItems(Version.create("2.2"), Version.create("2.3")));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(), is("http://dist.sonar.codehaus.org/sonar-2.2.zip"));
+      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
 
       Plugin clirr = center.getPlugin("clirr");
-      assertThat(clirr.getName(), is("Clirr"));
-      assertThat(clirr.getDescription(), is("Clirr Plugin"));
-      assertThat(clirr.getVersions(),hasItems(Version.create("1.0"), Version.create("1.1")));
-      assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl(), is("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar"));
+      assertThat(clirr.getName()).isEqualTo("Clirr");
+      assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
+      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
+      assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+      assertThat(clirr.getRelease(Version.create("1.0")).getSourcesUrl()).isNull();
+      assertThat(clirr.getRelease(Version.create("1.0")).getDevelopers()).isEmpty();
+      assertThat(clirr.getRelease(Version.create("1.1")).getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
+      assertThat(clirr.getRelease(Version.create("1.1")).getDevelopers()).hasSize(3);
+      assertThat(clirr.getRelease(Version.create("1.1")).getDevelopers()).contains("Mike Haller", "Freddy Mallet", "Simon Brandhof");
 
     } finally {
       IOUtils.closeQuietly(input);

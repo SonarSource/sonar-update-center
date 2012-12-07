@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 public final class UpdateCenterDeserializer {
@@ -86,6 +87,8 @@ public final class UpdateCenterDeserializer {
         release.setChangelogUrl(get(p, pluginKey, pluginVersion + ".changelogUrl"));
         release.setDescription(get(p, pluginKey, pluginVersion + ".description"));
         release.setDate(toDate(get(p, pluginKey, pluginVersion + ".date"), false));
+        release.setSourcesUrl(get(p, pluginKey, pluginVersion + ".scm"));
+        release.setDevelopers(newArrayList(getArray(p, pluginKey, pluginVersion + ".developers")));
         String[] requiredSonarVersions = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, pluginVersion + ".requiredSonarVersions"), ""), ",");
         for (String requiredSonarVersion : requiredSonarVersions) {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
@@ -100,12 +103,18 @@ public final class UpdateCenterDeserializer {
     return StringUtils.defaultIfEmpty(props.getProperty(key), null);
   }
 
-  private static String[] getArray(Properties props, String key) {
-    return StringUtils.split(StringUtils.defaultIfEmpty(props.getProperty(key), ""), ",");
-  }
 
   private static String get(Properties p, String pluginKey, String field) {
     return get(p, pluginKey + "." + field);
   }
+
+  private static String[] getArray(Properties props, String key) {
+    return StringUtils.split(StringUtils.defaultIfEmpty(props.getProperty(key), ""), ",");
+  }
+
+  private static String[] getArray(Properties p, String pluginKey, String field) {
+    return getArray(p, pluginKey + "." + field);
+  }
+
 
 }

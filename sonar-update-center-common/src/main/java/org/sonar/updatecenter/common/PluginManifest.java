@@ -66,6 +66,16 @@ public final class PluginManifest {
    */
   public static final String IMPLEMENTATION_BUILD = "Implementation-Build";
 
+  /**
+   * @since 2.0
+   */
+  public static final String SOURCES_URL = "Plugin-SourcesUrl";
+
+  /**
+   * @since 2.0
+   */
+  public static final String DEVELOPERS = "Plugin-Developers";
+
   private String key;
   private String name;
   private String mainClass;
@@ -83,6 +93,8 @@ public final class PluginManifest {
   private boolean useChildFirstClassLoader = false;
   private String basePlugin;
   private String implementationBuild;
+  private String sourcesUrl;
+  private String[] developers = new String[0];
 
   /**
    * Load the manifest from a JAR file.
@@ -131,9 +143,13 @@ public final class PluginManifest {
     this.useChildFirstClassLoader = StringUtils.equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER), "true");
     this.basePlugin = attributes.getValue(BASE_PLUGIN);
     this.implementationBuild = attributes.getValue(IMPLEMENTATION_BUILD);
+    this.sourcesUrl = attributes.getValue(SOURCES_URL);
 
     String deps = attributes.getValue(DEPENDENCIES);
     this.dependencies = StringUtils.split(StringUtils.defaultString(deps), ' ');
+
+    String developers = attributes.getValue(DEVELOPERS);
+    this.developers = StringUtils.split(StringUtils.defaultString(developers), ' ');
   }
 
   public String getKey() {
@@ -304,6 +320,36 @@ public final class PluginManifest {
    */
   public PluginManifest setImplementationBuild(String implementationBuild) {
     this.implementationBuild = implementationBuild;
+    return this;
+  }
+
+  /**
+   * @since 2.0
+   */
+  public String getSourcesUrl() {
+    return sourcesUrl;
+  }
+
+  /**
+   * @since 2.0
+   */
+  public PluginManifest setSourcesUrl(String sourcesUrl) {
+    this.sourcesUrl = sourcesUrl;
+    return this;
+  }
+
+  /**
+   * @since 2.0
+   */
+  public String[] getDevelopers() {
+    return developers;
+  }
+
+  /**
+   * @since 2.0
+   */
+  public PluginManifest setDevelopers(String[] developers) {
+    this.developers = developers;
     return this;
   }
 
