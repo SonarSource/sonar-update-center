@@ -210,7 +210,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Issue Tracker URL", PluginManifest.ISSUE_TRACKER_URL, getPluginIssueTrackerUrl());
       addManifestProperty("Build date", PluginManifest.BUILD_DATE, FormatUtils.toString(new Date(), true));
       addManifestProperty("Sources URL", PluginManifest.SOURCES_URL, getProject().getScm().getUrl());
-      addManifestProperty("Developers", PluginManifest.BUILD_DATE, StringUtils.join(getProject().getDevelopers(), ","));
+      addManifestProperty("Developers", PluginManifest.DEVELOPERS, StringUtils.join(getProject().getDevelopers(), ","));
       getLog().info("-------------------------------------------------------");
 
       if (isSkipDependenciesPackaging()) {
