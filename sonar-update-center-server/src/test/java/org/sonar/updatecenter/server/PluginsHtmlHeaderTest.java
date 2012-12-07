@@ -45,7 +45,7 @@ public class PluginsHtmlHeaderTest {
   }
 
   @Test
-     public void shouldGenerateHtml() throws Exception {
+  public void shouldGenerateHtml() throws Exception {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
@@ -169,8 +169,8 @@ public class PluginsHtmlHeaderTest {
     assertThat(file).hasSameContentAs(getExpectedFile("without-developper.html"));
   }
 
-  private File getExpectedFile(String fileName){
-    return FileUtils.toFile(getClass().getResource("/"+ fileName));
+  private File getExpectedFile(String fileName) {
+    return FileUtils.toFile(getClass().getResource("/" + fileName));
   }
 
   private Date getDate() throws DateParseException {

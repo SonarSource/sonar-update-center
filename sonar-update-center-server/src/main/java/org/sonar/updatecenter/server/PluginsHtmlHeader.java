@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
-import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,11 +45,6 @@ public class PluginsHtmlHeader {
   private File outputDirectory;
   private String pluginInfoWidgetTemplate;
   private UpdateCenter center;
-
-  public PluginsHtmlHeader(File sonarUpdateProperties, File outputDirectory) throws IOException {
-    center = UpdateCenterDeserializer.fromProperties(sonarUpdateProperties);
-    this.outputDirectory = outputDirectory;
-  }
 
   public PluginsHtmlHeader(UpdateCenter center, File outputDirectory) throws IOException {
     this.outputDirectory = outputDirectory;
