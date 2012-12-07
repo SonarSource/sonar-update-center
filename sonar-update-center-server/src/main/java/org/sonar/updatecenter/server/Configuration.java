@@ -30,15 +30,25 @@ import java.util.Properties;
 
 public class Configuration {
 
-  public static final String WORKING_DIR = "workingDir";
-  public static final String OUTPUT_FILE = "outputFile";
-  public static final String SOURCE_PATH = "path";
-  public static final String SOURCE_LOGIN = "login";
-  public static final String SOURCE_PASSWORD = "password";
-
   private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
+
+  private static final String WORKING_DIR = "workingDir";
+  private static final String OUTPUT_FILE = "outputFile";
+  private static final String SOURCE_PATH = "path";
+  private static final String SOURCE_LOGIN = "login";
+  private static final String SOURCE_PASSWORD = "password";
+
   private Properties props;
-  private File workingDir = null;  
+  private File workingDir;
+
+  public Configuration(String workingDir, String outputFile, String path, String login, String password) {
+    props = new Properties();
+    setProperty(WORKING_DIR, workingDir);
+    setProperty(OUTPUT_FILE, outputFile);
+    setProperty(SOURCE_PATH, path);
+    setProperty(SOURCE_LOGIN, login);
+    setProperty(SOURCE_PASSWORD, password);
+  }
 
   public Configuration(Properties props) {
     this.props = props;
@@ -48,7 +58,7 @@ public class Configuration {
     LOG.info("-------------------------------");
     LOG.info(WORKING_DIR + ": " + getWorkingDir().getPath());
     LOG.info(OUTPUT_FILE + ": " + getOutputFile().getPath());
-    LOG.info(SOURCE_PATH + ": " +  getSourcePath());
+    LOG.info(SOURCE_PATH + ": " + getSourcePath());
     LOG.info(SOURCE_LOGIN + ": " + getSourceLogin());
     LOG.info(SOURCE_PASSWORD + ": " + getSourcePassword());
     LOG.info("-------------------------------");
@@ -91,4 +101,11 @@ public class Configuration {
   public String getSourcePassword() {
     return props.getProperty(SOURCE_PASSWORD);
   }
+
+  private void setProperty(String property, String value) {
+    if (value != null) {
+      props.setProperty(property, value);
+    }
+  }
+
 }

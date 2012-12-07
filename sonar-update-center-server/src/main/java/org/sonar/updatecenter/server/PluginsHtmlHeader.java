@@ -21,6 +21,7 @@ package org.sonar.updatecenter.server;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -57,20 +59,26 @@ public class PluginsHtmlHeader {
 
   private void init() throws IOException {
     Preconditions.checkArgument(outputDirectory.exists());
-    pluginInfoWidgetTemplate = FileUtils.readFileToString(FileUtils.toFile(getClass().getResource("/plugin-info-widget-template.html")));
-    FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "style.css"));
+    InputStream inputStream = null;
+    try {
+      inputStream = getClass().getResourceAsStream("/plugin-info-widget-template.html");
+      pluginInfoWidgetTemplate = IOUtils.toString(inputStream);
+      FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "style.css"));
+    } catch (Exception e) {
+      IOUtils.closeQuietly(inputStream);
+    }
   }
 
   public void start() throws IOException {
     init();
 
     Set<Plugin> plugins = center.getPlugins();
-    LOG.info("Start generating html for " + plugins.size() + " plugins in folder :"+ outputDirectory);
+    LOG.info("Start generating html for " + plugins.size() + " plugins in folder :" + outputDirectory);
 
     for (Plugin plugin : plugins) {
       String pluginInfoWidget = generatePluginWidgetTemplate(plugin);
       File file = new File(outputDirectory, plugin.getKey() + ".html");
-      LOG.info("Generate html for plugin : " + plugin.getKey() + " in file : "+ file);
+      LOG.info("Generate html for plugin : " + plugin.getKey() + " in file : " + file);
       FileUtils.writeStringToFile(file, pluginInfoWidget, "UTF-8");
     }
   }

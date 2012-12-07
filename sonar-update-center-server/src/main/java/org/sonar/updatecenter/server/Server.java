@@ -37,19 +37,25 @@ import static org.apache.commons.io.FileUtils.forceMkdir;
 public final class Server {
 
   private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+  private static final String HTML_HEADER_DIR = "html";
 
-  public void start() throws IOException, URISyntaxException {
-    Configuration conf = new Configuration(System.getProperties());
-    conf.log();
-    HttpDownloader downloader = new HttpDownloader(conf.getWorkingDir());
-    UpdateCenter center = buildFromPartialMetadata(conf, downloader);
-    downloadReleases(downloader, center);
-    generateMetadata(conf, center);
-    generateHtmlHeader(conf, center);
+  private Configuration configuration;
+
+  public Server(Configuration configuration){
+    this.configuration = configuration;
   }
 
-  private UpdateCenter buildFromPartialMetadata(Configuration conf, HttpDownloader downloader) {
-    return new MetadataFile(conf, downloader).getUpdateCenter();
+  public void start() throws IOException, URISyntaxException {
+    configuration.log();
+    HttpDownloader downloader = new HttpDownloader(configuration.getWorkingDir());
+    UpdateCenter center = buildFromPartialMetadata(downloader);
+    downloadReleases(downloader, center);
+    generateMetadata(center);
+    generateHtmlHeader(center);
+  }
+
+  private UpdateCenter buildFromPartialMetadata(HttpDownloader downloader) {
+    return new MetadataFile(configuration, downloader).getUpdateCenter();
   }
 
   private void downloadReleases(HttpDownloader downloader, UpdateCenter center) throws IOException, URISyntaxException {
@@ -79,13 +85,13 @@ public final class Server {
     }
   }
 
-  private void generateMetadata(Configuration conf, UpdateCenter center) {
-    LOG.info("Generate output: " + conf.getOutputFile());
-    UpdateCenterSerializer.toProperties(center, conf.getOutputFile());
+  private void generateMetadata(UpdateCenter center) {
+    LOG.info("Generate output: " + configuration.getOutputFile());
+    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
-  private void generateHtmlHeader(Configuration conf, UpdateCenter center) throws IOException {
-    File htmlOutputDir = new File(conf.getWorkingDir(), "html");
+  private void generateHtmlHeader(UpdateCenter center) throws IOException {
+    File htmlOutputDir = new File(configuration.getWorkingDir(), HTML_HEADER_DIR);
     try {
       forceMkdir(htmlOutputDir);
     } catch (IOException e) {
@@ -93,10 +99,6 @@ public final class Server {
     }
     PluginsHtmlHeader pluginsHtmlHeader = new PluginsHtmlHeader(center, htmlOutputDir);
     pluginsHtmlHeader.start();
-  }
-
-  public static void main(String[] args) throws IOException, URISyntaxException {
-    new Server().start();
   }
 
 }
