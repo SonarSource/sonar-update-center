@@ -19,6 +19,8 @@
  */
 package org.sonar.updatecenter.mavenplugin;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
@@ -29,6 +31,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.model.Developer;
 import org.apache.maven.model.License;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -210,7 +213,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Issue Tracker URL", PluginManifest.ISSUE_TRACKER_URL, getPluginIssueTrackerUrl());
       addManifestProperty("Build date", PluginManifest.BUILD_DATE, FormatUtils.toString(new Date(), true));
       addManifestProperty("Sources URL", PluginManifest.SOURCES_URL, getProject().getScm().getUrl());
-      addManifestProperty("Developers", PluginManifest.DEVELOPERS, StringUtils.join(getProject().getDevelopers(), ","));
+      addManifestProperty("Developers", PluginManifest.DEVELOPERS, getDevelopers());
       getLog().info("-------------------------------------------------------");
 
       if (isSkipDependenciesPackaging()) {
@@ -230,6 +233,17 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     } catch (Exception e) {
       throw new MojoExecutionException("Error assembling Sonar-plugin: " + e.getMessage(), e);
     }
+  }
+
+  private String getDevelopers() {
+    return StringUtils.join(
+        Collections2.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+          public String apply(Developer developer) {
+            return developer.getName();
+          }
+        })
+        , ","
+    );
   }
 
   private void addManifestProperty(String label, String key, String value) {
