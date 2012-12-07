@@ -1,6 +1,8 @@
 package org.sonar.updatecenter.server;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.impl.cookie.DateParseException;
+import org.apache.http.impl.cookie.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class PluginsHtmlHeaderTest {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
-    release.setDate(new Date());
+    release.setDate(getDate());
     release.setDownloadUrl("download_url");
     release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
@@ -69,11 +71,11 @@ public class PluginsHtmlHeaderTest {
   }
 
   @Test
-  public void shouldWriteUnknowIfNoLicence() throws Exception {
+  public void shouldWriteUnknownIfNoLicence() throws Exception {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
-    release.setDate(new Date());
+    release.setDate(getDate());
     release.setDownloadUrl("download_url");
     release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
@@ -94,11 +96,11 @@ public class PluginsHtmlHeaderTest {
   }
 
   @Test
-  public void shouldWriteUnknowIfNoIssueUrl() throws Exception {
+  public void shouldWriteUnknownIfNoIssueUrl() throws Exception {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
-    release.setDate(new Date());
+    release.setDate(getDate());
     release.setDownloadUrl("download_url");
     release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
@@ -119,11 +121,11 @@ public class PluginsHtmlHeaderTest {
   }
 
   @Test
-  public void shouldWriteUnknowWhenNoDevelopper() throws Exception {
+  public void shouldWriteUnknownWhenNoDeveloper() throws Exception {
     Plugin plugin = new Plugin("key");
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
-    release.setDate(new Date());
+    release.setDate(getDate());
     release.setDownloadUrl("download_url");
     release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
@@ -145,6 +147,10 @@ public class PluginsHtmlHeaderTest {
 
   private File getExpectedFile(String fileName){
     return FileUtils.toFile(getClass().getResource("/"+ fileName));
+  }
+
+  private Date getDate() throws DateParseException {
+    return DateUtils.parseDate("12-12-2012", new String[]{"dd-MM-yyyy"});
   }
 
 }
