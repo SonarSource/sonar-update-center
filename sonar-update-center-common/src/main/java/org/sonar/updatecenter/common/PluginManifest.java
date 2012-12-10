@@ -148,8 +148,8 @@ public final class PluginManifest {
     String deps = attributes.getValue(DEPENDENCIES);
     this.dependencies = StringUtils.split(StringUtils.defaultString(deps), ' ');
 
-    String developers = attributes.getValue(DEVELOPERS);
-    this.developers = StringUtils.split(StringUtils.defaultString(developers), ',');
+    String devs = attributes.getValue(DEVELOPERS);
+    this.developers = StringUtils.split(StringUtils.defaultString(devs), ',');
   }
 
   public String getKey() {

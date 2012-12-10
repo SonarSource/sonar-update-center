@@ -31,18 +31,21 @@ public class ServerMojo extends AbstractMojo {
 
   /**
    * The working directory
+   *
    * @parameter expression="${workingDir}" default-value="${basedir}/sonar-update-center"
    */
   private String workingDir;
 
   /**
    * The generated file containing the sonar update center properties
+   *
    * @parameter expression="${outputFile}" default-value="${basedir}/sonar-update-center/generated-sonar-updates.properties"
    */
   private String outputFile;
 
   /**
    * The path to the metadata file (can be remote or locale)
+   *
    * @parameter expression="${path}"
    * @required
    */
@@ -50,12 +53,14 @@ public class ServerMojo extends AbstractMojo {
 
   /**
    * The login needed to access the metadata file
+   *
    * @parameter expression="${login}"
    */
   private String login;
 
   /**
    * The password needed to access the metadata file
+   *
    * @parameter expression="${password}"
    */
   private String password;
@@ -67,7 +72,7 @@ public class ServerMojo extends AbstractMojo {
       Server server = new Server(configuration);
       server.start();
     } catch (Exception e) {
-      throw new RuntimeException("Fail to execute server mojo", e);
+      throw new MojoExecutionException("Fail to execute server mojo", e);
     }
   }
 
