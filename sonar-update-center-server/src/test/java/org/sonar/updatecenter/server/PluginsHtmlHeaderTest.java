@@ -13,6 +13,7 @@ import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -23,6 +24,8 @@ public class PluginsHtmlHeaderTest {
   private PluginsHtmlHeader pluginsHtmlHeader;
 
   private UpdateCenter center;
+
+  private final static String PLUGIN_KEY = "key";
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -46,7 +49,7 @@ public class PluginsHtmlHeaderTest {
 
   @Test
   public void shouldGenerateHtml() throws Exception {
-    Plugin plugin = new Plugin("key");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -64,14 +67,19 @@ public class PluginsHtmlHeaderTest {
     pluginsHtmlHeader.start();
 
     assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()[0]).contains("key.html");
-    File file = outputFolder.listFiles()[0];
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
+  }
+
+  class FilenameFilterForGeneratedHtml implements FilenameFilter {
+    public boolean accept(File file, String s) {
+      return (PLUGIN_KEY + ".html").equals(s);
+    }
   }
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
-    Plugin plugin = new Plugin("key");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -89,14 +97,13 @@ public class PluginsHtmlHeaderTest {
     pluginsHtmlHeader.start();
 
     assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()[0]).contains("key.html");
-    File file = outputFolder.listFiles()[0];
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
   }
 
   @Test
   public void shouldWriteUnknownIfNoLicence() throws Exception {
-    Plugin plugin = new Plugin("key");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -114,14 +121,13 @@ public class PluginsHtmlHeaderTest {
     pluginsHtmlHeader.start();
 
     assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()[0]).contains("key.html");
-    File file = outputFolder.listFiles()[0];
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
   }
 
   @Test
   public void shouldWriteUnknownIfNoIssueUrl() throws Exception {
-    Plugin plugin = new Plugin("key");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -139,14 +145,13 @@ public class PluginsHtmlHeaderTest {
     pluginsHtmlHeader.start();
 
     assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()[0]).contains("key.html");
-    File file = outputFolder.listFiles()[0];
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
   }
 
   @Test
   public void shouldWriteUnknownWhenNoDeveloper() throws Exception {
-    Plugin plugin = new Plugin("key");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -164,8 +169,7 @@ public class PluginsHtmlHeaderTest {
     pluginsHtmlHeader.start();
 
     assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()[0]).contains("key.html");
-    File file = outputFolder.listFiles()[0];
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-developper.html"));
   }
 
