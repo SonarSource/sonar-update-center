@@ -36,16 +36,18 @@ public class UpdateCenterSerializerTest {
 
     center.getSonar().addRelease(Version.create("2.0"));
     center.getSonar().addRelease(Version.create("2.1"));
-    center.addPlugin(new Plugin("foo").setName("Foo").setOrganizationUrl("http://www.sonarsource.org"));
-    Plugin barPlugin = new Plugin("bar");
+    center.addPlugin(new Plugin("foo")
+        .setName("Foo")
+        .setOrganizationUrl("http://www.sonarsource.org"));
+    Plugin barPlugin = new Plugin("bar")
+        .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
+        .setDevelopers(newArrayList("dev1", "dev2"));
     center.addPlugin(barPlugin);
     barPlugin.addRelease(
         new Release(barPlugin, Version.create("1.2"))
             .addRequiredSonarVersions(Version.create("2.0"))
             .addRequiredSonarVersions(Version.create("2.1"))
-            .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2"))
-        .setDevelopers(newArrayList("dev1", "dev2"))
-    ;
+    );
 
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
@@ -55,9 +57,9 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "bar.versions", "1.2");
+    assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
+    assertProperty(properties, "bar.developers", "dev1,dev2");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.1.2.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
-    assertProperty(properties, "bar.1.2.developers", "dev1,dev2");
   }
 
   private void assertProperty(Properties props, String key, String value) {

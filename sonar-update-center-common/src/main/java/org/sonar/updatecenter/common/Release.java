@@ -24,7 +24,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -35,8 +34,6 @@ public final class Release implements Comparable<Release> {
   private String description;
   private String downloadUrl;
   private String changelogUrl;
-  private String sourcesUrl;
-  private List<String> developers;
 
   /**
    * from oldest to newest sonar versions
@@ -142,24 +139,6 @@ public final class Release implements Comparable<Release> {
 
   public Release setChangelogUrl(String changelogUrl) {
     this.changelogUrl = changelogUrl;
-    return this;
-  }
-
-  public String getSourcesUrl() {
-    return sourcesUrl;
-  }
-
-  public Release setSourcesUrl(String sourcesUrl) {
-    this.sourcesUrl = sourcesUrl;
-    return this;
-  }
-
-  public List<String> getDevelopers() {
-    return developers;
-  }
-
-  public Release setDevelopers(List<String> developers) {
-    this.developers = developers;
     return this;
   }
 

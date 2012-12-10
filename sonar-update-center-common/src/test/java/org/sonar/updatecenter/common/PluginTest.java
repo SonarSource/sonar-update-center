@@ -21,11 +21,11 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
+
 
 public class PluginTest {
-  
+
   @Test
   public void shouldMergeWithManifest() {
     Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
@@ -33,8 +33,29 @@ public class PluginTest {
 
     plugin.merge(manifest);
 
-    assertThat(plugin.getLicense(), is("LGPL2")); // initial definition is reference
-    assertThat(plugin.getOrganization(), is("SonarSource"));
-    assertThat(plugin.getDescription(), is("Parser"));
+    assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
+    assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
+    assertThat(plugin.getDescription()).isEqualTo("Parser");
+
+  }
+
+  @Test
+  public void shouldAddDevelopers() {
+    Plugin plugin = new Plugin("squid");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[]{"Dev1"});
+
+    plugin.merge(manifest);
+
+    assertThat(plugin.getDevelopers()).contains("Dev1");
+  }
+
+  @Test
+  public void shouldAddSourcesUrl() {
+    Plugin plugin = new Plugin("squid");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setSourcesUrl("sourcesUrl");
+
+    plugin.merge(manifest);
+
+    assertThat(plugin.getSourcesUrl()).isEqualTo("sourcesUrl");
   }
 }

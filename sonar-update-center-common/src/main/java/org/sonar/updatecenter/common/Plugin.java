@@ -19,7 +19,10 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+
+import java.util.List;
 
 public final class Plugin extends Artifact {
 
@@ -32,7 +35,9 @@ public final class Plugin extends Artifact {
   private String termsConditionsUrl;
   private String category;
   private String issueTrackerUrl;
-  
+  private String sourcesUrl;
+  private List<String> developers;
+
   public Plugin(String key) {
     super(key);
   }
@@ -118,6 +123,24 @@ public final class Plugin extends Artifact {
     return this;
   }
 
+  public String getSourcesUrl() {
+    return sourcesUrl;
+  }
+
+  public Plugin setSourcesUrl(String sourcesUrl) {
+    this.sourcesUrl = sourcesUrl;
+    return this;
+  }
+
+  public List<String> getDevelopers() {
+    return developers;
+  }
+
+  public Plugin setDevelopers(List<String> developers) {
+    this.developers = developers;
+    return this;
+  }
+
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
@@ -128,6 +151,8 @@ public final class Plugin extends Artifact {
       license = StringUtils.defaultIfEmpty(license, manifest.getLicense());
       homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
       termsConditionsUrl = StringUtils.defaultIfEmpty(termsConditionsUrl, manifest.getTermsConditionsUrl());
+      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
+      developers = Lists.newArrayList(manifest.getDevelopers());
     }
     return this;
   }

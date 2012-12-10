@@ -78,6 +78,8 @@ public final class UpdateCenterDeserializer {
       plugin.setOrganizationUrl(get(p, pluginKey, "organizationUrl"));
       plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl"));
       plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl"));
+      plugin.setSourcesUrl(get(p, pluginKey, "scm"));
+      plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
       String[] pluginReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, "versions"), ""), ",");
       for (String pluginVersion : pluginReleases) {
@@ -87,8 +89,6 @@ public final class UpdateCenterDeserializer {
         release.setChangelogUrl(get(p, pluginKey, pluginVersion + ".changelogUrl"));
         release.setDescription(get(p, pluginKey, pluginVersion + ".description"));
         release.setDate(toDate(get(p, pluginKey, pluginVersion + ".date"), false));
-        release.setSourcesUrl(get(p, pluginKey, pluginVersion + ".scm"));
-        release.setDevelopers(newArrayList(getArray(p, pluginKey, pluginVersion + ".developers")));
         String[] requiredSonarVersions = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, pluginVersion + ".requiredSonarVersions"), ""), ",");
         for (String requiredSonarVersion : requiredSonarVersions) {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));

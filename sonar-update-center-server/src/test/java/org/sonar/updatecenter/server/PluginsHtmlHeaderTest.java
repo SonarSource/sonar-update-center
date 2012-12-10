@@ -51,13 +51,13 @@ public class PluginsHtmlHeaderTest {
     Release release = new Release(plugin, version);
     release.setDate(getDate());
     release.setDownloadUrl("download_url");
-    release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(newArrayList("dev"));
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
 
     center.setPlugins(newArrayList(plugin));
 
@@ -76,13 +76,13 @@ public class PluginsHtmlHeaderTest {
     Release release = new Release(plugin, version);
     release.setDate(getDate());
     release.setDownloadUrl("download_url");
-    release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(newArrayList("dev1", "dev2"));
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev1", "dev2"));
 
     center.setPlugins(newArrayList(plugin));
 
@@ -101,13 +101,13 @@ public class PluginsHtmlHeaderTest {
     Release release = new Release(plugin, version);
     release.setDate(getDate());
     release.setDownloadUrl("download_url");
-    release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(newArrayList("dev"));
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense(null);
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
 
     center.setPlugins(newArrayList(plugin));
 
@@ -126,13 +126,13 @@ public class PluginsHtmlHeaderTest {
     Release release = new Release(plugin, version);
     release.setDate(getDate());
     release.setDownloadUrl("download_url");
-    release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(newArrayList("dev"));
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl(null);
     plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
 
     center.setPlugins(newArrayList(plugin));
 
@@ -151,13 +151,13 @@ public class PluginsHtmlHeaderTest {
     Release release = new Release(plugin, version);
     release.setDate(getDate());
     release.setDownloadUrl("download_url");
-    release.setSourcesUrl("sources_url");
     release.addRequiredSonarVersions("3.0");
-    release.setDevelopers(null);
     plugin.addRelease(release);
     plugin.setName("name");
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(null);
 
     center.setPlugins(newArrayList(plugin));
 

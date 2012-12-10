@@ -212,7 +212,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Terms & Conditions URL", PluginManifest.TERMS_CONDITIONS_URL, getPluginTermsConditionsUrl());
       addManifestProperty("Issue Tracker URL", PluginManifest.ISSUE_TRACKER_URL, getPluginIssueTrackerUrl());
       addManifestProperty("Build date", PluginManifest.BUILD_DATE, FormatUtils.toString(new Date(), true));
-      addManifestProperty("Sources URL", PluginManifest.SOURCES_URL, getProject().getScm().getUrl());
+      addManifestProperty("Sources URL", PluginManifest.SOURCES_URL, getSourcesUrl());
       addManifestProperty("Developers", PluginManifest.DEVELOPERS, getDevelopers());
       getLog().info("-------------------------------------------------------");
 
@@ -233,17 +233,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     } catch (Exception e) {
       throw new MojoExecutionException("Error assembling Sonar-plugin: " + e.getMessage(), e);
     }
-  }
-
-  private String getDevelopers() {
-    return StringUtils.join(
-        Collections2.transform(getProject().getDevelopers(), new Function<Developer, String>() {
-          public String apply(Developer developer) {
-            return developer.getName();
-          }
-        })
-        , ","
-    );
   }
 
   private void addManifestProperty(String label, String key, String value) {
@@ -283,6 +272,27 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       return getExplicitPluginKey();
     }
     return PluginKeyUtils.sanitize(getProject().getArtifactId());
+  }
+
+  private String getSourcesUrl() {
+    if (getProject().getScm() != null) {
+      return getProject().getScm().getUrl();
+    }
+    return null;
+  }
+
+  private String getDevelopers() {
+    if (getProject().getDevelopers() != null) {
+      return StringUtils.join(
+          Collections2.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+            public String apply(Developer developer) {
+              return developer.getName();
+            }
+          })
+          , ","
+      );
+    }
+    return null;
   }
 
   protected static File getJarFile(File basedir, String finalName, String classifier) {

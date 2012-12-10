@@ -83,6 +83,8 @@ public final class UpdateCenterSerializer {
       set(p, plugin, "organizationUrl", plugin.getOrganizationUrl());
       set(p, plugin, "termsConditionsUrl", plugin.getTermsConditionsUrl());
       set(p, plugin, "issueTrackerUrl", plugin.getIssueTrackerUrl());
+      set(p, plugin, "scm", plugin.getSourcesUrl());
+      set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
 
       List<String> releaseKeys = new ArrayList<String>();
       for (Release release : plugin.getReleases()) {
@@ -92,8 +94,6 @@ public final class UpdateCenterSerializer {
         set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
         set(p, plugin, release.getVersion() + ".description", release.getDescription());
         set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
-        set(p, plugin, release.getVersion() + ".scm", release.getSourcesUrl());
-        set(p, plugin, release.getVersion() + ".developers", StringUtils.join(release.getDevelopers(), ","));
       }
       set(p, plugin, "versions", releaseKeys);
     }

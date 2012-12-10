@@ -63,5 +63,25 @@ public class PluginManifestTest {
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
     assertThat(manifest.getDependencies()).isEmpty();
     assertThat(manifest.getImplementationBuild()).isNull();
+    assertThat(manifest.getDevelopers()).isEmpty();
+    assertThat(manifest.getSourcesUrl()).isNull();
+  }
+
+  @Test
+  public void shouldAddDevelpers() throws URISyntaxException, IOException {
+    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-devs.jar");
+
+    PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
+
+    assertThat(manifest.getDevelopers()).contains("Firstname1 Name1", "Firstname2 Name2");
+  }
+
+  @Test
+  public void shouldAddSourcesUrl() throws URISyntaxException, IOException {
+    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-sources.jar");
+
+    PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
+
+    assertThat(manifest.getSourcesUrl()).isEqualTo("https://github.com/SonarSource/project");
   }
 }

@@ -89,9 +89,9 @@ public class PluginsHtmlHeader {
             lastRelease.getDownloadUrl(),
             lastRelease.getMinimumRequiredSonarVersion().getName(),
             formatLink(plugin.getIssueTrackerUrl()),
-            formatLink(lastRelease.getSourcesUrl()),
+            formatLink(plugin.getSourcesUrl()),
             plugin.getLicense() == null ? "Unknown" : plugin.getLicense(),
-            formatDevelopers(lastRelease.getDevelopers())
+            formatDevelopers(plugin.getDevelopers())
         }
     );
   }
