@@ -67,12 +67,12 @@ public final class PluginManifest {
   public static final String IMPLEMENTATION_BUILD = "Implementation-Build";
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public static final String SOURCES_URL = "Plugin-SourcesUrl";
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public static final String DEVELOPERS = "Plugin-Developers";
 
@@ -324,14 +324,14 @@ public final class PluginManifest {
   }
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public String getSourcesUrl() {
     return sourcesUrl;
   }
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public PluginManifest setSourcesUrl(String sourcesUrl) {
     this.sourcesUrl = sourcesUrl;
@@ -339,14 +339,14 @@ public final class PluginManifest {
   }
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public String[] getDevelopers() {
     return developers;
   }
 
   /**
-   * @since 2.0
+   * @since 1.4
    */
   public PluginManifest setDevelopers(String[] developers) {
     this.developers = developers;
