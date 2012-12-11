@@ -9,7 +9,7 @@
   <name>Sonar :: Update Center</name>
   <url>http://www.sonarsource.org</url>
   <inceptionYear>2010</inceptionYear>
-  <description>Update center for Sonar</description>
+  <description>Sonar Update Center</description>
 
   <organization>
     <name>SonarSource</name>
@@ -23,29 +23,6 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-  <developers>
-    <developer>
-      <id>simon.brandhof</id>
-      <name>Simon Brandhof</name>
-      <email>simon.brandhof@sonarsource.com</email>
-      <organization>SonarSource</organization>
-      <roles>
-        <role>developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-    <developer>
-      <id>godin</id>
-      <name>Evgeny Mandrikov</name>
-      <email>evgeny.mandrikov@sonarsource.com</email>
-      <organization>SonarSource</organization>
-      <roles>
-        <role>developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-  </developers>
 
   <modules>
     <module>sonar-update-center-common</module>
