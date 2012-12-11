@@ -41,24 +41,24 @@ public final class Server {
 
   private Configuration configuration;
 
-  public Server(Configuration configuration){
+  public Server(Configuration configuration) {
     this.configuration = configuration;
   }
 
   public void start() throws IOException, URISyntaxException {
     configuration.log();
-    HttpDownloader downloader = new HttpDownloader(configuration.getWorkingDir());
-    UpdateCenter center = buildFromPartialMetadata(downloader);
-    downloadReleases(downloader, center);
+    UpdateCenter center = buildFromPartialMetadata();
+    downloadReleases(center);
     generateMetadata(center);
     generateHtmlHeader(center);
   }
 
-  private UpdateCenter buildFromPartialMetadata(HttpDownloader downloader) {
-    return new MetadataFile(configuration, downloader).getUpdateCenter();
+  private UpdateCenter buildFromPartialMetadata() {
+    return new MetadataFile(configuration).getUpdateCenter();
   }
 
-  private void downloadReleases(HttpDownloader downloader, UpdateCenter center) throws IOException, URISyntaxException {
+  private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
+    HttpDownloader downloader = new HttpDownloader(configuration.getWorkingDir());
     for (Plugin plugin : center.getPlugins()) {
       LOG.info("Load plugin: " + plugin.getKey());
 

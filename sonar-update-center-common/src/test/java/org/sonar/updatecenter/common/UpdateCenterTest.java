@@ -21,10 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterTest {
 
@@ -37,8 +34,8 @@ public class UpdateCenterTest {
     center.addPlugin(foo);
     center.addPlugin(bar);
 
-    assertEquals(foo, center.getPlugin("foo"));
-    assertNull(center.getPlugin("unknown"));
-    assertThat(center.getPlugins().size(), is(2));
+    assertThat(center.getPlugin("foo")).isEqualTo(foo);
+    assertThat(center.getPlugin("unknown")).isNull();
+    assertThat(center.getPlugins().size()).isEqualTo(2);
   }
 }

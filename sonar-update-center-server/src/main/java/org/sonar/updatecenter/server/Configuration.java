@@ -34,20 +34,16 @@ public class Configuration {
 
   private static final String WORKING_DIR = "workingDir";
   private static final String OUTPUT_FILE = "outputFile";
-  private static final String SOURCE_PATH = "path";
-  private static final String SOURCE_LOGIN = "login";
-  private static final String SOURCE_PASSWORD = "password";
+  private static final String SOURCE_PATH = "inputFile";
 
   private Properties props;
   private File workingDir;
 
-  public Configuration(String workingDir, String outputFile, String path, String login, String password) {
+  public Configuration(String workingDir, String outputFile, String inputFile) {
     props = new Properties();
     setProperty(WORKING_DIR, workingDir);
     setProperty(OUTPUT_FILE, outputFile);
-    setProperty(SOURCE_PATH, path);
-    setProperty(SOURCE_LOGIN, login);
-    setProperty(SOURCE_PASSWORD, password);
+    setProperty(SOURCE_PATH, inputFile);
   }
 
   public Configuration(Properties props) {
@@ -59,19 +55,13 @@ public class Configuration {
     LOG.info(WORKING_DIR + ": " + getWorkingDir().getPath());
     LOG.info(OUTPUT_FILE + ": " + getOutputFile().getPath());
     LOG.info(SOURCE_PATH + ": " + getSourcePath());
-    LOG.info(SOURCE_LOGIN + ": " + getSourceLogin());
-    LOG.info(SOURCE_PASSWORD + ": " + getSourcePassword());
     LOG.info("-------------------------------");
   }
 
   public File getWorkingDir() {
     if (workingDir == null) {
       String path = props.getProperty(WORKING_DIR);
-      if (StringUtils.isBlank(path)) {
-        workingDir = new File(System.getProperty("user.home"), ".sonar-update-center");
-      } else {
-        workingDir = new File(path);
-      }
+      workingDir = new File(path);
       try {
         FileUtils.forceMkdir(workingDir);
 
@@ -92,14 +82,6 @@ public class Configuration {
 
   public String getSourcePath() {
     return props.getProperty(SOURCE_PATH);
-  }
-
-  public String getSourceLogin() {
-    return props.getProperty(SOURCE_LOGIN);
-  }
-
-  public String getSourcePassword() {
-    return props.getProperty(SOURCE_PASSWORD);
   }
 
   private void setProperty(String property, String value) {

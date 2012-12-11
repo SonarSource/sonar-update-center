@@ -27,7 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal generate
  * @requiresProject false
  */
-public class ServerMojo extends AbstractMojo {
+public class GenerateMojo extends AbstractMojo {
 
   /**
    * The working directory
@@ -44,31 +44,16 @@ public class ServerMojo extends AbstractMojo {
   private String outputFile;
 
   /**
-   * The path to the metadata file (can be remote or locale)
+   * The path to the metadata file
    *
-   * @parameter expression="${path}"
+   * @parameter expression="${inputFile}"
    * @required
    */
-  private String path;
-
-  /**
-   * The login needed to access the metadata file
-   *
-   * @parameter expression="${login}"
-   */
-  private String login;
-
-  /**
-   * The password needed to access the metadata file
-   *
-   * @parameter expression="${password}"
-   */
-  private String password;
-
+  private String inputFile;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(workingDir, outputFile, path, login, password);
+      Configuration configuration = new Configuration(workingDir, outputFile, inputFile);
       Server server = new Server(configuration);
       server.start();
     } catch (Exception e) {

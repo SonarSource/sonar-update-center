@@ -19,41 +19,40 @@
  */
 package org.sonar.updatecenter.common;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 import org.junit.Test;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 public class PluginKeyUtilsTest {
 
   @Test
   public void shouldSanitizeMavenArtifactId() {
-    assertThat(PluginKeyUtils.sanitize("sonar-test-plugin"), is("test"));
-    assertThat(PluginKeyUtils.sanitize("test-sonar-plugin"), is("test"));
-    assertThat(PluginKeyUtils.sanitize("test"), is("test"));
+    assertThat(PluginKeyUtils.sanitize("sonar-test-plugin")).isEqualTo("test");
+    assertThat(PluginKeyUtils.sanitize("test-sonar-plugin")).isEqualTo("test");
+    assertThat(PluginKeyUtils.sanitize("test")).isEqualTo("test");
 
-    assertThat(PluginKeyUtils.sanitize("sonar-test-foo-plugin"), is("testfoo"));
-    assertThat(PluginKeyUtils.sanitize("test-foo-sonar-plugin"), is("testfoo"));
-    assertThat(PluginKeyUtils.sanitize("test-foo"), is("testfoo"));
-    assertThat(PluginKeyUtils.sanitize("keep.only-digits%12345&and*letters"), is("keeponlydigits12345andletters"));
-    assertThat(PluginKeyUtils.sanitize("   remove whitespaces   "), is("removewhitespaces"));
+    assertThat(PluginKeyUtils.sanitize("sonar-test-foo-plugin")).isEqualTo("testfoo");
+    assertThat(PluginKeyUtils.sanitize("test-foo-sonar-plugin")).isEqualTo("testfoo");
+    assertThat(PluginKeyUtils.sanitize("test-foo")).isEqualTo("testfoo");
+    assertThat(PluginKeyUtils.sanitize("keep.only-digits%12345&and*letters")).isEqualTo("keeponlydigits12345andletters");
+    assertThat(PluginKeyUtils.sanitize("   remove whitespaces   ")).isEqualTo("removewhitespaces");
   }
 
   @Test
   public void shouldBeValid() {
-    assertThat(PluginKeyUtils.isValid("foo"), is(true));
-    assertThat(PluginKeyUtils.isValid("sonarfooplugin"), is(true));
-    assertThat(PluginKeyUtils.isValid("foo6"), is(true));
-    assertThat(PluginKeyUtils.isValid("FOO6"), is(true));
+    assertThat(PluginKeyUtils.isValid("foo")).isEqualTo(true);
+    assertThat(PluginKeyUtils.isValid("sonarfooplugin")).isEqualTo(true);
+    assertThat(PluginKeyUtils.isValid("foo6")).isEqualTo(true);
+    assertThat(PluginKeyUtils.isValid("FOO6")).isEqualTo(true);
   }
 
   @Test
   public void shouldNotBeValid() {
-    assertThat(PluginKeyUtils.isValid(null), is(false));
-    assertThat(PluginKeyUtils.isValid(""), is(false));
-    assertThat(PluginKeyUtils.isValid("sonar-foo-plugin"), is(false));
-    assertThat(PluginKeyUtils.isValid("foo.bar"), is(false));
-    assertThat(PluginKeyUtils.isValid("  nowhitespaces   "), is(false));
-    assertThat(PluginKeyUtils.isValid("no whitespaces"), is(false));
+    assertThat(PluginKeyUtils.isValid(null)).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid("")).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid("sonar-foo-plugin")).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid("foo.bar")).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid("  nowhitespaces   ")).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid("no whitespaces")).isEqualTo(false);
   }
 }

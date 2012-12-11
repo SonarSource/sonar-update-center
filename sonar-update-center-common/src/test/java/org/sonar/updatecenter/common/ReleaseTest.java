@@ -21,18 +21,16 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertNull;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class ReleaseTest {
 
   @Test
   public void getFilename() {
     Release release = new Release(new Plugin("fake"), Version.create("1.2"));
-    assertNull(release.getFilename());
+    assertThat(release.getFilename()).isNull();
 
     release.setDownloadUrl("http://dist.sonarsource.org/foo-1.2.jar");
-    assertThat(release.getFilename(), is("foo-1.2.jar"));
+    assertThat(release.getFilename()).isEqualTo("foo-1.2.jar");
   }
 }

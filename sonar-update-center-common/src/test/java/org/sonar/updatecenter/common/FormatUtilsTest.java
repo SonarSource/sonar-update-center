@@ -23,19 +23,17 @@ import org.junit.Test;
 
 import java.text.ParseException;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class FormatUtilsTest {
 
   @Test
   public void testToDate() throws ParseException {
-    assertThat(FormatUtils.toDate("2010-05-18", false).getDate(), is(18));
+    assertThat(FormatUtils.toDate("2010-05-18", false).getDate()).isEqualTo(18);
   }
 
   @Test
   public void ignoreNullDate() {
-    assertNull(FormatUtils.toDate(null, true));
+    assertThat(FormatUtils.toDate(null, true)).isNull();
   }
 }

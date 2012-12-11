@@ -28,21 +28,14 @@ import java.io.IOException;
 public final class MetadataFile {
 
   private Configuration conf;
-  private HttpDownloader downloader;
 
-  public MetadataFile(Configuration conf, HttpDownloader downloader) {
+  public MetadataFile(Configuration conf) {
     this.conf = conf;
-    this.downloader = downloader;
   }
 
   public File getFile() {
     try {
-      File file;
-      if (isRemote()) {
-        file = downloader.download(conf.getSourcePath(), true, conf.getSourceLogin(), conf.getSourcePassword());
-      } else {
-        file = new File(conf.getSourcePath());
-      }
+      File file = new File(conf.getSourcePath());
       if (!file.exists()) {
         throw new IllegalStateException("The metadata file does not exist: " + file.getPath());
       }
@@ -62,7 +55,4 @@ public final class MetadataFile {
     }
   }
 
-  private boolean isRemote() {
-    return conf.getSourcePath().startsWith("http");
-  }
 }
