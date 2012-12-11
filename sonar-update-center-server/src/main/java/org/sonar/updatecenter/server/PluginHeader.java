@@ -69,7 +69,7 @@ public class PluginHeader {
   }
 
   public String getLicense() {
-    return plugin.getLicense() != null ? plugin.getLicense() : "";
+    return plugin.getLicense();
   }
 
   public String getDevelopers() {
@@ -77,7 +77,7 @@ public class PluginHeader {
   }
 
   private String formatLink(String url) {
-    return StringUtils.isNotBlank(url) ? "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>" : "";
+    return StringUtils.isNotBlank(url) ? "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>" : null;
   }
 
   private String formatDate(Date date) {
@@ -86,7 +86,7 @@ public class PluginHeader {
 
   private String formatDevelopers(List<String> developers) {
     if (developers == null || developers.isEmpty()) {
-      return "";
+      return null;
     }
     return StringUtils.join(developers, ", ");
   }

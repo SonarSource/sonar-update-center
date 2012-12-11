@@ -29,25 +29,25 @@
         <td><strong>Download</strong></td>
         <td><a href="${pluginHeader.getDownloadUrl()}">${pluginHeader.getDownloadUrl()}</a></td>
     </tr>
-    <#if pluginHeader.getLicense() != "" >
+    <#if pluginHeader.getLicense()?? >
     <tr>
         <td><strong>License</strong></td>
         <td>${pluginHeader.getLicense()}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getDevelopers() != "" >
+    <#if pluginHeader.getDevelopers()?? >
     <tr>
         <td><strong>Developers</strong></td>
         <td>${pluginHeader.getDevelopers()}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getIssueTracker() != "" >
+    <#if pluginHeader.getIssueTracker()?? >
     <tr>
         <td><strong>Issue tracker</strong></td>
         <td>${pluginHeader.getIssueTracker()}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getSources() != "" >
+    <#if pluginHeader.getSources()?? >
     <tr>
         <td><strong>Sources</strong></td>
         <td>${pluginHeader.getSources()}</td>
