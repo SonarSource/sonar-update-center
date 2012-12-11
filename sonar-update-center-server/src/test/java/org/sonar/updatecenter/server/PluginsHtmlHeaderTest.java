@@ -173,6 +173,30 @@ public class PluginsHtmlHeaderTest {
     assertThat(file).hasSameContentAs(getExpectedFile("without-developper.html"));
   }
 
+  @Test
+  public void shouldWriteUnknownWhenNoSources() throws Exception {
+    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Version version = Version.create("1.0");
+    Release release = new Release(plugin, version);
+    release.setDate(getDate());
+    release.setDownloadUrl("download_url");
+    release.addRequiredSonarVersions("3.0");
+    plugin.addRelease(release);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+    plugin.setSourcesUrl(null);
+    plugin.setDevelopers(newArrayList("dev"));
+
+    center.setPlugins(newArrayList(plugin));
+
+    pluginsHtmlHeader.start();
+
+    assertThat(outputFolder.list()).hasSize(2);
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
+  }
+
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/" + fileName));
   }

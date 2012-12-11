@@ -20,22 +20,21 @@
 package org.sonar.updatecenter.server;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.io.Writer;
+import java.util.Map;
 import java.util.Set;
 
 public class PluginsHtmlHeader {
@@ -43,7 +42,6 @@ public class PluginsHtmlHeader {
   private static final Logger LOG = LoggerFactory.getLogger(PluginsHtmlHeader.class);
 
   private File outputDirectory;
-  private String pluginInfoWidgetTemplate;
   private UpdateCenter center;
 
   public PluginsHtmlHeader(UpdateCenter center, File outputDirectory) throws IOException {
@@ -53,62 +51,42 @@ public class PluginsHtmlHeader {
 
   private void init() throws IOException {
     Preconditions.checkArgument(outputDirectory.exists());
-    InputStream inputStream = null;
+    FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "style.css"));
+  }
+
+  private void print(PluginHeader pluginHeader, File toFile) {
+    Writer writer = null;
     try {
-      inputStream = getClass().getResourceAsStream("/plugin-info-widget-template.html");
-      pluginInfoWidgetTemplate = IOUtils.toString(inputStream);
-      FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "style.css"));
+      freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
+      freemarker.template.Configuration cfg = new freemarker.template.Configuration();
+      cfg.setClassForTemplateLoading(PluginHeader.class, "");
+      cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+      Map<String, Object> root = Maps.newHashMap();
+      root.put("pluginHeader", pluginHeader);
+
+      Template template = cfg.getTemplate("plugin-template.ftl");
+      writer = new FileWriter(toFile);
+      template.process(root, writer);
+      writer.flush();
     } catch (Exception e) {
-      IOUtils.closeQuietly(inputStream);
+      throw new IllegalStateException("Fail to generate Autocontrol HTML report to: " + toFile, e);
+
+    } finally {
+      IOUtils.closeQuietly(writer);
     }
   }
 
   public void start() throws IOException {
     init();
-
     Set<Plugin> plugins = center.getPlugins();
     LOG.info("Start generating html for " + plugins.size() + " plugins in folder :" + outputDirectory);
-
     for (Plugin plugin : plugins) {
-      String pluginInfoWidget = generatePluginWidgetTemplate(plugin);
       File file = new File(outputDirectory, plugin.getKey() + ".html");
       LOG.info("Generate html for plugin : " + plugin.getKey() + " in file : " + file);
-      FileUtils.writeStringToFile(file, pluginInfoWidget, "UTF-8");
+      PluginHeader pluginHeader = new PluginHeader(plugin);
+      print(pluginHeader, file);
     }
-  }
-
-  private String generatePluginWidgetTemplate(Plugin plugin) {
-    Release lastRelease = plugin.getLastRelease();
-    return StringUtils.replaceEach(
-        pluginInfoWidgetTemplate,
-        new String[]{"%name%", "%version%", "%date%", "%downloadUrl%", "%sonarVersion%", "%issueTracker%", "%sources%", "%license%", "%developers%"},
-        new String[]{
-            plugin.getName(),
-            lastRelease.getVersion().getName(),
-            formatDate(lastRelease.getDate()),
-            lastRelease.getDownloadUrl(),
-            lastRelease.getMinimumRequiredSonarVersion().getName(),
-            formatLink(plugin.getIssueTrackerUrl()),
-            formatLink(plugin.getSourcesUrl()),
-            plugin.getLicense() == null ? "Unknown" : plugin.getLicense(),
-            formatDevelopers(plugin.getDevelopers())
-        }
-    );
-  }
-
-  private String formatLink(String url) {
-    return StringUtils.isBlank(url) ? "Unknown" : "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>";
-  }
-
-  private String formatDate(Date date) {
-    return (new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)).format(date);
-  }
-
-  private String formatDevelopers(List<String> developers) {
-    if (developers == null || developers.isEmpty()) {
-      return "Unknown";
-    }
-    return StringUtils.join(developers, ", ");
   }
 
 }
