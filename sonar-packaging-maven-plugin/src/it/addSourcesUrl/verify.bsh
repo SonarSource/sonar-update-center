@@ -15,7 +15,7 @@ try {
   Manifest manifest = new Manifest(input);
   String sourcesUrl = manifest.getMainAttributes().getValue("Plugin-SourcesUrl");
   if (!"https://github.com/SonarSource/project".equals(sourcesUrl)) {
-    throw new Exception("Developers key is not valid: " + dev);
+    throw new Exception("Plugin-SourcesUrl is not valid: " + dev);
   }
 } finally {
   zipFile.close();
