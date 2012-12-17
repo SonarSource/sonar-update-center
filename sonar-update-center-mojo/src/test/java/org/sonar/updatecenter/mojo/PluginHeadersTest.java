@@ -1,8 +1,9 @@
-package org.sonar.updatecenter.server;
+package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
+import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
+import org.sonar.updatecenter.mojo.PluginHeaders;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -18,10 +20,11 @@ import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-public class PluginsHtmlHeaderTest {
+public class PluginHeadersTest {
 
-  private PluginsHtmlHeader pluginsHtmlHeader;
+  private PluginHeaders pluginHeaders;
 
   private UpdateCenter center;
 
@@ -36,12 +39,12 @@ public class PluginsHtmlHeaderTest {
   public void before() throws Exception {
     center = new UpdateCenter();
     outputFolder = temporaryFolder.newFolder();
-    pluginsHtmlHeader = new PluginsHtmlHeader(center, outputFolder);
+    pluginHeaders = new PluginHeaders(center, outputFolder, mock(Log.class));
   }
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(1);
     assertThat(outputFolder.list()[0]).contains("style.css");
@@ -64,7 +67,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
@@ -94,7 +97,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
@@ -118,7 +121,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
@@ -142,7 +145,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
@@ -166,7 +169,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
@@ -190,7 +193,7 @@ public class PluginsHtmlHeaderTest {
 
     center.setPlugins(newArrayList(plugin));
 
-    pluginsHtmlHeader.start();
+    pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];

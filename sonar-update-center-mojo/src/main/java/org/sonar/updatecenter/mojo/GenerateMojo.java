@@ -17,7 +17,7 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.server;
+package org.sonar.updatecenter.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -30,18 +30,12 @@ import org.apache.maven.plugin.MojoFailureException;
 public class GenerateMojo extends AbstractMojo {
 
   /**
-   * The working directory
+   * The directory that contains generated files and cache of plugins.
    *
-   * @parameter expression="${workingDir}" default-value="${basedir}/sonar-update-center"
+   * @parameter expression="${outputDir}"
+   * @required
    */
-  private String workingDir;
-
-  /**
-   * The generated file containing the sonar update center properties
-   *
-   * @parameter expression="${outputFile}" default-value="${basedir}/sonar-update-center/generated-sonar-updates.properties"
-   */
-  private String outputFile;
+  private String outputDir;
 
   /**
    * The path to the metadata file
@@ -53,11 +47,11 @@ public class GenerateMojo extends AbstractMojo {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(workingDir, outputFile, inputFile);
-      Server server = new Server(configuration);
-      server.start();
+      Configuration configuration = new Configuration(outputDir, inputFile, getLog());
+      Generator generator = new Generator(configuration, getLog());
+      generator.start();
     } catch (Exception e) {
-      throw new MojoExecutionException("Fail to execute server mojo", e);
+      throw new MojoExecutionException("Fail to execute mojo", e);
     }
   }
 

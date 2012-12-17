@@ -17,7 +17,7 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.server;
+package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.lang.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
@@ -34,10 +34,6 @@ public class PluginHeader {
 
   public PluginHeader(Plugin plugin) {
     this.plugin = plugin;
-  }
-
-  private Release getRelease() {
-    return plugin.getLastRelease();
   }
 
   public String getName() {
@@ -91,4 +87,7 @@ public class PluginHeader {
     return StringUtils.join(developers, ", ");
   }
 
+  private Release getRelease() {
+    return plugin.getLastRelease();
+  }
 }

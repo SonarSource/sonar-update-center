@@ -17,11 +17,10 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.server;
+package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginManifest;
 import org.sonar.updatecenter.common.Release;
@@ -34,18 +33,19 @@ import java.net.URISyntaxException;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
 
-public final class Server {
+class Generator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Server.class);
   private static final String HTML_HEADER_DIR = "html";
 
-  private Configuration configuration;
+  private final Configuration configuration;
+  private final Log log;
 
-  public Server(Configuration configuration) {
+  Generator(Configuration configuration, Log log) {
     this.configuration = configuration;
+    this.log = log;
   }
 
-  public void start() throws IOException, URISyntaxException {
+  void start() throws IOException, URISyntaxException {
     configuration.log();
     UpdateCenter center = buildFromPartialMetadata();
     downloadReleases(center);
@@ -58,9 +58,9 @@ public final class Server {
   }
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
-    HttpDownloader downloader = new HttpDownloader(configuration.getWorkingDir());
+    HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
     for (Plugin plugin : center.getPlugins()) {
-      LOG.info("Load plugin: " + plugin.getKey());
+      log.info("Load plugin: " + plugin.getKey());
 
       File masterJar = null;
       for (Release release : plugin.getReleases()) {
@@ -69,12 +69,11 @@ public final class Server {
           if (jar != null && jar.exists()) {
             masterJar = jar;
           } else {
-            release.setDownloadUrl(null);
-            LOG.warn("Ignored because of wrong downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
+            throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
           }
 
         } else {
-          LOG.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
+          log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
         }
       }
 
@@ -86,19 +85,19 @@ public final class Server {
   }
 
   private void generateMetadata(UpdateCenter center) {
-    LOG.info("Generate output: " + configuration.getOutputFile());
+    log.info("Generate output: " + configuration.getOutputFile());
     UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
   private void generateHtmlHeader(UpdateCenter center) throws IOException {
-    File htmlOutputDir = new File(configuration.getWorkingDir(), HTML_HEADER_DIR);
+    File htmlOutputDir = new File(configuration.getOutputDir(), HTML_HEADER_DIR);
     try {
       forceMkdir(htmlOutputDir);
     } catch (IOException e) {
       throw new IllegalStateException("Fail to create the working directory: " + htmlOutputDir.getAbsolutePath(), e);
     }
-    PluginsHtmlHeader pluginsHtmlHeader = new PluginsHtmlHeader(center, htmlOutputDir);
-    pluginsHtmlHeader.start();
+    PluginHeaders pluginHeaders = new PluginHeaders(center, htmlOutputDir, log);
+    pluginHeaders.generateHtml();
   }
 
 }

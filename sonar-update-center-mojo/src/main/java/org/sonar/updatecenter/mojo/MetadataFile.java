@@ -17,7 +17,7 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.server;
+package org.sonar.updatecenter.mojo;
 
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer;
@@ -35,13 +35,13 @@ public final class MetadataFile {
 
   public File getFile() {
     try {
-      File file = new File(conf.getSourcePath());
+      File file = conf.getInputFile();
       if (!file.exists()) {
         throw new IllegalStateException("The metadata file does not exist: " + file.getPath());
       }
       return file;
     } catch (Exception e) {
-      throw new IllegalStateException("Can not open the metadata file: " + conf.getSourcePath(), e);
+      throw new IllegalStateException("Can not open the metadata file: " + conf.getInputFile(), e);
     }
   }
 
