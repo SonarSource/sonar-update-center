@@ -19,9 +19,9 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 public final class Plugin extends Artifact {
@@ -152,7 +152,7 @@ public final class Plugin extends Artifact {
       homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
       termsConditionsUrl = StringUtils.defaultIfEmpty(termsConditionsUrl, manifest.getTermsConditionsUrl());
       sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
-      developers = Lists.newArrayList(manifest.getDevelopers());
+      developers = Arrays.asList(manifest.getDevelopers());
     }
     return this;
   }

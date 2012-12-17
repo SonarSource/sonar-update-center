@@ -23,9 +23,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Properties;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterSerializerTest {
@@ -41,7 +41,7 @@ public class UpdateCenterSerializerTest {
         .setOrganizationUrl("http://www.sonarsource.org"));
     Plugin barPlugin = new Plugin("bar")
         .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
-        .setDevelopers(newArrayList("dev1", "dev2"));
+        .setDevelopers(Arrays.asList("dev1", "dev2"));
     center.addPlugin(barPlugin);
     barPlugin.addRelease(
         new Release(barPlugin, Version.create("1.2"))
