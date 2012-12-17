@@ -160,7 +160,8 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   }
 
   private void checkMandatoryAttributes() throws MojoExecutionException {
-    if (StringUtils.isBlank(getPluginName())) {
+    // Maven automatically sets the name as "Unnamed - <artifactId>" when the field <name> is missing.
+    if (StringUtils.isBlank(getPluginName()) || getPluginName().startsWith("Unnamed - ")) {
       throw new MojoExecutionException("Plugin name is missing. "
           + "Please add the field <name> or the property sonar.pluginName.");
     }
