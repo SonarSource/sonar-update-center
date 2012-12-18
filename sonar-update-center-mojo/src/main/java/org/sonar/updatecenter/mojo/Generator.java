@@ -45,16 +45,11 @@ class Generator {
     this.log = log;
   }
 
-  void start() throws IOException, URISyntaxException {
-    configuration.log();
-    UpdateCenter center = buildFromPartialMetadata();
+  void generate() throws IOException, URISyntaxException {
+    UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
     generateHtmlHeader(center);
-  }
-
-  private UpdateCenter buildFromPartialMetadata() {
-    return new MetadataFile(configuration).getUpdateCenter();
   }
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {

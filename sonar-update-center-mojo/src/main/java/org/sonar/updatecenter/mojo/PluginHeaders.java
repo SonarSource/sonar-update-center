@@ -80,7 +80,7 @@ class PluginHeaders {
       template.process(root, writer);
       writer.flush();
     } catch (Exception e) {
-      throw new IllegalStateException("Fail to generate Autocontrol HTML report to: " + toFile, e);
+      throw new IllegalStateException("Fail to generate HTML header to: " + toFile, e);
 
     } finally {
       IOUtils.closeQuietly(writer);

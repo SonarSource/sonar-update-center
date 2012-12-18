@@ -201,7 +201,7 @@ public class PluginHeadersTest {
   }
 
   private File getExpectedFile(String fileName) {
-    return FileUtils.toFile(getClass().getResource("/" + fileName));
+    return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
   }
 
   private Date getDate() throws DateParseException {

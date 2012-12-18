@@ -23,6 +23,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
+import java.io.File;
+
 /**
  * @goal generate
  * @requiresProject false
@@ -35,7 +37,7 @@ public class GenerateMojo extends AbstractMojo {
    * @parameter expression="${outputDir}"
    * @required
    */
-  private String outputDir;
+  private File outputDir;
 
   /**
    * The path to the metadata file
@@ -43,13 +45,12 @@ public class GenerateMojo extends AbstractMojo {
    * @parameter expression="${inputFile}"
    * @required
    */
-  private String inputFile;
+  private File inputFile;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, getLog());
-      Generator generator = new Generator(configuration, getLog());
-      generator.start();
+      new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
     }

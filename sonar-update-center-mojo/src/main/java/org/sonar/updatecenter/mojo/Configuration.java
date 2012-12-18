@@ -19,47 +19,41 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
+import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 
 class Configuration {
 
-  private static final String OUTPUT_DIR = "outputDir";
-  private static final String INPUT_FILE = "inputFile";
+  private File outputDir, inputFile;
 
-  private Properties props;
-  private File outputDir;
-  private Log log;
-
-  Configuration(String outputDir, String inputFile, Log log) {
-    props = new Properties();
-    setProperty(OUTPUT_DIR, outputDir);
-    setProperty(INPUT_FILE, inputFile);
-    this.log = log;
+  Configuration(File outputDir, File inputFile, Log log) {
+    Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
+    Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
+    try {
+      FileUtils.forceMkdir(outputDir);
+    } catch (IOException e) {
+      throw new IllegalStateException("Fail to create the output directory: " + outputDir.getAbsolutePath(), e);
+    }
+    this.outputDir = outputDir;
+    this.inputFile = inputFile;
+    log(log);
   }
 
-  void log() {
+  private void log(Log log) {
     log.info("-------------------------------");
-    log.info(OUTPUT_DIR + ": " + getOutputDir().getAbsolutePath());
-    log.info(INPUT_FILE + ": " + getInputFile().getAbsolutePath());
+    log.info("outputDir: " + outputDir.getAbsolutePath());
+    log.info("inputFile: " + inputFile.getAbsolutePath());
     log.info("-------------------------------");
   }
+
 
   File getOutputDir() {
-    if (outputDir == null) {
-      String path = props.getProperty(OUTPUT_DIR);
-      outputDir = new File(path);
-      try {
-        FileUtils.forceMkdir(outputDir);
-
-      } catch (IOException e) {
-        throw new IllegalStateException("Fail to create the working directory: " + outputDir.getAbsolutePath(), e);
-      }
-    }
     return outputDir;
   }
 
@@ -68,13 +62,15 @@ class Configuration {
   }
 
   File getInputFile() {
-    return new File(props.getProperty(INPUT_FILE));
+    return inputFile;
   }
 
-  private void setProperty(String property, String value) {
-    if (value != null) {
-      props.setProperty(property, value);
+  UpdateCenter getUpdateCenter() {
+    try {
+      return UpdateCenterDeserializer.fromProperties(getInputFile());
+
+    } catch (IOException e) {
+      throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);
     }
   }
-
 }
