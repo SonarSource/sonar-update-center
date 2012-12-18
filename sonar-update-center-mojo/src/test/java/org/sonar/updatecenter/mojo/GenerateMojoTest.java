@@ -20,7 +20,8 @@
 package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,28 +31,24 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
-public class GeneratorTest {
+public class GenerateMojoTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
-  public void generate_properties_and_html() throws IOException, URISyntaxException {
+  public void generate_properties_and_html() throws IOException, URISyntaxException, MojoFailureException, MojoExecutionException {
     File outputDir = temp.newFolder();
-    System.out.println(outputDir);
+
     // plugin is already cached
-    FileUtils.copyURLToFile(
-      getClass().getResource("/org/sonar/updatecenter/mojo/GeneratorTest/sonar-artifact-size-plugin-0.3.jar"),
-      new File(outputDir, "sonar-artifact-size-plugin-0.3.jar"));
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
 
-    File inputFile = FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/GeneratorTest/update-center-template.properties"));
-    Configuration config = new Configuration(outputDir, inputFile, mock(Log.class));
-    new Generator(config, mock(Log.class)).generate();
+    File inputFile = resource("update-center-template.properties");
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
+    // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
     assertThat(outputFile).exists().isFile();
-
     String output = FileUtils.readFileToString(outputFile);
 
     // metadata loaded from properties template
@@ -66,5 +63,9 @@ public class GeneratorTest {
     assertThat(new File(outputDir, "html/style.css")).exists().isFile();
     String html = FileUtils.readFileToString(htmlHeader);
     assertThat(html).contains("<title>Artifact Size</title>");
+  }
+
+  private File resource(String filename) {
+    return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/GenerateMojoTest/" + filename));
   }
 }

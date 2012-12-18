@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -56,4 +57,15 @@ public class GenerateMojo extends AbstractMojo {
     }
   }
 
+  @VisibleForTesting
+  GenerateMojo setOutputDir(File d) {
+    this.outputDir = d;
+    return this;
+  }
+
+  @VisibleForTesting
+  GenerateMojo setInputFile(File f) {
+    this.inputFile = f;
+    return this;
+  }
 }
