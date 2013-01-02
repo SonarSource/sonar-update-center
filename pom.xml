@@ -49,9 +49,9 @@
   </modules>
 
   <scm>
-    <connection>scm:git:git@github.com:SonarSource/sonar-update-center-2.git</connection>
-    <developerConnection>scm:git:git@github.com:SonarSource/sonar-update-center-2.git</developerConnection>
-    <url>https://github.com/SonarSource/sonar-update-center-2</url>
+    <connection>scm:git:git@github.com:SonarSource/sonar-update-center.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarSource/sonar-update-center.git</developerConnection>
+    <url>https://github.com/SonarSource/sonar-update-center</url>
   </scm>
 
   <issueManagement>
