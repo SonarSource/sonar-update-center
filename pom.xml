@@ -25,6 +25,23 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <id>simon.brandhof</id>
+      <name>Simon Brandhof</name>
+      <email>simon.brandhof@sonarsource.com</email>
+      <organization>SonarSource</organization>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>julien.lancelot</id>
+      <name>Julien Lancelot</name>
+      <email>julien.lancelot@sonarsource.com</email>
+      <organization>SonarSource</organization>
+      <timezone>+1</timezone>
+    </developer>    
+  </developers>
+
   <modules>
     <module>sonar-update-center-common</module>
     <module>sonar-update-center-mojo</module>
