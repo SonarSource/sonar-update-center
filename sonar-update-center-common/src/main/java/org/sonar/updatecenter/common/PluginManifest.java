@@ -39,6 +39,8 @@ public final class PluginManifest {
   public static final String KEY = "Plugin-Key";
   public static final String MAIN_CLASS = "Plugin-Class";
   public static final String NAME = "Plugin-Name";
+  public static final String GROUP = "Plugin-Group";
+  public static final String REQUIRES_GROUP = "Plugin-RequiresGroup";
   public static final String DESCRIPTION = "Plugin-Description";
   public static final String ORGANIZATION = "Plugin-Organization";
   public static final String ORGANIZATION_URL = "Plugin-OrganizationUrl";
@@ -78,6 +80,8 @@ public final class PluginManifest {
 
   private String key;
   private String name;
+  private String group;
+  private String requiresGroup;
   private String mainClass;
   private String description;
   private String organization;
@@ -130,6 +134,8 @@ public final class PluginManifest {
     this.key = PluginKeyUtils.sanitize(attributes.getValue(KEY));
     this.mainClass = attributes.getValue(MAIN_CLASS);
     this.name = attributes.getValue(NAME);
+    this.group = attributes.getValue(GROUP);
+    this.requiresGroup = attributes.getValue(REQUIRES_GROUP);
     this.description = attributes.getValue(DESCRIPTION);
     this.license = attributes.getValue(LICENSE);
     this.organization = attributes.getValue(ORGANIZATION);
@@ -167,6 +173,24 @@ public final class PluginManifest {
 
   public PluginManifest setName(String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getGroup() {
+    return group;
+  }
+
+  public PluginManifest setGroup(String group) {
+    this.group = group;
+    return this;
+  }
+
+  public String getRequiresGroup() {
+    return requiresGroup;
+  }
+
+  public PluginManifest setRequiresGroup(String requiresGroup) {
+    this.requiresGroup = requiresGroup;
     return this;
   }
 

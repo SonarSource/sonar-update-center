@@ -31,7 +31,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class UpdateCenterDeserializerTest {
 
   @Test
-  public void fromProperties() throws IOException {
+  public void read_infos_from_froperties() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates.properties");
     try {
       Properties props = new Properties();
@@ -43,6 +43,7 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
+      assertThat(clirr.getGroup()).isEqualTo("Group");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
@@ -56,22 +57,14 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void shouldAddDevelopers() throws IOException {
+  public void should_add_developers() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-developers.properties");
     try {
       Properties props = new Properties();
       props.load(input);
       UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
-      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
-
       Plugin clirr = center.getPlugin("clirr");
-      assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
-      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
-
-      assertThat(clirr.getSourcesUrl()).isNull();
       assertThat(clirr.getDevelopers()).hasSize(3);
       assertThat(clirr.getDevelopers()).contains("Mike Haller", "Freddy Mallet", "Simon Brandhof");
 
@@ -81,23 +74,32 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void shouldAddSourcesUrl() throws IOException {
+  public void should_add_sources_url() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-scm.properties");
     try {
       Properties props = new Properties();
       props.load(input);
       UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
-      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
+      Plugin clirr = center.getPlugin("clirr");
+      assertThat(clirr.getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  @Test
+  public void should_add_requires_group() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-requires-group.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
-      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
-
-      assertThat(clirr.getDevelopers()).isEmpty();
-      assertThat(clirr.getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
+      assertThat(clirr.getRequiresGroup()).isEqualTo("motionchart");
 
     } finally {
       IOUtils.closeQuietly(input);

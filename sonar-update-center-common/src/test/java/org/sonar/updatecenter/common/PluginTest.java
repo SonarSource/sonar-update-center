@@ -27,20 +27,21 @@ import static org.fest.assertions.Assertions.assertThat;
 public class PluginTest {
 
   @Test
-  public void shouldMergeWithManifest() {
+  public void should_merge_with_manifest() {
     Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setGroup("group");
 
     plugin.merge(manifest);
 
     assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
     assertThat(plugin.getDescription()).isEqualTo("Parser");
+    assertThat(plugin.getGroup()).isEqualTo("group");
 
   }
 
   @Test
-  public void shouldAddDevelopers() {
+  public void should_add_developers() {
     Plugin plugin = new Plugin("squid");
     PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[]{"Dev1"});
 
@@ -50,12 +51,22 @@ public class PluginTest {
   }
 
   @Test
-  public void shouldAddSourcesUrl() {
+  public void should_add_sources_url() {
     Plugin plugin = new Plugin("squid");
     PluginManifest manifest = new PluginManifest().setKey("squid").setSourcesUrl("sourcesUrl");
 
     plugin.merge(manifest);
 
     assertThat(plugin.getSourcesUrl()).isEqualTo("sourcesUrl");
+  }
+
+  @Test
+  public void shoud_add_requires_group() {
+    Plugin plugin = new Plugin("squid");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresGroup("group");
+
+    plugin.merge(manifest);
+
+    assertThat(plugin.getRequiresGroup()).isEqualTo("group");
   }
 }

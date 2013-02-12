@@ -75,6 +75,8 @@ public final class UpdateCenterSerializer {
     for (Plugin plugin : center.getPlugins()) {
       pluginKeys.add(plugin.getKey());
       set(p, plugin, "name", plugin.getName());
+      set(p, plugin, "group", plugin.getGroup());
+      set(p, plugin, "requiresGroup", plugin.getRequiresGroup());
       set(p, plugin, "description", plugin.getDescription());
       set(p, plugin, "category", plugin.getCategory());
       set(p, plugin, "homepageUrl", plugin.getHomepageUrl());

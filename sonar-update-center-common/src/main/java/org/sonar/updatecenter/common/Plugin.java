@@ -27,6 +27,8 @@ import java.util.List;
 public final class Plugin extends Artifact {
 
   private String name;
+  private String group;
+  private String requiresGroup;
   private String description;
   private String homepageUrl;
   private String license;
@@ -48,6 +50,24 @@ public final class Plugin extends Artifact {
 
   public Plugin setName(String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getGroup() {
+    return group;
+  }
+
+  public Plugin setGroup(String group) {
+    this.group = group;
+    return this;
+  }
+
+  public String getRequiresGroup() {
+    return requiresGroup;
+  }
+
+  public Plugin setRequiresGroup(String requiresGroup) {
+    this.requiresGroup = requiresGroup;
     return this;
   }
 
@@ -144,6 +164,8 @@ public final class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
+      group = manifest.getGroup();
+      requiresGroup = manifest.getRequiresGroup();
       description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
       organization = StringUtils.defaultIfEmpty(organization, manifest.getOrganization());
       organizationUrl = StringUtils.defaultIfEmpty(organizationUrl, manifest.getOrganizationUrl());

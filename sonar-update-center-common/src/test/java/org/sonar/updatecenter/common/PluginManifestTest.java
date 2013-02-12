@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -36,13 +37,15 @@ public class PluginManifestTest {
   }
 
   @Test
-  public void testCreateManifest() throws URISyntaxException, IOException {
+  public void should_create_manifest() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/checkstyle-plugin.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     assertThat(manifest.getKey()).isEqualTo("checkstyle");
     assertThat(manifest.getName()).isEqualTo("Checkstyle");
+    assertThat(manifest.getGroup()).isEqualTo("Java");
+    assertThat(manifest.getRequiresGroup()).isNull();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.getVersion().length()).isGreaterThan(1);
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
@@ -52,13 +55,15 @@ public class PluginManifestTest {
   }
 
   @Test
-  public void doNotFailWhenNoOldPluginManifest() throws URISyntaxException, IOException {
+  public void do_not_fail_when_no_old_plugin_manifest() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/old-plugin.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     assertThat(manifest.getKey()).isNull();
     assertThat(manifest.getName()).isNull();
+    assertThat(manifest.getGroup()).isNull();
+    assertThat(manifest.getRequiresGroup()).isNull();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
     assertThat(manifest.getDependencies()).isEmpty();
@@ -68,7 +73,7 @@ public class PluginManifestTest {
   }
 
   @Test
-  public void shouldAddDevelpers() throws URISyntaxException, IOException {
+  public void should_add_develpers() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-devs.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
@@ -77,11 +82,20 @@ public class PluginManifestTest {
   }
 
   @Test
-  public void shouldAddSourcesUrl() throws URISyntaxException, IOException {
+     public void should_add_sources_url() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-sources.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     assertThat(manifest.getSourcesUrl()).isEqualTo("https://github.com/SonarSource/project");
+  }
+
+  @Test
+  public void should_add_requires_group() throws URISyntaxException, IOException {
+    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-requires-group.jar");
+
+    PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
+
+    assertThat(manifest.getRequiresGroup()).isEqualTo("scm");
   }
 }

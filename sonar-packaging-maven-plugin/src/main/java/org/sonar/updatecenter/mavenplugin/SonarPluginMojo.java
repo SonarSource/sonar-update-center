@@ -20,7 +20,9 @@
 package org.sonar.updatecenter.mavenplugin;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
@@ -194,6 +196,8 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Description", PluginManifest.DESCRIPTION, getPluginDescription());
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
+      addManifestProperty("Group", PluginManifest.GROUP, getPluginGroup());
+      addManifestProperty("Requires group", PluginManifest.REQUIRES_GROUP, getPluginRequiresGroup());
 
       if (isUseChildFirstClassLoader()) {
         getLog().info("    Uses child-first class loading strategy");
@@ -275,6 +279,13 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return PluginKeyUtils.sanitize(getProject().getArtifactId());
   }
 
+  private String getPluginGroup() {
+    if (StringUtils.isNotBlank(getExplicitPluginGroup())) {
+      return getExplicitPluginGroup();
+    }
+    return getPluginKey();
+  }
+
   private String getSourcesUrl() {
     if (getProject().getScm() != null) {
       return getProject().getScm().getUrl();
@@ -284,13 +295,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
 
   private String getDevelopers() {
     if (getProject().getDevelopers() != null) {
-      return StringUtils.join(
-          Collections2.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+      return Joiner.on(",").join((
+          Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
             public String apply(Developer developer) {
               return developer.getName();
             }
-          })
-          , ","
+          }))
       );
     }
     return null;

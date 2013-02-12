@@ -120,6 +120,20 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
   private String pluginName;
 
   /**
+   * Plugin group.
+   *
+   * @parameter expression="${sonar.pluginGroup}"
+   */
+  protected String pluginGroup;
+
+  /**
+   * Plugin group.
+   *
+   * @parameter expression="${sonar.pluginRequiresGroup}"
+   */
+  protected String pluginRequiresGroup;
+
+  /**
    * @parameter expression="${sonar.pluginDescription}" default-value="${project.description}"
    */
   private String pluginDescription;
@@ -188,6 +202,14 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
 
   protected final String getPluginName() {
     return pluginName;
+  }
+
+  protected final String getExplicitPluginGroup() {
+    return pluginGroup;
+  }
+
+  protected final String getPluginRequiresGroup() {
+    return pluginRequiresGroup;
   }
 
   protected final String getPluginDescription() {

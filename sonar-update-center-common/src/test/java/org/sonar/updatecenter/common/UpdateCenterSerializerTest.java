@@ -40,6 +40,7 @@ public class UpdateCenterSerializerTest {
         .setName("Foo")
         .setOrganizationUrl("http://www.sonarsource.org"));
     Plugin barPlugin = new Plugin("bar")
+        .setGroup("Group")
         .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
         .setDevelopers(Arrays.asList("dev1", "dev2"));
     center.addPlugin(barPlugin);
@@ -56,6 +57,7 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "plugins", "foo,bar");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
+    assertProperty(properties, "bar.group", "Group");
     assertProperty(properties, "bar.versions", "1.2");
     assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
     assertProperty(properties, "bar.developers", "dev1,dev2");

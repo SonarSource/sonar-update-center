@@ -70,6 +70,8 @@ public final class UpdateCenterDeserializer {
       Plugin plugin = new Plugin(pluginKey);
       center.addPlugin(plugin);
       plugin.setName(get(p, pluginKey, "name"));
+      plugin.setGroup(get(p, pluginKey, "group"));
+      plugin.setRequiresGroup(get(p, pluginKey, "requiresGroup"));
       plugin.setDescription(get(p, pluginKey, "description"));
       plugin.setCategory(get(p, pluginKey, "category"));
       plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl"));
