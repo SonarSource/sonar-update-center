@@ -26,7 +26,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class UpdateCenterTest {
 
   @Test
-  public void getAndSetPlugins() {
+  public void get_and_set_plugins() {
     Plugin foo = new Plugin("foo");
     Plugin bar = new Plugin("bar");
 
@@ -36,6 +36,38 @@ public class UpdateCenterTest {
 
     assertThat(center.getPlugin("foo")).isEqualTo(foo);
     assertThat(center.getPlugin("unknown")).isNull();
-    assertThat(center.getPlugins().size()).isEqualTo(2);
+    assertThat(center.getPlugins()).hasSize(2);
   }
+
+  @Test
+  public void should_register_groups_containing_plugins() {
+    Plugin foo = new Plugin("foo").setGroup("foo");
+    Plugin fooBis = new Plugin("fooBis").setGroup("foo");
+
+    Plugin bar = new Plugin("bar").setGroup("bar");
+
+    UpdateCenter center = new UpdateCenter();
+    center.addPlugin(foo);
+    center.addPlugin(fooBis);
+    center.addPlugin(bar);
+
+    assertThat(center.getPlugins()).hasSize(3);
+    assertThat(center.getPluginsGroups()).hasSize(2);
+    assertThat(center.getGroup("foo").getPlugins()).hasSize(2);
+    assertThat(center.getGroup("bar").getPlugins()).hasSize(1);
+  }
+
+  @Test
+  public void should_use_plugin_key_for_group_key_if_plugin_group_is_null() {
+    Plugin foo = new Plugin("foo").setGroup("foo");
+    Plugin bar = new Plugin("bar").setGroup(null);
+
+    UpdateCenter center = new UpdateCenter();
+    center.addPlugin(foo);
+    center.addPlugin(bar);
+
+    assertThat(center.getPlugins()).hasSize(2);
+    assertThat(center.getPluginsGroups()).hasSize(2);
+  }
+
 }

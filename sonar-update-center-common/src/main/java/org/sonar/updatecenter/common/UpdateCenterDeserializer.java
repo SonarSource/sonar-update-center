@@ -68,7 +68,6 @@ public final class UpdateCenterDeserializer {
     String[] pluginKeys = getArray(p, "plugins");
     for (String pluginKey : pluginKeys) {
       Plugin plugin = new Plugin(pluginKey);
-      center.addPlugin(plugin);
       plugin.setName(get(p, pluginKey, "name"));
       plugin.setGroup(get(p, pluginKey, "group"));
       plugin.setRequiresGroup(get(p, pluginKey, "requiresGroup"));
@@ -96,6 +95,7 @@ public final class UpdateCenterDeserializer {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
         }
       }
+      center.addPlugin(plugin);
     }
 
     return center;

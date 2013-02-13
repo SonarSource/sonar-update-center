@@ -21,7 +21,6 @@ package org.sonar.updatecenter.mavenplugin;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -69,7 +68,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private static final String LIB_DIR = "META-INF/lib/";
   private static final String[] DEFAULT_EXCLUDES = new String[]{"**/package.html"};
   private static final String[] DEFAULT_INCLUDES = new String[]{"**/**"};
-
+  /**
+   * The Jar archiver.
+   *
+   * @component role="org.codehaus.plexus.archiver.Archiver" role-hint="jar"
+   */
+  protected JarArchiver jarArchiver;
   /**
    * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
    * is being packaged into the JAR.
@@ -77,7 +81,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @parameter
    */
   private String[] includes;
-
   /**
    * List of files to exclude. Specified as fileset patterns which are relative to the input directory whose contents
    * is being packaged into the JAR.
@@ -85,14 +88,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @parameter
    */
   private String[] excludes;
-
-  /**
-   * The Jar archiver.
-   *
-   * @component role="org.codehaus.plexus.archiver.Archiver" role-hint="jar"
-   */
-  protected JarArchiver jarArchiver;
-
   /**
    * The archive configuration to use.
    * See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven Archiver Reference</a>.
@@ -100,14 +95,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @parameter
    */
   private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
-
   /**
    * @component
    * @required
    * @readonly
    */
   private DependencyTreeBuilder dependencyTreeBuilder;
-
   /**
    * The artifact repository to use.
    *
@@ -116,7 +109,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @readonly
    */
   private ArtifactRepository localRepository;
-
   /**
    * The artifact factory to use.
    *
@@ -125,7 +117,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @readonly
    */
   private ArtifactFactory artifactFactory;
-
   /**
    * The artifact metadata source to use.
    *
@@ -134,7 +125,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @readonly
    */
   private ArtifactMetadataSource artifactMetadataSource;
-
   /**
    * The artifact collector to use.
    *
@@ -143,11 +133,19 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
    * @readonly
    */
   private ArtifactCollector artifactCollector;
-
   /**
    * @parameter expression="${sonar.addMavenDescriptor}"
    */
   private boolean addMavenDescriptor = true;
+
+  protected static File getJarFile(File basedir, String finalName, String classifier) {
+    if (classifier == null) {
+      classifier = "";
+    } else if (StringUtils.isNotBlank(classifier) && !classifier.startsWith("-")) {
+      classifier = "-" + classifier;
+    }
+    return new File(basedir, finalName + classifier + ".jar");
+  }
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     checkMandatoryAttributes();
@@ -178,7 +176,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       throw new MojoExecutionException("Plugin class not found: '" + getPluginClass());
     }
   }
-
 
   public File createArchive() throws MojoExecutionException {
     File jarFile = getJarFile(getOutputDirectory(), getFinalName(), getClassifier());
@@ -304,15 +301,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       );
     }
     return null;
-  }
-
-  protected static File getJarFile(File basedir, String finalName, String classifier) {
-    if (classifier == null) {
-      classifier = "";
-    } else if (StringUtils.isNotBlank(classifier) && !classifier.startsWith("-")) {
-      classifier = "-" + classifier;
-    }
-    return new File(basedir, finalName + classifier + ".jar");
   }
 
   private List<String> copyDependencies() throws IOException, DependencyTreeBuilderException {

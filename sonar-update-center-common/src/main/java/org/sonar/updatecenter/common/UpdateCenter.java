@@ -19,17 +19,23 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
+
+import javax.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 public final class UpdateCenter {
 
   private Sonar sonar = new Sonar();
-  private Set<Plugin> plugins = new HashSet<Plugin>();
+  private Set<Plugin> plugins;
+  private Set<PluginsGroup> pluginsGroups;
   private Date date;
 
   public UpdateCenter() {
@@ -38,12 +44,36 @@ public final class UpdateCenter {
 
   public UpdateCenter(Date date) {
     this.date = date;
+    this.plugins = newHashSet();
+    this.pluginsGroups = newHashSet();
   }
 
   public Set<Plugin> getPlugins() {
     return plugins;
   }
 
+  public UpdateCenter setPlugins(Collection<Plugin> plugins) {
+    this.plugins.clear();
+    for (Plugin plugin : plugins) {
+      addPlugin(plugin);
+    }
+    return this;
+  }
+
+  public Set<PluginsGroup> getPluginsGroups() {
+    return pluginsGroups;
+  }
+
+  @Nullable
+  public PluginsGroup getGroup(final String groupKey) {
+    return Iterables.find(pluginsGroups, new Predicate<PluginsGroup>() {
+      public boolean apply(PluginsGroup pluginsGroup) {
+        return pluginsGroup.getKey().equals(groupKey);
+      }
+    }, null);
+  }
+
+  @Nullable
   public Plugin getPlugin(String key) {
     for (Plugin plugin : plugins) {
       if (StringUtils.equals(key, plugin.getKey())) {
@@ -53,14 +83,9 @@ public final class UpdateCenter {
     return null;
   }
 
-  public UpdateCenter setPlugins(Collection<Plugin> plugins) {
-    this.plugins.clear();
-    this.plugins.addAll(plugins);
-    return this;
-  }
-
   public UpdateCenter addPlugin(Plugin plugin) {
     this.plugins.add(plugin);
+    addGroup(plugin);
     return this;
   }
 
@@ -81,4 +106,15 @@ public final class UpdateCenter {
     this.date = date;
     return this;
   }
+
+  private void addGroup(Plugin plugin) {
+    String groupKey = plugin.getGroup() != null ? plugin.getGroup() : plugin.getKey();
+    PluginsGroup pluginsGroup = getGroup(groupKey);
+    if (pluginsGroup == null) {
+      pluginsGroup = new PluginsGroup(groupKey);
+      pluginsGroups.add(pluginsGroup);
+    }
+    pluginsGroup.addPlugin(plugin);
+  }
+
 }
