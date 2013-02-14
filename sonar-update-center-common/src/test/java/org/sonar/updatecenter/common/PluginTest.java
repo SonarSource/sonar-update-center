@@ -21,6 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 
@@ -61,12 +62,14 @@ public class PluginTest {
   }
 
   @Test
-  public void shoud_add_requires_group() {
+  public void shoud_add_requires_plugins() {
     Plugin plugin = new Plugin("squid");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresPlugins("group");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresPlugins(newArrayList("foo:1.0", "foo:1.0"));
 
     plugin.merge(manifest);
 
-    assertThat(plugin.getRequiresPlugins()).isEqualTo("group");
+    assertThat(plugin.getRequiresPlugins()).hasSize(2);
+    assertThat(plugin.getRequiresPlugins().get(0)).isEqualTo("foo:1.0");
+    assertThat(plugin.getRequiresPlugins().get(1)).isEqualTo("foo:1.0");
   }
 }

@@ -21,8 +21,10 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.NoSuchElementException;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class PluginParentTest {
@@ -30,17 +32,28 @@ public class PluginParentTest {
   @Test
   public void should_register_plugins() {
     PluginParent pluginParent = new PluginParent("java");
-    pluginParent.addPlugin(new Plugin("java").setParent("java"));
-    pluginParent.addPlugin(new Plugin("plugin").setParent("java"));
+    pluginParent.addPlugin(new Plugin("java").setParent("java"), Collections.<RequiredPlugin>emptyList());
+    pluginParent.addPlugin(new Plugin("plugin").setParent("java"), Collections.<RequiredPlugin>emptyList());
 
     assertThat(pluginParent.getChildren()).hasSize(2);
     assertThat(pluginParent.getMasterPlugin().getKey()).isEqualTo("java");
   }
 
+  @Test
+  public void should_add_required_plugins_from_children() {
+    PluginParent pluginParent = new PluginParent("java");
+    pluginParent.addPlugin(new Plugin("java").setParent("java"), newArrayList(RequiredPlugin.create(new Plugin("foo"), "1.0")));
+    pluginParent.addPlugin(new Plugin("plugin").setParent("java"),
+        newArrayList(RequiredPlugin.create(new Plugin("bar"), "1.1"), RequiredPlugin.create(new Plugin("bar2"), "1.2"))
+    );
+
+    assertThat(pluginParent.getRequiredPlugins()).hasSize(3);
+  }
+
   @Test(expected = NoSuchElementException.class)
   public void should_get_master_plugin_throw_exception_if_not_existing() {
     PluginParent pluginParent = new PluginParent("java");
-    pluginParent.addPlugin(new Plugin("plugin").setParent("java"));
+    pluginParent.addPlugin(new Plugin("plugin").setParent("java"), Collections.<RequiredPlugin>emptyList());
 
     assertThat(pluginParent.getMasterPlugin()).isNull();
   }

@@ -20,6 +20,7 @@
 package org.sonar.updatecenter.common;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
@@ -27,8 +28,11 @@ import javax.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 public final class UpdateCenter {
@@ -85,7 +89,7 @@ public final class UpdateCenter {
 
   public UpdateCenter addPlugin(Plugin plugin) {
     this.plugins.add(plugin);
-    updatePluginParents(plugin);
+    addPluginParents(plugin);
     return this;
   }
 
@@ -107,14 +111,23 @@ public final class UpdateCenter {
     return this;
   }
 
-  private void updatePluginParents(Plugin plugin) {
+  private void addPluginParents(Plugin plugin) {
     String groupKey = plugin.getParent() != null ? plugin.getParent() : plugin.getKey();
     PluginParent pluginParent = getParent(groupKey);
     if (pluginParent == null) {
       pluginParent = new PluginParent(groupKey);
       pluginParents.add(pluginParent);
     }
-    pluginParent.addPlugin(plugin);
+    List<RequiredPlugin> requiredPlugins = newArrayList();
+    for (String requiredPluginText : plugin.getRequiresPlugins()) {
+      Iterator<String> split = Splitter.on(':').split(requiredPluginText).iterator();
+      String pluginKey = split.next();
+      String version = split.next();
+      Plugin child = getPlugin(pluginKey);
+      RequiredPlugin requiredPlugin = RequiredPlugin.create(child, version);
+      requiredPlugins.add(requiredPlugin);
+    }
+    pluginParent.addPlugin(plugin, requiredPlugins);
   }
 
 }

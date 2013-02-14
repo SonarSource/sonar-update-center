@@ -24,11 +24,13 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 public final class Plugin extends Artifact {
 
   private String name;
   private String parent;
-  private String requiresPlugins;
+  private List<String> requiresPlugins;
   private String description;
   private String homepageUrl;
   private String license;
@@ -42,6 +44,7 @@ public final class Plugin extends Artifact {
 
   public Plugin(String key) {
     super(key);
+    this.requiresPlugins = newArrayList();
   }
 
   public String getName() {
@@ -62,11 +65,11 @@ public final class Plugin extends Artifact {
     return this;
   }
 
-  public String getRequiresPlugins() {
+  public List<String> getRequiresPlugins() {
     return requiresPlugins;
   }
 
-  public Plugin setRequiresPlugins(String requiresPlugins) {
+  public Plugin setRequiresPlugins(List<String> requiresPlugins) {
     this.requiresPlugins = requiresPlugins;
     return this;
   }

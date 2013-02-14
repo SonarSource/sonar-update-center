@@ -19,16 +19,19 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Splitter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 /**
@@ -81,7 +84,7 @@ public final class PluginManifest {
   private String key;
   private String name;
   private String parent;
-  private String requiresPlugins;
+  private List<String> requiresPlugins;
   private String mainClass;
   private String description;
   private String organization;
@@ -135,7 +138,7 @@ public final class PluginManifest {
     this.mainClass = attributes.getValue(MAIN_CLASS);
     this.name = attributes.getValue(NAME);
     this.parent = attributes.getValue(PARENT);
-    this.requiresPlugins = attributes.getValue(REQUIRES_PLUGINS);
+    this.requiresPlugins = getRequiredPlugins(attributes.getValue(REQUIRES_PLUGINS));
     this.description = attributes.getValue(DESCRIPTION);
     this.license = attributes.getValue(LICENSE);
     this.organization = attributes.getValue(ORGANIZATION);
@@ -176,20 +179,32 @@ public final class PluginManifest {
     return this;
   }
 
+  /**
+   * @since 3.5
+   */
   public String getParent() {
     return parent;
   }
 
+  /**
+   * @since 3.5
+   */
   public PluginManifest setParent(String parent) {
     this.parent = parent;
     return this;
   }
 
-  public String getRequiresPlugins() {
+  /**
+   * @since 3.5
+   */
+  public List<String> getRequiresPlugins() {
     return requiresPlugins;
   }
 
-  public PluginManifest setRequiresPlugins(String requiresPlugins) {
+  /**
+   * @since 3.5
+   */
+  public PluginManifest setRequiresPlugins(List<String> requiresPlugins) {
     this.requiresPlugins = requiresPlugins;
     return this;
   }
@@ -384,5 +399,15 @@ public final class PluginManifest {
 
   public boolean isValid() {
     return StringUtils.isNotBlank(key) && StringUtils.isNotBlank(version);
+  }
+
+  private List<String> getRequiredPlugins(String requiresPluginsText) {
+    List<String> requiredPluginList = newArrayList();
+    if (StringUtils.isNotBlank(requiresPluginsText)) {
+      for (String requiresPlugin : Splitter.on(',').split(requiresPluginsText)){
+        requiredPluginList.add(requiresPlugin);
+      }
+    }
+    return requiredPluginList;
   }
 }

@@ -99,8 +99,9 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getRequiresPlugins()).isEqualTo("motionchart");
-
+      assertThat(clirr.getRequiresPlugins()).hasSize(2);
+      assertThat(clirr.getRequiresPlugins().get(0)).isEqualTo("foo:1.0");
+      assertThat(clirr.getRequiresPlugins().get(1)).isEqualTo("bar:1.1");
     } finally {
       IOUtils.closeQuietly(input);
     }

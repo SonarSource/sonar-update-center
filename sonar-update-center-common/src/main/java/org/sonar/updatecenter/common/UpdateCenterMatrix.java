@@ -34,7 +34,7 @@ public final class UpdateCenterMatrix {
   private UpdateCenter center;
   private Version installedSonarVersion;
   private Map<Plugin, Version> installedPlugins = Maps.newHashMap();
-  private Map<PluginParent, Version> installedGroups = Maps.newHashMap();
+  private Map<PluginParent, Version> installedPluginParents = Maps.newHashMap();
   private List<String> pendingPluginFilenames = newArrayList();
   private Date date;
 
@@ -47,10 +47,9 @@ public final class UpdateCenterMatrix {
     Plugin plugin = center.getPlugin(pluginKey);
     if (plugin != null) {
       installedPlugins.put(plugin, pluginVersion);
-      // TODO check partial group installation
       PluginParent pluginParent = center.getParent(pluginKey);
       if (pluginParent != null) {
-        installedGroups.put(center.getParent(pluginKey), pluginVersion);
+        installedPluginParents.put(center.getParent(pluginKey), pluginVersion);
       }
     }
     return this;
@@ -65,8 +64,8 @@ public final class UpdateCenterMatrix {
     return center;
   }
 
-  public List<PluginParent> getInstalledGroups(){
-    return newArrayList(installedGroups.keySet());
+  public List<PluginParent> getInstalledPluginParents(){
+    return newArrayList(installedPluginParents.keySet());
   }
 
   public List<PluginParentUpdate> findAvailablePlugins() {
@@ -94,7 +93,7 @@ public final class UpdateCenterMatrix {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
 
     List<PluginParentUpdate> updates = newArrayList();
-    for (Map.Entry<PluginParent, Version> entry : installedGroups.entrySet()) {
+    for (Map.Entry<PluginParent, Version> entry : installedPluginParents.entrySet()) {
       PluginParent pluginParent = entry.getKey();
       Plugin plugin = pluginParent.getMasterPlugin();
       if (!isAlreadyDownloaded(plugin)) {

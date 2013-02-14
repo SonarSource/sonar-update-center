@@ -30,10 +30,12 @@ public class PluginParent {
 
   private String key;
   private List<Plugin> children;
+  private List<RequiredPlugin> requiredPlugins;
 
   public PluginParent(String key) {
     this.key = key;
     this.children = newArrayList();
+    this.requiredPlugins = newArrayList();
   }
 
   public String getKey() {
@@ -48,13 +50,18 @@ public class PluginParent {
     });
   }
 
-  public PluginParent addPlugin(Plugin plugin) {
+  public PluginParent addPlugin(Plugin plugin, List<RequiredPlugin> requiredPlugins) {
     children.add(plugin);
+    this.requiredPlugins.addAll(requiredPlugins);
     return this;
   }
 
   public List<Plugin> getChildren() {
     return children;
+  }
+
+  public List<RequiredPlugin> getRequiredPlugins() {
+    return requiredPlugins;
   }
 
   @Override

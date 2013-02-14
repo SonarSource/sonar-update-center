@@ -44,7 +44,7 @@ public class PluginManifestTest {
     assertThat(manifest.getKey()).isEqualTo("checkstyle");
     assertThat(manifest.getName()).isEqualTo("Checkstyle");
     assertThat(manifest.getParent()).isNull();
-    assertThat(manifest.getRequiresPlugins()).isNull();
+    assertThat(manifest.getRequiresPlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.getVersion().length()).isGreaterThan(1);
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
@@ -62,7 +62,7 @@ public class PluginManifestTest {
     assertThat(manifest.getKey()).isNull();
     assertThat(manifest.getName()).isNull();
     assertThat(manifest.getParent()).isNull();
-    assertThat(manifest.getRequiresPlugins()).isNull();
+    assertThat(manifest.getRequiresPlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
     assertThat(manifest.getDependencies()).isEmpty();
@@ -104,6 +104,8 @@ public class PluginManifestTest {
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
-    assertThat(manifest.getRequiresPlugins()).isEqualTo("scm:1.0,fake:1.1");
+    assertThat(manifest.getRequiresPlugins()).hasSize(2);
+    assertThat(manifest.getRequiresPlugins().get(0)).isEqualTo("scm:1.0");
+    assertThat(manifest.getRequiresPlugins().get(1)).isEqualTo("fake:1.1");
   }
 }

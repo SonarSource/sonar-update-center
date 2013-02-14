@@ -26,10 +26,10 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 public final class UpdateCenterDeserializer {
@@ -70,7 +70,7 @@ public final class UpdateCenterDeserializer {
       Plugin plugin = new Plugin(pluginKey);
       plugin.setName(get(p, pluginKey, "name"));
       plugin.setParent(get(p, pluginKey, "parent"));
-      plugin.setRequiresPlugins(get(p, pluginKey, "requiresPlugins"));
+      plugin.setRequiresPlugins(newArrayList(getArray(p, pluginKey, "requiresPlugins")));
       plugin.setDescription(get(p, pluginKey, "description"));
       plugin.setCategory(get(p, pluginKey, "category"));
       plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl"));
@@ -80,7 +80,7 @@ public final class UpdateCenterDeserializer {
       plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl"));
       plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl"));
       plugin.setSourcesUrl(get(p, pluginKey, "scm"));
-      plugin.setDevelopers(Arrays.asList(getArray(p, pluginKey, "developers")));
+      plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
       String[] pluginReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, "versions"), ""), ",");
       for (String pluginVersion : pluginReleases) {
@@ -105,7 +105,6 @@ public final class UpdateCenterDeserializer {
     return StringUtils.defaultIfEmpty(props.getProperty(key), null);
   }
 
-
   private static String get(Properties p, String pluginKey, String field) {
     return get(p, pluginKey + "." + field);
   }
@@ -117,6 +116,5 @@ public final class UpdateCenterDeserializer {
   private static String[] getArray(Properties p, String pluginKey, String field) {
     return getArray(p, pluginKey + "." + field);
   }
-
 
 }

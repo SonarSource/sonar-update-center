@@ -64,7 +64,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.1"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<PluginParent> pluginParents = matrix.getInstalledGroups();
+    List<PluginParent> pluginParents = matrix.getInstalledPluginParents();
     assertThat(pluginParents).hasSize(1);
     assertThat(pluginParents.get(0).getKey()).isEqualTo("foo");
   }
