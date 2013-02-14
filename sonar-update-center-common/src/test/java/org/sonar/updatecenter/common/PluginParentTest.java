@@ -25,23 +25,23 @@ import java.util.NoSuchElementException;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class PluginsGroupTest {
+public class PluginParentTest {
 
   @Test
   public void should_register_plugins() {
-    PluginsGroup pluginsGroup = new PluginsGroup("java");
-    pluginsGroup.addPlugin(new Plugin("java").setGroup("java"));
-    pluginsGroup.addPlugin(new Plugin("plugin").setGroup("java"));
+    PluginParent pluginParent = new PluginParent("java");
+    pluginParent.addPlugin(new Plugin("java").setParent("java"));
+    pluginParent.addPlugin(new Plugin("plugin").setParent("java"));
 
-    assertThat(pluginsGroup.getPlugins()).hasSize(2);
-    assertThat(pluginsGroup.getMasterPlugin().getKey()).isEqualTo("java");
+    assertThat(pluginParent.getChildren()).hasSize(2);
+    assertThat(pluginParent.getMasterPlugin().getKey()).isEqualTo("java");
   }
 
   @Test(expected = NoSuchElementException.class)
   public void should_get_master_plugin_throw_exception_if_not_existing() {
-    PluginsGroup pluginsGroup = new PluginsGroup("java");
-    pluginsGroup.addPlugin(new Plugin("plugin").setGroup("java"));
+    PluginParent pluginParent = new PluginParent("java");
+    pluginParent.addPlugin(new Plugin("plugin").setParent("java"));
 
-    assertThat(pluginsGroup.getMasterPlugin()).isNull();
+    assertThat(pluginParent.getMasterPlugin()).isNull();
   }
 }

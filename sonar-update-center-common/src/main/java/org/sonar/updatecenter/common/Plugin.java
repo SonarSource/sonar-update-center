@@ -27,8 +27,8 @@ import java.util.List;
 public final class Plugin extends Artifact {
 
   private String name;
-  private String group;
-  private String requiresGroup;
+  private String parent;
+  private String requiresPlugins;
   private String description;
   private String homepageUrl;
   private String license;
@@ -53,21 +53,21 @@ public final class Plugin extends Artifact {
     return this;
   }
 
-  public String getGroup() {
-    return group;
+  public String getParent() {
+    return parent;
   }
 
-  public Plugin setGroup(String group) {
-    this.group = group;
+  public Plugin setParent(String parent) {
+    this.parent = parent;
     return this;
   }
 
-  public String getRequiresGroup() {
-    return requiresGroup;
+  public String getRequiresPlugins() {
+    return requiresPlugins;
   }
 
-  public Plugin setRequiresGroup(String requiresGroup) {
-    this.requiresGroup = requiresGroup;
+  public Plugin setRequiresPlugins(String requiresPlugins) {
+    this.requiresPlugins = requiresPlugins;
     return this;
   }
 
@@ -164,8 +164,8 @@ public final class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
-      group = manifest.getGroup();
-      requiresGroup = manifest.getRequiresGroup();
+      parent = manifest.getParent();
+      requiresPlugins = manifest.getRequiresPlugins();
       description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
       organization = StringUtils.defaultIfEmpty(organization, manifest.getOrganization());
       organizationUrl = StringUtils.defaultIfEmpty(organizationUrl, manifest.getOrganizationUrl());

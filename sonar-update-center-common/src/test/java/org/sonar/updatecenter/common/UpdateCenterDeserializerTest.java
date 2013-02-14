@@ -43,7 +43,7 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getGroup()).isEqualTo("Group");
+      assertThat(clirr.getParent()).isEqualTo("Group");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
@@ -90,8 +90,8 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void should_add_requires_group() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-requires-group.properties");
+  public void should_add_requires_plugins() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-requires-plugins.properties");
     try {
       Properties props = new Properties();
       props.load(input);
@@ -99,7 +99,7 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getRequiresGroup()).isEqualTo("motionchart");
+      assertThat(clirr.getRequiresPlugins()).isEqualTo("motionchart");
 
     } finally {
       IOUtils.closeQuietly(input);

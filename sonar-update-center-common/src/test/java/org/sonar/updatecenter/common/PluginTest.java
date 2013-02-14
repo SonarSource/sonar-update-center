@@ -29,14 +29,14 @@ public class PluginTest {
   @Test
   public void should_merge_with_manifest() {
     Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setGroup("group");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setParent("group");
 
     plugin.merge(manifest);
 
     assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
     assertThat(plugin.getDescription()).isEqualTo("Parser");
-    assertThat(plugin.getGroup()).isEqualTo("group");
+    assertThat(plugin.getParent()).isEqualTo("group");
 
   }
 
@@ -63,10 +63,10 @@ public class PluginTest {
   @Test
   public void shoud_add_requires_group() {
     Plugin plugin = new Plugin("squid");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresGroup("group");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresPlugins("group");
 
     plugin.merge(manifest);
 
-    assertThat(plugin.getRequiresGroup()).isEqualTo("group");
+    assertThat(plugin.getRequiresPlugins()).isEqualTo("group");
   }
 }

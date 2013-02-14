@@ -35,7 +35,7 @@ public final class UpdateCenter {
 
   private Sonar sonar = new Sonar();
   private Set<Plugin> plugins;
-  private Set<PluginsGroup> pluginsGroups;
+  private Set<PluginParent> pluginParents;
   private Date date;
 
   public UpdateCenter() {
@@ -45,10 +45,10 @@ public final class UpdateCenter {
   public UpdateCenter(Date date) {
     this.date = date;
     this.plugins = newHashSet();
-    this.pluginsGroups = newHashSet();
+    this.pluginParents = newHashSet();
   }
 
-  public Set<Plugin> getPlugins() {
+  public Set<Plugin> getAllChildrenPlugins() {
     return plugins;
   }
 
@@ -60,15 +60,15 @@ public final class UpdateCenter {
     return this;
   }
 
-  public Set<PluginsGroup> getPluginsGroups() {
-    return pluginsGroups;
+  public Set<PluginParent> getPluginParents() {
+    return pluginParents;
   }
 
   @Nullable
-  public PluginsGroup getGroup(final String groupKey) {
-    return Iterables.find(pluginsGroups, new Predicate<PluginsGroup>() {
-      public boolean apply(PluginsGroup pluginsGroup) {
-        return pluginsGroup.getKey().equals(groupKey);
+  public PluginParent getParent(final String groupKey) {
+    return Iterables.find(pluginParents, new Predicate<PluginParent>() {
+      public boolean apply(PluginParent pluginParent) {
+        return pluginParent.getKey().equals(groupKey);
       }
     }, null);
   }
@@ -85,7 +85,7 @@ public final class UpdateCenter {
 
   public UpdateCenter addPlugin(Plugin plugin) {
     this.plugins.add(plugin);
-    addGroup(plugin);
+    updatePluginParents(plugin);
     return this;
   }
 
@@ -107,14 +107,14 @@ public final class UpdateCenter {
     return this;
   }
 
-  private void addGroup(Plugin plugin) {
-    String groupKey = plugin.getGroup() != null ? plugin.getGroup() : plugin.getKey();
-    PluginsGroup pluginsGroup = getGroup(groupKey);
-    if (pluginsGroup == null) {
-      pluginsGroup = new PluginsGroup(groupKey);
-      pluginsGroups.add(pluginsGroup);
+  private void updatePluginParents(Plugin plugin) {
+    String groupKey = plugin.getParent() != null ? plugin.getParent() : plugin.getKey();
+    PluginParent pluginParent = getParent(groupKey);
+    if (pluginParent == null) {
+      pluginParent = new PluginParent(groupKey);
+      pluginParents.add(pluginParent);
     }
-    pluginsGroup.addPlugin(plugin);
+    pluginParent.addPlugin(plugin);
   }
 
 }

@@ -193,8 +193,8 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Description", PluginManifest.DESCRIPTION, getPluginDescription());
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
-      addManifestProperty("Group", PluginManifest.GROUP, getPluginGroup());
-      addManifestProperty("Requires group", PluginManifest.REQUIRES_GROUP, getPluginRequiresGroup());
+      addManifestProperty("Parent", PluginManifest.PARENT, getPluginParent());
+      addManifestProperty("Requires plugins", PluginManifest.REQUIRES_PLUGINS, getRequiresPlugins());
 
       if (isUseChildFirstClassLoader()) {
         getLog().info("    Uses child-first class loading strategy");
@@ -276,9 +276,9 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return PluginKeyUtils.sanitize(getProject().getArtifactId());
   }
 
-  private String getPluginGroup() {
-    if (StringUtils.isNotBlank(getExplicitPluginGroup())) {
-      return getExplicitPluginGroup();
+  private String getPluginParent() {
+    if (StringUtils.isNotBlank(getExplicitPluginParent())) {
+      return getExplicitPluginParent();
     }
     return getPluginKey();
   }

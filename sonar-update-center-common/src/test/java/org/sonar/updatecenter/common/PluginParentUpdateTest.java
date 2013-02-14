@@ -19,5 +19,8 @@
  */
 package org.sonar.updatecenter.common;
 
-public class GroupUpdateTest {
+public class PluginParentUpdateTest {
+
+  // TODO
+
 }

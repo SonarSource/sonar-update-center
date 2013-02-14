@@ -19,30 +19,30 @@
  */
 package org.sonar.updatecenter.common;
 
-public class GroupUpdate {
+public class PluginParentUpdate {
 
   public enum Status {
     COMPATIBLE, INCOMPATIBLE, REQUIRE_SONAR_UPGRADE
   }
 
   private Status status = Status.COMPATIBLE;
-  private PluginsGroup pluginsGroup;
+  private PluginParent pluginParent;
   private Release release;
 
-  public GroupUpdate(PluginsGroup pluginsGroup) {
-    this.pluginsGroup = pluginsGroup;
+  public PluginParentUpdate(PluginParent pluginParent) {
+    this.pluginParent = pluginParent;
   }
 
   public Status getStatus() {
     return status;
   }
 
-  public PluginsGroup getPluginsGroup() {
-    return pluginsGroup;
+  public PluginParent getPluginParent() {
+    return pluginParent;
   }
 
   public Plugin getPlugin() {
-    return pluginsGroup.getMasterPlugin();
+    return pluginParent.getMasterPlugin();
   }
 
   public void setStatus(Status status) {
@@ -69,15 +69,15 @@ public class GroupUpdate {
     return Status.REQUIRE_SONAR_UPGRADE.equals(status);
   }
 
-  public static GroupUpdate createWithStatus(PluginsGroup pluginsGroup, Release pluginRelease, Status status) {
-    GroupUpdate update = new GroupUpdate(pluginsGroup);
+  public static PluginParentUpdate createWithStatus(PluginParent pluginParent, Release pluginRelease, Status status) {
+    PluginParentUpdate update = new PluginParentUpdate(pluginParent);
     update.setRelease(pluginRelease);
     update.setStatus(status);
     return update;
   }
 
-  public static GroupUpdate createForPluginRelease(PluginsGroup pluginsGroup, Release pluginRelease, Version sonarVersion) {
-    GroupUpdate update = new GroupUpdate(pluginsGroup);
+  public static PluginParentUpdate createForPluginRelease(PluginParent pluginParent, Release pluginRelease, Version sonarVersion) {
+    PluginParentUpdate update = new PluginParentUpdate(pluginParent);
     update.setRelease(pluginRelease);
 
     if (pluginRelease.supportSonarVersion(sonarVersion)) {

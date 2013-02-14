@@ -39,8 +39,8 @@ public final class PluginManifest {
   public static final String KEY = "Plugin-Key";
   public static final String MAIN_CLASS = "Plugin-Class";
   public static final String NAME = "Plugin-Name";
-  public static final String GROUP = "Plugin-Group";
-  public static final String REQUIRES_GROUP = "Plugin-RequiresGroup";
+  public static final String PARENT = "Plugin-Parent";
+  public static final String REQUIRES_PLUGINS = "Plugin-RequiresPlugins";
   public static final String DESCRIPTION = "Plugin-Description";
   public static final String ORGANIZATION = "Plugin-Organization";
   public static final String ORGANIZATION_URL = "Plugin-OrganizationUrl";
@@ -80,8 +80,8 @@ public final class PluginManifest {
 
   private String key;
   private String name;
-  private String group;
-  private String requiresGroup;
+  private String parent;
+  private String requiresPlugins;
   private String mainClass;
   private String description;
   private String organization;
@@ -134,8 +134,8 @@ public final class PluginManifest {
     this.key = PluginKeyUtils.sanitize(attributes.getValue(KEY));
     this.mainClass = attributes.getValue(MAIN_CLASS);
     this.name = attributes.getValue(NAME);
-    this.group = attributes.getValue(GROUP);
-    this.requiresGroup = attributes.getValue(REQUIRES_GROUP);
+    this.parent = attributes.getValue(PARENT);
+    this.requiresPlugins = attributes.getValue(REQUIRES_PLUGINS);
     this.description = attributes.getValue(DESCRIPTION);
     this.license = attributes.getValue(LICENSE);
     this.organization = attributes.getValue(ORGANIZATION);
@@ -176,21 +176,21 @@ public final class PluginManifest {
     return this;
   }
 
-  public String getGroup() {
-    return group;
+  public String getParent() {
+    return parent;
   }
 
-  public PluginManifest setGroup(String group) {
-    this.group = group;
+  public PluginManifest setParent(String parent) {
+    this.parent = parent;
     return this;
   }
 
-  public String getRequiresGroup() {
-    return requiresGroup;
+  public String getRequiresPlugins() {
+    return requiresPlugins;
   }
 
-  public PluginManifest setRequiresGroup(String requiresGroup) {
-    this.requiresGroup = requiresGroup;
+  public PluginManifest setRequiresPlugins(String requiresPlugins) {
+    this.requiresPlugins = requiresPlugins;
     return this;
   }
 

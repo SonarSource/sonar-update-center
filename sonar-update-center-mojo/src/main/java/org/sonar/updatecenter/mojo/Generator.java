@@ -54,7 +54,7 @@ class Generator {
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
-    for (Plugin plugin : center.getPlugins()) {
+    for (Plugin plugin : center.getAllChildrenPlugins()) {
       log.info("Load plugin: " + plugin.getKey());
 
       File masterJar = null;

@@ -64,9 +64,9 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.1"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<PluginsGroup> pluginsGroups = matrix.getInstalledGroups();
-    assertThat(pluginsGroups).hasSize(1);
-    assertThat(pluginsGroups.get(0).getKey()).isEqualTo("foo");
+    List<PluginParent> pluginParents = matrix.getInstalledGroups();
+    assertThat(pluginParents).hasSize(1);
+    assertThat(pluginParents.get(0).getKey()).isEqualTo("foo");
   }
 
   @Test
@@ -74,7 +74,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.1"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<GroupUpdate> updates = matrix.findGroupUpdates();
+    List<PluginParentUpdate> updates = matrix.findPluginUpdates();
     assertThat(updates).hasSize(2);
 
     assertThat(updates.get(0).getRelease()).isEqualTo(foo11);
@@ -88,7 +88,7 @@ public class UpdateCenterMatrixTest {
   public void no_plugin_updates_if_last_release_is_installed() {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.3"));
     matrix.registerInstalledPlugin("foo", Version.create("1.2"));
-    assertThat(matrix.findGroupUpdates()).isEmpty();
+    assertThat(matrix.findPluginUpdates()).isEmpty();
   }
 
   @Test
@@ -96,7 +96,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.2"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<GroupUpdate> availables = matrix.findAvailableGroups();
+    List<PluginParentUpdate> availables = matrix.findAvailablePlugins();
 
     // bar 1.0 is compatible with the installed sonar
     // bar 1.1 requires sonar to be upgraded to 2.2.2 or 2.3
@@ -111,7 +111,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.2.1"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<GroupUpdate> availables = matrix.findAvailableGroups();
+    List<PluginParentUpdate> availables = matrix.findAvailablePlugins();
 
     // bar 1.0 is not compatible with the installed sonar
     // bar 1.1 requires sonar to be upgraded to 2.2.2 or 2.3
@@ -164,7 +164,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.1"));
     matrix.registerInstalledPlugin("foo", Version.create("1.0"));
     matrix.registerPendingPluginsByFilename("foo-1.0.jar");
-    List<GroupUpdate> updates = matrix.findGroupUpdates();
+    List<PluginParentUpdate> updates = matrix.findPluginUpdates();
     assertThat(updates).hasSize(0);
   }
 
@@ -173,7 +173,7 @@ public class UpdateCenterMatrixTest {
     UpdateCenterMatrix matrix = new UpdateCenterMatrix(center, Version.create("2.1"));
     matrix.registerPendingPluginsByFilename("foo-1.0.jar");
     matrix.registerPendingPluginsByFilename("bar-1.1.jar");
-    List<GroupUpdate> updates = matrix.findAvailableGroups();
+    List<PluginParentUpdate> updates = matrix.findAvailablePlugins();
     assertThat(updates).hasSize(0);
   }
 }

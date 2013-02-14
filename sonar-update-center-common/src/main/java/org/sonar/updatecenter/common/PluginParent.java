@@ -26,14 +26,14 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class PluginsGroup {
+public class PluginParent {
 
   private String key;
-  private List<Plugin> plugins;
+  private List<Plugin> children;
 
-  public PluginsGroup(String key) {
+  public PluginParent(String key) {
     this.key = key;
-    this.plugins = newArrayList();
+    this.children = newArrayList();
   }
 
   public String getKey() {
@@ -41,20 +41,20 @@ public class PluginsGroup {
   }
 
   public Plugin getMasterPlugin() {
-    return Iterables.find(plugins, new Predicate<Plugin>() {
+    return Iterables.find(children, new Predicate<Plugin>() {
       public boolean apply(Plugin plugin) {
         return plugin.getKey().equals(key);
       }
     });
   }
 
-  public PluginsGroup addPlugin(Plugin plugin) {
-    plugins.add(plugin);
+  public PluginParent addPlugin(Plugin plugin) {
+    children.add(plugin);
     return this;
   }
 
-  public List<Plugin> getPlugins() {
-    return plugins;
+  public List<Plugin> getChildren() {
+    return children;
   }
 
   @Override
@@ -66,9 +66,9 @@ public class PluginsGroup {
       return false;
     }
 
-    PluginsGroup pluginsGroup = (PluginsGroup) o;
+    PluginParent pluginParent = (PluginParent) o;
 
-    if (key != null ? !key.equals(pluginsGroup.key) : pluginsGroup.key != null) {
+    if (key != null ? !key.equals(pluginParent.key) : pluginParent.key != null) {
       return false;
     }
 

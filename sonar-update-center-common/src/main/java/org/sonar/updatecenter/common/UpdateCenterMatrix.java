@@ -34,7 +34,7 @@ public final class UpdateCenterMatrix {
   private UpdateCenter center;
   private Version installedSonarVersion;
   private Map<Plugin, Version> installedPlugins = Maps.newHashMap();
-  private Map<PluginsGroup, Version> installedGroups = Maps.newHashMap();
+  private Map<PluginParent, Version> installedGroups = Maps.newHashMap();
   private List<String> pendingPluginFilenames = newArrayList();
   private Date date;
 
@@ -48,9 +48,9 @@ public final class UpdateCenterMatrix {
     if (plugin != null) {
       installedPlugins.put(plugin, pluginVersion);
       // TODO check partial group installation
-      PluginsGroup pluginsGroup = center.getGroup(pluginKey);
-      if (pluginsGroup != null) {
-        installedGroups.put(center.getGroup(pluginKey), pluginVersion);
+      PluginParent pluginParent = center.getParent(pluginKey);
+      if (pluginParent != null) {
+        installedGroups.put(center.getParent(pluginKey), pluginVersion);
       }
     }
     return this;
@@ -65,24 +65,24 @@ public final class UpdateCenterMatrix {
     return center;
   }
 
-  public List<PluginsGroup> getInstalledGroups(){
+  public List<PluginParent> getInstalledGroups(){
     return newArrayList(installedGroups.keySet());
   }
 
-  public List<GroupUpdate> findAvailableGroups() {
+  public List<PluginParentUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
-    List<GroupUpdate> availables = newArrayList();
-    for (PluginsGroup pluginsGroup : center.getPluginsGroups()){
-      Plugin plugin = pluginsGroup.getMasterPlugin();
+    List<PluginParentUpdate> availables = newArrayList();
+    for (PluginParent pluginParent : center.getPluginParents()){
+      Plugin plugin = pluginParent.getMasterPlugin();
       // TODO check each plugin is not in already downloaded mode
       if (!installedPlugins.containsKey(plugin) && !isAlreadyDownloaded(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
-          availables.add(GroupUpdate.createWithStatus(pluginsGroup, release, GroupUpdate.Status.COMPATIBLE));
+          availables.add(PluginParentUpdate.createWithStatus(pluginParent, release, PluginParentUpdate.Status.COMPATIBLE));
         } else {
           release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
           if (release != null) {
-            availables.add(GroupUpdate.createWithStatus(pluginsGroup, release, GroupUpdate.Status.REQUIRE_SONAR_UPGRADE));
+            availables.add(PluginParentUpdate.createWithStatus(pluginParent, release, PluginParentUpdate.Status.REQUIRE_SONAR_UPGRADE));
           }
         }
       }
@@ -90,56 +90,17 @@ public final class UpdateCenterMatrix {
     return availables;
   }
 
-  @Deprecated
-  public List<PluginUpdate> findAvailablePlugins() {
+  public List<PluginParentUpdate> findPluginUpdates() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
 
-    List<PluginUpdate> availables = newArrayList();
-    for (Plugin plugin : center.getPlugins()) {
-      if (!installedPlugins.containsKey(plugin) && !isAlreadyDownloaded(plugin)) {
-        Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
-        if (release != null) {
-          availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
-
-        } else {
-          release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
-          if (release != null) {
-            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
-          }
-        }
-      }
-    }
-    return availables;
-  }
-
-  public List<GroupUpdate> findGroupUpdates() {
-    Version adjustedSonarVersion = getAdjustedSonarVersion();
-
-    List<GroupUpdate> updates = newArrayList();
-    for (Map.Entry<PluginsGroup, Version> entry : installedGroups.entrySet()) {
-      PluginsGroup pluginsGroup = entry.getKey();
-      Plugin plugin = pluginsGroup.getMasterPlugin();
+    List<PluginParentUpdate> updates = newArrayList();
+    for (Map.Entry<PluginParent, Version> entry : installedGroups.entrySet()) {
+      PluginParent pluginParent = entry.getKey();
+      Plugin plugin = pluginParent.getMasterPlugin();
       if (!isAlreadyDownloaded(plugin)) {
         Version pluginVersion = entry.getValue();
         for (Release release : plugin.getReleasesGreaterThan(pluginVersion)) {
-          updates.add(GroupUpdate.createForPluginRelease(pluginsGroup, release, adjustedSonarVersion));
-        }
-      }
-    }
-    return updates;
-  }
-
-  @Deprecated
-  public List<PluginUpdate> findPluginUpdates() {
-    Version adjustedSonarVersion = getAdjustedSonarVersion();
-
-    List<PluginUpdate> updates = newArrayList();
-    for (Map.Entry<Plugin, Version> entry : installedPlugins.entrySet()) {
-      Plugin plugin = entry.getKey();
-      if (!isAlreadyDownloaded(plugin)) {
-        Version pluginVersion = entry.getValue();
-        for (Release release : plugin.getReleasesGreaterThan(pluginVersion)) {
-          updates.add(PluginUpdate.createForPluginRelease(release, adjustedSonarVersion));
+          updates.add(PluginParentUpdate.createForPluginRelease(pluginParent, release, adjustedSonarVersion));
         }
       }
     }

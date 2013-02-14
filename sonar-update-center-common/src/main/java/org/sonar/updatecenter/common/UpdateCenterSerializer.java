@@ -31,6 +31,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 public final class UpdateCenterSerializer {
 
   private UpdateCenterSerializer() {
@@ -71,12 +73,12 @@ public final class UpdateCenterSerializer {
       set(p, "sonar." + sonarRelease.getVersion() + ".date", FormatUtils.toString(sonarRelease.getDate(), false));
     }
 
-    List<String> pluginKeys = new ArrayList<String>();
-    for (Plugin plugin : center.getPlugins()) {
+    List<String> pluginKeys = newArrayList();
+    for (Plugin plugin : center.getAllChildrenPlugins()) {
       pluginKeys.add(plugin.getKey());
       set(p, plugin, "name", plugin.getName());
-      set(p, plugin, "group", plugin.getGroup());
-      set(p, plugin, "requiresGroup", plugin.getRequiresGroup());
+      set(p, plugin, "parent", plugin.getParent());
+      set(p, plugin, "requiresGroup", plugin.getRequiresPlugins());
       set(p, plugin, "description", plugin.getDescription());
       set(p, plugin, "category", plugin.getCategory());
       set(p, plugin, "homepageUrl", plugin.getHomepageUrl());
