@@ -19,18 +19,24 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Nullable;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 public final class Plugin extends Artifact {
 
   private String name;
-  private String parent;
-  private List<String> requiresPlugins;
+  private Plugin parent;
   private String description;
   private String homepageUrl;
   private String license;
@@ -41,10 +47,13 @@ public final class Plugin extends Artifact {
   private String issueTrackerUrl;
   private String sourcesUrl;
   private List<String> developers;
+  private Set<Plugin> children;
+  private List<Release> requiredPlugins;
 
   public Plugin(String key) {
     super(key);
-    this.requiresPlugins = newArrayList();
+    this.children = newHashSet();
+    this.requiredPlugins = newArrayList();
   }
 
   public String getName() {
@@ -56,21 +65,15 @@ public final class Plugin extends Artifact {
     return this;
   }
 
-  public String getParent() {
+  public Plugin getParent() {
     return parent;
   }
 
-  public Plugin setParent(String parent) {
+  public Plugin setParent(Plugin parent) {
     this.parent = parent;
-    return this;
-  }
-
-  public List<String> getRequiresPlugins() {
-    return requiresPlugins;
-  }
-
-  public Plugin setRequiresPlugins(List<String> requiresPlugins) {
-    this.requiresPlugins = requiresPlugins;
+    if (parent != null) {
+      parent.addChild(this);
+    }
     return this;
   }
 
@@ -164,11 +167,40 @@ public final class Plugin extends Artifact {
     return this;
   }
 
+  public Collection<Plugin> getChildren() {
+    return children;
+  }
+
+  public Plugin addChild(Plugin plugin) {
+    children.add(plugin);
+    return this;
+  }
+
+  @Nullable
+  public Plugin getChild(final String pluginKey) {
+    return Iterables.find(children, new Predicate<Plugin>() {
+      public boolean apply(@Nullable Plugin input) {
+        return input.getKey().equals(pluginKey);
+      }
+    }, null);
+  }
+
+  public List<Release> getRequiredPlugins() {
+    return requiredPlugins;
+  }
+
+  public Plugin addRequired(Release required) {
+    requiredPlugins.add(required);
+    return this;
+  }
+
+  public boolean isMaster() {
+    return getParent() != null ? getKey().equals(getParent().getKey()) : true;
+  }
+
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
-      parent = manifest.getParent();
-      requiresPlugins = manifest.getRequiresPlugins();
       description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
       organization = StringUtils.defaultIfEmpty(organization, manifest.getOrganization());
       organizationUrl = StringUtils.defaultIfEmpty(organizationUrl, manifest.getOrganizationUrl());

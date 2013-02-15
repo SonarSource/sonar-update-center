@@ -9,13 +9,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
-import org.sonar.updatecenter.mojo.PluginHeaders;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Collections;
 import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -23,10 +23,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class PluginHeadersTest {
-
-  private PluginHeaders pluginHeaders;
-
-  private UpdateCenter center;
 
   private final static String PLUGIN_KEY = "key";
 
@@ -37,13 +33,13 @@ public class PluginHeadersTest {
 
   @Before
   public void before() throws Exception {
-    center = new UpdateCenter();
     outputFolder = temporaryFolder.newFolder();
-    pluginHeaders = new PluginHeaders(center, outputFolder, mock(Log.class));
   }
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
+    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin>emptyList());
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(1);
@@ -65,8 +61,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -95,8 +91,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev1", "dev2"));
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -119,8 +115,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -143,8 +139,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -167,8 +163,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(null);
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -191,8 +187,8 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl(null);
     plugin.setDevelopers(newArrayList("dev"));
 
-    center.setPlugins(newArrayList(plugin));
-
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
+    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);

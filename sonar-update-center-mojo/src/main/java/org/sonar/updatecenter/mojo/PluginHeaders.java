@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.PluginReferential;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -39,10 +39,10 @@ import java.util.Set;
 class PluginHeaders {
 
   private final File outputDirectory;
-  private final UpdateCenter center;
+  private final PluginReferential center;
   private final Log log;
 
-  PluginHeaders(UpdateCenter center, File outputDirectory, Log log) throws IOException {
+  PluginHeaders(PluginReferential center, File outputDirectory, Log log) throws IOException {
     this.outputDirectory = outputDirectory;
     this.center = center;
     this.log = log;
@@ -55,7 +55,7 @@ class PluginHeaders {
 
   void generateHtml() throws IOException {
     init();
-    Set<Plugin> plugins = center.getAllChildrenPlugins();
+    Set<Plugin> plugins = center.getPlugins();
     for (Plugin plugin : plugins) {
       File file = new File(outputDirectory, plugin.getKey() + ".html");
       log.info("Generate html header of plugin " + plugin.getKey() + " in: " + file);

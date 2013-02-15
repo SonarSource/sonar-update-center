@@ -29,59 +29,48 @@ import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public final class UpdateCenterMatrix {
+public final class PluginCenter {
 
-  private UpdateCenter center;
+  private PluginReferential pluginReferential;
   private Version installedSonarVersion;
   private Map<Plugin, Version> installedPlugins = Maps.newHashMap();
-  private Map<PluginParent, Version> installedPluginParents = Maps.newHashMap();
-  private List<String> pendingPluginFilenames = newArrayList();
   private Date date;
 
-  public UpdateCenterMatrix(UpdateCenter center, Version installedSonarVersion) {
-    this.center = center;
+  public PluginCenter(PluginReferential pluginReferential, Version installedSonarVersion) {
+    this.pluginReferential = pluginReferential;
     this.installedSonarVersion = installedSonarVersion;
   }
 
-  public UpdateCenterMatrix registerInstalledPlugin(String pluginKey, Version pluginVersion) {
-    Plugin plugin = center.getPlugin(pluginKey);
+  public PluginCenter registerInstalledPlugin(String pluginKey, Version pluginVersion) {
+    Plugin plugin = pluginReferential.getPlugin(pluginKey);
     if (plugin != null) {
       installedPlugins.put(plugin, pluginVersion);
-      PluginParent pluginParent = center.getParent(pluginKey);
-      if (pluginParent != null) {
-        installedPluginParents.put(center.getParent(pluginKey), pluginVersion);
-      }
     }
     return this;
   }
 
-  public UpdateCenterMatrix registerPendingPluginsByFilename(String filename) {
-    pendingPluginFilenames.add(filename);
-    return this;
+  public PluginReferential getPluginReferential() {
+    return pluginReferential;
   }
 
-  public UpdateCenter getCenter() {
-    return center;
+  public List<Plugin> getInstalledPlugins() {
+    return newArrayList(installedPlugins.keySet());
   }
 
-  public List<PluginParent> getInstalledPluginParents(){
-    return newArrayList(installedPluginParents.keySet());
-  }
-
-  public List<PluginParentUpdate> findAvailablePlugins() {
+  public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
-    List<PluginParentUpdate> availables = newArrayList();
-    for (PluginParent pluginParent : center.getPluginParents()){
-      Plugin plugin = pluginParent.getMasterPlugin();
+    List<PluginUpdate> availables = newArrayList();
+    for (Plugin plugin : pluginReferential.getPlugins()) {
+
       // TODO check each plugin is not in already downloaded mode
-      if (!installedPlugins.containsKey(plugin) && !isAlreadyDownloaded(plugin)) {
+      if (!installedPlugins.containsKey(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
-          availables.add(PluginParentUpdate.createWithStatus(pluginParent, release, PluginParentUpdate.Status.COMPATIBLE));
+          availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
         } else {
           release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
           if (release != null) {
-            availables.add(PluginParentUpdate.createWithStatus(pluginParent, release, PluginParentUpdate.Status.REQUIRE_SONAR_UPGRADE));
+            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
           }
         }
       }
@@ -89,26 +78,38 @@ public final class UpdateCenterMatrix {
     return availables;
   }
 
-  public List<PluginParentUpdate> findPluginUpdates() {
+  public List<PluginUpdate> findPluginUpdates() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
 
-    List<PluginParentUpdate> updates = newArrayList();
-    for (Map.Entry<PluginParent, Version> entry : installedPluginParents.entrySet()) {
-      PluginParent pluginParent = entry.getKey();
-      Plugin plugin = pluginParent.getMasterPlugin();
-      if (!isAlreadyDownloaded(plugin)) {
-        Version pluginVersion = entry.getValue();
-        for (Release release : plugin.getReleasesGreaterThan(pluginVersion)) {
-          updates.add(PluginParentUpdate.createForPluginRelease(pluginParent, release, adjustedSonarVersion));
-        }
+    List<PluginUpdate> updates = newArrayList();
+    for (Map.Entry<Plugin, Version> entry : installedPlugins.entrySet()) {
+      Plugin plugin = entry.getKey();
+      Version pluginVersion = entry.getValue();
+      for (Release release : plugin.getReleasesGreaterThan(pluginVersion)) {
+        updates.add(PluginUpdate.createForPluginRelease(release, adjustedSonarVersion));
       }
     }
     return updates;
   }
 
+  /**
+   * Return plugin files to download (including dependencies)
+   */
+  public List<Release> findInstallablePlugins(String pluginKey, Version version) {
+    List<Release> installablePlugins = newArrayList();
+
+    Plugin plugin = pluginReferential.getPlugin(pluginKey);
+    installablePlugins.add(plugin.getRelease(version));
+    for (Plugin child : plugin.getChildren()) {
+      installablePlugins.add(child.getRelease(version));
+    }
+
+    return installablePlugins;
+  }
+
   public List<SonarUpdate> findSonarUpdates() {
     List<SonarUpdate> updates = Lists.newArrayList();
-    SortedSet<Release> releases = center.getSonar().getReleasesGreaterThan(installedSonarVersion);
+    SortedSet<Release> releases = pluginReferential.getSonar().getReleasesGreaterThan(installedSonarVersion);
     for (Release release : releases) {
       updates.add(createSonarUpdate(release));
     }
@@ -150,7 +151,7 @@ public final class UpdateCenterMatrix {
     return date;
   }
 
-  public UpdateCenterMatrix setDate(Date d) {
+  public PluginCenter setDate(Date d) {
     this.date = d;
     return this;
   }
@@ -164,13 +165,4 @@ public final class UpdateCenterMatrix {
     return Version.createRelease(installedSonarVersion.toString());
   }
 
-  private boolean isAlreadyDownloaded(Artifact artifact) {
-    for (Release r : artifact.getReleases()) {
-      if (pendingPluginFilenames.contains(r.getFilename())) {
-        // already downloaded
-        return true;
-      }
-    }
-    return false;
-  }
 }

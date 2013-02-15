@@ -21,18 +21,12 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.Collections;
 
-public class ReleaseTest {
+public class PluginManifestReaderTest {
 
   @Test
-  public void getFilename() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2"));
-    assertThat(release.getFilename()).isNull();
-
-    release.setDownloadUrl("http://dist.sonarsource.org/foo-1.2.jar");
-    assertThat(release.getFilename()).isEqualTo("foo-1.2.jar");
+  public void test(){
+    PluginReferential pluginReferential = PluginManifestReader.fromPluginManifests(Collections.<PluginManifest>emptyList());
   }
-
-  // TODO required test
 }

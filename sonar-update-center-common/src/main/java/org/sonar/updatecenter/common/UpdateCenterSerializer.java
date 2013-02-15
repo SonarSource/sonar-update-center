@@ -62,7 +62,7 @@ public final class UpdateCenterSerializer {
     }
   }
 
-  public static Properties toProperties(UpdateCenter center) {
+  public static Properties toProperties(PluginReferential center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
     set(p, "sonar.versions", center.getSonar().getVersions());
@@ -74,38 +74,47 @@ public final class UpdateCenterSerializer {
     }
 
     List<String> pluginKeys = newArrayList();
-    for (Plugin plugin : center.getAllChildrenPlugins()) {
-      pluginKeys.add(plugin.getKey());
-      set(p, plugin, "name", plugin.getName());
-      set(p, plugin, "parent", plugin.getParent());
-      set(p, plugin, "requiresGroup", plugin.getRequiresPlugins());
-      set(p, plugin, "description", plugin.getDescription());
-      set(p, plugin, "category", plugin.getCategory());
-      set(p, plugin, "homepageUrl", plugin.getHomepageUrl());
-      set(p, plugin, "license", plugin.getLicense());
-      set(p, plugin, "organization", plugin.getOrganization());
-      set(p, plugin, "organizationUrl", plugin.getOrganizationUrl());
-      set(p, plugin, "termsConditionsUrl", plugin.getTermsConditionsUrl());
-      set(p, plugin, "issueTrackerUrl", plugin.getIssueTrackerUrl());
-      set(p, plugin, "scm", plugin.getSourcesUrl());
-      set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
-
-      List<String> releaseKeys = new ArrayList<String>();
-      for (Release release : plugin.getReleases()) {
-        releaseKeys.add(release.getVersion().toString());
-        set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
-        set(p, plugin, release.getVersion() + ".downloadUrl", release.getDownloadUrl());
-        set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
-        set(p, plugin, release.getVersion() + ".description", release.getDescription());
-        set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
+    for (Plugin plugin : center.getPlugins()) {
+      addPlugin(plugin, pluginKeys, p);
+      for (Plugin child : plugin.getChildren()) {
+        addPlugin(child, pluginKeys, p);
       }
-      set(p, plugin, "versions", releaseKeys);
     }
     set(p, "plugins", pluginKeys);
     return p;
   }
 
-  public static void toProperties(UpdateCenter sonar, File toFile) {
+  private static void addPlugin(Plugin plugin, List<String> pluginKeys, Properties p){
+    pluginKeys.add(plugin.getKey());
+    set(p, plugin, "name", plugin.getName());
+    if (plugin.getParent() != null) {
+      set(p, plugin, "parent", plugin.getParent().getKey());
+    }
+    set(p, plugin, "requiresGroup", StringUtils.join(getRequiredList(plugin), ","));
+    set(p, plugin, "description", plugin.getDescription());
+    set(p, plugin, "category", plugin.getCategory());
+    set(p, plugin, "homepageUrl", plugin.getHomepageUrl());
+    set(p, plugin, "license", plugin.getLicense());
+    set(p, plugin, "organization", plugin.getOrganization());
+    set(p, plugin, "organizationUrl", plugin.getOrganizationUrl());
+    set(p, plugin, "termsConditionsUrl", plugin.getTermsConditionsUrl());
+    set(p, plugin, "issueTrackerUrl", plugin.getIssueTrackerUrl());
+    set(p, plugin, "scm", plugin.getSourcesUrl());
+    set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
+
+    List<String> releaseKeys = new ArrayList<String>();
+    for (Release release : plugin.getReleases()) {
+      releaseKeys.add(release.getVersion().toString());
+      set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
+      set(p, plugin, release.getVersion() + ".downloadUrl", release.getDownloadUrl());
+      set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
+      set(p, plugin, release.getVersion() + ".description", release.getDescription());
+      set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
+    }
+    set(p, plugin, "versions", releaseKeys);
+  }
+
+  public static void toProperties(PluginReferential sonar, File toFile) {
     FileOutputStream output = null;
     try {
       output = FileUtils.openOutputStream(toFile);
@@ -117,5 +126,13 @@ public final class UpdateCenterSerializer {
     } finally {
       IOUtils.closeQuietly(output);
     }
+  }
+
+  private static String[] getRequiredList(Plugin plugin){
+    List<String> reauiredStringList = newArrayList();
+    for (Release release : plugin.getRequiredPlugins()) {
+      reauiredStringList.add(plugin.getKey() +":"+ release.getVersion().getName());
+    }
+    return reauiredStringList.toArray(new String[]{});
   }
 }

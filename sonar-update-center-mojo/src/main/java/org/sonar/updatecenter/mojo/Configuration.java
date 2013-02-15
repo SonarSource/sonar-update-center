@@ -22,7 +22,7 @@ package org.sonar.updatecenter.mojo;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 
 import java.io.File;
@@ -65,7 +65,7 @@ class Configuration {
     return inputFile;
   }
 
-  UpdateCenter getUpdateCenter() {
+  PluginReferential getUpdateCenter() {
     try {
       return UpdateCenterDeserializer.fromProperties(getInputFile());
 

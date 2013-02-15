@@ -1,11 +1,11 @@
 package org.sonar.updatecenter.common;
 
-public class RequiredPlugin {
+public class PluginVersion {
 
   public Plugin plugin;
   public Version version;
 
-  private RequiredPlugin(Plugin plugin, Version version) {
+  private PluginVersion(Plugin plugin, Version version) {
     this.plugin = plugin;
     this.version = version;
   }
@@ -18,12 +18,12 @@ public class RequiredPlugin {
     return version;
   }
 
-  public static RequiredPlugin create(Plugin plugin, Version version) {
-    return new RequiredPlugin(plugin, version);
+  public static PluginVersion create(Plugin plugin, Version version) {
+    return new PluginVersion(plugin, version);
   }
 
-  public static RequiredPlugin create(Plugin plugin, String version) {
-    return new RequiredPlugin(plugin, Version.create(version));
+  public static PluginVersion create(Plugin plugin, String version) {
+    return new PluginVersion(plugin, Version.create(version));
   }
 
   @Override
@@ -35,7 +35,7 @@ public class RequiredPlugin {
       return false;
     }
 
-    RequiredPlugin that = (RequiredPlugin) o;
+    PluginVersion that = (PluginVersion) o;
 
     if (!plugin.getKey().equals(that.plugin.getKey())) {
       return false;

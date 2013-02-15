@@ -26,16 +26,17 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+@Deprecated
 public class PluginParent {
 
   private String key;
   private List<Plugin> children;
-  private List<RequiredPlugin> requiredPlugins;
+  private List<PluginVersion> pluginVersions;
 
   public PluginParent(String key) {
     this.key = key;
     this.children = newArrayList();
-    this.requiredPlugins = newArrayList();
+    this.pluginVersions = newArrayList();
   }
 
   public String getKey() {
@@ -50,9 +51,9 @@ public class PluginParent {
     });
   }
 
-  public PluginParent addPlugin(Plugin plugin, List<RequiredPlugin> requiredPlugins) {
+  public PluginParent addPlugin(Plugin plugin, List<PluginVersion> pluginVersions) {
     children.add(plugin);
-    this.requiredPlugins.addAll(requiredPlugins);
+    this.pluginVersions.addAll(pluginVersions);
     return this;
   }
 
@@ -60,8 +61,8 @@ public class PluginParent {
     return children;
   }
 
-  public List<RequiredPlugin> getRequiredPlugins() {
-    return requiredPlugins;
+  public List<PluginVersion> getPluginVersions() {
+    return pluginVersions;
   }
 
   @Override

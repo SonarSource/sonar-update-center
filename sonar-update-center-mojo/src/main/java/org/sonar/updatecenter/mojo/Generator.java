@@ -23,8 +23,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginManifest;
+import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterSerializer;
 
 import java.io.File;
@@ -46,15 +46,15 @@ class Generator {
   }
 
   void generate() throws IOException, URISyntaxException {
-    UpdateCenter center = configuration.getUpdateCenter();
+    PluginReferential center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
     generateHtmlHeader(center);
   }
 
-  private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
+  private void downloadReleases(PluginReferential center) throws IOException, URISyntaxException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
-    for (Plugin plugin : center.getAllChildrenPlugins()) {
+    for (Plugin plugin : center.getPlugins()) {
       log.info("Load plugin: " + plugin.getKey());
 
       File masterJar = null;
@@ -79,12 +79,12 @@ class Generator {
     }
   }
 
-  private void generateMetadata(UpdateCenter center) {
+  private void generateMetadata(PluginReferential center) {
     log.info("Generate output: " + configuration.getOutputFile());
     UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
-  private void generateHtmlHeader(UpdateCenter center) throws IOException {
+  private void generateHtmlHeader(PluginReferential center) throws IOException {
     File htmlOutputDir = new File(configuration.getOutputDir(), HTML_HEADER_DIR);
     try {
       forceMkdir(htmlOutputDir);

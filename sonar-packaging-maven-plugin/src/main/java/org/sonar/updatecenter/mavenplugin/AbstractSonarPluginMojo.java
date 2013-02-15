@@ -131,7 +131,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
    *
    * @parameter expression="${sonar.pluginRequiresPlugins}"
    */
-  protected String[] pluginRequiresPlugins;
+  protected String pluginRequiresPlugins;
 
   /**
    * @parameter expression="${sonar.pluginDescription}" default-value="${project.description}"
@@ -208,7 +208,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return pluginParent;
   }
 
-  protected final String[] getRequiresPlugins() {
+  protected final String getRequiresPlugins() {
     return pluginRequiresPlugins;
   }
 

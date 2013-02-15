@@ -36,14 +36,13 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      PluginReferential center = UpdateCenterDeserializer.fromProperties(props);
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getParent()).isEqualTo("Group");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
@@ -62,7 +61,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      PluginReferential center = UpdateCenterDeserializer.fromProperties(props);
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getDevelopers()).hasSize(3);
@@ -79,11 +78,31 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      PluginReferential center = UpdateCenterDeserializer.fromProperties(props);
 
       Plugin clirr = center.getPlugin("clirr");
       assertThat(clirr.getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
 
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  @Test
+  public void should_add_parent() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-parent.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      PluginReferential pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+
+      assertThat(pluginReferential.getPlugins()).hasSize(1);
+
+      Plugin clirr = pluginReferential.getPlugin("clirr");
+      assertThat(clirr.getName()).isEqualTo("Clirr");
+      assertThat(clirr.getChildren()).hasSize(1);
+      assertThat(clirr.getChild("motionchart")).isNotNull();
+      assertThat(clirr.getChild("motionchart").getName()).isEqualTo("Motion Chart");
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -95,13 +114,17 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      PluginReferential pluginReferential = UpdateCenterDeserializer.fromProperties(props);
 
-      Plugin clirr = center.getPlugin("clirr");
+      assertThat(pluginReferential.getPlugins()).hasSize(3);
+
+      Plugin clirr = pluginReferential.getPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getRequiresPlugins()).hasSize(2);
-      assertThat(clirr.getRequiresPlugins().get(0)).isEqualTo("foo:1.0");
-      assertThat(clirr.getRequiresPlugins().get(1)).isEqualTo("bar:1.1");
+      assertThat(clirr.getRequiredPlugins()).hasSize(2);
+      assertThat(clirr.getRequiredPlugins().get(0).getArtifact().getKey()).isEqualTo("foo");
+      assertThat(clirr.getRequiredPlugins().get(0).getVersion().getName()).isEqualTo("1.0");
+      assertThat(clirr.getRequiredPlugins().get(1).getArtifact().getKey()).isEqualTo("bar");
+      assertThat(clirr.getRequiredPlugins().get(1).getVersion().getName()).isEqualTo("1.1");
     } finally {
       IOUtils.closeQuietly(input);
     }

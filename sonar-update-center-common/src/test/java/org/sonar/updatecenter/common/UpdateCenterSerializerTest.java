@@ -26,29 +26,33 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterSerializerTest {
 
   @Test
   public void testToProperties() throws IOException, URISyntaxException {
-    UpdateCenter center = new UpdateCenter();
+    Sonar sonar = new Sonar();
+    sonar.addRelease(Version.create("2.0"));
+    sonar.addRelease(Version.create("2.1"));
 
-    center.getSonar().addRelease(Version.create("2.0"));
-    center.getSonar().addRelease(Version.create("2.1"));
-    center.addPlugin(new Plugin("foo")
+    Plugin plugin = new Plugin("foo")
         .setName("Foo")
-        .setOrganizationUrl("http://www.sonarsource.org"));
+        .setOrganizationUrl("http://www.sonarsource.org");
+
     Plugin barPlugin = new Plugin("bar")
-        .setParent("fake")
+        .setParent(new Plugin("foo"))
         .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
         .setDevelopers(Arrays.asList("dev1", "dev2"));
-    center.addPlugin(barPlugin);
+
     barPlugin.addRelease(
         new Release(barPlugin, Version.create("1.2"))
             .addRequiredSonarVersions(Version.create("2.0"))
             .addRequiredSonarVersions(Version.create("2.1"))
     );
+
+    PluginReferential center = PluginReferential.create(newArrayList(plugin, barPlugin), sonar, null);
 
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
@@ -57,7 +61,7 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "plugins", "foo,bar");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
-    assertProperty(properties, "bar.parent", "fake");
+    assertProperty(properties, "bar.parent", "foo");
     assertProperty(properties, "bar.versions", "1.2");
     assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
     assertProperty(properties, "bar.developers", "dev1,dev2");

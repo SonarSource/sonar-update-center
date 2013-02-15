@@ -21,7 +21,6 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 
@@ -37,8 +36,6 @@ public class PluginTest {
     assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
     assertThat(plugin.getDescription()).isEqualTo("Parser");
-    assertThat(plugin.getParent()).isEqualTo("group");
-
   }
 
   @Test
@@ -62,14 +59,12 @@ public class PluginTest {
   }
 
   @Test
-  public void shoud_add_requires_plugins() {
+  public void should_return_master(){
     Plugin plugin = new Plugin("squid");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setRequiresPlugins(newArrayList("foo:1.0", "foo:1.0"));
+    assertThat(plugin.isMaster()).isTrue();
 
-    plugin.merge(manifest);
-
-    assertThat(plugin.getRequiresPlugins()).hasSize(2);
-    assertThat(plugin.getRequiresPlugins().get(0)).isEqualTo("foo:1.0");
-    assertThat(plugin.getRequiresPlugins().get(1)).isEqualTo("foo:1.0");
+    plugin = new Plugin("squid").setParent(new Plugin("foo"));
+    assertThat(plugin.isMaster()).isFalse();
   }
+
 }

@@ -194,7 +194,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
       addManifestProperty("Parent", PluginManifest.PARENT, getPluginParent());
-      addManifestProperty("Requires plugins", PluginManifest.REQUIRES_PLUGINS, getRequiresPluginsString());
+      addManifestProperty("Requires plugins", PluginManifest.REQUIRES_PLUGINS, getRequiresPlugins());
 
       if (isUseChildFirstClassLoader()) {
         getLog().info("    Uses child-first class loading strategy");
@@ -299,13 +299,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
             }
           }))
       );
-    }
-    return null;
-  }
-
-  private String getRequiresPluginsString() {
-    if (getRequiresPlugins() != null) {
-      return Joiner.on(",").join(getRequiresPlugins());
     }
     return null;
   }

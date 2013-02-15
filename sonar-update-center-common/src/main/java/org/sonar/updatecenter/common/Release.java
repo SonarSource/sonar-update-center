@@ -47,8 +47,7 @@ public final class Release implements Comparable<Release> {
   }
 
   public Release(Artifact artifact, String version) {
-    this.artifact = artifact;
-    this.version = Version.create(version);
+    this(artifact, Version.create(version));
   }
 
   public Artifact getArtifact() {
