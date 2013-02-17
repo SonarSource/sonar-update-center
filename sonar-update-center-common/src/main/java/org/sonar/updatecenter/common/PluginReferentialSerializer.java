@@ -33,9 +33,9 @@ import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public final class UpdateCenterSerializer {
+public final class PluginReferentialSerializer {
 
-  private UpdateCenterSerializer() {
+  private PluginReferentialSerializer() {
   }
 
   private static void set(Properties props, String key, String value) {
@@ -90,7 +90,6 @@ public final class UpdateCenterSerializer {
     if (plugin.getParent() != null) {
       set(p, plugin, "parent", plugin.getParent().getKey());
     }
-    set(p, plugin, "requiresGroup", StringUtils.join(getRequiredList(plugin), ","));
     set(p, plugin, "description", plugin.getDescription());
     set(p, plugin, "category", plugin.getCategory());
     set(p, plugin, "homepageUrl", plugin.getHomepageUrl());
@@ -110,6 +109,7 @@ public final class UpdateCenterSerializer {
       set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
       set(p, plugin, release.getVersion() + ".description", release.getDescription());
       set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
+      set(p, plugin, "requiresGroup", StringUtils.join(getRequiredList(release), ","));
     }
     set(p, plugin, "versions", releaseKeys);
   }
@@ -128,11 +128,11 @@ public final class UpdateCenterSerializer {
     }
   }
 
-  private static String[] getRequiredList(Plugin plugin){
-    List<String> reauiredStringList = newArrayList();
-    for (Release release : plugin.getRequiredPlugins()) {
-      reauiredStringList.add(plugin.getKey() +":"+ release.getVersion().getName());
+  private static String[] getRequiredList(Release release){
+    List<String> requiredStringList = newArrayList();
+    for (Release requiredRelease : release.getRequiredReleases()) {
+      requiredStringList.add(release.getArtifact().getKey() +":"+ release.getVersion().getName());
     }
-    return reauiredStringList.toArray(new String[]{});
+    return requiredStringList.toArray(new String[]{});
   }
 }

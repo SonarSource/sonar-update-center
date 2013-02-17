@@ -32,10 +32,10 @@ public class PluginReferentialTest {
   public void get_and_set_plugins() {
     Plugin foo = new Plugin("foo");
     Plugin bar = new Plugin("bar");
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar), new Sonar());
 
-    assertThat(pluginReferential.getPlugin("foo")).isEqualTo(foo);
-    assertThat(pluginReferential.getPlugin("unknown")).isNull();
+    assertThat(pluginReferential.findPlugin("foo")).isEqualTo(foo);
+    assertThat(pluginReferential.findPlugin("unknown")).isNull();
     assertThat(pluginReferential.getPlugins()).hasSize(2);
   }
 
@@ -45,11 +45,11 @@ public class PluginReferentialTest {
     Plugin fooBis = new Plugin("fooBis").setParent(new Plugin("foo"));
     Plugin bar = new Plugin("bar").setParent(new Plugin("bar"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar), new Sonar());
 
     assertThat(pluginReferential.getPlugins()).hasSize(2);
-    assertThat(pluginReferential.getPlugin("foo").getChildren()).hasSize(1);
-    assertThat(pluginReferential.getPlugin("bar").getChildren()).hasSize(0);
+    assertThat(pluginReferential.findPlugin("foo").getChildren()).hasSize(1);
+    assertThat(pluginReferential.findPlugin("bar").getChildren()).hasSize(0);
   }
 
   @Test
@@ -57,7 +57,7 @@ public class PluginReferentialTest {
     Plugin foo = new Plugin("foo").setParent(new Plugin("foo"));
     Plugin bar = new Plugin("bar").setParent(null);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar), new Sonar());
 
     assertThat(pluginReferential.getPlugins()).hasSize(2);
   }
@@ -65,7 +65,7 @@ public class PluginReferentialTest {
   @Test(expected = NoSuchElementException.class)
   public void should_throw_exception_if_plugin_parent_does_not_exist() {
     Plugin foo = new Plugin("foo").setParent(new Plugin("not_found"));
-    PluginReferential.create(newArrayList(foo));
+    PluginReferential.create(newArrayList(foo), new Sonar());
   }
 
 }

@@ -24,19 +24,16 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 public final class Plugin extends Artifact {
 
   private String name;
-  private Plugin parent;
   private String description;
   private String homepageUrl;
   private String license;
@@ -47,13 +44,13 @@ public final class Plugin extends Artifact {
   private String issueTrackerUrl;
   private String sourcesUrl;
   private List<String> developers;
+  private Plugin parent;
   private Set<Plugin> children;
-  private List<Release> requiredPlugins;
+
 
   public Plugin(String key) {
     super(key);
     this.children = newHashSet();
-    this.requiredPlugins = newArrayList();
   }
 
   public String getName() {
@@ -62,18 +59,6 @@ public final class Plugin extends Artifact {
 
   public Plugin setName(String name) {
     this.name = name;
-    return this;
-  }
-
-  public Plugin getParent() {
-    return parent;
-  }
-
-  public Plugin setParent(Plugin parent) {
-    this.parent = parent;
-    if (parent != null) {
-      parent.addChild(this);
-    }
     return this;
   }
 
@@ -167,6 +152,18 @@ public final class Plugin extends Artifact {
     return this;
   }
 
+  public Plugin getParent() {
+    return parent;
+  }
+
+  public Plugin setParent(Plugin parent) {
+    this.parent = parent;
+    if (parent != null) {
+      parent.addChild(this);
+    }
+    return this;
+  }
+
   public Collection<Plugin> getChildren() {
     return children;
   }
@@ -185,17 +182,8 @@ public final class Plugin extends Artifact {
     }, null);
   }
 
-  public List<Release> getRequiredPlugins() {
-    return requiredPlugins;
-  }
-
-  public Plugin addRequired(Release required) {
-    requiredPlugins.add(required);
-    return this;
-  }
-
   public boolean isMaster() {
-    return getParent() != null ? getKey().equals(getParent().getKey()) : true;
+    return getParent() == null || getKey().equals(getParent().getKey());
   }
 
   public Plugin merge(PluginManifest manifest) {
@@ -212,5 +200,13 @@ public final class Plugin extends Artifact {
       developers = Arrays.asList(manifest.getDevelopers());
     }
     return this;
+  }
+
+  @Override
+  public String toString() {
+    return new StringBuilder()
+        .append(key)
+        .append(children)
+        .toString();
   }
 }

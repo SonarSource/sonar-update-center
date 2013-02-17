@@ -22,10 +22,9 @@ package org.sonar.updatecenter.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public final class Release implements Comparable<Release> {
 
@@ -34,6 +33,7 @@ public final class Release implements Comparable<Release> {
   private String description;
   private String downloadUrl;
   private String changelogUrl;
+  private List<Release> requiredReleases;
 
   /**
    * from oldest to newest sonar versions
@@ -44,6 +44,7 @@ public final class Release implements Comparable<Release> {
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
+    this.requiredReleases = newArrayList();
   }
 
   public Release(Artifact artifact, String version) {
@@ -141,6 +142,15 @@ public final class Release implements Comparable<Release> {
     return this;
   }
 
+  public List<Release> getRequiredReleases() {
+    return requiredReleases;
+  }
+
+  public Release addRequiredRelease(Release required) {
+    requiredReleases.add(required);
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -149,14 +159,24 @@ public final class Release implements Comparable<Release> {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Release that = (Release) o;
-    return version.equals(that.version);
 
+    Release release = (Release) o;
+
+    if (!artifact.equals(release.artifact)) {
+      return false;
+    }
+    if (!version.equals(release.version)) {
+      return false;
+    }
+
+    return true;
   }
 
   @Override
   public int hashCode() {
-    return version.hashCode();
+    int result = artifact.hashCode();
+    result = 31 * result + version.hashCode();
+    return result;
   }
 
   @Override

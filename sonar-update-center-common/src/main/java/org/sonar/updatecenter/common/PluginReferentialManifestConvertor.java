@@ -24,16 +24,15 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
-
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class PluginManifestReader {
+public class PluginReferentialManifestConvertor {
 
-  public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList) {
+  public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList, Version sonarVersion) {
     List<Plugin> plugins = newArrayList();
 
     for (PluginManifest pluginManifest : pluginManifestList) {
@@ -51,18 +50,23 @@ public class PluginManifestReader {
       plugin.setParent(getPlugin(pluginManifest.getParent(), plugins));
     }
 
-    PluginReferential pluginReferential = PluginReferential.create(plugins, new Sonar(), new Date());
+
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
       for (String requiresPluginKey : pluginManifest.getRequiresPlugins()) {
-        Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-        String requiredPluginReleaseKey = split.next();
-        String requiredMinimumReleaseVersion = split.next();
-        Release requiredRelease = pluginReferential.findRelease(requiredPluginReleaseKey, requiredMinimumReleaseVersion);
-        plugin.addRequired(requiredRelease);
+        for (Release release : plugin.getReleases()) {
+          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
+          String requiredPluginReleaseKey = split.next();
+          String requiredMinimumReleaseVersion = split.next();
+          Release requiredRelease = getPlugin(requiresPluginKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
+          release.addRequiredRelease(requiredRelease);
+        }
       }
     }
 
+    Sonar sonar = new Sonar();
+    sonar.addRelease(sonarVersion);
+    PluginReferential pluginReferential = PluginReferential.create(plugins, sonar, new Date());
     return pluginReferential;
   }
 

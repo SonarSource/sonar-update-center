@@ -21,12 +21,17 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import java.util.Collections;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.fest.assertions.Assertions.assertThat;
 
-public class PluginManifestReaderTest {
+public class PluginReferentialManifestConvertorTest {
 
   @Test
-  public void test(){
-    PluginReferential pluginReferential = PluginManifestReader.fromPluginManifests(Collections.<PluginManifest>emptyList());
+  public void should_return_plugins(){
+    PluginManifest PluginManifest = new PluginManifest().setKey("foo");
+
+    PluginReferential pluginReferential = PluginReferentialManifestConvertor.fromPluginManifests(newArrayList(PluginManifest), Version.create("2.0"));
+
+    assertThat(pluginReferential.getPlugins()).hasSize(1);
   }
 }

@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.PluginReferential;
-import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,7 +66,7 @@ class Configuration {
 
   PluginReferential getUpdateCenter() {
     try {
-      return UpdateCenterDeserializer.fromProperties(getInputFile());
+      return org.sonar.updatecenter.common.PluginReferentialDeserializer.fromProperties(getInputFile());
 
     } catch (IOException e) {
       throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);

@@ -25,7 +25,6 @@ import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginManifest;
 import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.UpdateCenterSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +80,7 @@ class Generator {
 
   private void generateMetadata(PluginReferential center) {
     log.info("Generate output: " + configuration.getOutputFile());
-    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
+    org.sonar.updatecenter.common.PluginReferentialSerializer.toProperties(center, configuration.getOutputFile());
   }
 
   private void generateHtmlHeader(PluginReferential center) throws IOException {

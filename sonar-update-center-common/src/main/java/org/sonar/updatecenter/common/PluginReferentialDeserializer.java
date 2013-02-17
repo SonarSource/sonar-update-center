@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,9 +38,9 @@ import java.util.Properties;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
-public final class UpdateCenterDeserializer {
+public final class PluginReferentialDeserializer {
 
-  private UpdateCenterDeserializer() {
+  private PluginReferentialDeserializer() {
     // only static methods
   }
 
@@ -107,23 +106,23 @@ public final class UpdateCenterDeserializer {
 
     for (Plugin plugin : plugins) {
       plugin.setParent(getPlugin(get(p, plugin.getKey(), "parent"), plugins));
-    }
-
-    PluginReferential pluginReferential = PluginReferential.create(plugins, sonar, date);
-    for (Plugin plugin : plugins) {
-      for (String requiresPluginKey : getArray(p, plugin.getKey(), "requiresPlugins")) {
-        Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-        String requiredPluginReleaseKey = split.next();
-        String requiredMinimumReleaseVersion = split.next();
-        Release requiredRelease = pluginReferential.findRelease(requiredPluginReleaseKey, requiredMinimumReleaseVersion);
-        if (requiredRelease != null) {
-          plugin.addRequired(requiredRelease);
-        } else {
-          throw new RuntimeException("Plugin not found : '"+ requiredPluginReleaseKey + "' with minimum version "+ requiredMinimumReleaseVersion);
+      for (Release release : plugin.getReleases()){
+        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requiresPlugins"), ""), ",");
+        for (String requiresPluginKey : requiredReleases) {
+          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
+          String requiredPluginReleaseKey = split.next();
+          String requiredMinimumReleaseVersion = split.next();
+          Release requiredRelease = getPlugin(requiredPluginReleaseKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
+          if (requiredRelease != null) {
+            release.addRequiredRelease(requiredRelease);
+          } else {
+            throw new RuntimeException("Plugin not found : '"+ requiredPluginReleaseKey + "' with minimum version "+ requiredMinimumReleaseVersion);
+          }
         }
       }
     }
 
+    PluginReferential pluginReferential = PluginReferential.create(plugins, sonar, date);
     return pluginReferential;
   }
 

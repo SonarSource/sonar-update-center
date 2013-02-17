@@ -92,21 +92,22 @@ public final class PluginManifest {
   private String license;
   private String version;
   private String sonarVersion;
-  private String[] dependencies = new String[0];
+  private String[] dependencies;
   private String homepage;
   private String termsConditionsUrl;
   private Date buildDate;
   private String issueTrackerUrl;
-  private boolean useChildFirstClassLoader = false;
+  private boolean useChildFirstClassLoader;
   private String basePlugin;
   private String implementationBuild;
   private String sourcesUrl;
-  private String[] developers = new String[0];
+  private String[] developers;
 
   /**
    * Load the manifest from a JAR file.
    */
   public PluginManifest(File file) throws IOException {
+    this();
     JarFile jar = null;
     try {
       jar = new JarFile(file);
@@ -126,10 +127,15 @@ public final class PluginManifest {
    * @param manifest can not be null
    */
   public PluginManifest(Manifest manifest) {
+    this();
     loadManifest(manifest);
   }
 
   public PluginManifest() {
+    dependencies = new String[0];
+    developers = new String[0];
+    useChildFirstClassLoader = false;
+    requiresPlugins = newArrayList();
   }
 
   private void loadManifest(Manifest manifest) {

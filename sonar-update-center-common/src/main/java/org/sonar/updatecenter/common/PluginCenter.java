@@ -19,12 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -33,18 +35,21 @@ public final class PluginCenter {
 
   private PluginReferential pluginReferential;
   private Version installedSonarVersion;
-  private Map<Plugin, Version> installedPlugins = Maps.newHashMap();
+  private List<Release> installedReleases;
   private Date date;
 
   public PluginCenter(PluginReferential pluginReferential, Version installedSonarVersion) {
     this.pluginReferential = pluginReferential;
     this.installedSonarVersion = installedSonarVersion;
+    installedReleases = newArrayList();
   }
 
-  public PluginCenter registerInstalledPlugin(String pluginKey, Version pluginVersion) {
-    Plugin plugin = pluginReferential.getPlugin(pluginKey);
-    if (plugin != null) {
-      installedPlugins.put(plugin, pluginVersion);
+  public PluginCenter registerInstalledPlugin(String key, Version version) {
+    Release release = pluginReferential.findRelease(key, version);
+    if (release != null) {
+      installedReleases.add(release);
+    } else {
+      throw new PluginNotFoundException("Release not found : "+ key + " with version : "+ version.getName());
     }
     return this;
   }
@@ -53,17 +58,16 @@ public final class PluginCenter {
     return pluginReferential;
   }
 
-  public List<Plugin> getInstalledPlugins() {
-    return newArrayList(installedPlugins.keySet());
+  public List<Release> getInstalledReleases() {
+    return installedReleases;
   }
 
   public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
+    // TODO check all dependencies are available, if not, set a a status special
     for (Plugin plugin : pluginReferential.getPlugins()) {
-
-      // TODO check each plugin is not in already downloaded mode
-      if (!installedPlugins.containsKey(plugin)) {
+      if (!isInstalled(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
           availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
@@ -82,29 +86,63 @@ public final class PluginCenter {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
 
     List<PluginUpdate> updates = newArrayList();
-    for (Map.Entry<Plugin, Version> entry : installedPlugins.entrySet()) {
-      Plugin plugin = entry.getKey();
-      Version pluginVersion = entry.getValue();
-      for (Release release : plugin.getReleasesGreaterThan(pluginVersion)) {
-        updates.add(PluginUpdate.createForPluginRelease(release, adjustedSonarVersion));
+    for (Release release : installedReleases) {
+      Plugin plugin = findPlugin(release);
+      // TODO check all dependencies are available, if not, set a a status special
+      for (Release nextRelease : plugin.getReleasesGreaterThan(release.getVersion())) {
+        updates.add(PluginUpdate.createForPluginRelease(nextRelease, adjustedSonarVersion));
       }
     }
     return updates;
   }
 
   /**
-   * Return plugin files to download (including dependencies)
+   * Return all release to download (including dependencies) to install / update a plugin
    */
-  public List<Release> findInstallablePlugins(String pluginKey, Version version) {
+  public List<Release> findInstallablePlugins(String pluginKey, Version minimumVersion) {
     List<Release> installablePlugins = newArrayList();
-
-    Plugin plugin = pluginReferential.getPlugin(pluginKey);
-    installablePlugins.add(plugin.getRelease(version));
-    for (Plugin child : plugin.getChildren()) {
-      installablePlugins.add(child.getRelease(version));
+    Plugin plugin = pluginReferential.findPlugin(pluginKey);
+    if (plugin != null) {
+      Release pluginRelease = plugin.getLastCompatibleRelease(installedSonarVersion);
+      if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
+        throw new IncompatiblePluginVersionException("Plugin "+ pluginKey + " is needed to be installed at version greater or equal "+ minimumVersion);
+      }
+      addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
+      for (Plugin child : plugin.getChildren()) {
+        addReleaseIfNotAlreadyInstalled(child.getRelease(pluginRelease.getVersion()), installablePlugins);
+      }
+      for (Release requiredRelease : pluginRelease.getRequiredReleases()) {
+        installablePlugins.addAll(findInstallablePlugins(requiredRelease.getArtifact().getKey(), requiredRelease.getVersion()));
+      }
+    } else {
+     throw new PluginNotFoundException("Needed plugin '"+ pluginKey + "' version "+ minimumVersion + " not found.");
     }
-
     return installablePlugins;
+  }
+
+  private void addReleaseIfNotAlreadyInstalled(Release release, List<Release> installablePlugins) {
+    if (!isInstalled(release)) {
+      installablePlugins.add(release);
+    }
+  }
+
+  /**
+   * Return plugin keys to remove (including dependencies) to remove a plugin
+   */
+  public List<String> findRemovablePlugins(String pluginKey) {
+    List<String> removablePlugins = newArrayList();
+    Plugin plugin = pluginReferential.findPlugin(pluginKey);
+    if (plugin != null) {
+      Release pluginRelease = plugin.getLastRelease();
+      removablePlugins.add(plugin.getKey());
+      for (Plugin child : plugin.getChildren()) {
+          removablePlugins.add(child.getKey());
+      }
+      for (Release requiredRelease : pluginRelease.getRequiredReleases()) {
+        removablePlugins.addAll(findRemovablePlugins(requiredRelease.getArtifact().getKey()));
+      }
+    }
+    return removablePlugins;
   }
 
   public List<SonarUpdate> findSonarUpdates() {
@@ -118,20 +156,17 @@ public final class PluginCenter {
 
   SonarUpdate createSonarUpdate(Release sonarRelease) {
     SonarUpdate update = new SonarUpdate(sonarRelease);
-    // TODO use groups instead of plugins
-    for (Map.Entry<Plugin, Version> entry : installedPlugins.entrySet()) {
-      Plugin plugin = entry.getKey();
-      Version pluginVersion = entry.getValue();
-      Release pluginRelease = plugin.getRelease(pluginVersion);
+    for (Release release : installedReleases) {
+      Plugin plugin = findPlugin(release);
 
-      if (pluginRelease != null && pluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
+      if (release.supportSonarVersion(sonarRelease.getVersion())) {
         update.addCompatiblePlugin(plugin);
 
       } else {
         // search for a compatible plugin upgrade
         boolean ok = false;
         Release compatibleRelease = null;
-        for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(pluginVersion)) {
+        for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(release.getVersion())) {
           if (greaterPluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
             compatibleRelease = greaterPluginRelease;
             ok = true;
@@ -145,6 +180,15 @@ public final class PluginCenter {
       }
     }
     return update;
+  }
+
+  public Release findLatestCompatible(String pluginKey) {
+    Plugin plugin = pluginReferential.findPlugin(pluginKey);
+    if (plugin != null) {
+      return plugin.getLastCompatibleRelease(installedSonarVersion);
+    } else {
+      return null;
+    }
   }
 
   public Date getDate() {
@@ -163,6 +207,26 @@ public final class PluginCenter {
    */
   private Version getAdjustedSonarVersion() {
     return Version.createRelease(installedSonarVersion.toString());
+  }
+
+  private boolean isInstalled(final Release releaseToFind) {
+    return Iterables.any(installedReleases, new Predicate<Release>() {
+      public boolean apply(Release release) {
+        return releaseToFind.equals(release);
+      }
+    });
+  }
+
+  private boolean isInstalled(final Plugin plugin) {
+    return Iterables.any(installedReleases, new Predicate<Release>() {
+      public boolean apply(Release release) {
+        return plugin.getKey().equals(release.getArtifact().getKey());
+      }
+    });
+  }
+
+  private Plugin findPlugin(Release release) {
+    return pluginReferential.findPlugin(release.getArtifact().getKey());
   }
 
 }

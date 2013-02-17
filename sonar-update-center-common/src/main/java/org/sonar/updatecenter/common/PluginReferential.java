@@ -23,7 +23,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +47,6 @@ public final class PluginReferential {
 
   public static PluginReferential create(List<Plugin> pluginList, Sonar sonar, Date date) {
     PluginReferential pluginReferential = new PluginReferential(sonar, date);
-
     for (Plugin plugin : pluginList) {
       if (plugin.isMaster()) {
         pluginReferential.add(plugin);
@@ -63,21 +61,35 @@ public final class PluginReferential {
     return PluginReferential.create(pluginList, sonar, null);
   }
 
-  public static PluginReferential create(List<Plugin> pluginList) {
-    return PluginReferential.create(pluginList, new Sonar(), null);
-  }
-
   public Set<Plugin> getPlugins() {
     return plugins;
   }
 
   @Nullable
-  public Plugin getPlugin(final String key) {
+  public Plugin findPlugin(final String key) {
     return Iterables.find(plugins, new Predicate<Plugin>() {
       public boolean apply(Plugin input) {
         return input.getKey().equals(key);
       }
     }, null);
+  }
+
+  @Nullable
+  public Release findRelease(final String key, Version version) {
+    for (Plugin plugin : plugins) {
+      if (plugin.getKey().equals(key)){
+        Release pluginRelease = plugin.getRelease(version);
+        if (pluginRelease != null) {
+          return pluginRelease;
+        }
+      }
+      for (Plugin child : plugin.getChildren()) {
+        if (child.getKey().equals(key)){
+          return child.getRelease(version);
+        }
+      }
+    }
+    return null;
   }
 
   public Sonar getSonar() {
@@ -104,7 +116,7 @@ public final class PluginReferential {
   }
 
   public Release findRelease(String pluginKey, String version) {
-    Plugin plugin = getPlugin(pluginKey);
+    Plugin plugin = findPlugin(pluginKey);
     return plugin.getRelease(Version.create(version));
   }
 

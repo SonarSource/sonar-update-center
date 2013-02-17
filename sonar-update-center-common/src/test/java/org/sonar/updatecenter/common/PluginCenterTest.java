@@ -19,10 +19,12 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -62,20 +64,20 @@ public class PluginCenterTest {
 
   @Test
   public void should_find_plugin_installed() {
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.1"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<Plugin> pluginParents = matrix.getInstalledPlugins();
-    assertThat(pluginParents).hasSize(1);
-    assertThat(pluginParents.get(0).getKey()).isEqualTo("foo");
+    List<Release> installed = pluginCenter.getInstalledReleases();
+    assertThat(installed).hasSize(1);
+    assertThat(installed.get(0).getArtifact().getKey()).isEqualTo("foo");
   }
 
   @Test
   public void should_find_plugin_updates() {
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.1"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<PluginUpdate> updates = matrix.findPluginUpdates();
+    List<PluginUpdate> updates = pluginCenter.findPluginUpdates();
     assertThat(updates).hasSize(2);
 
     assertThat(updates.get(0).getRelease()).isEqualTo(foo11);
@@ -87,17 +89,17 @@ public class PluginCenterTest {
 
   @Test
   public void no_plugin_updates_if_last_release_is_installed() {
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.3"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.2"));
-    assertThat(matrix.findPluginUpdates()).isEmpty();
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.3"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.2"));
+    assertThat(pluginCenter.findPluginUpdates()).isEmpty();
   }
 
   @Test
   public void available_plugins_are_only_the_best_releases() {
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.2"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.2"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<PluginUpdate> availables = matrix.findAvailablePlugins();
+    List<PluginUpdate> availables = pluginCenter.findAvailablePlugins();
 
     // bar 1.0 is compatible with the installed sonar
     // bar 1.1 requires sonar to be upgraded to 2.2.2 or 2.3
@@ -109,10 +111,10 @@ public class PluginCenterTest {
 
   @Test
   public void available_plugins_require_sonar_upgrade() {
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.2.1"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.2.1"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
 
-    List<PluginUpdate> availables = matrix.findAvailablePlugins();
+    List<PluginUpdate> availables = pluginCenter.findAvailablePlugins();
 
     // bar 1.0 is not compatible with the installed sonar
     // bar 1.1 requires sonar to be upgraded to 2.2.2 or 2.3
@@ -125,24 +127,24 @@ public class PluginCenterTest {
   @Test
   public void should_return_only_parent_plugins_when_getting_availables_plugins() {
     Plugin test = new Plugin("test");
-    Release test10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
     test.addRelease(test10);
 
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     foo.addRelease(foo10);
 
-    Plugin bar = new Plugin("bar").setParent(foo);
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
-    bar.addRelease(bar10);
+    Plugin fooChild = new Plugin("bar").setParent(foo);
+    Release fooChild10 = new Release(fooChild, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-child-1.0.jar");
+    fooChild.addRelease(fooChild10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar, test));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooChild, test), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
     pluginReferential.getSonar().addRelease(Version.create("2.1"));
 
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.1"));
-    matrix.registerInstalledPlugin("test", Version.create("1.0"));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+    pluginCenter.registerInstalledPlugin("test", Version.create("1.0"));
 
-    List<PluginUpdate> availables = matrix.findAvailablePlugins();
+    List<PluginUpdate> availables = pluginCenter.findAvailablePlugins();
     assertThat(availables).hasSize(1);
     assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
     assertThat(availables.get(0).isCompatible()).isTrue();
@@ -154,8 +156,8 @@ public class PluginCenterTest {
     pluginReferential.getSonar().addRelease(Version.create("2.3"));
     pluginReferential.getSonar().addRelease(Version.create("2.4"));
 
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.2"));
-    List<SonarUpdate> updates = matrix.findSonarUpdates();
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.2"));
+    List<SonarUpdate> updates = pluginCenter.findSonarUpdates();
 
     // no plugins are installed, so both sonar versions are compatible
     assertThat(updates).hasSize(2);
@@ -168,10 +170,10 @@ public class PluginCenterTest {
     pluginReferential.getSonar().addRelease(Version.create("2.3"));
     pluginReferential.getSonar().addRelease(Version.create("2.4"));
 
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.2"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
-    matrix.registerInstalledPlugin("bar", Version.create("1.0"));
-    List<SonarUpdate> updates = matrix.findSonarUpdates();
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.2"));
+    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
+    pluginCenter.registerInstalledPlugin("bar", Version.create("1.0"));
+    List<SonarUpdate> updates = pluginCenter.findSonarUpdates();
 
     assertThat(updates).hasSize(2);
 
@@ -189,63 +191,102 @@ public class PluginCenterTest {
 
 //  @Test
 //  public void exclude_pending_downloads_from_plugin_updates() {
-//    PluginCenter matrix = new PluginCenter(plugins, Version.create("2.1"));
-//    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
-//    matrix.registerPendingPluginsByFilename("foo-1.0.jar");
-//    List<PluginUpdate> updates = matrix.findPluginUpdates();
+//    PluginCenter pluginCenter = new PluginCenter(plugins, Version.create("2.1"));
+//    pluginCenter.registerInstalledPlugin("foo", Version.create("1.0"));
+//    pluginCenter.registerPendingPluginsByFilename("foo-1.0.jar");
+//    List<PluginUpdate> updates = pluginCenter.findPluginUpdates();
 //    assertThat(updates).hasSize(0);
 //  }
 //
 //  @Test
 //  public void exclude_pending_downloads_from_available_plugins() {
-//    PluginCenter matrix = new PluginCenter(plugins, Version.create("2.1"));
-//    matrix.registerPendingPluginsByFilename("foo-1.0.jar");
-//    matrix.registerPendingPluginsByFilename("bar-1.1.jar");
-//    List<PluginUpdate> updates = matrix.findAvailablePlugins();
+//    PluginCenter pluginCenter = new PluginCenter(plugins, Version.create("2.1"));
+//    pluginCenter.registerPendingPluginsByFilename("foo-1.0.jar");
+//    pluginCenter.registerPendingPluginsByFilename("bar-1.1.jar");
+//    List<PluginUpdate> updates = pluginCenter.findAvailablePlugins();
 //    assertThat(updates).hasSize(0);
 //  }
 
   @Test
-  public void should_return_children_plugins_to_download() {
+  public void should_return_children_releases_to_download_that_are_not_already_installed() {
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     foo.addRelease(foo10);
+
+    Plugin foobis = new Plugin("foobis").setParent(foo);
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    foobis.addRelease(foobis10);
 
     Plugin bar = new Plugin("bar").setParent(foo);
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+    pluginCenter.registerInstalledPlugin("bar", Version.create("1.0"));
 
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.1"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
-    matrix.registerInstalledPlugin("bar", Version.create("1.0"));
-
-    List<Release> installablePlugins = matrix.findInstallablePlugins("foo", Version.create("1.0"));
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("foo", Version.create("1.0"));
     assertThat(installablePlugins).hasSize(2);
+    assertThat(getRelease("foo", installablePlugins)).isNotNull();
+    assertThat(getRelease("foobis", installablePlugins)).isNotNull();
+    assertThat(getRelease("bar", installablePlugins)).isNull();
   }
 
   @Test
-  @Ignore
-  public void should_return_dependencies_plugin_to_download() {
+  public void should_return_dependencies_to_download_that_are_not_already_installed() {
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     foo.addRelease(foo10);
 
-    Plugin bar = new Plugin("bar").addRequired(new Release(foo, "1.0"));
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Plugin foobis = new Plugin("foobis");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    foobis.addRelease(foobis10);
+
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addRequiredRelease(foo10).addRequiredRelease(foobis10);
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+    pluginCenter.registerInstalledPlugin("foobis", Version.create("1.0"));
 
-    PluginCenter matrix = new PluginCenter(pluginReferential, Version.create("2.1"));
-    matrix.registerInstalledPlugin("foo", Version.create("1.0"));
-    matrix.registerInstalledPlugin("bar", Version.create("1.0"));
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.0"));
+    assertThat(installablePlugins).hasSize(2);
+    assertThat(getRelease("bar", installablePlugins)).isNotNull();
+    assertThat(getRelease("foo", installablePlugins)).isNotNull();
+  }
 
-    List<Release> installablePlugins = matrix.findInstallablePlugins("bar", Version.create("1.0"));
-    // TODO
-    assertThat(installablePlugins).hasSize(1);
-//    assertThat(installablePlugins.get(0).getPlugin().getKey()).isEqualTo("foo");
+  @Test
+  public void should_return_plugin_keys_to_remove() {
+    Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
+    foo.addRelease(foo10);
+
+    Plugin foobis = new Plugin("foobis");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    foobis.addRelease(foobis10);
+
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addRequiredRelease(foo10).addRequiredRelease(foobis10);
+    bar.addRelease(bar10);
+    Plugin barbis = new Plugin("barbis").setParent(bar);
+    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
+    barbis.addRelease(barbis10);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
+    PluginCenter pluginCenter = new PluginCenter(pluginReferential, Version.create("2.1"));
+
+    List<String> installablePlugins = pluginCenter.findRemovablePlugins("bar");
+    assertThat(installablePlugins).contains("bar", "barbis", "foo", "foobis");
+  }
+
+  @Nullable
+  public Release getRelease(final String key, List<Release> releases) {
+    return Iterables.find(releases, new Predicate<Release>() {
+      public boolean apply(Release input) {
+        return input.getArtifact().getKey().equals(key);
+      }
+    }, null);
   }
 
 }

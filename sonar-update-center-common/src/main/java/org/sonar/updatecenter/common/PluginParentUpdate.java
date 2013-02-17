@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+@Deprecated
 public class PluginParentUpdate {
 
   public enum Status {

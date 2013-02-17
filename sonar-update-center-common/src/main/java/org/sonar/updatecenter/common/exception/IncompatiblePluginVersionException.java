@@ -17,27 +17,11 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.common;
+package org.sonar.updatecenter.common.exception;
 
-import org.junit.Test;
+public class IncompatiblePluginVersionException extends RuntimeException {
 
-import static org.fest.assertions.Assertions.assertThat;
-
-public class ReleaseTest {
-
-  @Test
-  public void should_contain_filename() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2"));
-    assertThat(release.getFilename()).isNull();
-
-    release.setDownloadUrl("http://dist.sonarsource.org/foo-1.2.jar");
-    assertThat(release.getFilename()).isEqualTo("foo-1.2.jar");
-  }
-
-  @Test
-  public void return_requires_releases() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2")).addRequiredRelease(new Release(new Plugin("foo"), Version.create("1.0")));
-
-    assertThat(release.getRequiredReleases()).hasSize(1);
+  public IncompatiblePluginVersionException(String s) {
+    super(s);
   }
 }

@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
+@Deprecated
 public class PluginParentTest {
 
   @Test

@@ -17,10 +17,11 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-package org.sonar.updatecenter.common;
+package org.sonar.updatecenter.common.exception;
 
-public class PluginParentUpdateTest {
+public class PluginNotFoundException extends RuntimeException {
 
-  // TODO
-
+  public PluginNotFoundException(String s) {
+    super(s);
+  }
 }
