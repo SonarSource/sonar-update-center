@@ -53,7 +53,7 @@ public class PluginReferentialManifestConverter {
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
       Plugin pluginParent = getPlugin(pluginManifest.getParent(), plugins);
-      if (pluginParent != null && !pluginParent.getKey().equals(plugin.getKey())) {
+      if (pluginParent != null) {
         plugin.setParent(pluginParent);
       }
     }

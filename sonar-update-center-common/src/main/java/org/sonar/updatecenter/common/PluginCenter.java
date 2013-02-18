@@ -162,25 +162,6 @@ public final class PluginCenter {
     }
   }
 
-  /**
-   * Return releases keys to remove (including incoming dependencies) to remove a plugin
-   */
-  public List<String> findRemovableReleases(String pluginKey) {
-    List<String> removablePlugins = newArrayList();
-    Plugin plugin = installedPluginReferential.findPlugin(pluginKey);
-    if (plugin != null) {
-      Release pluginRelease = plugin.getLastRelease();
-      removablePlugins.add(plugin.getKey());
-      for (Plugin child : plugin.getChildren()) {
-        removablePlugins.add(child.getKey());
-      }
-      for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
-        removablePlugins.addAll(findRemovableReleases(incomingDependencies.getArtifact().getKey()));
-      }
-    }
-    return removablePlugins;
-  }
-
   public List<SonarUpdate> findSonarUpdates() {
     List<SonarUpdate> updates = Lists.newArrayList();
     SortedSet<Release> releases = updateCenterPluginReferential.getSonar().getReleasesGreaterThan(installedSonarVersion);

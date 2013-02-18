@@ -21,6 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -76,6 +77,37 @@ public class PluginReferentialTest {
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo), new Sonar());
     assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
+  }
+
+
+  @Test
+  public void should_return_releases_keys_to_remove() {
+    // Standalone plugin
+    Plugin test = new Plugin("test");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
+    test.addRelease(test10);
+
+    Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
+    foo.addRelease(foo10);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar").addOutgoingDependency(foo10);
+    foobis.addRelease(foobis10);
+
+    // bar has one child and depends upon foobis
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addOutgoingDependency(foobis10);
+    bar.addRelease(bar10);
+    Plugin barbis = new Plugin("barbis").setParent(bar);
+    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
+    barbis.addRelease(barbis10);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
+
+    List<String> installablePlugins = pluginReferential.findReleasesWithDependencies("foo");
+    assertThat(installablePlugins).containsExactly("foo", "foobis", "bar", "barbis");
   }
 
 }

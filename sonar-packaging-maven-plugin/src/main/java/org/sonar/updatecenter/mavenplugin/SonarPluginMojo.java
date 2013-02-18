@@ -229,11 +229,22 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
         }
       }
 
+      checkParentAndRequiresPluginProperties();
+
       archiver.createArchive(getProject(), archive);
       return jarFile;
 
     } catch (Exception e) {
       throw new MojoExecutionException("Error assembling Sonar-plugin: " + e.getMessage(), e);
+    }
+  }
+
+  private void checkParentAndRequiresPluginProperties(){
+    if (getPluginParent() != null && getRequiresPlugins() != null) {
+      throw new IllegalStateException("The plugin '"+ getPluginKey() + "' can't be both part of the plugin '"+ getPluginParent() +"' and having a dependency on '"+  getRequiresPlugins() + "'");
+    }
+    if (getPluginParent() != null && getPluginParent().equals(getPluginKey())) {
+      throw new IllegalStateException("The plugin '"+ getPluginKey() + "' can't be his own parent. Please remove the '"+ PluginManifest.PARENT +"' property.");
     }
   }
 

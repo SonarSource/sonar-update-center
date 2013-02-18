@@ -39,18 +39,6 @@ public class PluginReferentialManifestConverterTest {
   }
 
   @Test
-  public void should_return_plugins_with_parent_plugin_defining_themselves_as_parent(){
-    PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0").setParent("foo");
-    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("1.1").setParent("bar");
-
-    PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, bar), Version.create("2.0"));
-
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
-    assertThat(pluginReferential.getPlugins().get(0).getParent()).isNull();
-    assertThat(pluginReferential.getPlugins().get(1).getParent()).isNull();
-  }
-
-  @Test
   public void should_return_plugins_with_children(){
     PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0");
     PluginManifest fooBis = new PluginManifest().setKey("foobis").setVersion("1.0").setParent("foo");

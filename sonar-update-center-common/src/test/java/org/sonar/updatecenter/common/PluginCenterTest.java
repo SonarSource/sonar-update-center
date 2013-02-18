@@ -23,6 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.junit.Before;
 import org.junit.Test;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
 
@@ -183,31 +184,55 @@ public class PluginCenterTest {
   }
 
   @Test
-  public void should_return_releases_to_download_with_children_and_dependencies_that_are_not_already_downloaded_when_searching_releases_to_install() {
-    // Standalone plugin
-    Plugin test = new Plugin("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
-    test.addRelease(test10);
-
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
-    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
-    foo.addRelease(foo10);
-    foo.addRelease(foo11);
-
-    // foobis depends upon foo
-    Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar").addOutgoingDependency(foo10);
-    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
-//    Release foobis12 = new Release(foobis, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foobis-1.2.jar").addOutgoingDependency(foo11); // TODO
-    foobis.addRelease(foobis10);
-    foobis.addRelease(foobis11);
-//    foobis.addRelease(foobis12);
-
-    // bar has one child and depends upon foobis
+  public void should_return_latest_releases_to_download(){
     Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addOutgoingDependency(foobis10);
-    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
+    bar.addRelease(bar10);
+    bar.addRelease(bar11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.0"));
+    assertThat(installablePlugins).hasSize(1);
+    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test
+  public void should_return_releases_to_download() {
+    Plugin bar = new Plugin("bar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
+    bar.addRelease(bar11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(1);
+    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test(expected = PluginNotFoundException.class)
+  public void should_throw_exception_if_plugin_to_download_not_found() {
+    Plugin bar = new Plugin("bar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
+    bar.addRelease(bar11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    pluginCenter.findInstallablePlugins("not_found", Version.create("1.1"));
+  }
+
+  @Test
+  public void should_return_releases_to_download_with_children() {
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
     bar.addRelease(bar10);
     bar.addRelease(bar11);
     Plugin barbis = new Plugin("barbis").setParent(bar);
@@ -217,18 +242,61 @@ public class PluginCenterTest {
     barbis.addRelease(barbis11);
 
     PluginCenter pluginCenter = PluginCenter.create(
-        PluginReferential.create(newArrayList(foo, foobis, bar, test), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        PluginReferential.create(newArrayList(bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
         PluginReferential.create(newArrayList(
-            (Plugin) new Plugin("bar").addRelease("1.0").getArtifact(),
-            (Plugin) new Plugin("foo").addRelease("1.1").getArtifact())),
+            (Plugin) new Plugin("bar").addRelease("1.0").getArtifact()
+        )),
         Version.create("2.1"));
 
     List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.1"));
-    assertThat(installablePlugins).hasSize(3);
+    assertThat(installablePlugins).hasSize(2);
     assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("barbis", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test
+  public void should_return_release_dependencies_to_download() {
+    Plugin foo = new Plugin("foo");
+    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
+    foo.addRelease(foo11);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    foobis.addRelease(foobis11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(foo, foobis), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("foobis", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(2);
     assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
-    assertThat(getRelease("foo", "1.1", installablePlugins)).isNull();  // foo is already downloaded
+    assertThat(getRelease("foo", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test
+  public void should_return_release_dependencies_not_already_downloaded_to_download() {
+    Plugin foo = new Plugin("foo");
+    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
+    foo.addRelease(foo11);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    foobis.addRelease(foobis11);
+
+    PluginCenter pluginCenter = PluginCenter.create(
+        PluginReferential.create(newArrayList(foo, foobis), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        PluginReferential.create(newArrayList(
+            (Plugin) new Plugin("foo").addRelease("1.1").getArtifact()
+        )),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("foobis", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(1);
+    assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
+    assertThat(getRelease("foo", "1.1", installablePlugins)).isNull();
   }
 
   @Test
@@ -287,7 +355,7 @@ public class PluginCenterTest {
   }
 
   @Test
-  public void should_return_outcoming_and_incoming_dependencies_when_searching_releases_to_update() {
+  public void should_return_outcoming_and_incoming_dependencies_to_download() {
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
@@ -307,60 +375,21 @@ public class PluginCenterTest {
     Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
     bar.addRelease(bar10);
     bar.addRelease(bar11);
-    Plugin barbis = new Plugin("barbis").setParent(bar);
-    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
-    Release barbis11 = new Release(barbis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.1.jar");
-    barbis.addRelease(barbis10);
-    barbis.addRelease(barbis11);
 
     PluginCenter pluginCenter = PluginCenter.create(
         PluginReferential.create(newArrayList(foo, foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
         PluginReferential.create(newArrayList(
             (Plugin) new Plugin("foo").addRelease("1.0").getArtifact(),
             (Plugin) new Plugin("foobis").addRelease("1.0").getArtifact(),
-            (Plugin) new Plugin("bar").addRelease("1.0").getArtifact(),
-            (Plugin) new Plugin("barbis").addRelease("1.0").getArtifact()
+            (Plugin) new Plugin("bar").addRelease("1.0").getArtifact()
         )),
         Version.create("2.1"));
 
     List<Release> installablePlugins = pluginCenter.findInstallablePlugins("foobis", Version.create("1.1"));
-    assertThat(installablePlugins).hasSize(4);
+    assertThat(installablePlugins).hasSize(3);
     assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
-    assertThat(getRelease("barbis", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("foo", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
-  }
-
-  @Test
-  public void should_return_releases_keys_to_remove() {
-    // Standalone plugin
-    Plugin test = new Plugin("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
-    test.addRelease(test10);
-
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
-    foo.addRelease(foo10);
-
-    // foobis depends upon foo
-    Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar").addOutgoingDependency(foo10);
-    foobis.addRelease(foobis10);
-
-    // bar has one child and depends upon foobis
-    Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addOutgoingDependency(foobis10);
-    bar.addRelease(bar10);
-    Plugin barbis = new Plugin("barbis").setParent(bar);
-    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
-    barbis.addRelease(barbis10);
-
-    PluginCenter pluginCenter = PluginCenter.createForInstalledPlugins(
-        PluginReferential.create(newArrayList(foo, foobis, bar, test), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
-        Version.create("2.1"));
-
-    List<String> installablePlugins = pluginCenter.findRemovableReleases("foo");
-    assertThat(installablePlugins).containsExactly("foo", "foobis", "bar", "barbis"); // test will not be removed
   }
 
   @Test

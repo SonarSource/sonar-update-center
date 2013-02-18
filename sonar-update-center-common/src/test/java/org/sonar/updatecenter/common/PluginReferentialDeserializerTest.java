@@ -104,6 +104,7 @@ public class PluginReferentialDeserializerTest {
       assertThat(clirr.getChildren()).hasSize(1);
       assertThat(clirr.getChild("motionchart")).isNotNull();
       assertThat(clirr.getChild("motionchart").getName()).isEqualTo("Motion Chart");
+      assertThat(clirr.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
     } finally {
       IOUtils.closeQuietly(input);
     }

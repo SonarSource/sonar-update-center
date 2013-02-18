@@ -139,6 +139,22 @@ public final class PluginReferential {
     }
   }
 
+  public List<String> findReleasesWithDependencies(String pluginKey) {
+    List<String> removablePlugins = newArrayList();
+    Plugin plugin = findPlugin(pluginKey);
+    if (plugin != null) {
+      Release pluginRelease = plugin.getLastRelease();
+      removablePlugins.add(plugin.getKey());
+      for (Plugin child : plugin.getChildren()) {
+        removablePlugins.add(child.getKey());
+      }
+      for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
+        removablePlugins.addAll(findReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
+      }
+    }
+    return removablePlugins;
+  }
+
   List<Release> getReleasesForMasterPlugins(){
     List<Release> releases = newArrayList();
     for (Plugin plugin : plugins) {
