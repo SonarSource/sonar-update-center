@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -28,7 +29,6 @@ import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionExceptio
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -37,38 +37,60 @@ import java.util.SortedSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
-public final class PluginCenter {
+public final class UpdateCenter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PluginCenter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UpdateCenter.class);
   private PluginReferential updateCenterPluginReferential;
   private PluginReferential installedPluginReferential;
   private Version installedSonarVersion;
+
   private Date date;
+  private Sonar sonar;
 
-  private PluginCenter(PluginReferential updateCenterPluginReferential, PluginReferential installedPluginReferential, Version installedSonarVersion) {
+  private UpdateCenter(PluginReferential updateCenterPluginReferential, Sonar sonar) {
     this.updateCenterPluginReferential = updateCenterPluginReferential;
-    this.installedSonarVersion = installedSonarVersion;
-    this.installedPluginReferential = installedPluginReferential;
+    this.sonar = sonar;
+    this.installedPluginReferential = PluginReferential.createEmpty();
   }
 
-  public static PluginCenter create(PluginReferential updateCenterPluginReferential, PluginReferential installedPluginReferential, Version installedSonarVersion) {
-    return new PluginCenter(updateCenterPluginReferential, installedPluginReferential, installedSonarVersion);
-  }
-
-  public static PluginCenter createForUpdateCenterPlugins(PluginReferential updateCenterPluginReferential, Version installedSonarVersion) {
-    return PluginCenter.create(updateCenterPluginReferential, PluginReferential.createEmptyReferential(), installedSonarVersion);
-  }
-
-  public static PluginCenter createForInstalledPlugins(PluginReferential installedPluginReferential, Version installedSonarVersion) {
-    return PluginCenter.create(PluginReferential.createEmptyReferential(), installedPluginReferential, installedSonarVersion);
+  public static UpdateCenter create(PluginReferential updateCenterPluginReferential, Sonar sonar) {
+    return new UpdateCenter(updateCenterPluginReferential, sonar);
   }
 
   public PluginReferential getUpdateCenterPluginReferential() {
     return updateCenterPluginReferential;
   }
 
-  public PluginReferential getInstalledPluginReferential() {
+  @VisibleForTesting
+  PluginReferential getInstalledPluginReferential() {
     return installedPluginReferential;
+  }
+
+  public List<Plugin> getPlugins(){
+    return updateCenterPluginReferential.getPlugins();
+  }
+
+  public UpdateCenter registerInstalledPlugins(PluginReferential installedPluginReferential) {
+    this.installedPluginReferential = installedPluginReferential;
+    return this;
+  }
+
+  public Sonar getSonar() {
+    return sonar;
+  }
+
+  public UpdateCenter setInstalledSonarVersion(Version installedSonarVersion) {
+    this.installedSonarVersion = installedSonarVersion;
+    return this;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
+  public UpdateCenter setDate(Date date) {
+    this.date = date;
+    return this;
   }
 
   public List<PluginUpdate> findAvailablePlugins() {
@@ -164,7 +186,7 @@ public final class PluginCenter {
 
   public List<SonarUpdate> findSonarUpdates() {
     List<SonarUpdate> updates = Lists.newArrayList();
-    SortedSet<Release> releases = updateCenterPluginReferential.getSonar().getReleasesGreaterThan(installedSonarVersion);
+    SortedSet<Release> releases = sonar.getReleasesGreaterThan(installedSonarVersion);
     for (Release release : releases) {
       updates.add(createSonarUpdate(release));
     }
@@ -209,15 +231,6 @@ public final class PluginCenter {
     } else {
       return null;
     }
-  }
-
-  public Date getDate() {
-    return date;
-  }
-
-  public PluginCenter setDate(Date d) {
-    this.date = d;
-    return this;
   }
 
   /**

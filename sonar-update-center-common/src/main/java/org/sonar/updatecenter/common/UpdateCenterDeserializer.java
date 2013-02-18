@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,18 +38,18 @@ import java.util.Properties;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
-public final class PluginReferentialDeserializer {
+public final class UpdateCenterDeserializer {
 
-  private PluginReferentialDeserializer() {
+  private UpdateCenterDeserializer() {
     // only static methods
   }
 
-  public static PluginReferential fromProperties(File file) throws IOException {
+  public static UpdateCenter fromProperties(File file) throws IOException {
     FileInputStream in = FileUtils.openInputStream(file);
     try {
       Properties props = new Properties();
       props.load(in);
-      PluginReferential pluginReferential = fromProperties(props);
+      UpdateCenter pluginReferential = fromProperties(props);
       pluginReferential.setDate(new Date(file.lastModified()));
       return pluginReferential;
 
@@ -59,7 +58,7 @@ public final class PluginReferentialDeserializer {
     }
   }
 
-  public static PluginReferential fromProperties(Properties p) {
+  public static UpdateCenter fromProperties(Properties p) {
     Sonar sonar = new Sonar();
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
     List<Plugin> plugins = newArrayList();
@@ -108,7 +107,7 @@ public final class PluginReferentialDeserializer {
 
     for (Plugin plugin : plugins) {
       plugin.setParent(getPlugin(get(p, plugin.getKey(), "parent"), plugins));
-      for (Release release : plugin.getReleases()){
+      for (Release release : plugin.getReleases()) {
         String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requiresPlugins"), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
           Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
@@ -118,13 +117,13 @@ public final class PluginReferentialDeserializer {
           if (requiredRelease != null) {
             release.addOutgoingDependency(requiredRelease);
           } else {
-            throw new RuntimeException("Plugin not found : '"+ requiredPluginReleaseKey + "' with minimum version "+ requiredMinimumReleaseVersion);
+            throw new RuntimeException("Plugin not found : '" + requiredPluginReleaseKey + "' with minimum version " + requiredMinimumReleaseVersion);
           }
         }
       }
     }
 
-    return PluginReferential.create(plugins, sonar, date);
+    return UpdateCenter.create(PluginReferential.create(plugins), sonar).setDate(date);
   }
 
   private static String get(Properties props, String key) {

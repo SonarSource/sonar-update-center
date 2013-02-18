@@ -33,7 +33,7 @@ public class PluginReferentialTest {
   public void get_and_set_plugins() {
     Plugin foo = new Plugin("foo");
     Plugin bar = new Plugin("bar");
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
 
     assertThat(pluginReferential.findPlugin("foo")).isEqualTo(foo);
     assertThat(pluginReferential.findPlugin("unknown")).isNull();
@@ -46,7 +46,7 @@ public class PluginReferentialTest {
     Plugin fooBis = new Plugin("fooBis").setParent(new Plugin("foo"));
     Plugin bar = new Plugin("bar").setParent(new Plugin("bar"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar));
 
     assertThat(pluginReferential.getPlugins()).hasSize(2);
     assertThat(pluginReferential.findPlugin("foo").getChildren()).hasSize(1);
@@ -58,7 +58,7 @@ public class PluginReferentialTest {
     Plugin foo = new Plugin("foo").setParent(new Plugin("foo"));
     Plugin bar = new Plugin("bar").setParent(null);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
 
     assertThat(pluginReferential.getPlugins()).hasSize(2);
   }
@@ -66,7 +66,7 @@ public class PluginReferentialTest {
   @Test(expected = NoSuchElementException.class)
   public void should_throw_exception_if_plugin_parent_does_not_exist() {
     Plugin foo = new Plugin("foo").setParent(new Plugin("not_found"));
-    PluginReferential.create(newArrayList(foo), new Sonar());
+    PluginReferential.create(newArrayList(foo));
   }
 
   @Test
@@ -75,7 +75,7 @@ public class PluginReferentialTest {
     foo.addRelease("1.0");
     foo.addRelease("1.1");
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
     assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
   }
 
@@ -104,7 +104,7 @@ public class PluginReferentialTest {
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
     barbis.addRelease(barbis10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact()));
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
 
     List<String> installablePlugins = pluginReferential.findReleasesWithDependencies("foo");
     assertThat(installablePlugins).containsExactly("foo", "foobis", "bar", "barbis");

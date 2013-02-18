@@ -21,10 +21,9 @@ package org.sonar.updatecenter.common;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
-
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -33,18 +32,14 @@ import static com.google.common.collect.Sets.newHashSet;
 
 public final class PluginReferential {
 
-  private Sonar sonar;
   private Set<Plugin> plugins;
-  private Date date;
 
-  private PluginReferential(Sonar sonar, Date date) {
-    this.date = date;
+  private PluginReferential() {
     this.plugins = newHashSet();
-    this.sonar = sonar;
   }
 
-  public static PluginReferential create(List<Plugin> pluginList, Sonar sonar, Date date) {
-    PluginReferential pluginReferential = new PluginReferential(sonar, date);
+  public static PluginReferential create(List<Plugin> pluginList) {
+    PluginReferential pluginReferential = new PluginReferential();
     for (Plugin plugin : pluginList) {
       if (plugin.isMaster()) {
         pluginReferential.add(plugin);
@@ -55,42 +50,12 @@ public final class PluginReferential {
     return pluginReferential;
   }
 
-  public static PluginReferential create(List<Plugin> pluginList, Sonar sonar) {
-    return PluginReferential.create(pluginList, sonar, null);
-  }
-
-  public static PluginReferential create(List<Plugin> pluginList) {
-    return PluginReferential.create(pluginList, new Sonar(), new Date());
-  }
-
-  public static PluginReferential create(Sonar sonar, Date date) {
-    return new PluginReferential(sonar, date);
-  }
-
-  public static PluginReferential createEmptyReferential() {
-    return new PluginReferential(new Sonar(), new Date());
+  public static PluginReferential createEmpty(){
+   return PluginReferential.create(Lists.<Plugin>newArrayList());
   }
 
   public List<Plugin> getPlugins() {
     return newArrayList(plugins);
-  }
-
-  public Sonar getSonar() {
-    return sonar;
-  }
-
-  private PluginReferential setSonar(Sonar sonar) {
-    this.sonar = sonar;
-    return this;
-  }
-
-  public Date getDate() {
-    return date;
-  }
-
-  public PluginReferential setDate(Date date) {
-    this.date = date;
-    return this;
   }
 
   public PluginReferential add(Plugin plugin) {

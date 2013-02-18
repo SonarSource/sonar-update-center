@@ -21,10 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.PluginManifest;
-import org.sonar.updatecenter.common.PluginReferential;
-import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,13 +42,13 @@ class Generator {
   }
 
   void generate() throws IOException, URISyntaxException {
-    PluginReferential center = configuration.getUpdateCenter();
+    UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
     generateHtmlHeader(center);
   }
 
-  private void downloadReleases(PluginReferential center) throws IOException, URISyntaxException {
+  private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
     for (Plugin plugin : center.getPlugins()) {
       log.info("Load plugin: " + plugin.getKey());
@@ -78,19 +75,19 @@ class Generator {
     }
   }
 
-  private void generateMetadata(PluginReferential center) {
+  private void generateMetadata(UpdateCenter center) {
     log.info("Generate output: " + configuration.getOutputFile());
-    org.sonar.updatecenter.common.PluginReferentialSerializer.toProperties(center, configuration.getOutputFile());
+    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
-  private void generateHtmlHeader(PluginReferential center) throws IOException {
+  private void generateHtmlHeader(UpdateCenter center) throws IOException {
     File htmlOutputDir = new File(configuration.getOutputDir(), HTML_HEADER_DIR);
     try {
       forceMkdir(htmlOutputDir);
     } catch (IOException e) {
       throw new IllegalStateException("Fail to create the working directory: " + htmlOutputDir.getAbsolutePath(), e);
     }
-    PluginHeaders pluginHeaders = new PluginHeaders(center, htmlOutputDir, log);
+    PluginHeaders pluginHeaders = new PluginHeaders(center.getUpdateCenterPluginReferential(), htmlOutputDir, log);
     pluginHeaders.generateHtml();
   }
 

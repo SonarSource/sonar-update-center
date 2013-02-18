@@ -29,7 +29,7 @@ import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class PluginReferentialDeserializerTest {
+public class UpdateCenterDeserializerTest {
 
   @Test
   public void read_infos_from_froperties() throws IOException {
@@ -37,12 +37,12 @@ public class PluginReferentialDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      PluginReferential center = PluginReferentialDeserializer.fromProperties(props);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
 
-      Plugin clirr = center.findPlugin("clirr");
+      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
@@ -62,9 +62,9 @@ public class PluginReferentialDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      PluginReferential center = PluginReferentialDeserializer.fromProperties(props);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
-      Plugin clirr = center.findPlugin("clirr");
+      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getDevelopers()).hasSize(3);
       assertThat(clirr.getDevelopers()).contains("Mike Haller", "Freddy Mallet", "Simon Brandhof");
 
@@ -79,9 +79,9 @@ public class PluginReferentialDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      PluginReferential center = PluginReferentialDeserializer.fromProperties(props);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
 
-      Plugin clirr = center.findPlugin("clirr");
+      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
 
     } finally {
@@ -95,11 +95,11 @@ public class PluginReferentialDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      PluginReferential pluginReferential = PluginReferentialDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
 
       assertThat(pluginReferential.getPlugins()).hasSize(1);
 
-      Plugin clirr = pluginReferential.findPlugin("clirr");
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getChildren()).hasSize(1);
       assertThat(clirr.getChild("motionchart")).isNotNull();
@@ -116,11 +116,11 @@ public class PluginReferentialDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      PluginReferential pluginReferential = PluginReferentialDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
 
       assertThat(pluginReferential.getPlugins()).hasSize(3);
 
-      Plugin clirr = pluginReferential.findPlugin("clirr");
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       List<Release> requiredReleases =  clirr.getRelease(Version.create("1.1")).getOutgoingDependencies();
       assertThat(requiredReleases).hasSize(2);

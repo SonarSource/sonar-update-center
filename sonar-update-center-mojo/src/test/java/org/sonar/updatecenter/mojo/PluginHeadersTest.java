@@ -8,7 +8,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.sonar.updatecenter.common.*;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.PluginReferential;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Version;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -35,7 +38,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
-    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin>emptyList(), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin>emptyList());
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -58,7 +61,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -88,7 +91,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev1", "dev2"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -112,7 +115,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -136,7 +139,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -160,7 +163,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(null);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -184,7 +187,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl(null);
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin), new Sonar());
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 

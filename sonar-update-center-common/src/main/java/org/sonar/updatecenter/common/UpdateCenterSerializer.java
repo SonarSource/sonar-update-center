@@ -33,9 +33,9 @@ import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public final class PluginReferentialSerializer {
+public final class UpdateCenterSerializer {
 
-  private PluginReferentialSerializer() {
+  private UpdateCenterSerializer() {
   }
 
   private static void set(Properties props, String key, String value) {
@@ -62,7 +62,7 @@ public final class PluginReferentialSerializer {
     }
   }
 
-  public static Properties toProperties(PluginReferential center) {
+  public static Properties toProperties(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
     set(p, "sonar.versions", center.getSonar().getVersions());
@@ -74,7 +74,7 @@ public final class PluginReferentialSerializer {
     }
 
     List<String> pluginKeys = newArrayList();
-    for (Plugin plugin : center.getPlugins()) {
+    for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
       addPlugin(plugin, pluginKeys, p);
       for (Plugin child : plugin.getChildren()) {
         addPlugin(child, pluginKeys, p);
@@ -84,7 +84,7 @@ public final class PluginReferentialSerializer {
     return p;
   }
 
-  private static void addPlugin(Plugin plugin, List<String> pluginKeys, Properties p){
+  private static void addPlugin(Plugin plugin, List<String> pluginKeys, Properties p) {
     pluginKeys.add(plugin.getKey());
     set(p, plugin, "name", plugin.getName());
     if (plugin.getParent() != null) {
@@ -114,7 +114,7 @@ public final class PluginReferentialSerializer {
     set(p, plugin, "versions", releaseKeys);
   }
 
-  public static void toProperties(PluginReferential sonar, File toFile) {
+  public static void toProperties(UpdateCenter sonar, File toFile) {
     FileOutputStream output = null;
     try {
       output = FileUtils.openOutputStream(toFile);
@@ -128,10 +128,10 @@ public final class PluginReferentialSerializer {
     }
   }
 
-  private static String[] getRequiredList(Release release){
+  private static String[] getRequiredList(Release release) {
     List<String> requiredStringList = newArrayList();
     for (Release requiredRelease : release.getOutgoingDependencies()) {
-      requiredStringList.add(release.getArtifact().getKey() +":"+ release.getVersion().getName());
+      requiredStringList.add(release.getArtifact().getKey() + ":" + release.getVersion().getName());
     }
     return requiredStringList.toArray(new String[]{});
   }

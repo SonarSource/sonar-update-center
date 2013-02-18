@@ -29,7 +29,7 @@ import java.util.Properties;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
-public class PluginReferentialSerializerTest {
+public class UpdateCenterSerializerTest {
 
   @Test
   public void testToProperties() throws IOException, URISyntaxException {
@@ -52,9 +52,8 @@ public class PluginReferentialSerializerTest {
             .addRequiredSonarVersions(Version.create("2.1"))
     );
 
-    PluginReferential center = PluginReferential.create(newArrayList(plugin, barPlugin), sonar, null);
-
-    Properties properties = PluginReferentialSerializer.toProperties(center);
+    UpdateCenter center = UpdateCenter.create(PluginReferential.create(newArrayList(plugin, barPlugin)), sonar);
+    Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
     assertProperty(properties, "sonar.versions", "2.0,2.1");

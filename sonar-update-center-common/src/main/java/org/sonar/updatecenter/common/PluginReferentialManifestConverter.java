@@ -24,8 +24,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
-
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,7 +72,7 @@ public class PluginReferentialManifestConverter {
 
     Sonar sonar = new Sonar();
     sonar.addRelease(sonarVersion);
-    return PluginReferential.create(plugins, sonar, new Date());
+    return PluginReferential.create(plugins);
   }
 
   @Nullable
