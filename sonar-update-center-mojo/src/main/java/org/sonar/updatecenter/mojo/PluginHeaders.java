@@ -33,8 +33,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 class PluginHeaders {
 
@@ -55,7 +55,7 @@ class PluginHeaders {
 
   void generateHtml() throws IOException {
     init();
-    Set<Plugin> plugins = center.getPlugins();
+    List<Plugin> plugins = center.getPlugins();
     for (Plugin plugin : plugins) {
       File file = new File(outputDirectory, plugin.getKey() + ".html");
       log.info("Generate html header of plugin " + plugin.getKey() + " in: " + file);

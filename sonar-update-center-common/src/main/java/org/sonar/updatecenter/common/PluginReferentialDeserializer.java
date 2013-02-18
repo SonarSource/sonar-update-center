@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -66,9 +67,10 @@ public final class PluginReferentialDeserializer {
     String[] sonarVersions = getArray(p, "sonar.versions");
     for (String sonarVersion : sonarVersions) {
       Release release = new Release(sonar, sonarVersion);
-      release.setChangelogUrl(get(p, "sonar." + sonarVersion + ".changelogUrl"));
-      release.setDescription(get(p, "sonar." + sonarVersion + ".description"));
-      release.setDownloadUrl(get(p, "sonar." + sonarVersion + ".downloadUrl"));
+      String sonarPrefix = "sonar.";
+      release.setChangelogUrl(get(p, sonarPrefix + sonarVersion + ".changelogUrl"));
+      release.setDescription(get(p, sonarPrefix + sonarVersion + ".description"));
+      release.setDownloadUrl(get(p, sonarPrefix + sonarVersion + ".downloadUrl"));
       release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
       sonar.addRelease(release);
     }
@@ -114,7 +116,7 @@ public final class PluginReferentialDeserializer {
           String requiredMinimumReleaseVersion = split.next();
           Release requiredRelease = getPlugin(requiredPluginReleaseKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
           if (requiredRelease != null) {
-            release.addRequiredRelease(requiredRelease);
+            release.addOutgoingDependency(requiredRelease);
           } else {
             throw new RuntimeException("Plugin not found : '"+ requiredPluginReleaseKey + "' with minimum version "+ requiredMinimumReleaseVersion);
           }
@@ -122,8 +124,7 @@ public final class PluginReferentialDeserializer {
       }
     }
 
-    PluginReferential pluginReferential = PluginReferential.create(plugins, sonar, date);
-    return pluginReferential;
+    return PluginReferential.create(plugins, sonar, date);
   }
 
   private static String get(Properties props, String key) {

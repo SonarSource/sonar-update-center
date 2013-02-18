@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -206,7 +207,6 @@ public final class Plugin extends Artifact {
   public String toString() {
     return new StringBuilder()
         .append(key)
-        .append(children)
         .toString();
   }
 }

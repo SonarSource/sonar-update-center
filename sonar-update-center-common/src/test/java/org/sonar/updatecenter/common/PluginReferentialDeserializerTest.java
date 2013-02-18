@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -90,7 +90,7 @@ public class PluginReferentialDeserializerTest {
   }
 
   @Test
-  public void should_add_parent() throws IOException {
+  public void should_add_children() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-parent.properties");
     try {
       Properties props = new Properties();
@@ -110,7 +110,7 @@ public class PluginReferentialDeserializerTest {
   }
 
   @Test
-  public void should_add_requires_plugins() throws IOException {
+  public void should_add_dependencies() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-requires-plugins.properties");
     try {
       Properties props = new Properties();
@@ -121,7 +121,7 @@ public class PluginReferentialDeserializerTest {
 
       Plugin clirr = pluginReferential.findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      List<Release> requiredReleases =  clirr.getRelease(Version.create("1.1")).getRequiredReleases();
+      List<Release> requiredReleases =  clirr.getRelease(Version.create("1.1")).getOutgoingDependencies();
       assertThat(requiredReleases).hasSize(2);
       assertThat(requiredReleases.get(0).getArtifact().getKey()).isEqualTo("foo");
       assertThat(requiredReleases.get(0).getVersion().getName()).isEqualTo("1.0");

@@ -105,7 +105,7 @@ public class PluginManifestTest {
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     assertThat(manifest.getRequiresPlugins()).hasSize(2);
-    assertThat(manifest.getRequiresPlugins().get(0)).isEqualTo("scm:1.0");
-    assertThat(manifest.getRequiresPlugins().get(1)).isEqualTo("fake:1.1");
+    assertThat(manifest.getRequiresPlugins()[0]).isEqualTo("scm:1.0");
+    assertThat(manifest.getRequiresPlugins()[1]).isEqualTo("fake:1.1");
   }
 }

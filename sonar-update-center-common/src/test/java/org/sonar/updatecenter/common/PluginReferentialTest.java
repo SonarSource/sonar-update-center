@@ -68,4 +68,14 @@ public class PluginReferentialTest {
     PluginReferential.create(newArrayList(foo), new Sonar());
   }
 
+  @Test
+  public void should_find_latest_release() {
+    Plugin foo = new Plugin("foo").setParent(new Plugin("foo"));
+    foo.addRelease("1.0");
+    foo.addRelease("1.1");
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo), new Sonar());
+    assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
+  }
+
 }

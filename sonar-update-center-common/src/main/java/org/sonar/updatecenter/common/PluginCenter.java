@@ -22,51 +22,60 @@ package org.sonar.updatecenter.common;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
+import javax.annotation.Nullable;
+
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 public final class PluginCenter {
 
-  private PluginReferential pluginReferential;
+  private static final Logger LOG = LoggerFactory.getLogger(PluginCenter.class);
+  private PluginReferential updateCenterPluginReferential;
+  private PluginReferential installedPluginReferential;
   private Version installedSonarVersion;
-  private List<Release> installedReleases;
   private Date date;
 
-  public PluginCenter(PluginReferential pluginReferential, Version installedSonarVersion) {
-    this.pluginReferential = pluginReferential;
+  private PluginCenter(PluginReferential updateCenterPluginReferential, PluginReferential installedPluginReferential, Version installedSonarVersion) {
+    this.updateCenterPluginReferential = updateCenterPluginReferential;
     this.installedSonarVersion = installedSonarVersion;
-    installedReleases = newArrayList();
+    this.installedPluginReferential = installedPluginReferential;
   }
 
-  public PluginCenter registerInstalledPlugin(String key, Version version) {
-    Release release = pluginReferential.findRelease(key, version);
-    if (release != null) {
-      installedReleases.add(release);
-    } else {
-      throw new PluginNotFoundException("Release not found : "+ key + " with version : "+ version.getName());
-    }
-    return this;
+  public static PluginCenter create(PluginReferential updateCenterPluginReferential, PluginReferential installedPluginReferential, Version installedSonarVersion) {
+    return new PluginCenter(updateCenterPluginReferential, installedPluginReferential, installedSonarVersion);
   }
 
-  public PluginReferential getPluginReferential() {
-    return pluginReferential;
+  public static PluginCenter createForUpdateCenterPlugins(PluginReferential updateCenterPluginReferential, Version installedSonarVersion) {
+    return PluginCenter.create(updateCenterPluginReferential, PluginReferential.createEmptyReferential(), installedSonarVersion);
   }
 
-  public List<Release> getInstalledReleases() {
-    return installedReleases;
+  public static PluginCenter createForInstalledPlugins(PluginReferential installedPluginReferential, Version installedSonarVersion) {
+    return PluginCenter.create(PluginReferential.createEmptyReferential(), installedPluginReferential, installedSonarVersion);
+  }
+
+  public PluginReferential getUpdateCenterPluginReferential() {
+    return updateCenterPluginReferential;
+  }
+
+  public PluginReferential getInstalledPluginReferential() {
+    return installedPluginReferential;
   }
 
   public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
     // TODO check all dependencies are available, if not, set a a status special
-    for (Plugin plugin : pluginReferential.getPlugins()) {
+    for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       if (!isInstalled(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
@@ -83,63 +92,90 @@ public final class PluginCenter {
   }
 
   public List<PluginUpdate> findPluginUpdates() {
-    Version adjustedSonarVersion = getAdjustedSonarVersion();
-
     List<PluginUpdate> updates = newArrayList();
-    for (Release release : installedReleases) {
-      Plugin plugin = findPlugin(release);
-      // TODO check all dependencies are available, if not, set a a status special
-      for (Release nextRelease : plugin.getReleasesGreaterThan(release.getVersion())) {
-        updates.add(PluginUpdate.createForPluginRelease(nextRelease, adjustedSonarVersion));
+    for (Release installedRelease : installedPluginReferential.getReleasesForMasterPlugins()) {
+      Plugin plugin = findPlugin(installedRelease);
+      if (plugin != null) {
+        // TODO check all dependencies are available, if not, set a a status special
+        for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
+          updates.add(PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion()));
+        }
+      } else {
+        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
       }
     }
     return updates;
   }
 
   /**
-   * Return all release to download (including dependencies) to install / update a plugin
+   * Return all releases to download (including outgoing dependencies) to install / update a plugin
    */
   public List<Release> findInstallablePlugins(String pluginKey, Version minimumVersion) {
-    List<Release> installablePlugins = newArrayList();
-    Plugin plugin = pluginReferential.findPlugin(pluginKey);
-    if (plugin != null) {
-      Release pluginRelease = plugin.getLastCompatibleRelease(installedSonarVersion);
+    Set<Release> installablePlugins = newHashSet();
+    findInstallablePlugins(pluginKey, minimumVersion, installablePlugins);
+    return newArrayList(installablePlugins);
+  }
+
+  /**
+   * Return all releases to download (including outgoing dependencies) to install / update a plugin
+   */
+  public void findInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins) {
+    Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
+    if (plugin != null && !contain(pluginKey, installablePlugins)) {
+      Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
       if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
-        throw new IncompatiblePluginVersionException("Plugin "+ pluginKey + " is needed to be installed at version greater or equal "+ minimumVersion);
+        throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
       }
       addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
       for (Plugin child : plugin.getChildren()) {
         addReleaseIfNotAlreadyInstalled(child.getRelease(pluginRelease.getVersion()), installablePlugins);
       }
-      for (Release requiredRelease : pluginRelease.getRequiredReleases()) {
-        installablePlugins.addAll(findInstallablePlugins(requiredRelease.getArtifact().getKey(), requiredRelease.getVersion()));
+      for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
+        if (!installablePlugins.contains(outgoingDependency)) {
+          findInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);
+          installablePlugins.addAll(installablePlugins);
+        }
+      }
+      for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
+        if (!installablePlugins.contains(incomingDependency)) {
+          findInstallablePlugins(incomingDependency.getArtifact().getKey(), incomingDependency.getVersion(), installablePlugins);
+          installablePlugins.addAll(installablePlugins);
+        }
       }
     } else {
-     throw new PluginNotFoundException("Needed plugin '"+ pluginKey + "' version "+ minimumVersion + " not found.");
+      throw new PluginNotFoundException("Needed plugin '" + pluginKey + "' version " + minimumVersion + " not found.");
     }
-    return installablePlugins;
+//    return installablePlugins;
   }
 
-  private void addReleaseIfNotAlreadyInstalled(Release release, List<Release> installablePlugins) {
+  private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
+    return Iterables.any(installablePlugins, new Predicate<Release>() {
+      public boolean apply(@Nullable Release input) {
+        return input.getArtifact().getKey().equals(pluginKey);
+      }
+    });
+  }
+
+  private void addReleaseIfNotAlreadyInstalled(Release release, Set<Release> installablePlugins) {
     if (!isInstalled(release)) {
       installablePlugins.add(release);
     }
   }
 
   /**
-   * Return plugin keys to remove (including dependencies) to remove a plugin
+   * Return releases keys to remove (including incoming dependencies) to remove a plugin
    */
-  public List<String> findRemovablePlugins(String pluginKey) {
+  public List<String> findRemovableReleases(String pluginKey) {
     List<String> removablePlugins = newArrayList();
-    Plugin plugin = pluginReferential.findPlugin(pluginKey);
+    Plugin plugin = installedPluginReferential.findPlugin(pluginKey);
     if (plugin != null) {
       Release pluginRelease = plugin.getLastRelease();
       removablePlugins.add(plugin.getKey());
       for (Plugin child : plugin.getChildren()) {
-          removablePlugins.add(child.getKey());
+        removablePlugins.add(child.getKey());
       }
-      for (Release requiredRelease : pluginRelease.getRequiredReleases()) {
-        removablePlugins.addAll(findRemovablePlugins(requiredRelease.getArtifact().getKey()));
+      for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
+        removablePlugins.addAll(findRemovableReleases(incomingDependencies.getArtifact().getKey()));
       }
     }
     return removablePlugins;
@@ -147,7 +183,7 @@ public final class PluginCenter {
 
   public List<SonarUpdate> findSonarUpdates() {
     List<SonarUpdate> updates = Lists.newArrayList();
-    SortedSet<Release> releases = pluginReferential.getSonar().getReleasesGreaterThan(installedSonarVersion);
+    SortedSet<Release> releases = updateCenterPluginReferential.getSonar().getReleasesGreaterThan(installedSonarVersion);
     for (Release release : releases) {
       updates.add(createSonarUpdate(release));
     }
@@ -156,36 +192,39 @@ public final class PluginCenter {
 
   SonarUpdate createSonarUpdate(Release sonarRelease) {
     SonarUpdate update = new SonarUpdate(sonarRelease);
-    for (Release release : installedReleases) {
-      Plugin plugin = findPlugin(release);
+    for (Release installedRelease : installedPluginReferential.getReleasesForMasterPlugins()) {
+      Plugin plugin = findPlugin(installedRelease);
+      if (plugin != null) {
+        if (installedRelease.supportSonarVersion(sonarRelease.getVersion())) {
+          update.addCompatiblePlugin(plugin);
 
-      if (release.supportSonarVersion(sonarRelease.getVersion())) {
-        update.addCompatiblePlugin(plugin);
-
-      } else {
-        // search for a compatible plugin upgrade
-        boolean ok = false;
-        Release compatibleRelease = null;
-        for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(release.getVersion())) {
-          if (greaterPluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
-            compatibleRelease = greaterPluginRelease;
-            ok = true;
+        } else {
+          // search for a compatible plugin upgrade
+          boolean ok = false;
+          Release compatibleRelease = null;
+          for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
+            if (greaterPluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
+              compatibleRelease = greaterPluginRelease;
+              ok = true;
+            }
+          }
+          if (ok) {
+            update.addPluginToUpgrade(compatibleRelease);
+          } else {
+            update.addIncompatiblePlugin(plugin);
           }
         }
-        if (ok) {
-          update.addPluginToUpgrade(compatibleRelease);
-        } else {
-          update.addIncompatiblePlugin(plugin);
-        }
+      } else {
+        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
       }
     }
     return update;
   }
 
-  public Release findLatestCompatible(String pluginKey) {
-    Plugin plugin = pluginReferential.findPlugin(pluginKey);
+  public Release findLatestCompatibleRelease(String pluginKey) {
+    Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
     if (plugin != null) {
-      return plugin.getLastCompatibleRelease(installedSonarVersion);
+      return plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
     } else {
       return null;
     }
@@ -210,23 +249,16 @@ public final class PluginCenter {
   }
 
   private boolean isInstalled(final Release releaseToFind) {
-    return Iterables.any(installedReleases, new Predicate<Release>() {
-      public boolean apply(Release release) {
-        return releaseToFind.equals(release);
-      }
-    });
+    return installedPluginReferential.findRelease(releaseToFind.getArtifact().getKey(), releaseToFind.getVersion()) != null;
   }
 
   private boolean isInstalled(final Plugin plugin) {
-    return Iterables.any(installedReleases, new Predicate<Release>() {
-      public boolean apply(Release release) {
-        return plugin.getKey().equals(release.getArtifact().getKey());
-      }
-    });
+    return installedPluginReferential.findPlugin(plugin.getKey()) != null;
   }
 
+  @Nullable
   private Plugin findPlugin(Release release) {
-    return pluginReferential.findPlugin(release.getArtifact().getKey());
+    return updateCenterPluginReferential.findPlugin(release.getArtifact().getKey());
   }
 
 }

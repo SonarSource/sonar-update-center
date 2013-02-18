@@ -35,9 +35,11 @@ public class ReleaseTest {
   }
 
   @Test
-  public void return_requires_releases() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2")).addRequiredRelease(new Release(new Plugin("foo"), Version.create("1.0")));
+  public void should_add_dependencies() {
+    Release dependency = new Release(new Plugin("foo"), Version.create("1.0"));
+    Release release = new Release(new Plugin("fake"), Version.create("1.2")).addOutgoingDependency(dependency);
 
-    assertThat(release.getRequiredReleases()).hasSize(1);
+    assertThat(release.getOutgoingDependencies()).hasSize(1);
+    assertThat(dependency.getIncomingDependencies()).hasSize(1);
   }
 }

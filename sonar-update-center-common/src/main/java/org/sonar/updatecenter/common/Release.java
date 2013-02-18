@@ -22,9 +22,15 @@ package org.sonar.updatecenter.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 public final class Release implements Comparable<Release> {
 
@@ -33,8 +39,8 @@ public final class Release implements Comparable<Release> {
   private String description;
   private String downloadUrl;
   private String changelogUrl;
-  private List<Release> requiredReleases;
-
+  private Set<Release> outgoingDependencies;
+  private Set<Release> incomingDependencies;
   /**
    * from oldest to newest sonar versions
    */
@@ -44,7 +50,8 @@ public final class Release implements Comparable<Release> {
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
-    this.requiredReleases = newArrayList();
+    this.outgoingDependencies = newHashSet();
+    this.incomingDependencies = newHashSet();
   }
 
   public Release(Artifact artifact, String version) {
@@ -142,12 +149,22 @@ public final class Release implements Comparable<Release> {
     return this;
   }
 
-  public List<Release> getRequiredReleases() {
-    return requiredReleases;
+  public List<Release> getOutgoingDependencies() {
+    return newArrayList(outgoingDependencies);
   }
 
-  public Release addRequiredRelease(Release required) {
-    requiredReleases.add(required);
+  public Release addOutgoingDependency(Release required) {
+    outgoingDependencies.add(required);
+    required.addIncomingDependency(this);
+    return this;
+  }
+
+  public List<Release> getIncomingDependencies() {
+    return newArrayList(incomingDependencies);
+  }
+
+  private Release addIncomingDependency(Release required) {
+    incomingDependencies.add(required);
     return this;
   }
 

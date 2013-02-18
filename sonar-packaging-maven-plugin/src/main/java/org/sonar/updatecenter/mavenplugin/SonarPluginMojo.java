@@ -276,13 +276,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return PluginKeyUtils.sanitize(getProject().getArtifactId());
   }
 
-  private String getPluginParent() {
-    if (StringUtils.isNotBlank(getExplicitPluginParent())) {
-      return getExplicitPluginParent();
-    }
-    return getPluginKey();
-  }
-
   private String getSourcesUrl() {
     if (getProject().getScm() != null) {
       return getProject().getScm().getUrl();

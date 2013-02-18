@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -24,13 +24,18 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class PluginReferentialManifestConvertor {
+public class PluginReferentialManifestConverter {
+
+  private PluginReferentialManifestConverter() {
+    // only static methods
+  }
 
   public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList, Version sonarVersion) {
     List<Plugin> plugins = newArrayList();
@@ -47,9 +52,11 @@ public class PluginReferentialManifestConvertor {
 
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
-      plugin.setParent(getPlugin(pluginManifest.getParent(), plugins));
+      Plugin pluginParent = getPlugin(pluginManifest.getParent(), plugins);
+      if (pluginParent != null && !pluginParent.getKey().equals(plugin.getKey())) {
+        plugin.setParent(pluginParent);
+      }
     }
-
 
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
@@ -58,16 +65,16 @@ public class PluginReferentialManifestConvertor {
           Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
           String requiredPluginReleaseKey = split.next();
           String requiredMinimumReleaseVersion = split.next();
-          Release requiredRelease = getPlugin(requiresPluginKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
-          release.addRequiredRelease(requiredRelease);
+          Release requiredRelease = getPlugin(requiredPluginReleaseKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
+          // TODO throw exception if requiredRelease not found
+          release.addOutgoingDependency(requiredRelease);
         }
       }
     }
 
     Sonar sonar = new Sonar();
     sonar.addRelease(sonarVersion);
-    PluginReferential pluginReferential = PluginReferential.create(plugins, sonar, new Date());
-    return pluginReferential;
+    return PluginReferential.create(plugins, sonar, new Date());
   }
 
   @Nullable

@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -130,7 +130,7 @@ public final class PluginReferentialSerializer {
 
   private static String[] getRequiredList(Release release){
     List<String> requiredStringList = newArrayList();
-    for (Release requiredRelease : release.getRequiredReleases()) {
+    for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(release.getArtifact().getKey() +":"+ release.getVersion().getName());
     }
     return requiredStringList.toArray(new String[]{});

@@ -23,10 +23,12 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 public final class PluginReferential {
@@ -39,10 +41,6 @@ public final class PluginReferential {
     this.date = date;
     this.plugins = newHashSet();
     this.sonar = sonar;
-  }
-
-  public static PluginReferential create(Sonar sonar, Date date) {
-    return new PluginReferential(sonar, date);
   }
 
   public static PluginReferential create(List<Plugin> pluginList, Sonar sonar, Date date) {
@@ -61,8 +59,43 @@ public final class PluginReferential {
     return PluginReferential.create(pluginList, sonar, null);
   }
 
-  public Set<Plugin> getPlugins() {
-    return plugins;
+  public static PluginReferential create(List<Plugin> pluginList) {
+    return PluginReferential.create(pluginList, new Sonar(), new Date());
+  }
+
+  public static PluginReferential create(Sonar sonar, Date date) {
+    return new PluginReferential(sonar, date);
+  }
+
+  public static PluginReferential createEmptyReferential() {
+    return new PluginReferential(new Sonar(), new Date());
+  }
+
+  public List<Plugin> getPlugins() {
+    return newArrayList(plugins);
+  }
+
+  public Sonar getSonar() {
+    return sonar;
+  }
+
+  private PluginReferential setSonar(Sonar sonar) {
+    this.sonar = sonar;
+    return this;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
+  public PluginReferential setDate(Date date) {
+    this.date = date;
+    return this;
+  }
+
+  public PluginReferential add(Plugin plugin) {
+    this.plugins.add(plugin);
+    return this;
   }
 
   @Nullable
@@ -92,32 +125,26 @@ public final class PluginReferential {
     return null;
   }
 
-  public Sonar getSonar() {
-    return sonar;
-  }
-
-  private PluginReferential setSonar(Sonar sonar) {
-    this.sonar = sonar;
-    return this;
-  }
-
-  public Date getDate() {
-    return date;
-  }
-
-  public PluginReferential setDate(Date date) {
-    this.date = date;
-    return this;
-  }
-
-  public PluginReferential add(Plugin plugin) {
-    this.plugins.add(plugin);
-    return this;
-  }
-
   public Release findRelease(String pluginKey, String version) {
     Plugin plugin = findPlugin(pluginKey);
     return plugin.getRelease(Version.create(version));
+  }
+
+  public Release findLatestRelease(String pluginKey) {
+    Plugin plugin = findPlugin(pluginKey);
+    if (plugin != null) {
+      return plugin.getLastRelease();
+    } else {
+      return null;
+    }
+  }
+
+  List<Release> getReleasesForMasterPlugins(){
+    List<Release> releases = newArrayList();
+    for (Plugin plugin : plugins) {
+      releases.add(plugin.getLastRelease());
+    }
+    return releases;
   }
 
   private void addChild(final Plugin plugin, List<Plugin> pluginList) {

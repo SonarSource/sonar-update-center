@@ -42,8 +42,6 @@ public final class PluginManifest {
   public static final String KEY = "Plugin-Key";
   public static final String MAIN_CLASS = "Plugin-Class";
   public static final String NAME = "Plugin-Name";
-  public static final String PARENT = "Plugin-Parent";
-  public static final String REQUIRES_PLUGINS = "Plugin-RequiresPlugins";
   public static final String DESCRIPTION = "Plugin-Description";
   public static final String ORGANIZATION = "Plugin-Organization";
   public static final String ORGANIZATION_URL = "Plugin-OrganizationUrl";
@@ -55,6 +53,8 @@ public final class PluginManifest {
   public static final String TERMS_CONDITIONS_URL = "Plugin-TermsConditionsUrl";
   public static final String BUILD_DATE = "Plugin-BuildDate";
   public static final String ISSUE_TRACKER_URL = "Plugin-IssueTrackerUrl";
+  public static final String PARENT = "Plugin-Parent";
+  public static final String REQUIRES_PLUGINS = "Plugin-RequiresPlugins";
 
   /**
    * @since 0.3
@@ -83,8 +83,6 @@ public final class PluginManifest {
 
   private String key;
   private String name;
-  private String parent;
-  private List<String> requiresPlugins;
   private String mainClass;
   private String description;
   private String organization;
@@ -102,6 +100,8 @@ public final class PluginManifest {
   private String implementationBuild;
   private String sourcesUrl;
   private String[] developers;
+  private String parent;
+  private String[] requiresPlugins;
 
   /**
    * Load the manifest from a JAR file.
@@ -135,7 +135,7 @@ public final class PluginManifest {
     dependencies = new String[0];
     developers = new String[0];
     useChildFirstClassLoader = false;
-    requiresPlugins = newArrayList();
+    requiresPlugins = new String[0];
   }
 
   private void loadManifest(Manifest manifest) {
@@ -143,8 +143,6 @@ public final class PluginManifest {
     this.key = PluginKeyUtils.sanitize(attributes.getValue(KEY));
     this.mainClass = attributes.getValue(MAIN_CLASS);
     this.name = attributes.getValue(NAME);
-    this.parent = attributes.getValue(PARENT);
-    this.requiresPlugins = getRequiredPlugins(attributes.getValue(REQUIRES_PLUGINS));
     this.description = attributes.getValue(DESCRIPTION);
     this.license = attributes.getValue(LICENSE);
     this.organization = attributes.getValue(ORGANIZATION);
@@ -165,6 +163,11 @@ public final class PluginManifest {
 
     String devs = attributes.getValue(DEVELOPERS);
     this.developers = StringUtils.split(StringUtils.defaultString(devs), ',');
+
+    this.parent = attributes.getValue(PARENT);
+
+    String requires = attributes.getValue(REQUIRES_PLUGINS);
+    this.requiresPlugins = StringUtils.split(StringUtils.defaultString(requires), ',');
   }
 
   public String getKey() {
@@ -203,14 +206,14 @@ public final class PluginManifest {
   /**
    * @since 3.5
    */
-  public List<String> getRequiresPlugins() {
+  public String[] getRequiresPlugins() {
     return requiresPlugins;
   }
 
   /**
    * @since 3.5
    */
-  public PluginManifest setRequiresPlugins(List<String> requiresPlugins) {
+  public PluginManifest setRequiresPlugins(String[] requiresPlugins) {
     this.requiresPlugins = requiresPlugins;
     return this;
   }

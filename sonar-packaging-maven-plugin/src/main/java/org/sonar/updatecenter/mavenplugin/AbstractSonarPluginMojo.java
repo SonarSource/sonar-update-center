@@ -204,7 +204,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return pluginName;
   }
 
-  protected final String getExplicitPluginParent() {
+  protected final String getPluginParent() {
     return pluginParent;
   }
 

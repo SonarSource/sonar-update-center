@@ -19,7 +19,8 @@
  */
 package org.sonar.updatecenter.common;
 
-import java.util.*;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public abstract class Artifact implements Comparable<Artifact> {
 
@@ -45,6 +46,10 @@ public abstract class Artifact implements Comparable<Artifact> {
   }
 
   public final Release addRelease(Version version) {
+    return addRelease(new Release(this, version));
+  }
+
+  public final Release addRelease(String version) {
     return addRelease(new Release(this, version));
   }
 
