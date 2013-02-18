@@ -137,7 +137,7 @@ public final class PluginCenter {
         }
       }
       for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
-        if (!installablePlugins.contains(incomingDependency)) {
+        if (!installablePlugins.contains(incomingDependency) && !contain(incomingDependency.getArtifact().getKey(), installablePlugins)) {
           findInstallablePlugins(incomingDependency.getArtifact().getKey(), incomingDependency.getVersion(), installablePlugins);
           installablePlugins.addAll(installablePlugins);
         }

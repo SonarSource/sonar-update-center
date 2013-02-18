@@ -129,7 +129,7 @@ public class PluginCenterTest {
   }
 
   @Test
-  public void should_return_only_parent_plugins_when_getting_available_plugins() {
+  public void should_return_only_master_plugins_when_getting_available_plugins() {
     Plugin test = new Plugin("test");
     Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
     test.addRelease(test10);
@@ -229,6 +229,61 @@ public class PluginCenterTest {
     assertThat(getRelease("barbis", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("foo", "1.1", installablePlugins)).isNull();  // foo is already downloaded
+  }
+
+  @Test
+  public void should_not_return_incompatible_releases_to_download() {
+    Plugin foo = new Plugin("foo");
+    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
+    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foo-1.2.jar");
+    foo.addRelease(foo11);
+    foo.addRelease(foo12);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    // foobis 1.2 should not to be downloaded
+    Release foobis12 = new Release(foobis, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foobis-1.2.jar").addOutgoingDependency(foo11);
+    foobis.addRelease(foobis11);
+    foobis.addRelease(foobis12);
+
+    // bar depends upon foobis
+    Plugin bar = new Plugin("bar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    bar.addRelease(bar11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(foo, foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(3);
+    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
+    assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
+    assertThat(getRelease("foo", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test
+  public void should_return_latest_compatible_releases_with_sonar_version_to_download() {
+    Plugin foobis = new Plugin("foobis");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
+    Release foobis12 = new Release(foobis, "1.2").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.2.jar");
+    foobis.addRelease(foobis11);
+    foobis.addRelease(foobis12);
+
+    // bar depends upon foobis 1.1
+    Plugin bar = new Plugin("bar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    bar.addRelease(bar11);
+
+    PluginCenter pluginCenter = PluginCenter.createForUpdateCenterPlugins(
+        PluginReferential.create(newArrayList(foobis, bar), (Sonar) (new Sonar().addRelease(Version.createRelease("2.1")).getArtifact())),
+        Version.create("2.1"));
+
+    List<Release> installablePlugins = pluginCenter.findInstallablePlugins("bar", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(2);
+    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
+    assertThat(getRelease("foobis", "1.2", installablePlugins)).isNotNull(); // foobis 1.2 is compatible with sonar 2.1, so it's this version that will be downloaded
   }
 
   @Test
