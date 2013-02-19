@@ -22,7 +22,7 @@ package org.sonar.updatecenter.common;
 public final class PluginUpdate {
 
   public enum Status {
-    COMPATIBLE, INCOMPATIBLE, REQUIRE_SONAR_UPGRADE
+    COMPATIBLE, INCOMPATIBLE, REQUIRE_SONAR_UPGRADE, DEPENDENCIES_REQUIRE_SONAR_UPGRADE
   }
 
   private Status status = Status.INCOMPATIBLE;
@@ -42,6 +42,10 @@ public final class PluginUpdate {
 
   public boolean requiresSonarUpgrade() {
     return Status.REQUIRE_SONAR_UPGRADE.equals(status);
+  }
+
+  public boolean requiresSonarUpgradeForDependencies() {
+    return Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE.equals(status);
   }
 
   public void setStatus(Status status) {

@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -123,6 +124,29 @@ public class UpdateCenterTest {
     assertThat(availables).hasSize(1);
     assertThat(availables.get(0).getRelease()).isEqualTo(bar11);
     assertThat(availables.get(0).requiresSonarUpgrade()).isTrue();
+  }
+
+  @Test
+  public void available_plugins_require_dependencies_sonar_upgrade() {
+    Plugin test = new Plugin("test");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
+    Release test11 = new Release(test, "1.1").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/test-1.1.jar");
+    test.addRelease(test10);
+    test.addRelease(test11);
+
+    Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
+    foo.addRelease(foo10).addOutgoingDependency(test11);
+
+    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, test));
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+        PluginReferential.create(newArrayList((Plugin) new Plugin("test").addRelease("1.0").getArtifact())));
+
+    List<PluginUpdate> availables = updateCenter.findAvailablePlugins();
+    assertThat(availables).hasSize(1);
+    assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
+    assertThat(availables.get(0).requiresSonarUpgradeForDependencies()).isTrue();
   }
 
   @Test

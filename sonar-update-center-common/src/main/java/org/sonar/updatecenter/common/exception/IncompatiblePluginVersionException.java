@@ -24,4 +24,8 @@ public class IncompatiblePluginVersionException extends RuntimeException {
   public IncompatiblePluginVersionException(String s) {
     super(s);
   }
+
+  public IncompatiblePluginVersionException(String s, Throwable throwable) {
+    super(s, throwable);
+  }
 }

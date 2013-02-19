@@ -24,4 +24,8 @@ public class PluginNotFoundException extends RuntimeException {
   public PluginNotFoundException(String s) {
     super(s);
   }
+
+  public PluginNotFoundException(String s, Throwable throwable) {
+    super(s, throwable);
+  }
 }

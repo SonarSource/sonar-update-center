@@ -125,7 +125,7 @@ public final class PluginReferential {
       plugin.setParent(parent);
       checkPluginVersion(plugin, parent);
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing");
+      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing", e);
     }
   }
 
@@ -147,12 +147,12 @@ public final class PluginReferential {
       } else {
         Release latest = requiredPlugin.getLastRelease();
         if (latest != null) {
-          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName() + " whereas the plugin '" + release.getArtifact().getKey()
-              + "' requires a least a version " + requiredMinimumReleaseVersion);
+          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName()
+              + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion);
         }
       }
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing");
+      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing", e);
     }
   }
 

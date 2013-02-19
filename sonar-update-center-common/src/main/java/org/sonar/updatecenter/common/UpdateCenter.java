@@ -96,12 +96,16 @@ public final class UpdateCenter {
   public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
-    // TODO check all dependencies are available, if not, set a a status special
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       if (!isInstalled(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
-          availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
+          try {
+            findInstallablePlugins(plugin.getKey(), release.getVersion());
+            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
+          } catch (IncompatiblePluginVersionException e) {
+            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
+          }
         } else {
           release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
           if (release != null) {
@@ -138,10 +142,7 @@ public final class UpdateCenter {
     return newArrayList(installablePlugins);
   }
 
-  /**
-   * Return all releases to download (including outgoing dependencies) to install / update a plugin
-   */
-  public void findInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins) {
+  private void findInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins) {
     if (updateCenterPluginReferential.doesContainPlugin(pluginKey) && !contain(pluginKey, installablePlugins)) {
       Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
       Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
