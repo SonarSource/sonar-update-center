@@ -120,10 +120,12 @@ public class UpdateCenterTest {
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
     foo.addRelease(foo10);
-    foo.addRelease(foo11).addOutgoingDependency(test11);
+    foo.addRelease(foo11);
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, test));
+    pluginReferential.addOutgoingDependency(foo11, "test", "1.1");
+
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList((Plugin) new Plugin("foo").addRelease("1.0").getArtifact())));
 
@@ -180,10 +182,12 @@ public class UpdateCenterTest {
 
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
-    foo.addRelease(foo10).addOutgoingDependency(test11);
+    foo.addRelease(foo10);
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, test));
+    pluginReferential.addOutgoingDependency(foo10, "test", "1.1");
+
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList((Plugin) new Plugin("test").addRelease("1.0").getArtifact())));
 
@@ -203,12 +207,14 @@ public class UpdateCenterTest {
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
     foo.addRelease(foo10);
 
-    Plugin fooChild = new Plugin("bar").setParent(foo);
+    Plugin fooChild = new Plugin("bar");
     Release fooChild10 = new Release(fooChild, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-child-1.0.jar");
     fooChild.addRelease(fooChild10);
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooChild, test));
+    pluginReferential.setParent(fooChild, "foo");
+
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList((Plugin) new Plugin("test").addRelease("1.0").getArtifact())));
 
@@ -265,6 +271,22 @@ public class UpdateCenterTest {
   }
 
   @Test
+  public void should_return_releases_compatible_with_installed_sonar_version_to_download() {
+    Plugin bar = new Plugin("bar");
+    // bar 1.0 est not compatible with sonar 2.1
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.0").setDownloadUrl("http://server/bar-1.0.jar");
+    bar.addRelease(bar10);
+
+    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
+    UpdateCenter updateCenter = UpdateCenter.create(
+        PluginReferential.create(newArrayList(bar)), sonar)
+        .setInstalledSonarVersion(Version.create("2.1"));
+
+    List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.0"));
+    assertThat(installablePlugins).hasSize(0);
+  }
+
+  @Test
   public void should_return_releases_to_download() {
     Plugin bar = new Plugin("bar");
     Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
@@ -301,15 +323,18 @@ public class UpdateCenterTest {
     Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
     bar.addRelease(bar10);
     bar.addRelease(bar11);
-    Plugin barbis = new Plugin("barbis").setParent(bar);
+    Plugin barbis = new Plugin("barbis");
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
     Release barbis11 = new Release(barbis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.1.jar");
     barbis.addRelease(barbis10);
     barbis.addRelease(barbis11);
 
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar));
+    pluginReferential.setParent(barbis, "bar");
+
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(bar)), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+        pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList(
             (Plugin) new Plugin("bar").addRelease("1.0").getArtifact()
         )));
@@ -328,13 +353,14 @@ public class UpdateCenterTest {
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
     foobis.addRelease(foobis11);
 
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis));
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
+
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(foo, foobis)), sonar)
-        .setInstalledSonarVersion(Version.create("2.1"));
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("foobis", Version.create("1.1"));
     assertThat(installablePlugins).hasSize(2);
@@ -350,12 +376,15 @@ public class UpdateCenterTest {
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
     foobis.addRelease(foobis11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis));
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(foo, foobis)), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+        pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList(
             (Plugin) new Plugin("foo").addRelease("1.1").getArtifact()
         )));
@@ -376,20 +405,25 @@ public class UpdateCenterTest {
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
     // foobis 1.2 should not to be downloaded
-    Release foobis12 = new Release(foobis, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foobis-1.2.jar").addOutgoingDependency(foo11);
+    Release foobis12 = new Release(foobis, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foobis-1.2.jar");
     foobis.addRelease(foobis11);
     foobis.addRelease(foobis12);
 
     // bar depends upon foobis
     Plugin bar = new Plugin("bar");
-    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
     bar.addRelease(bar11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar));
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
+    pluginReferential.addOutgoingDependency(foobis12, "foo", "1.1");
+    pluginReferential.addOutgoingDependency(bar11, "foobis", "1.1");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(foo, foobis, bar)), sonar)
+        pluginReferential, sonar)
         .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -409,12 +443,15 @@ public class UpdateCenterTest {
 
     // bar depends upon foobis 1.1
     Plugin bar = new Plugin("bar");
-    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
     bar.addRelease(bar11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foobis, bar));
+    pluginReferential.addOutgoingDependency(bar11, "foobis", "1.1");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(foobis, bar)), sonar)
+        pluginReferential, sonar)
         .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -433,21 +470,27 @@ public class UpdateCenterTest {
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar").addOutgoingDependency(foo10);
-    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar").addOutgoingDependency(foo11);
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
     foobis.addRelease(foobis10);
     foobis.addRelease(foobis11);
 
     // bar has one child and depends upon foobis
     Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addOutgoingDependency(foobis10);
-    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar").addOutgoingDependency(foobis11);
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
     bar.addRelease(bar10);
     bar.addRelease(bar11);
 
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar));
+    pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
+    pluginReferential.addOutgoingDependency(bar10, "foobis", "1.0");
+    pluginReferential.addOutgoingDependency(bar11, "foobis", "1.1");
+
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(foo, foobis, bar)), sonar)
+        pluginReferential, sonar)
         .setInstalledSonarVersion(Version.create("2.1"))
         .registerInstalledPlugins(PluginReferential.create(newArrayList(
             (Plugin) new Plugin("foo").addRelease("1.0").getArtifact(),

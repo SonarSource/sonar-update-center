@@ -49,7 +49,6 @@ public final class Plugin extends Artifact {
   private Plugin parent;
   private Set<Plugin> children;
 
-
   public Plugin(String key) {
     super(key);
     this.children = newHashSet();
@@ -158,17 +157,18 @@ public final class Plugin extends Artifact {
     return parent;
   }
 
-  // Should only be called by PluginReferential, in order to do some checks
-  Plugin setParent(Plugin parent) {
+  public Plugin setParent(Plugin parent) {
     this.parent = parent;
-    if (parent != null) {
-      parent.getChildren().add(this);
-    }
     return this;
   }
 
   public Collection<Plugin> getChildren() {
     return children;
+  }
+
+  public Plugin addChild(Plugin plugin) {
+    children.add(plugin);
+    return this;
   }
 
   @Nullable

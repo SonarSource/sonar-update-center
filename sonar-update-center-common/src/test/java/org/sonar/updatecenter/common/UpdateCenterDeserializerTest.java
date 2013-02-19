@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterDeserializerTest {
@@ -124,7 +125,7 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      List<Release> requiredReleases =  clirr.getRelease(Version.create("1.1")).getOutgoingDependencies();
+      List<Release> requiredReleases = newArrayList(clirr.getRelease(Version.create("1.1")).getOutgoingDependencies());
       assertThat(requiredReleases).hasSize(2);
       assertThat(requiredReleases.get(0).getArtifact().getKey()).isEqualTo("foo");
       assertThat(requiredReleases.get(0).getVersion().getName()).isEqualTo("1.0");

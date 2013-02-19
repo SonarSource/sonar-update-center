@@ -24,12 +24,10 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 public final class Release implements Comparable<Release> {
@@ -149,22 +147,20 @@ public final class Release implements Comparable<Release> {
     return this;
   }
 
-  public List<Release> getOutgoingDependencies() {
-    return newArrayList(outgoingDependencies);
+  public Set<Release> getOutgoingDependencies() {
+    return outgoingDependencies;
   }
 
-  // Should only be called by PluginReferential, in order to do some checks
-  Release addOutgoingDependency(Release required) {
+  public Release addOutgoingDependency(Release required) {
     outgoingDependencies.add(required);
-    required.addIncomingDependency(this);
     return this;
   }
 
-  public List<Release> getIncomingDependencies() {
-    return newArrayList(incomingDependencies);
+  public Set<Release> getIncomingDependencies() {
+    return incomingDependencies;
   }
 
-  private Release addIncomingDependency(Release required) {
+  public Release addIncomingDependency(Release required) {
     incomingDependencies.add(required);
     return this;
   }

@@ -126,6 +126,8 @@ public final class PluginReferential {
     try {
       Plugin parent = findPlugin(parentKey);
       plugin.setParent(parent);
+      parent.addChild(plugin);
+
       checkPluginVersion(plugin, parent);
     } catch (NoSuchElementException e) {
       throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing.", e);
@@ -147,6 +149,7 @@ public final class PluginReferential {
       Release minimalRequiredRelease = requiredPlugin.getMinimalRelease(Version.create(requiredMinimumReleaseVersion));
       if (minimalRequiredRelease != null) {
         release.addOutgoingDependency(minimalRequiredRelease);
+        minimalRequiredRelease.addIncomingDependency(release);
         checkDependencyCycle(release);
       } else {
         Release latest = requiredPlugin.getLastRelease();

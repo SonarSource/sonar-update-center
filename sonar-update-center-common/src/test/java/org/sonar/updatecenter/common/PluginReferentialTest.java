@@ -53,10 +53,11 @@ public class PluginReferentialTest {
   @Test
   public void should_register_groups_containing_plugins() {
     Plugin foo = new Plugin("foo");
-    Plugin fooBis = new Plugin("fooBis").setParent(foo);
+    Plugin fooBis = new Plugin("fooBis");
     Plugin bar = new Plugin("bar");
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar));
+    pluginReferential.setParent(fooBis, "foo");
 
     assertThat(pluginReferential.getPlugins()).hasSize(2);
     assertThat(pluginReferential.findPlugin("foo").getChildren()).hasSize(1);
@@ -64,22 +65,13 @@ public class PluginReferentialTest {
   }
 
   @Test
-  public void should_use_plugin_key_for_group_key_if_plugin_group_is_null() {
-    Plugin foo = new Plugin("foo").setParent(new Plugin("foo"));
-    Plugin bar = new Plugin("bar").setParent(null);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
-
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
-  }
-
-  @Test
   public void should_find_latest_release() {
-    Plugin foo = new Plugin("foo").setParent(new Plugin("foo"));
+    Plugin foo = new Plugin("foo");
     foo.addRelease("1.0");
     foo.addRelease("1.1");
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
+    pluginReferential.setParent(foo, "foo");
     assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
   }
 
@@ -103,11 +95,12 @@ public class PluginReferentialTest {
     Plugin bar = new Plugin("bar");
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
     bar.addRelease(bar10);
-    Plugin barbis = new Plugin("barbis").setParent(bar);
+    Plugin barbis = new Plugin("barbis");
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
     barbis.addRelease(barbis10);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
+    pluginReferential.setParent(barbis, "bar");
     pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
@@ -151,7 +144,7 @@ public class PluginReferentialTest {
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
-    assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().get(0).getVersion().getName()).isEqualTo("1.0");
+    assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().iterator().next().getVersion().getName()).isEqualTo("1.0");
   }
 
   @Test
@@ -168,7 +161,7 @@ public class PluginReferentialTest {
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
-    assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().get(0).getVersion().getName()).isEqualTo("1.2");
+    assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().iterator().next().getVersion().getName()).isEqualTo("1.2");
   }
 
   @Test(expected = PluginNotFoundException.class)
