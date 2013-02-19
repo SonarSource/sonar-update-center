@@ -19,21 +19,41 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 public class FormatUtilsTest {
 
   @Test
-  public void testToDate() throws ParseException {
+  public void test_to_date() throws ParseException {
     assertThat(FormatUtils.toDate("2010-05-18", false).getDate()).isEqualTo(18);
   }
 
   @Test
-  public void ignoreNullDate() {
+  public void ignore_null_and_empty_date() {
     assertThat(FormatUtils.toDate(null, true)).isNull();
+    assertThat(FormatUtils.toDate("", true)).isNull();
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void should_throw_exception_on_invalid_format() {
+    assertThat(FormatUtils.toDate("2010", true)).isNull();
+  }
+
+  @Test
+  public void test_to_string() throws ParseException {
+    Date date = DateUtils.parseDate("2010-05-18", new String []{"yyyy-MM-dd"});
+    assertThat(FormatUtils.toString(date, false)).isNotNull();
+  }
+
+  @Test
+  public void should_return_null__if_no_date() throws ParseException {
+    assertThat(FormatUtils.toString(null, false)).isNull();
+  }
+
 }
