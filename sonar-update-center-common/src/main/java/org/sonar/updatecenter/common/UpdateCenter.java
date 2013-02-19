@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import javax.annotation.Nullable;
-
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -169,12 +167,11 @@ public final class UpdateCenter {
     } else {
       throw new PluginNotFoundException("Needed plugin '" + pluginKey + "' version " + minimumVersion + " not found.");
     }
-//    return installablePlugins;
   }
 
   private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
     return Iterables.any(installablePlugins, new Predicate<Release>() {
-      public boolean apply(@Nullable Release input) {
+      public boolean apply(Release input) {
         return input.getArtifact().getKey().equals(pluginKey);
       }
     });

@@ -147,7 +147,7 @@ public final class PluginReferential {
       } else {
         Release latest = requiredPlugin.getLastRelease();
         if (latest != null) {
-          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version "+ latest.getVersion().getName() +" whereas the plugin '" + release.getArtifact().getKey()
+          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName() + " whereas the plugin '" + release.getArtifact().getKey()
               + "' requires a least a version " + requiredMinimumReleaseVersion);
         }
       }

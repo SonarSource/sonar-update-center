@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
@@ -171,9 +172,10 @@ public final class Plugin extends Artifact {
   }
 
   @Nullable
-  public Plugin getChild(final String pluginKey) {
+  @VisibleForTesting
+  Plugin getChild(final String pluginKey) {
     return Iterables.find(children, new Predicate<Plugin>() {
-      public boolean apply(@Nullable Plugin input) {
+      public boolean apply(Plugin input) {
         return input.getKey().equals(pluginKey);
       }
     }, null);
