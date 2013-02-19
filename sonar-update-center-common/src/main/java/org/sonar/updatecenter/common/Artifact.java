@@ -105,6 +105,15 @@ public abstract class Artifact implements Comparable<Artifact> {
     return result;
   }
 
+  public final Release getMinimalRelease(Version minimalVersion) {
+    for (Release r : releases) {
+      if (r.getVersion().compareTo(minimalVersion)>=0) {
+        return r;
+      }
+    }
+    return null;
+  }
+
   public final Release getLastCompatibleReleaseIfUpgrade(Version sonarVersion) {
     Release result = null;
     for (Release r : releases) {

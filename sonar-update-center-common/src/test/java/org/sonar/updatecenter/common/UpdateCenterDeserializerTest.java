@@ -17,10 +17,12 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
+
 package org.sonar.updatecenter.common;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,5 +133,14 @@ public class UpdateCenterDeserializerTest {
     } finally {
       IOUtils.closeQuietly(input);
     }
+  }
+
+  @Test(expected = PluginNotFoundException.class)
+  public void should_throw_exception_when_parent_is_missing(){
+    Properties props = new Properties();
+    props.put("plugins", "foo");
+    props.put("foo.name", "Foo");
+    props.put("foo.parent", "bar");
+    UpdateCenterDeserializer.fromProperties(props);
   }
 }

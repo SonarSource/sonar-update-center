@@ -21,7 +21,11 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedSet;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -71,6 +75,17 @@ public class ArtifactTest {
 
     SortedSet<Release> greaterReleases = artifact.getReleasesGreaterThan("1.2");
     assertThat(greaterReleases).onProperty("version").containsOnly(Version.create("1.5"), Version.create("2.0"));
+  }
+
+  @Test
+  public void get_minimal_release() {
+    FakeArtifact artifact = new FakeArtifact("fake");
+    artifact.addRelease(Version.create("2.0"));
+    artifact.addRelease(Version.create("1.1"));
+    artifact.addRelease(Version.create("1.5"));
+
+    Release release = artifact.getMinimalRelease(Version.create("1.2"));
+    assertThat(release.getVersion().getName()).isEqualTo("1.5");
   }
 }
 

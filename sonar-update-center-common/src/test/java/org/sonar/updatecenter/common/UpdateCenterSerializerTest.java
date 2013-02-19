@@ -1,6 +1,6 @@
 /*
  * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
+ * Copyright (C) 2008-2012 SonarSource
  * mailto:contact AT sonarsource DOT com
  *
  * Sonar is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@ public class UpdateCenterSerializerTest {
         .setOrganizationUrl("http://www.sonarsource.org");
 
     Plugin barPlugin = new Plugin("bar")
-        .setParent(new Plugin("foo"))
+        .setParent(plugin)
         .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
         .setDevelopers(Arrays.asList("dev1", "dev2"));
 

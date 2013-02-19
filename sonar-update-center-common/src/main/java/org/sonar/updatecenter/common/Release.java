@@ -153,7 +153,8 @@ public final class Release implements Comparable<Release> {
     return newArrayList(outgoingDependencies);
   }
 
-  public Release addOutgoingDependency(Release required) {
+  // Should only be called by PluginReferential, in order to do some checks
+  Release addOutgoingDependency(Release required) {
     outgoingDependencies.add(required);
     required.addIncomingDependency(this);
     return this;

@@ -17,16 +17,14 @@
  * License along with Sonar; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
+
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -105,25 +103,23 @@ public final class UpdateCenterDeserializer {
       plugins.add(plugin);
     }
 
-    for (Plugin plugin : plugins) {
-      plugin.setParent(getPlugin(get(p, plugin.getKey(), "parent"), plugins));
+    PluginReferential pluginReferential = PluginReferential.create(plugins);
+    for (Plugin plugin : pluginReferential.getAllPlugins()) {
+      String parentKey = get(p, plugin.getKey(), "parent");
+      if (parentKey != null) {
+        pluginReferential.setParent(plugin, parentKey);
+      }
       for (Release release : plugin.getReleases()) {
         String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requiresPlugins"), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
           Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
           String requiredPluginReleaseKey = split.next();
           String requiredMinimumReleaseVersion = split.next();
-          Release requiredRelease = getPlugin(requiredPluginReleaseKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
-          if (requiredRelease != null) {
-            release.addOutgoingDependency(requiredRelease);
-          } else {
-            throw new RuntimeException("Plugin not found : '" + requiredPluginReleaseKey + "' with minimum version " + requiredMinimumReleaseVersion);
-          }
+          pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
         }
       }
     }
-
-    return UpdateCenter.create(PluginReferential.create(plugins), sonar).setDate(date);
+    return UpdateCenter.create(pluginReferential, sonar).setDate(date);
   }
 
   private static String get(Properties props, String key) {
@@ -140,15 +136,6 @@ public final class UpdateCenterDeserializer {
 
   private static String[] getArray(Properties p, String pluginKey, String field) {
     return getArray(p, pluginKey + "." + field);
-  }
-
-  @Nullable
-  public static Plugin getPlugin(final String key, List<Plugin> plugins) {
-    return Iterables.find(plugins, new Predicate<Plugin>() {
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(key);
-      }
-    }, null);
   }
 
 }

@@ -19,11 +19,9 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
+import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,9 +33,8 @@ public class PluginReferentialManifestConverter {
     // only static methods
   }
 
-  public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList, Version sonarVersion) {
+  public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList) {
     List<Plugin> plugins = newArrayList();
-
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = new Plugin(pluginManifest.getKey());
       plugin.merge(pluginManifest);
@@ -48,40 +45,29 @@ public class PluginReferentialManifestConverter {
       plugins.add(plugin);
     }
 
+    PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (PluginManifest pluginManifest : pluginManifestList) {
-      Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
-      Plugin pluginParent = getPlugin(pluginManifest.getParent(), plugins);
-      if (pluginParent != null) {
-        plugin.setParent(pluginParent);
+      Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
+      String parentKey = pluginManifest.getParent();
+      if (StringUtils.isNotBlank(parentKey)) {
+        pluginReferential.setParent(plugin, parentKey);
       }
     }
 
     for (PluginManifest pluginManifest : pluginManifestList) {
-      Plugin plugin = getPlugin(pluginManifest.getKey(), plugins);
+      Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
       for (String requiresPluginKey : pluginManifest.getRequiresPlugins()) {
-        for (Release release : plugin.getReleases()) {
-          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-          String requiredPluginReleaseKey = split.next();
-          String requiredMinimumReleaseVersion = split.next();
-          Release requiredRelease = getPlugin(requiredPluginReleaseKey, plugins).getRelease(Version.create(requiredMinimumReleaseVersion));
-          // TODO throw exception if requiredRelease not found
-          release.addOutgoingDependency(requiredRelease);
+        if (StringUtils.isNotBlank(requiresPluginKey)) {
+          for (Release release : plugin.getReleases()) {
+            Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
+            String requiredPluginReleaseKey = split.next();
+            String requiredMinimumReleaseVersion = split.next();
+            pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
+          }
         }
       }
     }
-
-    Sonar sonar = new Sonar();
-    sonar.addRelease(sonarVersion);
-    return PluginReferential.create(plugins);
-  }
-
-  @Nullable
-  public static Plugin getPlugin(final String key, List<Plugin> plugins) {
-    return Iterables.find(plugins, new Predicate<Plugin>() {
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(key);
-      }
-    }, null);
+    return pluginReferential;
   }
 
 }

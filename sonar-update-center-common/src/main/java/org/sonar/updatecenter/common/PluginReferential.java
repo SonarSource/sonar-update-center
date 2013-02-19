@@ -22,9 +22,11 @@ package org.sonar.updatecenter.common;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -41,58 +43,55 @@ public final class PluginReferential {
   public static PluginReferential create(List<Plugin> pluginList) {
     PluginReferential pluginReferential = new PluginReferential();
     for (Plugin plugin : pluginList) {
-      if (plugin.isMaster()) {
-        pluginReferential.add(plugin);
-      } else {
-        pluginReferential.addChild(plugin, pluginList);
-      }
+      pluginReferential.add(plugin);
     }
     return pluginReferential;
   }
 
-  public static PluginReferential createEmpty(){
-   return PluginReferential.create(Lists.<Plugin>newArrayList());
+  public static PluginReferential createEmpty() {
+    return PluginReferential.create(Lists.<Plugin>newArrayList());
   }
 
+  /**
+   * @return the list of master plugins
+   */
   public List<Plugin> getPlugins() {
-    return newArrayList(plugins);
+    return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
+      public boolean apply(Plugin input) {
+        return input.isMaster();
+      }
+    }));
   }
 
-  public PluginReferential add(Plugin plugin) {
-    this.plugins.add(plugin);
-    return this;
-  }
-
-  @Nullable
+  /**
+   * @throws NoSuchElementException if plugin could not be found
+   */
   public Plugin findPlugin(final String key) {
     return Iterables.find(plugins, new Predicate<Plugin>() {
       public boolean apply(Plugin input) {
         return input.getKey().equals(key);
       }
-    }, null);
+    });
   }
 
-  @Nullable
-  public Release findRelease(final String key, Version version) {
+  public boolean doesContainPlugin(final String key) {
+    return Iterables.any(plugins, new Predicate<Plugin>() {
+      public boolean apply(Plugin input) {
+        return input.getKey().equals(key);
+      }
+    });
+  }
+
+  public boolean doesContainRelease(final String key, Version version) {
     for (Plugin plugin : plugins) {
-      if (plugin.getKey().equals(key)){
+      if (plugin.getKey().equals(key)) {
         Release pluginRelease = plugin.getRelease(version);
         if (pluginRelease != null) {
-          return pluginRelease;
-        }
-      }
-      for (Plugin child : plugin.getChildren()) {
-        if (child.getKey().equals(key)){
-          return child.getRelease(version);
+          return true;
         }
       }
     }
-    return null;
-  }
-
-  public Release findRelease(String pluginKey, String version) {
-    Plugin plugin = findPlugin(pluginKey);
-    return plugin.getRelease(Version.create(version));
+    return false;
   }
 
   public Release findLatestRelease(String pluginKey) {
@@ -120,21 +119,58 @@ public final class PluginReferential {
     return removablePlugins;
   }
 
-  List<Release> getReleasesForMasterPlugins(){
+  public void setParent(Plugin plugin, String parentKey) {
+    try {
+      Plugin parent = findPlugin(parentKey);
+      plugin.setParent(parent);
+      checkPluginVersion(plugin, parent);
+    } catch (NoSuchElementException e) {
+      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing");
+    }
+  }
+
+  private void checkPluginVersion(Plugin plugin, Plugin parent) {
+    for (Release release : plugin.getReleases()) {
+      if (!parent.getReleases().contains(release)) {
+        throw new IncompatiblePluginVersionException("The plugins '" + plugin.getKey() + "' and '" + parent.getKey() +
+            "' must have exactly the same version as they belong to the same group");
+      }
+    }
+  }
+
+  public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
+    try {
+      Plugin requiredPlugin = findPlugin(requiredPluginReleaseKey);
+      Release minimalRequiredRelease = requiredPlugin.getMinimalRelease(Version.create(requiredMinimumReleaseVersion));
+      if (minimalRequiredRelease != null) {
+        release.addOutgoingDependency(minimalRequiredRelease);
+      } else {
+        Release latest = requiredPlugin.getLastRelease();
+        if (latest != null) {
+          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version "+ latest.getVersion().getName() +" whereas the plugin '" + release.getArtifact().getKey()
+              + "' requires a least a version " + requiredMinimumReleaseVersion);
+        }
+      }
+    } catch (NoSuchElementException e) {
+      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing");
+    }
+  }
+
+  List<Release> getReleasesForMasterPlugins() {
     List<Release> releases = newArrayList();
-    for (Plugin plugin : plugins) {
+    for (Plugin plugin : getPlugins()) {
       releases.add(plugin.getLastRelease());
     }
     return releases;
   }
 
-  private void addChild(final Plugin plugin, List<Plugin> pluginList) {
-    Plugin pluginParent = Iterables.find(pluginList, new Predicate<Plugin>() {
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(plugin.getParent().getKey());
-      }
-    });
-    pluginParent.addChild(plugin);
+  List<Plugin> getAllPlugins() {
+    return newArrayList(plugins);
+  }
+
+  private PluginReferential add(Plugin plugin) {
+    this.plugins.add(plugin);
+    return this;
   }
 
 }
