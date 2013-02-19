@@ -19,9 +19,12 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
@@ -125,7 +128,7 @@ public final class PluginReferential {
       plugin.setParent(parent);
       checkPluginVersion(plugin, parent);
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing", e);
+      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing.", e);
     }
   }
 
@@ -133,7 +136,7 @@ public final class PluginReferential {
     for (Release release : plugin.getReleases()) {
       if (!parent.getReleases().contains(release)) {
         throw new IncompatiblePluginVersionException("The plugins '" + plugin.getKey() + "' and '" + parent.getKey() +
-            "' must have exactly the same version as they belong to the same group");
+            "' must have exactly the same version as they belong to the same group.");
       }
     }
   }
@@ -144,15 +147,40 @@ public final class PluginReferential {
       Release minimalRequiredRelease = requiredPlugin.getMinimalRelease(Version.create(requiredMinimumReleaseVersion));
       if (minimalRequiredRelease != null) {
         release.addOutgoingDependency(minimalRequiredRelease);
+        checkDependencyCycle(release);
       } else {
         Release latest = requiredPlugin.getLastRelease();
         if (latest != null) {
           throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName()
-              + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion);
+              + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion + ".");
         }
       }
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing", e);
+      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing.", e);
+    }
+  }
+
+  private void checkDependencyCycle(Release release) {
+    List<Release> releases = newArrayList();
+    try {
+      checkDependencyCycle(release, releases);
+    } catch (DependencyCycleException e) {
+      List<String> releaseKeys = newArrayList(Iterables.transform(releases, new Function<Release, String>() {
+        public String apply(Release input) {
+          return input.getArtifact().getKey();
+        }
+      }));
+      throw new DependencyCycleException("There is a dependency cycle between plugins '" + Joiner.on("', '").join(releaseKeys) + "' that must be cut.", e);
+    }
+  }
+
+  private void checkDependencyCycle(Release release, List<Release> releases) {
+    for (Release outgoingDependency : release.getOutgoingDependencies()) {
+      if (releases.contains(outgoingDependency)) {
+        throw new DependencyCycleException();
+      }
+      releases.add(outgoingDependency);
+      checkDependencyCycle(outgoingDependency, releases);
     }
   }
 

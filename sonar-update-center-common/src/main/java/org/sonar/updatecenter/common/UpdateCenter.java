@@ -61,11 +61,6 @@ public final class UpdateCenter {
     return updateCenterPluginReferential;
   }
 
-  @VisibleForTesting
-  PluginReferential getInstalledPluginReferential() {
-    return installedPluginReferential;
-  }
-
   public List<Plugin> getPlugins() {
     return updateCenterPluginReferential.getPlugins();
   }
@@ -240,6 +235,11 @@ public final class UpdateCenter {
     } else {
       return null;
     }
+  }
+
+  @VisibleForTesting
+  PluginReferential getInstalledPluginReferential() {
+    return installedPluginReferential;
   }
 
   /**

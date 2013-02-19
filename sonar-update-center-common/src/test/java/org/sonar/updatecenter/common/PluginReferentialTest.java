@@ -20,6 +20,7 @@
 package org.sonar.updatecenter.common;
 
 import org.junit.Test;
+import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
@@ -28,6 +29,7 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
 public class PluginReferentialTest {
 
@@ -81,7 +83,6 @@ public class PluginReferentialTest {
     assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
   }
 
-
   @Test
   public void should_return_releases_keys_to_remove() {
     // Standalone plugin
@@ -95,21 +96,24 @@ public class PluginReferentialTest {
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar").addOutgoingDependency(foo10);
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
     foobis.addRelease(foobis10);
 
     // bar has one child and depends upon foobis
     Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar").addOutgoingDependency(foobis10);
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
     bar.addRelease(bar10);
     Plugin barbis = new Plugin("barbis").setParent(bar);
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
     barbis.addRelease(barbis10);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
+    pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
+    pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
     List<String> installablePlugins = pluginReferential.findReleasesWithDependencies("foo");
-    assertThat(installablePlugins).containsExactly("foo", "foobis", "bar", "barbis");
+    assertThat(installablePlugins).hasSize(4);
+    assertThat(installablePlugins).contains("foo", "foobis", "bar", "barbis");
   }
 
   @Test(expected = PluginNotFoundException.class)
@@ -120,7 +124,7 @@ public class PluginReferentialTest {
   }
 
   @Test(expected = IncompatiblePluginVersionException.class)
-  public void should_throw_exception_if_child_has_not_same_version_as_parent(){
+  public void should_throw_exception_if_child_has_not_same_version_as_parent() {
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0");
     Release foo11 = new Release(foo, "1.1");
@@ -189,6 +193,30 @@ public class PluginReferentialTest {
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
+  }
+
+  @Test
+  public void should_check_dependency_cycle() {
+    Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0");
+    Release foo11 = new Release(foo, "1.1");
+    foo.addRelease(foo10);
+    foo.addRelease(foo11);
+
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0");
+    Release bar11 = new Release(bar, "1.1");
+    bar.addRelease(bar10);
+    bar.addRelease(bar11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
+    pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
+    try {
+      pluginReferential.addOutgoingDependency(foo11, "bar", "1.0");
+      fail();
+    } catch (DependencyCycleException e) {
+      assertThat(e.getMessage()).contains("There is a dependency cycle between plugins 'bar', 'foo' that must be cut.");
+    }
   }
 
 }
