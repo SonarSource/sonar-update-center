@@ -122,9 +122,16 @@ public final class UpdateCenter {
     for (Release installedRelease : installedPluginReferential.getReleasesForMasterPlugins()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
-        // TODO check all dependencies are available, if not, set a a status special
         for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
-          updates.add(PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion()));
+          PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
+          try {
+            if (pluginUpdate.isCompatible()) {
+              findInstallablePlugins(plugin.getKey(), nextRelease.getVersion());
+            }
+          } catch (IncompatiblePluginVersionException e) {
+            pluginUpdate.setStatus(PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE);
+          }
+          updates.add(pluginUpdate);
         }
       } catch (NoSuchElementException e) {
         LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
@@ -143,26 +150,28 @@ public final class UpdateCenter {
   }
 
   private void findInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins) {
-    if (updateCenterPluginReferential.doesContainPlugin(pluginKey) && !contain(pluginKey, installablePlugins)) {
-      Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
-      Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
-      if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
-        throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
-      }
-      addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
-      for (Plugin child : plugin.getChildren()) {
-        addReleaseIfNotAlreadyInstalled(child.getRelease(pluginRelease.getVersion()), installablePlugins);
-      }
-      for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
-        if (!installablePlugins.contains(outgoingDependency)) {
-          findInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);
-          installablePlugins.addAll(installablePlugins);
+    if (updateCenterPluginReferential.doesContainPlugin(pluginKey)) {
+      if (!contain(pluginKey, installablePlugins)) {
+        Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
+        Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
+        if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
+          throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
         }
-      }
-      for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
-        if (!installablePlugins.contains(incomingDependency) && !contain(incomingDependency.getArtifact().getKey(), installablePlugins)) {
-          findInstallablePlugins(incomingDependency.getArtifact().getKey(), incomingDependency.getVersion(), installablePlugins);
-          installablePlugins.addAll(installablePlugins);
+        addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
+        for (Plugin child : plugin.getChildren()) {
+          addReleaseIfNotAlreadyInstalled(child.getRelease(pluginRelease.getVersion()), installablePlugins);
+        }
+        for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
+          if (!installablePlugins.contains(outgoingDependency)) {
+            findInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);
+            installablePlugins.addAll(installablePlugins);
+          }
+        }
+        for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
+          if (!installablePlugins.contains(incomingDependency) && !contain(incomingDependency.getArtifact().getKey(), installablePlugins)) {
+            findInstallablePlugins(incomingDependency.getArtifact().getKey(), incomingDependency.getVersion(), installablePlugins);
+            installablePlugins.addAll(installablePlugins);
+          }
         }
       }
     } else {
