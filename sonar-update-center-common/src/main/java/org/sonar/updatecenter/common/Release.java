@@ -19,10 +19,16 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import javax.annotation.Nullable;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
@@ -37,6 +43,9 @@ public class Release implements Comparable<Release> {
   private String description;
   private String downloadUrl;
   private String changelogUrl;
+
+  private Release parent;
+  private Set<Release> children;
   private Set<Release> outgoingDependencies;
   private Set<Release> incomingDependencies;
   /**
@@ -48,6 +57,7 @@ public class Release implements Comparable<Release> {
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
+    this.children = newHashSet();
     this.outgoingDependencies = newHashSet();
     this.incomingDependencies = newHashSet();
   }
@@ -147,6 +157,34 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
+  public Release getParent() {
+    return parent;
+  }
+
+  public Release setParent(Release parent) {
+    this.parent = parent;
+    return this;
+  }
+
+  public Collection<Release> getChildren() {
+    return children;
+  }
+
+  public Release addChild(Release release) {
+    children.add(release);
+    return this;
+  }
+
+  @Nullable
+  @VisibleForTesting
+  Release getChild(final String key) {
+    return Iterables.find(children, new Predicate<Release>() {
+      public boolean apply(Release input) {
+        return input.getArtifact().getKey().equals(key);
+      }
+    }, null);
+  }
+
   public Set<Release> getOutgoingDependencies() {
     return outgoingDependencies;
   }
@@ -163,6 +201,14 @@ public class Release implements Comparable<Release> {
   public Release addIncomingDependency(Release required) {
     incomingDependencies.add(required);
     return this;
+  }
+
+  public boolean isMaster() {
+    return getParent() == null;
+  }
+
+  public String getKey() {
+    return getArtifact().getKey();
   }
 
   @Override

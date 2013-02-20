@@ -62,6 +62,10 @@ public abstract class Artifact implements Comparable<Artifact> {
     return null;
   }
 
+  public final Release getRelease(String version) {
+    return getRelease(Version.create(version));
+  }
+
   public final SortedSet<Release> getReleases() {
     return releases;
   }

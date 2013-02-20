@@ -21,7 +21,11 @@ package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.*;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.PluginManifest;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.UpdateCenterSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +54,7 @@ class Generator {
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
-    for (Plugin plugin : center.getPlugins()) {
+    for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
       log.info("Load plugin: " + plugin.getKey());
 
       File masterJar = null;

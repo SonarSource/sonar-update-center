@@ -19,19 +19,10 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nullable;
-
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 
 public class Plugin extends Artifact {
 
@@ -46,12 +37,9 @@ public class Plugin extends Artifact {
   private String issueTrackerUrl;
   private String sourcesUrl;
   private List<String> developers;
-  private Plugin parent;
-  private Set<Plugin> children;
 
   public Plugin(String key) {
     super(key);
-    this.children = newHashSet();
   }
 
   public String getName() {
@@ -151,38 +139,6 @@ public class Plugin extends Artifact {
   public Plugin setDevelopers(List<String> developers) {
     this.developers = developers;
     return this;
-  }
-
-  public Plugin getParent() {
-    return parent;
-  }
-
-  public Plugin setParent(Plugin parent) {
-    this.parent = parent;
-    return this;
-  }
-
-  public Collection<Plugin> getChildren() {
-    return children;
-  }
-
-  public Plugin addChild(Plugin plugin) {
-    children.add(plugin);
-    return this;
-  }
-
-  @Nullable
-  @VisibleForTesting
-  Plugin getChild(final String pluginKey) {
-    return Iterables.find(children, new Predicate<Plugin>() {
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(pluginKey);
-      }
-    }, null);
-  }
-
-  public boolean isMaster() {
-    return getParent() == null || getKey().equals(getParent().getKey());
   }
 
   public Plugin merge(PluginManifest manifest) {

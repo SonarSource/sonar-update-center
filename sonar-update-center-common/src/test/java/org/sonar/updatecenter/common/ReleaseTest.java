@@ -42,4 +42,13 @@ public class ReleaseTest {
 
     assertThat(release.getOutgoingDependencies()).hasSize(1);
   }
+
+  @Test
+  public void should_return_master(){
+    Release plugin = new Release(new Plugin("squid"), "1.0");
+    assertThat(plugin.isMaster()).isTrue();
+
+    plugin = new Release(new Plugin("squid"), "1.0").setParent(new Release(new Plugin("foo"), "1.0"));
+    assertThat(plugin.isMaster()).isFalse();
+  }
 }

@@ -36,11 +36,17 @@ public class PluginReferentialTest {
   @Test
   public void get_and_set_plugins() {
     Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
+    foo.addRelease(foo10);
+
     Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
+    bar.addRelease(bar10);
+
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
 
     assertThat(pluginReferential.findPlugin("foo")).isEqualTo(foo);
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
+    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
   }
 
   @Test(expected = NoSuchElementException.class)
@@ -53,54 +59,52 @@ public class PluginReferentialTest {
   @Test
   public void should_register_groups_containing_plugins() {
     Plugin foo = new Plugin("foo");
-    Plugin fooBis = new Plugin("fooBis");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
+    foo.addRelease(foo10);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1");
+    foobis.addRelease(foobis10);
+
     Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
+    bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooBis, bar));
-    pluginReferential.setParent(fooBis, "foo");
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar));
+    pluginReferential.setParent(foobis10, "foo");
 
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
-    assertThat(pluginReferential.findPlugin("foo").getChildren()).hasSize(1);
-    assertThat(pluginReferential.findPlugin("bar").getChildren()).hasSize(0);
-  }
-
-  @Test
-  public void should_find_latest_release() {
-    Plugin foo = new Plugin("foo");
-    foo.addRelease("1.0");
-    foo.addRelease("1.1");
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
-    pluginReferential.setParent(foo, "foo");
-    assertThat(pluginReferential.findLatestRelease("foo").getVersion().getName()).isEqualTo("1.1");
+    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
+    assertThat(pluginReferential.findPlugin("foo").getRelease("1.0").getChildren()).hasSize(1);
+    assertThat(pluginReferential.findPlugin("bar").getRelease("1.0").getChildren()).hasSize(0);
   }
 
   @Test
   public void should_return_releases_keys_to_remove() {
     // Standalone plugin
     Plugin test = new Plugin("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1");
     test.addRelease(test10);
 
     Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
     foo.addRelease(foo10);
 
     // foobis depends upon foo
     Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1");
     foobis.addRelease(foobis10);
 
     // bar has one child and depends upon foobis
     Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
     bar.addRelease(bar10);
     Plugin barbis = new Plugin("barbis");
-    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
+    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1");
     barbis.addRelease(barbis10);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
-    pluginReferential.setParent(barbis, "bar");
+    pluginReferential.setParent(barbis10, "bar");
     pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
@@ -112,8 +116,11 @@ public class PluginReferentialTest {
   @Test(expected = PluginNotFoundException.class)
   public void should_throw_exception_if_plugin_parent_does_not_exist() {
     Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
+    foo.addRelease(foo10);
+
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
-    pluginReferential.setParent(foo, "not_found");
+    pluginReferential.setParent(foo10, "not_found");
   }
 
   @Test(expected = IncompatiblePluginVersionException.class)
@@ -129,7 +136,7 @@ public class PluginReferentialTest {
     bar.addRelease(bar10);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
-    pluginReferential.setParent(bar, "foo");
+    pluginReferential.setParent(bar10, "foo");
   }
 
   @Test

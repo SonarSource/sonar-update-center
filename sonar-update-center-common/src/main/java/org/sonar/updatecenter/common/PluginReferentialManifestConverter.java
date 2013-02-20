@@ -50,7 +50,8 @@ public class PluginReferentialManifestConverter {
       Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
       String parentKey = pluginManifest.getParent();
       if (StringUtils.isNotBlank(parentKey)) {
-        pluginReferential.setParent(plugin, parentKey);
+        Release release = plugin.getLastRelease();
+        pluginReferential.setParent(release, parentKey);
       }
     }
 

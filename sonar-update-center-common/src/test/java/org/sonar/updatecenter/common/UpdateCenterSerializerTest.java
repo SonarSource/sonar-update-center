@@ -55,7 +55,6 @@ public class UpdateCenterSerializerTest {
             .addRequiredSonarVersions(Version.create("2.1"))
     );
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
-    pluginReferential.setParent(bar, "foo");
 
     UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
     Properties properties = UpdateCenterSerializer.toProperties(center);
@@ -66,17 +65,72 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.parent", "foo");
     assertProperty(properties, "bar.versions", "1.2");
     assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
     assertProperty(properties, "bar.developers", "dev1,dev2");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
   }
 
-  // TODO
   @Test
-  public void should_return_required_releases(){
+  public void should_return_parent() throws IOException, URISyntaxException {
+    Sonar sonar = new Sonar();
+    sonar.addRelease(Version.create("2.0"));
+    sonar.addRelease(Version.create("2.1"));
 
+    Plugin foo = new Plugin("foo")
+        .setName("Foo")
+        .setOrganizationUrl("http://www.sonarsource.org");
+    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    foo.addRelease(foo12);
+
+    Plugin bar = new Plugin("bar");
+    Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    bar.addRelease(bar12);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    pluginReferential.setParent(bar12, "foo");
+
+    UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
+    Properties properties = UpdateCenterSerializer.toProperties(center);
+    properties.store(System.out, null);
+
+    assertProperty(properties, "plugins", "foo,bar");
+    assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.parent", "foo");
+  }
+
+  @Test
+  public void should_return_required_releases() throws IOException {
+    Sonar sonar = new Sonar();
+    sonar.addRelease(Version.create("2.0"));
+    sonar.addRelease(Version.create("2.1"));
+
+    Plugin foo = new Plugin("foo");
+    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    foo.addRelease(foo12);
+
+    Plugin test = new Plugin("test");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1");
+    test.addRelease(test10);
+
+    Plugin bar = new Plugin("bar");
+    Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    bar.addRelease(bar12);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar, test));
+    pluginReferential.addOutgoingDependency(bar12, "foo", "1.2");
+    pluginReferential.addOutgoingDependency(bar12, "test", "1.0");
+
+    UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
+    Properties properties = UpdateCenterSerializer.toProperties(center);
+    properties.store(System.out, null);
+
+    assertProperty(properties, "plugins", "test,foo,bar");
+    assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
+    assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.requiresPlugins", "bar:1.2,bar:1.2");
   }
 
   private void assertProperty(Properties props, String key, String value) {

@@ -61,10 +61,6 @@ public class UpdateCenter {
     return updateCenterPluginReferential;
   }
 
-  public List<Plugin> getPlugins() {
-    return updateCenterPluginReferential.getPlugins();
-  }
-
   public UpdateCenter registerInstalledPlugins(PluginReferential installedPluginReferential) {
     this.installedPluginReferential = installedPluginReferential;
     return this;
@@ -91,7 +87,7 @@ public class UpdateCenter {
   public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
-    for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
+    for (Plugin plugin : updateCenterPluginReferential.getLastMasterReleasePlugins()) {
       if (!isInstalled(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
@@ -153,7 +149,7 @@ public class UpdateCenter {
           if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
             throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
           }
-          addInstallableRelease(pluginRelease, plugin, installablePlugins);
+          addInstallableRelease(pluginRelease, installablePlugins);
         }
       }
     } catch (NoSuchElementException e) {
@@ -161,10 +157,10 @@ public class UpdateCenter {
     }
   }
 
-  private void addInstallableRelease(Release pluginRelease, Plugin plugin, Set<Release> installablePlugins) {
+  private void addInstallableRelease(Release pluginRelease, Set<Release> installablePlugins) {
     addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
-    for (Plugin child : plugin.getChildren()) {
-      addReleaseIfNotAlreadyInstalled(child.getRelease(pluginRelease.getVersion()), installablePlugins);
+    for (Release child : pluginRelease.getChildren()) {
+      addReleaseIfNotAlreadyInstalled(child, installablePlugins);
     }
     for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
       addInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);

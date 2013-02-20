@@ -78,9 +78,6 @@ public final class UpdateCenterSerializer {
     List<String> pluginKeys = newArrayList();
     for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
       addPlugin(plugin, pluginKeys, p);
-      for (Plugin child : plugin.getChildren()) {
-        addPlugin(child, pluginKeys, p);
-      }
     }
     set(p, "plugins", pluginKeys);
     return p;
@@ -89,9 +86,6 @@ public final class UpdateCenterSerializer {
   private static void addPlugin(Plugin plugin, List<String> pluginKeys, Properties p) {
     pluginKeys.add(plugin.getKey());
     set(p, plugin, "name", plugin.getName());
-    if (plugin.getParent() != null) {
-      set(p, plugin, "parent", plugin.getParent().getKey());
-    }
     set(p, plugin, "description", plugin.getDescription());
     set(p, plugin, "category", plugin.getCategory());
     set(p, plugin, "homepageUrl", plugin.getHomepageUrl());
@@ -106,12 +100,15 @@ public final class UpdateCenterSerializer {
     List<String> releaseKeys = new ArrayList<String>();
     for (Release release : plugin.getReleases()) {
       releaseKeys.add(release.getVersion().toString());
+      if (release.getParent() != null) {
+        set(p, plugin, release.getVersion() + ".parent", release.getParent().getKey());
+      }
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
       set(p, plugin, release.getVersion() + ".downloadUrl", release.getDownloadUrl());
       set(p, plugin, release.getVersion() + ".changelogUrl", release.getChangelogUrl());
       set(p, plugin, release.getVersion() + ".description", release.getDescription());
       set(p, plugin, release.getVersion() + ".date", FormatUtils.toString(release.getDate(), false));
-      set(p, plugin, "requiresGroup", StringUtils.join(getRequiredList(release), ","));
+      set(p, plugin, release.getVersion() + ".requiresPlugins", StringUtils.join(getRequiredList(release), ","));
     }
     set(p, plugin, "versions", releaseKeys);
   }

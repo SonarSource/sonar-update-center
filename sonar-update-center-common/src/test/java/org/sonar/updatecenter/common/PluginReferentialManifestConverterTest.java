@@ -34,9 +34,9 @@ public class PluginReferentialManifestConverterTest {
 
     PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, bar));
 
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
-    assertThat(pluginReferential.getPlugins().get(0).getParent()).isNull();
-    assertThat(pluginReferential.getPlugins().get(1).getParent()).isNull();
+    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
+    assertThat(pluginReferential.getLastMasterReleasePlugins().get(0).getLastRelease().getParent()).isNull();
+    assertThat(pluginReferential.getLastMasterReleasePlugins().get(1).getLastRelease().getParent()).isNull();
   }
 
   @Test
@@ -47,8 +47,8 @@ public class PluginReferentialManifestConverterTest {
 
     PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, fooBis, bar));
 
-    assertThat(pluginReferential.getPlugins()).hasSize(2);
-    assertThat(pluginReferential.findPlugin("foo").getChildren()).hasSize(1);
+    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
+    assertThat(pluginReferential.findPlugin("foo").getLastRelease().getChildren()).hasSize(1);
     assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("2.0")).getOutgoingDependencies()).hasSize(1);
   }
 

@@ -58,13 +58,4 @@ public class PluginTest {
     assertThat(plugin.getSourcesUrl()).isEqualTo("sourcesUrl");
   }
 
-  @Test
-  public void should_return_master(){
-    Plugin plugin = new Plugin("squid");
-    assertThat(plugin.isMaster()).isTrue();
-
-    plugin = new Plugin("squid").setParent(new Plugin("foo"));
-    assertThat(plugin.isMaster()).isFalse();
-  }
-
 }

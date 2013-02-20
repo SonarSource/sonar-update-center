@@ -100,14 +100,14 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
 
-      assertThat(pluginReferential.getPlugins()).hasSize(1);
+      assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(1);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getChildren()).hasSize(1);
-      assertThat(clirr.getChild("motionchart")).isNotNull();
-      assertThat(clirr.getChild("motionchart").getName()).isEqualTo("Motion Chart");
-      assertThat(clirr.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
+      Release release = clirr.getRelease("1.1");
+      assertThat(release.getChildren()).hasSize(1);
+      assertThat(release.getChild("motionchart")).isNotNull();
+      assertThat(release.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -121,7 +121,7 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
 
-      assertThat(pluginReferential.getPlugins()).hasSize(3);
+      assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(3);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
@@ -141,7 +141,8 @@ public class UpdateCenterDeserializerTest {
     Properties props = new Properties();
     props.put("plugins", "foo");
     props.put("foo.name", "Foo");
-    props.put("foo.parent", "bar");
+    props.put("foo.versions", "1.1");
+    props.put("foo.1.1.parent", "bar");
     UpdateCenterDeserializer.fromProperties(props);
   }
 }

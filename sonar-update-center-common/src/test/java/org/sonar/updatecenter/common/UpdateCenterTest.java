@@ -71,8 +71,8 @@ public class UpdateCenterTest {
         PluginReferential.create(newArrayList((Plugin) new Plugin("foo").addRelease("1.0").getArtifact())));
 
     PluginReferential installed = updateCenter.getInstalledPluginReferential();
-    assertThat(installed.getPlugins()).hasSize(1);
-    assertThat(installed.getPlugins().get(0).getKey()).isEqualTo("foo");
+    assertThat(installed.getLastMasterReleasePlugins()).hasSize(1);
+    assertThat(installed.getLastMasterReleasePlugins().get(0).getKey()).isEqualTo("foo");
   }
 
   @Test
@@ -214,7 +214,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooChild, test));
-    pluginReferential.setParent(fooChild, "foo");
+    pluginReferential.setParent(fooChild10, "foo");
 
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(newArrayList((Plugin) new Plugin("test").addRelease("1.0").getArtifact())));
@@ -223,7 +223,7 @@ public class UpdateCenterTest {
     assertThat(availables).hasSize(1);
     assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
     assertThat(availables.get(0).isCompatible()).isTrue();
-    assertThat(availables.get(0).getPlugin().getChildren()).hasSize(1);
+    assertThat(availables.get(0).getPlugin().getLastRelease().getChildren()).hasSize(1); // TODO
   }
 
   @Test
@@ -331,7 +331,8 @@ public class UpdateCenterTest {
     barbis.addRelease(barbis11);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar));
-    pluginReferential.setParent(barbis, "bar");
+    pluginReferential.setParent(barbis10, "bar");
+    pluginReferential.setParent(barbis11, "bar");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(

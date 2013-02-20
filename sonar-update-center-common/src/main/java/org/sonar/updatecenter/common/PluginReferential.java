@@ -56,14 +56,18 @@ public class PluginReferential {
   }
 
   /**
-   * @return the list of master plugins
+   * @return the list of plugins where last releases is master releases
    */
-  public List<Plugin> getPlugins() {
+  public List<Plugin> getLastMasterReleasePlugins() {
     return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
       public boolean apply(Plugin input) {
-        return input.isMaster();
+        return input.getLastRelease().isMaster();
       }
     }));
+  }
+
+  public List<Plugin> getPlugins() {
+    return newArrayList(plugins);
   }
 
   /**
@@ -97,22 +101,13 @@ public class PluginReferential {
     return false;
   }
 
-  public Release findLatestRelease(String pluginKey) {
-    Plugin plugin = findPlugin(pluginKey);
-    if (plugin != null) {
-      return plugin.getLastRelease();
-    } else {
-      return null;
-    }
-  }
-
   public List<String> findReleasesWithDependencies(String pluginKey) {
     List<String> removablePlugins = newArrayList();
     Plugin plugin = findPlugin(pluginKey);
     if (plugin != null) {
       Release pluginRelease = plugin.getLastRelease();
       removablePlugins.add(plugin.getKey());
-      for (Plugin child : plugin.getChildren()) {
+      for (Release child : pluginRelease.getChildren()) {
         removablePlugins.add(child.getKey());
       }
       for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
@@ -122,25 +117,27 @@ public class PluginReferential {
     return removablePlugins;
   }
 
-  public void setParent(Plugin plugin, String parentKey) {
+  public void setParent(Release release, String parentKey) {
     try {
-      Plugin parent = findPlugin(parentKey);
-      plugin.setParent(parent);
-      parent.addChild(plugin);
-
-      checkPluginVersion(plugin, parent);
+      Plugin pluginParent = findPlugin(parentKey);
+      Version version = release.getVersion();
+      Release parent = pluginParent.getRelease(version);
+      if (parent == null) {
+        throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parentKey +
+            "' must have exactly the same version as they belong to the same group.");
+      }
+      release.setParent(parent);
+      parent.addChild(release);
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + plugin.getKey() + "' is missing.", e);
+      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + release.getKey() + "' is missing.", e);
     }
   }
 
-  private void checkPluginVersion(Plugin plugin, Plugin parent) {
-    for (Release release : plugin.getReleases()) {
-      if (!parent.getReleases().contains(release)) {
-        throw new IncompatiblePluginVersionException("The plugins '" + plugin.getKey() + "' and '" + parent.getKey() +
+  private void checkPluginVersion(Release release, Release parent) {
+      if (!parent.getVersion().equals(release.getVersion())) {
+        throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parent.getKey() +
             "' must have exactly the same version as they belong to the same group.");
       }
-    }
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
@@ -189,14 +186,10 @@ public class PluginReferential {
 
   List<Release> getReleasesForMasterPlugins() {
     List<Release> releases = newArrayList();
-    for (Plugin plugin : getPlugins()) {
+    for (Plugin plugin : getLastMasterReleasePlugins()) {
       releases.add(plugin.getLastRelease());
     }
     return releases;
-  }
-
-  List<Plugin> getAllPlugins() {
-    return newArrayList(plugins);
   }
 
   private PluginReferential add(Plugin plugin) {
