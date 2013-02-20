@@ -23,6 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.junit.Before;
 import org.junit.Test;
+import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
@@ -366,6 +367,26 @@ public class UpdateCenterTest {
     assertThat(installablePlugins).hasSize(2);
     assertThat(getRelease("foobis", "1.1", installablePlugins)).isNotNull();
     assertThat(getRelease("foo", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test(expected = IncompatiblePluginVersionException.class)
+  public void should_throw_exception_if_dependency_not_found() {
+    Plugin foo = new Plugin("foo");
+    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
+    foo.addRelease(foo11);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
+    foobis.addRelease(foobis11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis));
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.2");
+
+    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1"));
+
+    updateCenter.findInstallablePlugins("foobis", Version.create("1.1"));
   }
 
   @Test
