@@ -130,7 +130,7 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.1.2.requiresPlugins", "bar:1.2,bar:1.2");
+    assertProperty(properties, "bar.1.2.requirePlugins", "bar:1.2,bar:1.2");
   }
 
   private void assertProperty(Properties props, String key, String value) {

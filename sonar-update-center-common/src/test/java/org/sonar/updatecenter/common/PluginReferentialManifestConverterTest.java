@@ -43,7 +43,7 @@ public class PluginReferentialManifestConverterTest {
   public void should_return_plugins_with_children(){
     PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0");
     PluginManifest fooBis = new PluginManifest().setKey("foobis").setVersion("1.0").setParent("foo");
-    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("2.0").setRequiresPlugins(new String[]{"foo:1.0"});
+    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("2.0").setRequirePlugins(new String[]{"foo:1.0"});
 
     PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, fooBis, bar));
 

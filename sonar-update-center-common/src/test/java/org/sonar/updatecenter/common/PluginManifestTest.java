@@ -44,7 +44,7 @@ public class PluginManifestTest {
     assertThat(manifest.getKey()).isEqualTo("checkstyle");
     assertThat(manifest.getName()).isEqualTo("Checkstyle");
     assertThat(manifest.getParent()).isNull();
-    assertThat(manifest.getRequiresPlugins()).isEmpty();
+    assertThat(manifest.getRequirePlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.getVersion().length()).isGreaterThan(1);
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
@@ -62,7 +62,7 @@ public class PluginManifestTest {
     assertThat(manifest.getKey()).isNull();
     assertThat(manifest.getName()).isNull();
     assertThat(manifest.getParent()).isNull();
-    assertThat(manifest.getRequiresPlugins()).isEmpty();
+    assertThat(manifest.getRequirePlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
     assertThat(manifest.getDependencies()).isEmpty();
@@ -100,12 +100,12 @@ public class PluginManifestTest {
 
   @Test
   public void should_add_requires_plugins() throws URISyntaxException, IOException {
-    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-requires-plugins.jar");
+    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-require-plugins.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
-    assertThat(manifest.getRequiresPlugins()).hasSize(2);
-    assertThat(manifest.getRequiresPlugins()[0]).isEqualTo("scm:1.0");
-    assertThat(manifest.getRequiresPlugins()[1]).isEqualTo("fake:1.1");
+    assertThat(manifest.getRequirePlugins()).hasSize(2);
+    assertThat(manifest.getRequirePlugins()[0]).isEqualTo("scm:1.0");
+    assertThat(manifest.getRequirePlugins()[1]).isEqualTo("fake:1.1");
   }
 }

@@ -51,7 +51,7 @@ public final class PluginManifest {
   public static final String BUILD_DATE = "Plugin-BuildDate";
   public static final String ISSUE_TRACKER_URL = "Plugin-IssueTrackerUrl";
   public static final String PARENT = "Plugin-Parent";
-  public static final String REQUIRES_PLUGINS = "Plugin-RequiresPlugins";
+  public static final String REQUIRE_PLUGINS = "Plugin-RequirePlugins";
 
   /**
    * @since 0.3
@@ -98,7 +98,7 @@ public final class PluginManifest {
   private String sourcesUrl;
   private String[] developers;
   private String parent;
-  private String[] requiresPlugins;
+  private String[] requirePlugins;
 
   /**
    * Load the manifest from a JAR file.
@@ -132,7 +132,7 @@ public final class PluginManifest {
     dependencies = new String[0];
     developers = new String[0];
     useChildFirstClassLoader = false;
-    requiresPlugins = new String[0];
+    requirePlugins = new String[0];
   }
 
   private void loadManifest(Manifest manifest) {
@@ -163,8 +163,8 @@ public final class PluginManifest {
 
     this.parent = attributes.getValue(PARENT);
 
-    String requires = attributes.getValue(REQUIRES_PLUGINS);
-    this.requiresPlugins = StringUtils.split(StringUtils.defaultString(requires), ',');
+    String requires = attributes.getValue(REQUIRE_PLUGINS);
+    this.requirePlugins = StringUtils.split(StringUtils.defaultString(requires), ',');
   }
 
   public String getKey() {
@@ -203,15 +203,15 @@ public final class PluginManifest {
   /**
    * @since 3.5
    */
-  public String[] getRequiresPlugins() {
-    return requiresPlugins;
+  public String[] getRequirePlugins() {
+    return requirePlugins;
   }
 
   /**
    * @since 3.5
    */
-  public PluginManifest setRequiresPlugins(String[] requiresPlugins) {
-    this.requiresPlugins = requiresPlugins;
+  public PluginManifest setRequirePlugins(String[] requirePlugins) {
+    this.requirePlugins = requirePlugins;
     return this;
   }
 

@@ -57,7 +57,7 @@ public class PluginReferentialManifestConverter {
 
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
-      for (String requiresPluginKey : pluginManifest.getRequiresPlugins()) {
+      for (String requiresPluginKey : pluginManifest.getRequirePlugins()) {
         if (StringUtils.isNotBlank(requiresPluginKey)) {
           for (Release release : plugin.getReleases()) {
             Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();

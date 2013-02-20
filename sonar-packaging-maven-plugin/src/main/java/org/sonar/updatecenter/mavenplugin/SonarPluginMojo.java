@@ -160,14 +160,15 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   }
 
   private void checkMandatoryAttributes() throws MojoExecutionException {
-    // Maven automatically sets the name as "Unnamed - <artifactId>" when the field <name> is missing.
+    // Maven 2 automatically sets the name as "Unnamed - <artifactId>" when the field <name> is missing.
+    // Note that Maven 3 has a different behavior. Name is the artifact id by default.
     if (StringUtils.isBlank(getPluginName()) || getPluginName().startsWith("Unnamed - ")) {
       throw new MojoExecutionException("Plugin name is missing. "
-          + "Please add the field <name> or the property sonar.pluginName.");
+        + "Please add the field <name> or the property sonar.pluginName.");
     }
     if (StringUtils.isBlank(getPluginDescription())) {
       throw new MojoExecutionException("Plugin description is missing. "
-          + "Please add the field <description> or the property sonar.pluginDescription.");
+        + "Please add the field <description> or the property sonar.pluginDescription.");
     }
     if (StringUtils.isNotBlank(getExplicitPluginKey()) && !PluginKeyUtils.isValid(getExplicitPluginKey())) {
       throw new MojoExecutionException("Plugin key is badly formatted. Please use ascii letters and digits only: " + getExplicitPluginKey());
@@ -193,8 +194,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Description", PluginManifest.DESCRIPTION, getPluginDescription());
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
-      addManifestProperty("Parent", PluginManifest.PARENT, getPluginParent());
-      addManifestProperty("Requires plugins", PluginManifest.REQUIRES_PLUGINS, getRequiresPlugins());
+      if (getPluginParent() != null) {
+        addManifestProperty("Parent", PluginManifest.PARENT, getPluginParent());
+      }
+      if (getRequirePlugins() != null) {
+        addManifestProperty("Require plugins", PluginManifest.REQUIRE_PLUGINS, getRequirePlugins());
+      }
 
       if (isUseChildFirstClassLoader()) {
         getLog().info("    Uses child-first class loading strategy");
@@ -239,13 +244,13 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     }
   }
 
-  private void checkParentAndRequiresPluginProperties(){
-    if (getPluginParent() != null && getRequiresPlugins() != null) {
-      throw new IllegalStateException("The plugin '"+ getPluginKey() + "' can't be both part of the plugin '"+ getPluginParent()
-          +"' and having a dependency on '"+  getRequiresPlugins() + "'");
+  private void checkParentAndRequiresPluginProperties() {
+    if (getPluginParent() != null && getRequirePlugins() != null) {
+      throw new IllegalStateException("The plugin '" + getPluginKey() + "' can't be both part of the plugin '" + getPluginParent()
+        + "' and having a dependency on '" + getRequirePlugins() + "'");
     }
     if (getPluginParent() != null && getPluginParent().equals(getPluginKey())) {
-      throw new IllegalStateException("The plugin '"+ getPluginKey() + "' can't be his own parent. Please remove the '"+ PluginManifest.PARENT +"' property.");
+      throw new IllegalStateException("The plugin '" + getPluginKey() + "' can't be his own parent. Please remove the '" + PluginManifest.PARENT + "' property.");
     }
   }
 
@@ -298,11 +303,11 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private String getDevelopers() {
     if (getProject().getDevelopers() != null) {
       return Joiner.on(",").join((
-          Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
-            public String apply(Developer developer) {
-              return developer.getName();
-            }
-          }))
+        Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+          public String apply(Developer developer) {
+            return developer.getName();
+          }
+        }))
       );
     }
     return null;
@@ -323,9 +328,9 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     if (!ids.isEmpty()) {
       getLog().info(getMessage("Following dependencies are packaged in the plugin:", ids));
       getLog().info(new StringBuilder()
-          .append("See following page for more details about plugin dependencies:\n")
-          .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
-          .toString());
+        .append("See following page for more details about plugin dependencies:\n")
+        .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
+        .toString());
     }
     return libs;
   }
@@ -355,7 +360,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private boolean containsArtifact(Set<Artifact> artifacts, Artifact artifact) {
     for (Artifact a : artifacts) {
       if (StringUtils.equals(a.getGroupId(), artifact.getGroupId()) &&
-          StringUtils.equals(a.getArtifactId(), artifact.getArtifactId())) {
+        StringUtils.equals(a.getArtifactId(), artifact.getArtifactId())) {
         return true;
       }
     }
@@ -366,7 +371,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     Set<Artifact> result = new HashSet<Artifact>();
     ArtifactFilter artifactFilter = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME);
     DependencyNode rootNode = dependencyTreeBuilder.buildDependencyTree(getProject(), localRepository, artifactFactory,
-        artifactMetadataSource, artifactFilter, artifactCollector);
+      artifactMetadataSource, artifactFilter, artifactCollector);
     rootNode.accept(new BuildingDependencyNodeVisitor());
     searchForSonarProvidedArtifacts(rootNode, result, false);
     return result;
@@ -377,7 +382,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       // skip check on root node - see SONAR-1815
       if (dependency.getParent() != null) {
         isProvidedBySonar = isProvidedBySonar ||
-            ("org.codehaus.sonar".equals(dependency.getArtifact().getGroupId()) && !Artifact.SCOPE_TEST.equals(dependency.getArtifact().getScope()));
+          ("org.codehaus.sonar".equals(dependency.getArtifact().getGroupId()) && !Artifact.SCOPE_TEST.equals(dependency.getArtifact().getScope()));
       }
 
       if (isProvidedBySonar) {
