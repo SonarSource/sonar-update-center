@@ -493,7 +493,6 @@ public class UpdateCenterTest {
         pluginReferential, sonar)
         .setInstalledSonarVersion(Version.create("2.1"))
         .registerInstalledPlugins(PluginReferential.create(newArrayList(
-            (Plugin) new Plugin("foo").addRelease("1.0").getArtifact(),
             (Plugin) new Plugin("foobis").addRelease("1.0").getArtifact(),
             (Plugin) new Plugin("bar").addRelease("1.0").getArtifact()
         )));
