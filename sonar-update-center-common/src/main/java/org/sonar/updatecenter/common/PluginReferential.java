@@ -33,14 +33,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 
 public class PluginReferential {
 
   private Set<Plugin> plugins;
 
   private PluginReferential() {
-    this.plugins = newHashSet();
+    this.plugins = newTreeSet();
   }
 
   public static PluginReferential create(List<Plugin> pluginList) {
@@ -134,10 +134,10 @@ public class PluginReferential {
   }
 
   private void checkPluginVersion(Release release, Release parent) {
-      if (!parent.getVersion().equals(release.getVersion())) {
-        throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parent.getKey() +
-            "' must have exactly the same version as they belong to the same group.");
-      }
+    if (!parent.getVersion().equals(release.getVersion())) {
+      throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parent.getKey() +
+          "' must have exactly the same version as they belong to the same group.");
+    }
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {

@@ -61,7 +61,7 @@ public class UpdateCenterSerializerTest {
     properties.store(System.out, null);
 
     assertProperty(properties, "sonar.versions", "2.0,2.1");
-    assertProperty(properties, "plugins", "foo,bar");
+    assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
@@ -94,7 +94,7 @@ public class UpdateCenterSerializerTest {
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
-    assertProperty(properties, "plugins", "foo,bar");
+    assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "bar.1.2.parent", "foo");
@@ -126,7 +126,7 @@ public class UpdateCenterSerializerTest {
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
-    assertProperty(properties, "plugins", "test,foo,bar");
+    assertProperty(properties, "plugins", "bar,foo,test");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
