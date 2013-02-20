@@ -170,7 +170,10 @@ public final class UpdateCenter {
       addInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);
     }
     for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
-      addInstallablePlugins(incomingDependency.getArtifact().getKey(), incomingDependency.getVersion(), installablePlugins);
+      String pluginKey = incomingDependency.getArtifact().getKey();
+      if (isInstalled(pluginKey)) {
+        addInstallablePlugins(pluginKey, incomingDependency.getVersion(), installablePlugins);
+      }
     }
   }
 
@@ -256,7 +259,11 @@ public final class UpdateCenter {
   }
 
   private boolean isInstalled(final Plugin plugin) {
-    return installedPluginReferential.doesContainPlugin(plugin.getKey());
+    return isInstalled(plugin.getKey());
+  }
+
+  private boolean isInstalled(final String pluginKey) {
+    return installedPluginReferential.doesContainPlugin(pluginKey);
   }
 
   private Plugin findPlugin(Release release) {
