@@ -19,7 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
-public final class Sonar extends Artifact {
+public class Sonar extends Artifact {
 
   public Sonar() {
     super("sonar");

@@ -38,7 +38,7 @@ import java.util.SortedSet;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
-public final class UpdateCenter {
+public class UpdateCenter {
 
   private static final Logger LOG = LoggerFactory.getLogger(UpdateCenter.class);
   private PluginReferential updateCenterPluginReferential;

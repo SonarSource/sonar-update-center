@@ -33,7 +33,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 
-public final class Plugin extends Artifact {
+public class Plugin extends Artifact {
 
   private String name;
   private String description;

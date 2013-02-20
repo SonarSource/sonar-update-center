@@ -35,7 +35,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
-public final class PluginReferential {
+public class PluginReferential {
 
   private Set<Plugin> plugins;
 

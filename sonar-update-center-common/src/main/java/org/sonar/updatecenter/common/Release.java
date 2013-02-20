@@ -30,7 +30,7 @@ import java.util.TreeSet;
 
 import static com.google.common.collect.Sets.newHashSet;
 
-public final class Release implements Comparable<Release> {
+public class Release implements Comparable<Release> {
 
   private Artifact artifact;
   private Version version;
