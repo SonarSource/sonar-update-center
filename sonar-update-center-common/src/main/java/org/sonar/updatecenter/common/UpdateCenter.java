@@ -136,20 +136,21 @@ public class UpdateCenter {
    */
   public List<Release> findInstallablePlugins(String pluginKey, Version minimumVersion) {
     Set<Release> installablePlugins = newHashSet();
-    addInstallablePlugins(pluginKey, minimumVersion, installablePlugins);
+    Set<Release> checkedPlugins = newHashSet();
+    addInstallablePlugins(pluginKey, minimumVersion, installablePlugins, checkedPlugins);
     return newArrayList(installablePlugins);
   }
 
-  private void addInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins) {
+  private void addInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins, Set<Release> checkedPlugins) {
     try {
-      if (!contain(pluginKey, installablePlugins)) {
+      if (!contain(pluginKey, installablePlugins) && !contain(pluginKey, checkedPlugins)) {
         Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
         Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
         if (pluginRelease != null) {
           if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
             throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
           }
-          addInstallableRelease(pluginRelease, installablePlugins);
+          addInstallableRelease(pluginRelease, installablePlugins, checkedPlugins);
         }
       }
     } catch (NoSuchElementException e) {
@@ -157,18 +158,19 @@ public class UpdateCenter {
     }
   }
 
-  private void addInstallableRelease(Release pluginRelease, Set<Release> installablePlugins) {
+  private void addInstallableRelease(Release pluginRelease, Set<Release> installablePlugins, Set<Release> checkedPlugins) {
     addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
+    checkedPlugins.add(pluginRelease);
     for (Release child : pluginRelease.getChildren()) {
       addReleaseIfNotAlreadyInstalled(child, installablePlugins);
     }
     for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
-      addInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins);
+      addInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins, checkedPlugins);
     }
     for (Release incomingDependency : pluginRelease.getIncomingDependencies()) {
       String pluginKey = incomingDependency.getArtifact().getKey();
       if (isInstalled(pluginKey)) {
-        addInstallablePlugins(pluginKey, incomingDependency.getVersion(), installablePlugins);
+        addInstallablePlugins(pluginKey, incomingDependency.getVersion(), installablePlugins, checkedPlugins);
       }
     }
   }
@@ -176,7 +178,7 @@ public class UpdateCenter {
   private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
     return Iterables.any(installablePlugins, new Predicate<Release>() {
       public boolean apply(Release input) {
-        return input.getArtifact().getKey().equals(pluginKey);
+        return input.getKey().equals(pluginKey);
       }
     });
   }
