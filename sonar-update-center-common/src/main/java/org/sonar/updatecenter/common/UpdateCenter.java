@@ -108,7 +108,7 @@ public class UpdateCenter {
 
   public List<PluginUpdate> findPluginUpdates() {
     List<PluginUpdate> updates = newArrayList();
-    for (Release installedRelease : getInstalledReleases()) {
+    for (Release installedRelease : getInstalledMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
@@ -196,9 +196,9 @@ public class UpdateCenter {
     return updates;
   }
 
-  SonarUpdate createSonarUpdate(Release sonarRelease) {
+  private SonarUpdate createSonarUpdate(Release sonarRelease) {
     SonarUpdate update = new SonarUpdate(sonarRelease);
-    for (Release installedRelease : getInstalledReleases()) {
+    for (Release installedRelease : getInstalledMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         if (installedRelease.supportSonarVersion(sonarRelease.getVersion())) {
@@ -225,15 +225,6 @@ public class UpdateCenter {
       }
     }
     return update;
-  }
-
-  public Release findLatestCompatibleRelease(String pluginKey) {
-    if (updateCenterPluginReferential.doesContainPlugin(pluginKey)) {
-      Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
-      return plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
-    } else {
-      return null;
-    }
   }
 
   @VisibleForTesting
@@ -267,7 +258,7 @@ public class UpdateCenter {
     return updateCenterPluginReferential.findPlugin(key);
   }
 
-  private List<Release> getInstalledReleases() {
+  private List<Release> getInstalledMasterReleases() {
     return installedPluginReferential.getLastMasterReleases();
   }
 

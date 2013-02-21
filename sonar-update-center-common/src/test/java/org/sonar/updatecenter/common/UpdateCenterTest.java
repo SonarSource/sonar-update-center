@@ -27,7 +27,6 @@ import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionExceptio
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -251,34 +250,7 @@ public class UpdateCenterTest {
     assertThat(availables).hasSize(1);
     assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
     assertThat(availables.get(0).isCompatible()).isTrue();
-    assertThat(availables.get(0).getPlugin().getLastRelease().getChildren()).hasSize(1); // TODO
-  }
-
-  @Test
-  public void should_find_latest_compatible_plugin() {
-    Plugin test = new Plugin("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
-    Release test11 = new Release(test, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.1.jar");
-    Release test12 = new Release(test, "1.2").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/test-1.1.jar");
-    test.addRelease(test10);
-    test.addRelease(test11);
-    test.addRelease(test12);
-
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.2").setDownloadUrl("http://server/foo-1.0.jar");
-    foo.addRelease(foo10);
-
-    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(
-        PluginReferential.create(newArrayList(test, foo)), sonar)
-        .setInstalledSonarVersion(Version.create("2.1"));
-
-    Release release = updateCenter.findLatestCompatibleRelease("test");
-    assertThat(release).isNotNull();
-    assertThat(release.getVersion().getName()).isEqualTo("1.1");
-
-    assertThat(updateCenter.findLatestCompatibleRelease("foo")).isNull();
-    assertThat(updateCenter.findLatestCompatibleRelease("unkownw")).isNull();
+    assertThat(availables.get(0).getPlugin().getLastRelease().getChildren()).hasSize(1);
   }
 
   @Test
