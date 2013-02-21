@@ -55,7 +55,7 @@ class PluginHeaders {
 
   void generateHtml() throws IOException {
     init();
-    List<Plugin> plugins = center.getLastMasterReleasePlugins();
+    List<Plugin> plugins = center.getPlugins();
     for (Plugin plugin : plugins) {
       File file = new File(outputDirectory, plugin.getKey() + ".html");
       log.info("Generate html header of plugin " + plugin.getKey() + " in: " + file);

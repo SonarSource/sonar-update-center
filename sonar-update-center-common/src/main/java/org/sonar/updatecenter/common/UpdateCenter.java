@@ -29,11 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -87,19 +83,21 @@ public class UpdateCenter {
   public List<PluginUpdate> findAvailablePlugins() {
     Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
-    for (Plugin plugin : updateCenterPluginReferential.getLastMasterReleasePlugins()) {
+    for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       if (!isInstalled(plugin)) {
         Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
         if (release != null) {
-          try {
-            findInstallablePlugins(plugin.getKey(), release.getVersion());
-            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
-          } catch (IncompatiblePluginVersionException e) {
-            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
+          if (release.isMaster()) {
+            try {
+              findInstallablePlugins(plugin.getKey(), release.getVersion());
+              availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE));
+            } catch (IncompatiblePluginVersionException e) {
+              availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
+            }
           }
         } else {
           release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
-          if (release != null) {
+          if (release != null && release.isMaster()) {
             availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
           }
         }
@@ -110,7 +108,7 @@ public class UpdateCenter {
 
   public List<PluginUpdate> findPluginUpdates() {
     List<PluginUpdate> updates = newArrayList();
-    for (Release installedRelease : installedPluginReferential.getLastMasterReleases()) {
+    for (Release installedRelease : getInstalledReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
@@ -200,7 +198,7 @@ public class UpdateCenter {
 
   SonarUpdate createSonarUpdate(Release sonarRelease) {
     SonarUpdate update = new SonarUpdate(sonarRelease);
-    for (Release installedRelease : installedPluginReferential.getLastMasterReleases()) {
+    for (Release installedRelease : getInstalledReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         if (installedRelease.supportSonarVersion(sonarRelease.getVersion())) {
@@ -267,6 +265,10 @@ public class UpdateCenter {
   private Plugin findPlugin(Release release) {
     String key = release.getArtifact().getKey();
     return updateCenterPluginReferential.findPlugin(key);
+  }
+
+  private List<Release> getInstalledReleases() {
+    return installedPluginReferential.getLastMasterReleases();
   }
 
 }
