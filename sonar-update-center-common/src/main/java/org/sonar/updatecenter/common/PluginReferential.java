@@ -133,13 +133,6 @@ public class PluginReferential {
     }
   }
 
-  private void checkPluginVersion(Release release, Release parent) {
-    if (!parent.getVersion().equals(release.getVersion())) {
-      throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parent.getKey() +
-          "' must have exactly the same version as they belong to the same group.");
-    }
-  }
-
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
     try {
       Plugin requiredPlugin = findPlugin(requiredPluginReleaseKey);
