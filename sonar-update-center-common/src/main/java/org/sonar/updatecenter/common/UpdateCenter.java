@@ -110,7 +110,7 @@ public class UpdateCenter {
 
   public List<PluginUpdate> findPluginUpdates() {
     List<PluginUpdate> updates = newArrayList();
-    for (Release installedRelease : installedPluginReferential.getReleasesForMasterPlugins()) {
+    for (Release installedRelease : installedPluginReferential.getLastMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
@@ -200,7 +200,7 @@ public class UpdateCenter {
 
   SonarUpdate createSonarUpdate(Release sonarRelease) {
     SonarUpdate update = new SonarUpdate(sonarRelease);
-    for (Release installedRelease : installedPluginReferential.getReleasesForMasterPlugins()) {
+    for (Release installedRelease : installedPluginReferential.getLastMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
         if (installedRelease.supportSonarVersion(sonarRelease.getVersion())) {

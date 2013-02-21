@@ -101,7 +101,7 @@ public class PluginReferential {
     return false;
   }
 
-  public List<String> findReleasesWithDependencies(String pluginKey) {
+  public List<String> findLastReleasesWithDependencies(String pluginKey) {
     List<String> removablePlugins = newArrayList();
     Plugin plugin = findPlugin(pluginKey);
     if (plugin != null) {
@@ -111,7 +111,7 @@ public class PluginReferential {
         removablePlugins.add(child.getKey());
       }
       for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
-        removablePlugins.addAll(findReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
+        removablePlugins.addAll(findLastReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
       }
     }
     return removablePlugins;
@@ -184,7 +184,7 @@ public class PluginReferential {
     }
   }
 
-  List<Release> getReleasesForMasterPlugins() {
+  List<Release> getLastMasterReleases() {
     List<Release> releases = newArrayList();
     for (Plugin plugin : getLastMasterReleasePlugins()) {
       releases.add(plugin.getLastRelease());
