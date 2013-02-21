@@ -29,13 +29,25 @@ public class PluginTest {
   @Test
   public void should_merge_with_manifest() {
     Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setParent("group");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setParent("parent");
 
     plugin.merge(manifest);
 
     assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
     assertThat(plugin.getDescription()).isEqualTo("Parser");
+  }
+
+  @Test
+  public void should_not_merge_with_manifest_plugin_key_is_different() {
+    Plugin plugin = new Plugin("squid").setOrganization("SonarSource");
+    PluginManifest manifest = new PluginManifest().setKey("another_key").setOrganization("Other");
+
+    plugin.merge(manifest);
+
+    assertThat(plugin.getLicense());
+    assertThat(plugin.getKey()).isEqualTo("squid");
+    assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
   }
 
   @Test
@@ -56,6 +68,13 @@ public class PluginTest {
     plugin.merge(manifest);
 
     assertThat(plugin.getSourcesUrl()).isEqualTo("sourcesUrl");
+  }
+
+  @Test
+  public void shoukd_return_string() {
+    Plugin plugin = new Plugin("squid");
+
+    assertThat(plugin.toString()).isEqualTo("squid");
   }
 
 }
