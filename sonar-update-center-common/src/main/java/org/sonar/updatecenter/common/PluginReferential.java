@@ -33,14 +33,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 
 public class PluginReferential {
 
   private Set<Plugin> plugins;
 
   private PluginReferential() {
-    this.plugins = newHashSet();
+    this.plugins = newTreeSet();
   }
 
   public static PluginReferential create(List<Plugin> pluginList) {
@@ -101,7 +101,7 @@ public class PluginReferential {
     return false;
   }
 
-  public List<String> findReleasesWithDependencies(String pluginKey) {
+  public List<String> findLastReleasesWithDependencies(String pluginKey) {
     List<String> removablePlugins = newArrayList();
     Plugin plugin = findPlugin(pluginKey);
     if (plugin != null) {
@@ -111,7 +111,7 @@ public class PluginReferential {
         removablePlugins.add(child.getKey());
       }
       for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
-        removablePlugins.addAll(findReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
+        removablePlugins.addAll(findLastReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
       }
     }
     return removablePlugins;
@@ -131,13 +131,6 @@ public class PluginReferential {
     } catch (NoSuchElementException e) {
       throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + release.getKey() + "' is missing.", e);
     }
-  }
-
-  private void checkPluginVersion(Release release, Release parent) {
-      if (!parent.getVersion().equals(release.getVersion())) {
-        throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parent.getKey() +
-            "' must have exactly the same version as they belong to the same group.");
-      }
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
@@ -184,7 +177,7 @@ public class PluginReferential {
     }
   }
 
-  List<Release> getReleasesForMasterPlugins() {
+  List<Release> getLastMasterReleases() {
     List<Release> releases = newArrayList();
     for (Plugin plugin : getLastMasterReleasePlugins()) {
       releases.add(plugin.getLastRelease());

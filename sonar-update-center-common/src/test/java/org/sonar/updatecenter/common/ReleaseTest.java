@@ -45,10 +45,56 @@ public class ReleaseTest {
 
   @Test
   public void should_return_master(){
-    Release plugin = new Release(new Plugin("squid"), "1.0");
-    assertThat(plugin.isMaster()).isTrue();
+    Release release = new Release(new Plugin("squid"), "1.0");
+    assertThat(release.isMaster()).isTrue();
 
-    plugin = new Release(new Plugin("squid"), "1.0").setParent(new Release(new Plugin("foo"), "1.0"));
-    assertThat(plugin.isMaster()).isFalse();
+    release = new Release(new Plugin("squid"), "1.0").setParent(new Release(new Plugin("foo"), "1.0"));
+    assertThat(release.isMaster()).isFalse();
+  }
+
+  @Test
+  public void should_add_required_sonar_versions(){
+    Release release = new Release(new Plugin("squid"), "1.0");
+    release.addRequiredSonarVersions("2.0");
+    assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
+
+    release.addRequiredSonarVersions((String[]) null);
+    assertThat(release.getRequiredSonarVersions()).hasSize(1);
+
+    release.addRequiredSonarVersions((Version[]) null);
+    assertThat(release.getRequiredSonarVersions()).hasSize(1);
+  }
+
+  @Test
+  public void should_return_last_required_sonar_version(){
+    Release release = new Release(new Plugin("squid"), "1.0");
+    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
+    assertThat(release.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.1"));
+
+    Release squid10 = new Release(new Plugin("squid"), "1.0");
+    assertThat(squid10.getLastRequiredSonarVersion()).isNull();
+  }
+
+  @Test
+  public void should_return_minimum_required_sonar_version(){
+    Release release = new Release(new Plugin("squid"), "1.0");
+    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
+    assertThat(release.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("1.9"));
+
+    Release squid10 = new Release(new Plugin("squid"), "1.0");
+    assertThat(squid10.getMinimumRequiredSonarVersion()).isNull();
+  }
+
+  @Test
+  public void test_equal(){
+    Release squid10 = new Release(new Plugin("squid"), "1.0");
+    Release squid10bis = new Release(new Plugin("squid"), "1.0");
+    Release squid20 = new Release(new Plugin("squid"), "2.0");
+
+    Release bar10 = new Release(new Plugin("bar"), "1.0");
+
+    assertThat(squid10).isEqualTo(squid10bis);
+    assertThat(squid10).isNotEqualTo(squid20);
+    assertThat(squid10).isNotEqualTo(bar10);
   }
 }

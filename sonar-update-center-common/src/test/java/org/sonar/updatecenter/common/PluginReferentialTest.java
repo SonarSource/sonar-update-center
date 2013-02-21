@@ -108,7 +108,7 @@ public class PluginReferentialTest {
     pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
-    List<String> installablePlugins = pluginReferential.findReleasesWithDependencies("foo");
+    List<String> installablePlugins = pluginReferential.findLastReleasesWithDependencies("foo");
     assertThat(installablePlugins).hasSize(4);
     assertThat(installablePlugins).contains("foo", "foobis", "bar", "barbis");
   }

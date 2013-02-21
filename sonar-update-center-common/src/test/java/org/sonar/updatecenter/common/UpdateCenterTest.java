@@ -527,6 +527,48 @@ public class UpdateCenterTest {
   }
 
   @Test
+  public void should_return_dependencies_to_download_with_some_installed_plugins_to_latest_version() {
+    Plugin foo = new Plugin("foo");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
+    Release foo11 = new Release(foo, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.1.jar");
+    foo.addRelease(foo10);
+    foo.addRelease(foo11);
+
+    // foobis depends upon foo
+    Plugin foobis = new Plugin("foobis");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.0.jar");
+    Release foobis11 = new Release(foobis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foobis-1.1.jar");
+    foobis.addRelease(foobis10);
+    foobis.addRelease(foobis11);
+
+    // bar has one child and depends upon foobis
+    Plugin bar = new Plugin("bar");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
+    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
+    bar.addRelease(bar10);
+    bar.addRelease(bar11);
+
+    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar));
+    pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
+    pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
+    pluginReferential.addOutgoingDependency(bar10, "foobis", "1.0");
+    pluginReferential.addOutgoingDependency(bar11, "foobis", "1.1");
+
+    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
+    UpdateCenter updateCenter = UpdateCenter.create(
+        pluginReferential, sonar)
+        .setInstalledSonarVersion(Version.create("2.1"))
+        .registerInstalledPlugins(PluginReferential.create(newArrayList(
+            (Plugin) new Plugin("foo").addRelease("1.1").getArtifact(),
+            (Plugin) new Plugin("foobis").addRelease("1.1").getArtifact()
+        )));
+
+    List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
+    assertThat(installablePlugins).hasSize(1);
+    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
+  }
+
+  @Test
   public void should_return_incoming_not_already_installed_dependencies_to_download() {
     Plugin foo = new Plugin("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
