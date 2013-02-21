@@ -32,9 +32,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 
 public class Release implements Comparable<Release> {
 
@@ -51,12 +51,14 @@ public class Release implements Comparable<Release> {
   /**
    * from oldest to newest sonar versions
    */
-  private SortedSet<Version> requiredSonarVersions = new TreeSet<Version>();
+  private SortedSet<Version> requiredSonarVersions;
   private Date date;
 
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
+
+    this.requiredSonarVersions = newTreeSet();
     this.children = newHashSet();
     this.outgoingDependencies = newHashSet();
     this.incomingDependencies = newHashSet();
@@ -117,14 +119,14 @@ public class Release implements Comparable<Release> {
   }
 
   public Version getLastRequiredSonarVersion() {
-    if (requiredSonarVersions != null && !requiredSonarVersions.isEmpty()) {
+    if (!requiredSonarVersions.isEmpty()) {
       return requiredSonarVersions.last();
     }
     return null;
   }
 
   public Version getMinimumRequiredSonarVersion() {
-    if (requiredSonarVersions != null && !requiredSonarVersions.isEmpty()) {
+    if (!requiredSonarVersions.isEmpty()) {
       return requiredSonarVersions.first();
     }
     return null;

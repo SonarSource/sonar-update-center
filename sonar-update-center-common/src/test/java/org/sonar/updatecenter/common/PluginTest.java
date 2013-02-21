@@ -71,7 +71,7 @@ public class PluginTest {
   }
 
   @Test
-  public void shoukd_return_string() {
+  public void should_return_string() {
     Plugin plugin = new Plugin("squid");
 
     assertThat(plugin.toString()).isEqualTo("squid");
