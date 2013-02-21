@@ -36,11 +36,12 @@ public class ReleaseTest {
 
   @Test
   public void should_add_dependencies() {
-    Release dependency = new Release(new Plugin("foo"), Version.create("1.0"));
     Release release = new Release(new Plugin("fake"), Version.create("1.2"));
-    release.getOutgoingDependencies().add(dependency);
-
+    release.addOutgoingDependency(new Release(new Plugin("foo"), Version.create("1.0")));
     assertThat(release.getOutgoingDependencies()).hasSize(1);
+
+    release.addIncomingDependency(new Release(new Plugin("fake2"), Version.create("1.2")));
+    assertThat(release.getIncomingDependencies()).hasSize(1);
   }
 
   @Test

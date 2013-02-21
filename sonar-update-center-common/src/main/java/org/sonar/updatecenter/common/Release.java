@@ -21,6 +21,7 @@ package org.sonar.updatecenter.common;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -188,7 +189,7 @@ public class Release implements Comparable<Release> {
   }
 
   public Set<Release> getOutgoingDependencies() {
-    return outgoingDependencies;
+    return ImmutableSortedSet.copyOf(outgoingDependencies);
   }
 
   public Release addOutgoingDependency(Release required) {
@@ -197,7 +198,7 @@ public class Release implements Comparable<Release> {
   }
 
   public Set<Release> getIncomingDependencies() {
-    return incomingDependencies;
+    return ImmutableSortedSet.copyOf(incomingDependencies);
   }
 
   public Release addIncomingDependency(Release required) {

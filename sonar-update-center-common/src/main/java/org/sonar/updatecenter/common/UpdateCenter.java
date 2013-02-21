@@ -117,7 +117,7 @@ public class UpdateCenter {
           PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
           try {
             if (pluginUpdate.isCompatible()) {
-              findInstallablePlugins(plugin.getKey(), nextRelease.getVersion());
+              pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), nextRelease.getVersion()));
             }
           } catch (IncompatiblePluginVersionException e) {
             pluginUpdate.setStatus(PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE);
@@ -125,14 +125,14 @@ public class UpdateCenter {
           updates.add(pluginUpdate);
         }
       } catch (NoSuchElementException e) {
-        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
+        // Nothing to do, this plugin is not in the update center, it has been installed manually.
       }
     }
     return updates;
   }
 
   /**
-   * Return all releases to download (including outgoing dependencies) to install / update a plugin
+   * Return all releases to download (including outgoing dependencies and installed incoming dependencies) to install / update a plugin
    */
   public List<Release> findInstallablePlugins(String pluginKey, Version minimumVersion) {
     Set<Release> installablePlugins = newHashSet();

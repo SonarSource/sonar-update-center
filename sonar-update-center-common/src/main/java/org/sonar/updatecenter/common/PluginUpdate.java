@@ -19,17 +19,49 @@
  */
 package org.sonar.updatecenter.common;
 
-public final class PluginUpdate {
+import com.google.common.collect.ImmutableList;
 
-  public enum Status {
-    COMPATIBLE, INCOMPATIBLE, REQUIRE_SONAR_UPGRADE, DEPENDENCIES_REQUIRE_SONAR_UPGRADE
-  }
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+
+public final class PluginUpdate {
 
   private Status status = Status.INCOMPATIBLE;
   private Release release;
+  private List<Release> dependencies = newArrayList();
+
+  public static PluginUpdate createWithStatus(Release pluginRelease, Status status) {
+    PluginUpdate update = new PluginUpdate();
+    update.setRelease(pluginRelease);
+    update.setStatus(status);
+    return update;
+  }
+
+  public static PluginUpdate createForPluginRelease(Release pluginRelease, Version sonarVersion) {
+    PluginUpdate update = new PluginUpdate();
+    update.setRelease(pluginRelease);
+
+    if (pluginRelease.supportSonarVersion(sonarVersion)) {
+      update.setStatus(Status.COMPATIBLE);
+
+    } else {
+      for (Version requiredSonarVersion : pluginRelease.getRequiredSonarVersions()) {
+        if (requiredSonarVersion.compareTo(sonarVersion) > 0) {
+          update.setStatus(Status.REQUIRE_SONAR_UPGRADE);
+          break;
+        }
+      }
+    }
+    return update;
+  }
 
   public Status getStatus() {
     return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
   public boolean isCompatible() {
@@ -48,12 +80,8 @@ public final class PluginUpdate {
     return Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE.equals(status);
   }
 
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
   public Plugin getPlugin() {
-    return (Plugin)release.getArtifact();
+    return (Plugin) release.getArtifact();
   }
 
   public Release getRelease() {
@@ -64,28 +92,16 @@ public final class PluginUpdate {
     this.release = release;
   }
 
-  public static PluginUpdate createWithStatus(Release pluginRelease, Status status) {
-    PluginUpdate update = new PluginUpdate();
-    update.setRelease(pluginRelease);
-    update.setStatus(status);
-    return update;
+  public List<Release> getDependencies() {
+    return ImmutableList.copyOf(dependencies);
   }
 
-  public static PluginUpdate createForPluginRelease(Release pluginRelease, Version sonarVersion) {
-    PluginUpdate update = new PluginUpdate();
-    update.setRelease(pluginRelease);
+  public void setDependencies(List<Release> dependencies) {
+    dependencies.remove(release);
+    this.dependencies = dependencies;
+  }
 
-    if (pluginRelease.supportSonarVersion(sonarVersion)) {
-      update.setStatus(Status.COMPATIBLE);
-
-    } else {
-      for (Version requiredSonarVersion : pluginRelease.getRequiredSonarVersions()) {
-        if (requiredSonarVersion.compareTo(sonarVersion)>0) {
-          update.setStatus(Status.REQUIRE_SONAR_UPGRADE);
-          break;
-        }
-      }
-    }
-    return update;
+  public enum Status {
+    COMPATIBLE, INCOMPATIBLE, REQUIRE_SONAR_UPGRADE, DEPENDENCIES_REQUIRE_SONAR_UPGRADE
   }
 }
