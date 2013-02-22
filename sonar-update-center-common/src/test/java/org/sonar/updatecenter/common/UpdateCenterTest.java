@@ -27,6 +27,7 @@ import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionExceptio
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -223,6 +224,7 @@ public class UpdateCenterTest {
     assertThat(availables).hasSize(1);
     assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
     assertThat(availables.get(0).requiresSonarUpgradeForDependencies()).isTrue();
+    assertThat(availables.get(0).getDependencies()).hasSize(0);
   }
 
   @Test
