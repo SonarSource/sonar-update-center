@@ -19,24 +19,22 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.PluginManifest;
-import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.UpdateCenter;
-import org.sonar.updatecenter.common.UpdateCenterSerializer;
+import org.sonar.updatecenter.common.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
 
 class Generator {
 
   private static final String HTML_HEADER_DIR = "html";
-
   private final Configuration configuration;
   private final Log log;
 
@@ -54,7 +52,8 @@ class Generator {
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), log);
-    for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
+    PluginReferential pluginReferential = center.getUpdateCenterPluginReferential();
+    for (Plugin plugin : pluginReferential.getPlugins()) {
       log.info("Load plugin: " + plugin.getKey());
 
       File masterJar = null;
@@ -62,11 +61,11 @@ class Generator {
         if (StringUtils.isNotBlank(release.getDownloadUrl())) {
           File jar = downloader.download(release.getDownloadUrl(), false);
           if (jar != null && jar.exists()) {
+            updateReleaseRequirePluginsAndParentProperties(pluginReferential, jar, release);
             masterJar = jar;
           } else {
             throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
           }
-
         } else {
           log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
         }
@@ -75,6 +74,21 @@ class Generator {
       // the last release is the master version for loading metadata included in manifest
       if (masterJar != null) {
         plugin.merge(new PluginManifest(masterJar));
+      }
+    }
+  }
+
+  private void updateReleaseRequirePluginsAndParentProperties(PluginReferential pluginReferential, File jar, Release release) throws IOException {
+    PluginManifest releaseManifest = new PluginManifest(jar);
+    if (!Strings.isNullOrEmpty(releaseManifest.getParent())) {
+      pluginReferential.setParent(release, releaseManifest.getParent());
+    }
+    if (releaseManifest.getRequirePlugins() != null) {
+      for (String requirePlugin : releaseManifest.getRequirePlugins()) {
+        Iterator<String> split = Splitter.on(':').split(requirePlugin).iterator();
+        String requiredPluginReleaseKey = split.next();
+        String requiredMinimumReleaseVersion = split.next();
+        pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
       }
     }
   }

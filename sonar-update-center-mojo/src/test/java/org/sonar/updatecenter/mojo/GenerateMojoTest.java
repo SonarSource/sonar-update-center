@@ -20,15 +20,11 @@
 package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -37,7 +33,7 @@ public class GenerateMojoTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
-  public void generate_properties_and_html() throws IOException, URISyntaxException, MojoFailureException, MojoExecutionException {
+  public void generate_properties_and_html() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached
@@ -63,6 +59,28 @@ public class GenerateMojoTest {
     assertThat(new File(outputDir, "html/style.css")).exists().isFile();
     String html = FileUtils.readFileToString(htmlHeader);
     assertThat(html).contains("<title>Artifact Size</title>");
+  }
+
+  @Test
+  public void generate_properties_with_requires_plugins_and_parent_properties() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugin is already cached
+    FileUtils.copyFileToDirectory(resource("csharp-plugin-1.0.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("dotnet-plugin-1.0.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.0.jar"), outputDir);
+
+    File inputFile = resource("update-center-template-for-requires-and-parent.properties");
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+
+    // verify that properties file is generated
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).exists().isFile();
+    String output = FileUtils.readFileToString(outputFile);
+
+    assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0");
+    assertThat(output).contains("fxcop.1.0.parent=dotnet");
+    assertThat(output).contains("parent");
   }
 
   private File resource(String filename) {
