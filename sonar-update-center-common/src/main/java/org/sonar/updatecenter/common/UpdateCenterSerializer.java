@@ -130,7 +130,7 @@ public final class UpdateCenterSerializer {
   private static String[] getRequiredList(Release release) {
     List<String> requiredStringList = newArrayList();
     for (Release requiredRelease : release.getOutgoingDependencies()) {
-      requiredStringList.add(release.getArtifact().getKey() + ":" + release.getVersion().getName());
+      requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
     return requiredStringList.toArray(new String[]{});
   }

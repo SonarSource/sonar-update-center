@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Splitter;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class UpdateCenterSerializerTest {
 
   @Test
-  public void testToProperties() throws IOException, URISyntaxException {
+  public void test_to_properties() throws IOException, URISyntaxException {
     Sonar sonar = new Sonar();
     sonar.addRelease(Version.create("2.0"));
     sonar.addRelease(Version.create("2.1"));
@@ -130,7 +131,8 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.1.2.requirePlugins", "bar:1.2,bar:1.2");
+    Iterable requirePlugins = Splitter.on(",").split(properties.getProperty("bar.1.2.requirePlugins"));
+    assertThat(requirePlugins).containsOnly("foo:1.2","test:1.0");
   }
 
   private void assertProperty(Properties props, String key, String value) {
