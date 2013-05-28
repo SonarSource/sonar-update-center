@@ -202,7 +202,7 @@ public class UpdateCenter {
     for (Release installedRelease : getInstalledMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
-        Release release = plugin.getRelease(installedRelease.getVersion());
+        Release release = plugin.getRelease(installedRelease.getAdjustedVersion());
         if (release.supportSonarVersion(sonarRelease.getVersion())) {
           update.addCompatiblePlugin(plugin);
 

@@ -28,11 +28,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
@@ -212,6 +208,10 @@ public class Release implements Comparable<Release> {
 
   public String getKey() {
     return getArtifact().getKey();
+  }
+
+  public Version getAdjustedVersion() {
+    return Version.createRelease(version.toString());
   }
 
   @Override
