@@ -630,7 +630,7 @@ public class UpdateCenterTest {
   }
 
   @Test
-  public void find_no_plugin_to_updgrade_on_already_compatible_plugins_with_sonar_updates() {
+  public void find_no_plugin_to_upgrade_on_already_compatible_plugins_with_sonar_updates() {
     sonar.addRelease(Version.create("2.3"));
 
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
