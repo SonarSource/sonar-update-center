@@ -630,6 +630,24 @@ public class UpdateCenterTest {
   }
 
   @Test
+  public void find_no_plugin_to_updgrade_on_already_compatible_plugins_with_sonar_updates() {
+    sonar.addRelease(Version.create("2.3"));
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
+      .setInstalledSonarVersion(Version.create("2.2"))
+      .registerInstalledPlugins(
+        PluginReferential.create(newArrayList((Plugin) new Plugin("foo").addRelease("1.2").getArtifact(), (Plugin) new Plugin("bar").addRelease("1.1").getArtifact())));
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    // sonar 2.3 supports foo 1.2 and bar 1.1
+    // => No plugin upgrade is required
+    assertThat(updates.get(0).hasWarnings()).isFalse();
+    assertThat(updates.get(0).requiresPluginUpgrades()).isFalse();
+    assertThat(updates.get(0).getPluginsToUpgrade()).isEmpty();
+    assertThat(updates.get(0).getIncompatiblePlugins()).isEmpty();
+  }
+
+  @Test
   public void warnings_on_sonar_updates() {
     sonar.addRelease(Version.create("2.3"));
     sonar.addRelease(Version.create("2.4"));
