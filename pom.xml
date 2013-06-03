@@ -4,7 +4,7 @@
 
   <groupId>org.codehaus.sonar</groupId>
   <artifactId>sonar-update-center</artifactId>
-  <version>1.7-SNAPSHOT</version>
+  <version>1.6.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Sonar :: Update Center</name>
   <url>http://www.sonarsource.org</url>
