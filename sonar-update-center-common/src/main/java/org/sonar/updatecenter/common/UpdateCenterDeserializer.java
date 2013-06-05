@@ -20,7 +20,10 @@
 
 package org.sonar.updatecenter.common;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Collections2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,11 +31,18 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
@@ -95,7 +105,7 @@ public final class UpdateCenterDeserializer {
         release.setChangelogUrl(get(p, pluginKey, pluginVersion + ".changelogUrl"));
         release.setDescription(get(p, pluginKey, pluginVersion + ".description"));
         release.setDate(toDate(get(p, pluginKey, pluginVersion + ".date"), false));
-        String[] requiredSonarVersions = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, pluginVersion + ".requiredSonarVersions"), ""), ",");
+        String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar.getReleases());
         for (String requiredSonarVersion : requiredSonarVersions) {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
         }
@@ -121,6 +131,65 @@ public final class UpdateCenterDeserializer {
       }
     }
     return UpdateCenter.create(pluginReferential, sonar).setDate(date);
+  }
+
+  private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, SortedSet<Release> sonarReleases) {
+    List<String> patterns = split(StringUtils.defaultIfEmpty(get(p, pluginKey, pluginVersion + ".requiredSonarVersions"), ""));
+    List<String> result = new LinkedList<String>();
+    for (String pattern : patterns) {
+      if (pattern != null) {
+        Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
+        if (matcher.matches()) {
+          final Version low = Version.create(resolve(matcher.group(1), sonarReleases));
+          final Version high = Version.create(resolve(matcher.group(2), sonarReleases));
+          Collection<Version> versions = Collections2.filter(transform(sonarReleases, new Function<Release, Version>() {
+            public Version apply(Release release) {
+              return release.getVersion();
+            }
+          }), new Predicate<Version>() {
+            public boolean apply(Version version) {
+              return version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
+            }
+          });
+          for (Version version : versions) {
+            result.add(version.toString());
+          }
+        }
+        else {
+          result.add(resolve(pattern, sonarReleases));
+        }
+      }
+    }
+    return result.toArray(new String[result.size()]);
+  }
+
+  private static List<String> split(String requiredSonarVersions) {
+    List<String> splitted = new ArrayList<String>();
+    int skipCommas = 0;
+    String s = "";
+    for (char c : requiredSonarVersions.toCharArray()) {
+      if (c == ',' && skipCommas == 0) {
+        splitted.add(s);
+        s = "";
+      } else {
+        if (c == '[') {
+          skipCommas++;
+        }
+        if (c == ']') {
+          skipCommas--;
+        }
+        s += c;
+      }
+    }
+    splitted.add(s);
+    return splitted;
+  }
+
+  private static String resolve(String version, SortedSet<Release> sonarReleases) {
+    if ("LATEST".equals(version)) {
+      return sonarReleases.last().getVersion().toString();
+    }
+    return version;
   }
 
   private static String get(Properties props, String key) {

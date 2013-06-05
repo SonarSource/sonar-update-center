@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
@@ -137,12 +138,65 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test(expected = PluginNotFoundException.class)
-  public void should_throw_exception_when_parent_is_missing(){
+  public void should_throw_exception_when_parent_is_missing() {
     Properties props = new Properties();
     props.put("plugins", "foo");
     props.put("foo.name", "Foo");
     props.put("foo.versions", "1.1");
     props.put("foo.1.1.parent", "bar");
     UpdateCenterDeserializer.fromProperties(props);
+  }
+
+  // UPC-6
+  @Test
+  public void should_resolve_ranges() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-ranges.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
+      SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(5);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.7");
+
+      Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(6);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.2");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+      assertThat(requiredSonarVersion).excludes(Version.create("2.7"));
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-7
+  @Test
+  public void should_resolve_latest() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-latest.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
+      SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(7);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+
+      Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(4);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
   }
 }
