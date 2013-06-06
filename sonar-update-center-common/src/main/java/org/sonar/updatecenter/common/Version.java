@@ -90,23 +90,15 @@ public class Version implements Comparable<Version> {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof Version)) {
       return false;
     }
     Version other = (Version) o;
-    if (!normalizedMajor.equals(other.normalizedMajor)) {
-      return false;
-    }
-    if (!normalizedMinor.equals(other.normalizedMinor)) {
-      return false;
-    }
-    if (!normalizedPatch.equals(other.normalizedPatch)) {
-      return false;
-    }
-    if (!normalizedPatch2.equals(other.normalizedPatch2)) {
-      return false;
-    }
-    return qualifier.equals(other.qualifier);
+    return normalizedMajor.equals(other.normalizedMajor)
+      && normalizedMinor.equals(other.normalizedMinor)
+      && normalizedPatch.equals(other.normalizedPatch)
+      && normalizedPatch2.equals(other.normalizedPatch2)
+      && qualifier.equals(other.qualifier);
   }
 
   @Override

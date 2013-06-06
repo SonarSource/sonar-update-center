@@ -66,8 +66,8 @@ import java.util.Set;
  */
 public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private static final String LIB_DIR = "META-INF/lib/";
-  private static final String[] DEFAULT_EXCLUDES = new String[]{"**/package.html"};
-  private static final String[] DEFAULT_INCLUDES = new String[]{"**/**"};
+  private static final String[] DEFAULT_EXCLUDES = new String[] {"**/package.html"};
+  private static final String[] DEFAULT_INCLUDES = new String[] {"**/**"};
   /**
    * The Jar archiver.
    *
@@ -160,21 +160,37 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   }
 
   private void checkMandatoryAttributes() throws MojoExecutionException {
+    checkPluginName();
+    checkPluginDescription();
+    checkPluginKey();
+    checkPluginClass();
+  }
+
+  private void checkPluginClass() throws MojoExecutionException {
+    if (!new File(getClassesDirectory(), getPluginClass().replace('.', '/') + ".class").exists()) {
+      throw new MojoExecutionException("Plugin class not found: '" + getPluginClass());
+    }
+  }
+
+  private void checkPluginKey() throws MojoExecutionException {
+    if (StringUtils.isNotBlank(getExplicitPluginKey()) && !PluginKeyUtils.isValid(getExplicitPluginKey())) {
+      throw new MojoExecutionException("Plugin key is badly formatted. Please use ascii letters and digits only: " + getExplicitPluginKey());
+    }
+  }
+
+  private void checkPluginDescription() throws MojoExecutionException {
+    if (StringUtils.isBlank(getPluginDescription())) {
+      throw new MojoExecutionException("Plugin description is missing. "
+        + "Please add the field <description> or the property sonar.pluginDescription.");
+    }
+  }
+
+  private void checkPluginName() throws MojoExecutionException {
     // Maven 2 automatically sets the name as "Unnamed - <artifactId>" when the field <name> is missing.
     // Note that Maven 3 has a different behavior. Name is the artifact id by default.
     if (StringUtils.isBlank(getPluginName()) || getPluginName().startsWith("Unnamed - ")) {
       throw new MojoExecutionException("Plugin name is missing. "
         + "Please add the field <name> or the property sonar.pluginName.");
-    }
-    if (StringUtils.isBlank(getPluginDescription())) {
-      throw new MojoExecutionException("Plugin description is missing. "
-        + "Please add the field <description> or the property sonar.pluginDescription.");
-    }
-    if (StringUtils.isNotBlank(getExplicitPluginKey()) && !PluginKeyUtils.isValid(getExplicitPluginKey())) {
-      throw new MojoExecutionException("Plugin key is badly formatted. Please use ascii letters and digits only: " + getExplicitPluginKey());
-    }
-    if (!new File(getClassesDirectory(), getPluginClass().replace('.', '/') + ".class").exists()) {
-      throw new MojoExecutionException("Plugin class not found: '" + getPluginClass());
     }
   }
 
@@ -303,12 +319,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private String getDevelopers() {
     if (getProject().getDevelopers() != null) {
       return Joiner.on(",").join((
-        Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
-          public String apply(Developer developer) {
-            return developer.getName();
-          }
-        }))
-      );
+          Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+            public String apply(Developer developer) {
+              return developer.getName();
+            }
+          }))
+          );
     }
     return null;
   }
@@ -328,9 +344,9 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     if (!ids.isEmpty()) {
       getLog().info(getMessage("Following dependencies are packaged in the plugin:", ids));
       getLog().info(new StringBuilder()
-        .append("See following page for more details about plugin dependencies:\n")
-        .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
-        .toString());
+          .append("See following page for more details about plugin dependencies:\n")
+          .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
+          .toString());
     }
     return libs;
   }
@@ -371,7 +387,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     Set<Artifact> result = new HashSet<Artifact>();
     ArtifactFilter artifactFilter = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME);
     DependencyNode rootNode = dependencyTreeBuilder.buildDependencyTree(getProject(), localRepository, artifactFactory,
-      artifactMetadataSource, artifactFilter, artifactCollector);
+        artifactMetadataSource, artifactFilter, artifactCollector);
     rootNode.accept(new BuildingDependencyNodeVisitor());
     searchForSonarProvidedArtifacts(rootNode, result, false);
     return result;

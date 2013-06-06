@@ -158,11 +158,11 @@ public final class UpdateCenterDeserializer {
           final Version high = Version.create(resolve(matcher.group(2), sonarReleases));
           Collection<Version> versions = Collections2.filter(transform(sonarReleases, new Function<Release, Version>() {
             public Version apply(Release release) {
-              return release.getVersion();
+              return release != null ? release.getVersion() : null;
             }
           }), new Predicate<Version>() {
             public boolean apply(Version version) {
-              return version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
+              return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
             }
           });
           for (Version version : versions) {

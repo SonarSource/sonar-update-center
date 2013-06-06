@@ -29,7 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -72,11 +76,11 @@ public class UpdateCenter {
   }
 
   public Date getDate() {
-    return date;
+    return date != null ? new Date(date.getTime()) : null;
   }
 
   public UpdateCenter setDate(Date date) {
-    this.date = date;
+    this.date = date != null ? new Date(date.getTime()) : null;
     return this;
   }
 

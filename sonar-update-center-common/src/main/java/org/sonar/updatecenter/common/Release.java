@@ -28,7 +28,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import javax.annotation.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
+import java.util.SortedSet;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newTreeSet;
@@ -130,11 +134,11 @@ public class Release implements Comparable<Release> {
   }
 
   public Date getDate() {
-    return date;
+    return date != null ? new Date(date.getTime()) : null;
   }
 
   public Release setDate(Date date) {
-    this.date = date;
+    this.date = date != null ? new Date(date.getTime()) : null;
     return this;
   }
 

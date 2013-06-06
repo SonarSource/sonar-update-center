@@ -204,14 +204,14 @@ public final class PluginManifest {
    * @since 3.5
    */
   public String[] getRequirePlugins() {
-    return requirePlugins;
+    return requirePlugins != null ? requirePlugins.clone() : null;
   }
 
   /**
    * @since 3.5
    */
   public PluginManifest setRequirePlugins(String[] requirePlugins) {
-    this.requirePlugins = requirePlugins;
+    this.requirePlugins = requirePlugins != null ? requirePlugins.clone() : null;
     return this;
   }
 
@@ -279,20 +279,20 @@ public final class PluginManifest {
   }
 
   public String[] getDependencies() {
-    return dependencies;
+    return dependencies != null ? dependencies.clone() : null;
   }
 
   public PluginManifest setDependencies(String[] dependencies) {
-    this.dependencies = dependencies;
+    this.dependencies = dependencies != null ? dependencies.clone() : null;
     return this;
   }
 
   public Date getBuildDate() {
-    return buildDate;
+    return buildDate != null ? new Date(buildDate.getTime()) : null;
   }
 
   public PluginManifest setBuildDate(Date buildDate) {
-    this.buildDate = buildDate;
+    this.buildDate = buildDate != null ? new Date(buildDate.getTime()) : null;
     return this;
   }
 
