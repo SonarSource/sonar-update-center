@@ -323,8 +323,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
             public String apply(Developer developer) {
               return developer.getName();
             }
-          }))
-          );
+          })));
     }
     return null;
   }

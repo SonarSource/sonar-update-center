@@ -79,20 +79,31 @@ public final class UpdateCenterDeserializer {
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
     List<Plugin> plugins = newArrayList();
 
-    String[] sonarVersions = getArray(p, "sonar.versions");
-    for (String sonarVersion : sonarVersions) {
-      if (ignoreSnapshots && Version.isSnapshot(sonarVersion)) {
-        continue;
-      }
-      Release release = new Release(sonar, sonarVersion);
-      String sonarPrefix = "sonar.";
-      release.setChangelogUrl(get(p, sonarPrefix + sonarVersion + ".changelogUrl"));
-      release.setDescription(get(p, sonarPrefix + sonarVersion + ".description"));
-      release.setDownloadUrl(get(p, sonarPrefix + sonarVersion + ".downloadUrl"));
-      release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
-      sonar.addRelease(release);
-    }
+    parseSonar(p, ignoreSnapshots, sonar);
 
+    parsePlugins(p, ignoreSnapshots, sonar, plugins);
+
+    PluginReferential pluginReferential = PluginReferential.create(plugins);
+    for (Plugin plugin : pluginReferential.getPlugins()) {
+      for (Release release : plugin.getReleases()) {
+        String parentKey = get(p, plugin.getKey(), release.getVersion().getName() + ".parent");
+        if (parentKey != null) {
+          pluginReferential.setParent(release, parentKey);
+        }
+
+        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins"), ""), ",");
+        for (String requiresPluginKey : requiredReleases) {
+          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
+          String requiredPluginReleaseKey = split.next();
+          String requiredMinimumReleaseVersion = split.next();
+          pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
+        }
+      }
+    }
+    return UpdateCenter.create(pluginReferential, sonar).setDate(date);
+  }
+
+  private static void parsePlugins(Properties p, boolean ignoreSnapshots, Sonar sonar, List<Plugin> plugins) {
     String[] pluginKeys = getArray(p, "plugins");
     for (String pluginKey : pluginKeys) {
       Plugin plugin = new Plugin(pluginKey);
@@ -126,25 +137,22 @@ public final class UpdateCenterDeserializer {
       }
       plugins.add(plugin);
     }
+  }
 
-    PluginReferential pluginReferential = PluginReferential.create(plugins);
-    for (Plugin plugin : pluginReferential.getPlugins()) {
-      for (Release release : plugin.getReleases()) {
-        String parentKey = get(p, plugin.getKey(), release.getVersion().getName() + ".parent");
-        if (parentKey != null) {
-          pluginReferential.setParent(release, parentKey);
-        }
-
-        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins"), ""), ",");
-        for (String requiresPluginKey : requiredReleases) {
-          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-          String requiredPluginReleaseKey = split.next();
-          String requiredMinimumReleaseVersion = split.next();
-          pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
-        }
+  private static void parseSonar(Properties p, boolean ignoreSnapshots, Sonar sonar) {
+    String[] sonarVersions = getArray(p, "sonar.versions");
+    for (String sonarVersion : sonarVersions) {
+      if (ignoreSnapshots && Version.isSnapshot(sonarVersion)) {
+        continue;
       }
+      Release release = new Release(sonar, sonarVersion);
+      String sonarPrefix = "sonar.";
+      release.setChangelogUrl(get(p, sonarPrefix + sonarVersion + ".changelogUrl"));
+      release.setDescription(get(p, sonarPrefix + sonarVersion + ".description"));
+      release.setDownloadUrl(get(p, sonarPrefix + sonarVersion + ".downloadUrl"));
+      release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
+      sonar.addRelease(release);
     }
-    return UpdateCenter.create(pluginReferential, sonar).setDate(date);
   }
 
   private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, SortedSet<Release> sonarReleases) {
