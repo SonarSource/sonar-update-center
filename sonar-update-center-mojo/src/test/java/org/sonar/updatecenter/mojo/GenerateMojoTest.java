@@ -40,7 +40,7 @@ public class GenerateMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
 
     File inputFile = resource("update-center-template.properties");
-    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setIgnoreSnapshots(false).execute();
 
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
@@ -71,7 +71,7 @@ public class GenerateMojoTest {
     FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.0.jar"), outputDir);
 
     File inputFile = resource("update-center-template-for-requires-and-parent.properties");
-    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setIgnoreSnapshots(false).execute();
 
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");

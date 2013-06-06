@@ -199,4 +199,41 @@ public class UpdateCenterDeserializerTest {
       IOUtils.closeQuietly(input);
     }
   }
+
+  // UPC-10
+  @Test
+  public void should_filter_snapshots() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-snapshots.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props, false);
+
+      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"), Version.create("2.4-SNAPSHOT"));
+      assertThat(center.getSonar().getRelease(Version.create("2.4-SNAPSHOT")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.4-SNAPSHOT.zip");
+
+      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
+      assertThat(clirr.getName()).isEqualTo("Clirr");
+      assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
+      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"), Version.create("1.2-SNAPSHOT"));
+
+      assertThat(clirr.getSourcesUrl()).isNull();
+      assertThat(clirr.getDevelopers()).isEmpty();
+
+      assertThat(clirr.getRelease(Version.create("1.2-SNAPSHOT")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.2-SNAPSHOT.jar");
+
+      center = UpdateCenterDeserializer.fromProperties(props, true);
+
+      assertThat(center.getSonar().getVersions()).excludes(Version.create("2.4-SNAPSHOT"));
+      assertThat(center.getSonar().getRelease(Version.create("2.4-SNAPSHOT"))).isNull();
+
+      clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
+      assertThat(clirr.getVersions()).excludes(Version.create("1.2-SNAPSHOT"));
+
+      assertThat(clirr.getRelease(Version.create("1.2-SNAPSHOT"))).isNull();
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }

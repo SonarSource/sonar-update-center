@@ -31,8 +31,10 @@ import java.io.IOException;
 class Configuration {
 
   private File outputDir, inputFile;
+  private boolean ignoreSnapshots;
 
-  Configuration(File outputDir, File inputFile, Log log) {
+  Configuration(File outputDir, File inputFile, boolean ignoreSnapshots, Log log) {
+    this.ignoreSnapshots = ignoreSnapshots;
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
     Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
     try {
@@ -52,7 +54,6 @@ class Configuration {
     log.info("-------------------------------");
   }
 
-
   File getOutputDir() {
     return outputDir;
   }
@@ -67,7 +68,7 @@ class Configuration {
 
   UpdateCenter getUpdateCenter() {
     try {
-      return UpdateCenterDeserializer.fromProperties(getInputFile());
+      return UpdateCenterDeserializer.fromProperties(getInputFile(), ignoreSnapshots);
 
     } catch (IOException e) {
       throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);

@@ -53,11 +53,15 @@ public final class UpdateCenterDeserializer {
   }
 
   public static UpdateCenter fromProperties(File file) throws IOException {
+    return fromProperties(file, false);
+  }
+
+  public static UpdateCenter fromProperties(File file, boolean ignoreSnapshots) throws IOException {
     FileInputStream in = FileUtils.openInputStream(file);
     try {
       Properties props = new Properties();
       props.load(in);
-      UpdateCenter pluginReferential = fromProperties(props);
+      UpdateCenter pluginReferential = fromProperties(props, ignoreSnapshots);
       pluginReferential.setDate(new Date(file.lastModified()));
       return pluginReferential;
 
@@ -67,12 +71,19 @@ public final class UpdateCenterDeserializer {
   }
 
   public static UpdateCenter fromProperties(Properties p) {
+    return fromProperties(p, false);
+  }
+
+  public static UpdateCenter fromProperties(Properties p, boolean ignoreSnapshots) {
     Sonar sonar = new Sonar();
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
     List<Plugin> plugins = newArrayList();
 
     String[] sonarVersions = getArray(p, "sonar.versions");
     for (String sonarVersion : sonarVersions) {
+      if (ignoreSnapshots && Version.isSnapshot(sonarVersion)) {
+        continue;
+      }
       Release release = new Release(sonar, sonarVersion);
       String sonarPrefix = "sonar.";
       release.setChangelogUrl(get(p, sonarPrefix + sonarVersion + ".changelogUrl"));
@@ -99,6 +110,9 @@ public final class UpdateCenterDeserializer {
 
       String[] pluginReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, pluginKey, "versions"), ""), ",");
       for (String pluginVersion : pluginReleases) {
+        if (ignoreSnapshots && Version.isSnapshot(pluginVersion)) {
+          continue;
+        }
         Release release = new Release(plugin, pluginVersion);
         plugin.addRelease(release);
         release.setDownloadUrl(get(p, pluginKey, pluginVersion + ".downloadUrl"));

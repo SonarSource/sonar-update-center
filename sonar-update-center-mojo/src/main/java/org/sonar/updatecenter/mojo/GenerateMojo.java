@@ -48,9 +48,17 @@ public class GenerateMojo extends AbstractMojo {
    */
   private File inputFile;
 
+  /**
+   * Ignore snapshots in the inputFile
+   *
+   * @parameter expression="${ignoreSnapshots}"
+   * @required
+   */
+  private boolean ignoreSnapshots;
+
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, ignoreSnapshots, getLog());
       new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
@@ -66,6 +74,12 @@ public class GenerateMojo extends AbstractMojo {
   @VisibleForTesting
   GenerateMojo setInputFile(File f) {
     this.inputFile = f;
+    return this;
+  }
+
+  @VisibleForTesting
+  GenerateMojo setIgnoreSnapshots(boolean b) {
+    this.ignoreSnapshots = b;
     return this;
   }
 }

@@ -158,4 +158,8 @@ public class Version implements Comparable<Version> {
   public static Version createRelease(String version) {
     return new Version(StringUtils.substringBefore(version, "-"));
   }
+
+  public static boolean isSnapshot(String version) {
+    return StringUtils.endsWith(version, "SNAPSHOT");
+  }
 }
