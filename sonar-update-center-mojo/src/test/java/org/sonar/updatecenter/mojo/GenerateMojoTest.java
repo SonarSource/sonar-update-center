@@ -49,7 +49,7 @@ public class GenerateMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2,0.3-SNAPSHOT\n");
+    assertThat(output).contains("artifactsize.versions=0.2,0.3-SNAPSHOT");
 
     // metadata loaded from jar manifest
     assertThat(output).contains("artifactsize.organization=SonarSource");
@@ -78,7 +78,8 @@ public class GenerateMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2\n");
+    assertThat(output).contains("artifactsize.versions=0.2");
+    assertThat(output).excludes("0.3-SNAPSHOT");
 
     // metadata loaded from jar manifest
     assertThat(output).contains("artifactsize.organization=SonarSource");
