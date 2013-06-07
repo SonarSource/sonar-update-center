@@ -19,22 +19,15 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import com.github.kevinsawicki.http.HttpRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 class HttpDownloader {
 
@@ -47,56 +40,34 @@ class HttpDownloader {
   }
 
   public File download(String url, boolean force) throws IOException, URISyntaxException {
-    return download(url, force, null, null);
-  }
-  public File download(String url, boolean force, String login, String password) throws IOException, URISyntaxException {
     FileUtils.forceMkdir(outputDir);
 
     String filename = StringUtils.substringAfterLast(url, "/");
     File output = new File(outputDir, filename);
     if (force || !output.exists() || output.length() <= 0) {
-      downloadFile(new URI(url), output, login, password);
+      downloadFile(new URL(url), output);
     } else {
       log.info("File found in local cache: " + url);
     }
     return output;
   }
 
-  File downloadFile(URI fileURI, File toFile, String login, String password) {
-    log.info("Download " + fileURI + " in " + toFile);
-    DefaultHttpClient client = new DefaultHttpClient();
+  File downloadFile(URL fileURL, File toFile) {
+    log.info("Download " + fileURL + " in " + toFile);
     try {
-      if (StringUtils.isNotBlank(login)) {
-        client.getCredentialsProvider().setCredentials(
-            new AuthScope(fileURI.getHost(), fileURI.getPort()),
-            new UsernamePasswordCredentials(login, password));
-      }
-      HttpGet httpget = new HttpGet(fileURI);
-      byte[] data = client.execute(httpget, new ByteResponseHandler());
-      if (data != null) {
-        FileUtils.writeByteArrayToFile(toFile, data);
+      HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
+      if (fileURL.getUserInfo() != null) {
+        request.header("Authorization", "Basic " + com.github.kevinsawicki.http.HttpRequest.Base64.encode(fileURL.getUserInfo()));
       }
 
+      if (!request.receive(toFile).ok()) {
+        throw new IllegalStateException(request.message());
+      }
     } catch (Exception e) {
       FileUtils.deleteQuietly(toFile);
-      throw new IllegalStateException("Fail to download " + fileURI + " to " + toFile, e);
-
-    } finally {
-      client.getConnectionManager().shutdown();
+      throw new IllegalStateException("Fail to download " + fileURL + " to " + toFile, e);
     }
     return toFile;
   }
 
-  private static class ByteResponseHandler implements ResponseHandler<byte[]> {
-    public byte[] handleResponse(HttpResponse response) throws IOException {
-      HttpEntity entity = response.getEntity();
-      if (response.getStatusLine().getStatusCode()!=200) {
-        throw new IllegalStateException("Unvalid HTTP response: " + response.getStatusLine());
-      }
-      if (entity != null) {
-        return EntityUtils.toByteArray(entity);
-      }
-      return null;
-    }
-  }
 }

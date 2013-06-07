@@ -1,8 +1,6 @@
 package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.cookie.DateParseException;
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,6 +13,8 @@ import org.sonar.updatecenter.common.Version;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 
@@ -38,7 +38,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
-    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin>emptyList());
+    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin> emptyList());
     PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
     pluginHeaders.generateHtml();
 
@@ -223,8 +223,8 @@ public class PluginHeadersTest {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
   }
 
-  private Date getDate() throws DateParseException {
-    return DateUtils.parseDate("12-12-2012", new String[]{"dd-MM-yyyy"});
+  private Date getDate() throws ParseException {
+    return new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2012");
   }
 
 }
