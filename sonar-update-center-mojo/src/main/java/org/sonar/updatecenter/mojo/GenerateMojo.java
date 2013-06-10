@@ -56,9 +56,16 @@ public class GenerateMojo extends AbstractMojo {
    */
   private boolean ignoreSnapshots;
 
+  /**
+   * Should we generate HTML header files
+   *
+   * @parameter expression="${generateHeaders}"
+   */
+  private boolean generateHeaders = true;
+
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, ignoreSnapshots, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, ignoreSnapshots, generateHeaders, getLog());
       new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
@@ -80,6 +87,12 @@ public class GenerateMojo extends AbstractMojo {
   @VisibleForTesting
   GenerateMojo setIgnoreSnapshots(boolean b) {
     this.ignoreSnapshots = b;
+    return this;
+  }
+
+  @VisibleForTesting
+  GenerateMojo setGenerateHeaders(boolean b) {
+    this.generateHeaders = b;
     return this;
   }
 }

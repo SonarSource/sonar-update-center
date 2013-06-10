@@ -32,9 +32,11 @@ class Configuration {
 
   private File outputDir, inputFile;
   private boolean ignoreSnapshots;
+  private boolean generateHeaders;
 
-  Configuration(File outputDir, File inputFile, boolean ignoreSnapshots, Log log) {
+  Configuration(File outputDir, File inputFile, boolean ignoreSnapshots, boolean generateHeaders, Log log) {
     this.ignoreSnapshots = ignoreSnapshots;
+    this.generateHeaders = generateHeaders;
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
     Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
     try {
@@ -64,6 +66,10 @@ class Configuration {
 
   File getInputFile() {
     return inputFile;
+  }
+
+  boolean shouldGenerateHeaders() {
+    return generateHeaders;
   }
 
   UpdateCenter getUpdateCenter() {

@@ -63,6 +63,33 @@ public class GenerateMojoTest {
   }
 
   @Test
+  public void generate_properties_and_no_html() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugin is already cached
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3-20110822.091313-2.jar"), outputDir);
+
+    File inputFile = resource("update-center-template.properties");
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setIgnoreSnapshots(false).setGenerateHeaders(false).execute();
+
+    // verify that properties file is generated
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).exists().isFile();
+    String output = FileUtils.readFileToString(outputFile);
+
+    // metadata loaded from properties template
+    assertThat(output).contains("artifactsize.versions=0.2,0.3-SNAPSHOT");
+
+    // metadata loaded from jar manifest
+    assertThat(output).contains("artifactsize.organization=SonarSource");
+
+    // html headers
+    File htmlHeader = new File(outputDir, "html");
+    assertThat(htmlHeader).doesNotExist();
+  }
+
+  @Test
   public void generate_properties_and_html_without_snapshots() throws Exception {
     File outputDir = temp.newFolder();
 

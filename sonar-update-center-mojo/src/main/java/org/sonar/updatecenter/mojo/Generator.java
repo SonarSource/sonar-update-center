@@ -23,7 +23,12 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.*;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.PluginManifest;
+import org.sonar.updatecenter.common.PluginReferential;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.UpdateCenterSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +52,9 @@ class Generator {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
-    generateHtmlHeader(center);
+    if (configuration.shouldGenerateHeaders()) {
+      generateHtmlHeader(center);
+    }
   }
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
