@@ -21,22 +21,32 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
+import java.util.NoSuchElementException;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SonarTest {
+
   @Test
-  public void setReleases() {
+  public void should_get_declared_releases() {
     Sonar sonar = new Sonar().setReleases(new String[]{"3.1", "3.2"});
 
     assertThat(sonar.getReleases()).containsOnly(new Release(sonar, "3.1"), new Release(sonar, "3.2"));
     assertThat(sonar.getRelease(Version.create("3.1"))).isNotNull();
     assertThat(sonar.getRelease(Version.create("3.2"))).isNotNull();
-    assertThat(sonar.getRelease(Version.create("3.3"))).isNull();
     assertThat(sonar.getVersions()).containsOnly(Version.create("3.1"), Version.create("3.2"));
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public void should_not_get_undeclared_releases() {
+    Sonar sonar = new Sonar().setReleases(new String[]{"3.1", "3.2"});
+
+    sonar.getRelease(Version.create("3.3"));
   }
 
   @Test
   public void sonar_key() {
     assertThat(new Sonar().getKey()).isEqualTo("sonar");
   }
+
 }

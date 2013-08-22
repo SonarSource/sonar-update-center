@@ -225,12 +225,12 @@ public class UpdateCenterDeserializerTest {
       center = UpdateCenterDeserializer.fromProperties(props, true);
 
       assertThat(center.getSonar().getVersions()).excludes(Version.create("2.4-SNAPSHOT"));
-      assertThat(center.getSonar().getRelease(Version.create("2.4-SNAPSHOT"))).isNull();
+      assertThat(center.getSonar().doesContainVersion(Version.create("2.4-SNAPSHOT"))).isFalse();
 
       clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getVersions()).excludes(Version.create("1.2-SNAPSHOT"));
 
-      assertThat(clirr.getRelease(Version.create("1.2-SNAPSHOT"))).isNull();
+      assertThat(clirr.doesContainVersion(Version.create("1.2-SNAPSHOT"))).isFalse();
 
     } finally {
       IOUtils.closeQuietly(input);

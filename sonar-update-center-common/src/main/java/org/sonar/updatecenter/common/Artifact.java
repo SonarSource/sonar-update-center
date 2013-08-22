@@ -19,6 +19,9 @@
  */
 package org.sonar.updatecenter.common;
 
+import javax.annotation.CheckForNull;
+
+import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -53,13 +56,25 @@ public abstract class Artifact implements Comparable<Artifact> {
     return addRelease(new Release(this, version));
   }
 
+  /**
+   * @throws java.util.NoSuchElementException if release could not be found
+   */
   public final Release getRelease(Version version) {
     for (Release release : getReleases()) {
       if (release.getVersion().equals(version)) {
         return release;
       }
     }
-    return null;
+    throw new NoSuchElementException();
+  }
+
+  public boolean doesContainVersion(Version version) {
+    for (Release release : getReleases()) {
+      if (release.getVersion().equals(version)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public final Release getRelease(String version) {
@@ -71,7 +86,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   }
 
   /**
-   * Shortcut for Ruby code 
+   * Shortcut for Ruby code
    */
   public final SortedSet<Release> getReleasesGreaterThan(String version) {
     return getReleasesGreaterThan(Version.create(version));
@@ -109,9 +124,10 @@ public abstract class Artifact implements Comparable<Artifact> {
     return result;
   }
 
+  @CheckForNull
   public final Release getMinimalRelease(Version minimalVersion) {
     for (Release r : releases) {
-      if (r.getVersion().compareTo(minimalVersion)>=0) {
+      if (r.getVersion().compareTo(minimalVersion) >= 0) {
         return r;
       }
     }
@@ -121,7 +137,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   public final Release getLastCompatibleReleaseIfUpgrade(Version sonarVersion) {
     Release result = null;
     for (Release r : releases) {
-      if (r.getLastRequiredSonarVersion()!=null && r.getLastRequiredSonarVersion().compareTo(sonarVersion)>=0) {
+      if (r.getLastRequiredSonarVersion() != null && r.getLastRequiredSonarVersion().compareTo(sonarVersion) >= 0) {
         result = r;
       }
     }

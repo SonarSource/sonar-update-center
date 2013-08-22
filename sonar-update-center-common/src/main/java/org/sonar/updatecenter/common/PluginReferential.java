@@ -92,8 +92,7 @@ public class PluginReferential {
   public boolean doesContainRelease(final String key, Version version) {
     for (Plugin plugin : plugins) {
       if (plugin.getKey().equals(key)) {
-        Release pluginRelease = plugin.getRelease(version);
-        if (pluginRelease != null) {
+        if (plugin.doesContainVersion(version)) {
           return true;
         }
       }
@@ -120,16 +119,20 @@ public class PluginReferential {
   public void setParent(Release release, String parentKey) {
     try {
       Plugin pluginParent = findPlugin(parentKey);
-      Version version = release.getVersion();
-      Release parent = pluginParent.getRelease(version);
-      if (parent == null) {
-        throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + parentKey +
-            "' must have exactly the same version as they belong to the same group.");
-      }
+      Release parent = getParentRelease(release, pluginParent);
       release.setParent(parent);
       parent.addChild(release);
     } catch (NoSuchElementException e) {
       throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + release.getKey() + "' is missing.", e);
+    }
+  }
+
+  private Release getParentRelease(Release release, Plugin pluginParent) {
+    try {
+      return pluginParent.getRelease(release.getVersion());
+    } catch (NoSuchElementException e) {
+      throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + pluginParent.key +
+        "' must have exactly the same version as they belong to the same group.");
     }
   }
 
@@ -145,7 +148,7 @@ public class PluginReferential {
         Release latest = requiredPlugin.getLastRelease();
         if (latest != null) {
           throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName()
-              + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion + ".");
+            + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion + ".");
         }
       }
     } catch (NoSuchElementException e) {
