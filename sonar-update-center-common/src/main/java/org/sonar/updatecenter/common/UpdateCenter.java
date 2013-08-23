@@ -113,21 +113,25 @@ public class UpdateCenter {
       try {
         Plugin plugin = findPlugin(installedRelease);
         for (Release nextRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
-          PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
-          try {
-            if (pluginUpdate.isCompatible()) {
-              pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), nextRelease.getVersion()));
-            }
-          } catch (IncompatiblePluginVersionException e) {
-            pluginUpdate.setStatus(PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE);
-          }
-          updates.add(pluginUpdate);
+          updates.add(getPluginUpdate(plugin, nextRelease));
         }
       } catch (NoSuchElementException e) {
         // Nothing to do, this plugin is not in the update center, it has been installed manually.
       }
     }
     return updates;
+  }
+
+  private PluginUpdate getPluginUpdate(Plugin plugin, Release nextRelease){
+    PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
+    try {
+      if (pluginUpdate.isCompatible()) {
+        pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), nextRelease.getVersion()));
+      }
+    } catch (IncompatiblePluginVersionException e) {
+      pluginUpdate.setStatus(PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE);
+    }
+    return pluginUpdate;
   }
 
   /**
@@ -223,7 +227,7 @@ public class UpdateCenter {
           }
         }
       } catch (NoSuchElementException e) {
-        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
+        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.", e);
       }
     }
     return update;

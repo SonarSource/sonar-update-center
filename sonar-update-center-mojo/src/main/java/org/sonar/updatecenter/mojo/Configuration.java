@@ -50,10 +50,11 @@ class Configuration {
   }
 
   private void log(Log log) {
-    log.info("-------------------------------");
+    String commentLine = "-------------------------------";
+    log.info(commentLine);
     log.info("outputDir: " + outputDir.getAbsolutePath());
     log.info("inputFile: " + inputFile.getAbsolutePath());
-    log.info("-------------------------------");
+    log.info(commentLine);
   }
 
   File getOutputDir() {

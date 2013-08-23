@@ -31,14 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -176,8 +169,7 @@ public final class UpdateCenterDeserializer {
           for (Version version : versions) {
             result.add(version.toString());
           }
-        }
-        else {
+        } else {
           result.add(resolve(pattern, sonarReleases));
         }
       }

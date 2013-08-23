@@ -48,11 +48,7 @@ import org.sonar.updatecenter.common.PluginManifest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Build a Sonar Plugin from the current project.
@@ -203,7 +199,10 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     try {
       archiver.getArchiver().addDirectory(getClassesDirectory(), getIncludes(), getExcludes());
       archive.setAddMavenDescriptor(addMavenDescriptor);
-      getLog().info("-------------------------------------------------------");
+
+      String logLine = "-------------------------------------------------------";
+
+      getLog().info(logLine);
       getLog().info("Plugin definition in update center");
       addManifestProperty("Key", PluginManifest.KEY, getPluginKey());
       addManifestProperty("Name", PluginManifest.NAME, getPluginName());
@@ -237,7 +236,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Build date", PluginManifest.BUILD_DATE, FormatUtils.toString(new Date(), true));
       addManifestProperty("Sources URL", PluginManifest.SOURCES_URL, getSourcesUrl());
       addManifestProperty("Developers", PluginManifest.DEVELOPERS, getDevelopers());
-      getLog().info("-------------------------------------------------------");
+      getLog().info(logLine);
 
       if (isSkipDependenciesPackaging()) {
         getLog().info("Skip packaging of dependencies");
@@ -318,12 +317,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
 
   private String getDevelopers() {
     if (getProject().getDevelopers() != null) {
-      return Joiner.on(",").join((
+      return Joiner.on(",").join(
           Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
             public String apply(Developer developer) {
               return developer.getName();
             }
-          })));
+          }));
     }
     return null;
   }

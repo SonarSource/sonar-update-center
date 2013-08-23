@@ -91,10 +91,8 @@ public class PluginReferential {
 
   public boolean doesContainRelease(final String key, Version version) {
     for (Plugin plugin : plugins) {
-      if (plugin.getKey().equals(key)) {
-        if (plugin.doesContainVersion(version)) {
-          return true;
-        }
+      if (plugin.getKey().equals(key) && plugin.doesContainVersion(version)) {
+        return true;
       }
     }
     return false;
@@ -132,7 +130,7 @@ public class PluginReferential {
       return pluginParent.getRelease(release.getVersion());
     } catch (NoSuchElementException e) {
       throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + pluginParent.key +
-        "' must have exactly the same version as they belong to the same group.");
+        "' must have exactly the same version as they belong to the same group.", e);
     }
   }
 
