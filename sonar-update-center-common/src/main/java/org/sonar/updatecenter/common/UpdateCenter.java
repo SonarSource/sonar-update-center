@@ -157,7 +157,7 @@ public class UpdateCenter {
         }
       }
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("Needed plugin '" + pluginKey + "' version " + minimumVersion + " not found.", e);
+      throw new PluginNotFoundException("Needed plugin '" + pluginKey + "' version " + minimumVersion + " not found.");
     }
   }
 
@@ -227,7 +227,8 @@ public class UpdateCenter {
           }
         }
       } catch (NoSuchElementException e) {
-        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() + "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.", e);
+        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() +
+          "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
       }
     }
     return update;
