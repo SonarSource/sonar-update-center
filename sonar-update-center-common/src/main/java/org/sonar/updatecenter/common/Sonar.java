@@ -21,8 +21,18 @@ package org.sonar.updatecenter.common;
 
 public class Sonar extends Artifact {
 
+  private Release nextRelease;
+
   public Sonar() {
     super("sonar");
+  }
+
+  public void setNextRelease(Release nextRelease) {
+    this.nextRelease = nextRelease;
+  }
+
+  public Release getNextRelease() {
+    return nextRelease;
   }
 
   /**

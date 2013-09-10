@@ -31,7 +31,13 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,7 +129,7 @@ public final class UpdateCenterDeserializer {
         release.setChangelogUrl(get(p, pluginKey, pluginVersion + ".changelogUrl"));
         release.setDescription(get(p, pluginKey, pluginVersion + ".description"));
         release.setDate(toDate(get(p, pluginKey, pluginVersion + ".date"), false));
-        String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar.getReleases());
+        String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
         for (String requiredSonarVersion : requiredSonarVersions) {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
         }
@@ -133,6 +139,10 @@ public final class UpdateCenterDeserializer {
   }
 
   private static void parseSonar(Properties p, boolean ignoreSnapshots, Sonar sonar) {
+    String nextVersion = get(p, "sonar.nextVersion");
+    if (StringUtils.isNotBlank(nextVersion)) {
+      sonar.setNextRelease(new Release(sonar, nextVersion));
+    }
     String[] sonarVersions = getArray(p, "sonar.versions");
     for (String sonarVersion : sonarVersions) {
       if (ignoreSnapshots && Version.isSnapshot(sonarVersion)) {
@@ -148,16 +158,16 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, SortedSet<Release> sonarReleases) {
+  private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
     List<String> patterns = split(StringUtils.defaultIfEmpty(get(p, pluginKey, pluginVersion + ".requiredSonarVersions"), ""));
     List<String> result = new LinkedList<String>();
     for (String pattern : patterns) {
       if (pattern != null) {
         Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
         if (matcher.matches()) {
-          final Version low = Version.create(resolve(matcher.group(1), sonarReleases));
-          final Version high = Version.create(resolve(matcher.group(2), sonarReleases));
-          Collection<Version> versions = Collections2.filter(transform(sonarReleases, new Function<Release, Version>() {
+          final Version low = Version.create(resolve(matcher.group(1), sonar));
+          final Version high = Version.create(resolve(matcher.group(2), sonar));
+          Collection<Version> versions = Collections2.filter(transform(sonar.getReleases(), new Function<Release, Version>() {
             public Version apply(Release release) {
               return release != null ? release.getVersion() : null;
             }
@@ -169,8 +179,12 @@ public final class UpdateCenterDeserializer {
           for (Version version : versions) {
             result.add(version.toString());
           }
+          // Include next release if it was used as upper bound even if it is not in current Sonar releases
+          if (sonar.getNextRelease() != null && high.equals(sonar.getNextRelease().getVersion())) {
+            result.add(sonar.getNextRelease().getVersion().toString());
+          }
         } else {
-          result.add(resolve(pattern, sonarReleases));
+          result.add(resolve(pattern, sonar));
         }
       }
     }
@@ -199,9 +213,12 @@ public final class UpdateCenterDeserializer {
     return splitted;
   }
 
-  private static String resolve(String version, SortedSet<Release> sonarReleases) {
+  private static String resolve(String version, Sonar sonar) {
     if ("LATEST".equals(version)) {
-      return sonarReleases.last().getVersion().toString();
+      if (sonar.getNextRelease() != null) {
+        return sonar.getNextRelease().getVersion().toString();
+      }
+      return sonar.getReleases().last().getVersion().toString();
     }
     return version;
   }
