@@ -21,7 +21,9 @@
 package org.sonar.updatecenter.common;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.IOException;
@@ -34,6 +36,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterDeserializerTest {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Test
   public void read_infos_from_froperties() throws IOException {
@@ -221,6 +226,21 @@ public class UpdateCenterDeserializerTest {
       assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
       assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
 
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-15
+  @Test
+  public void should_throw_if_sonar_next_outdated() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-next-outdated.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("sonar.nextVersion seems outdated. Update or remove it.");
+      UpdateCenterDeserializer.fromProperties(props);
     } finally {
       IOUtils.closeQuietly(input);
     }

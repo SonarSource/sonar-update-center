@@ -156,6 +156,9 @@ public final class UpdateCenterDeserializer {
       release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
       sonar.addRelease(release);
     }
+    if (sonar.getNextRelease() != null && sonar.getReleases().last().compareTo(sonar.getNextRelease()) >= 0) {
+      throw new IllegalStateException("sonar.nextVersion seems outdated. Update or remove it.");
+    }
   }
 
   private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
