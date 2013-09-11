@@ -47,6 +47,12 @@ import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 public final class UpdateCenterDeserializer {
 
+  private static final String DATE_SUFFIX = ".date";
+  private static final String DESCRIPTION_SUFFIX = ".description";
+  private static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
+  private static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
+  private static final String SONAR_PREFIX = "sonar.";
+
   private UpdateCenterDeserializer() {
     // only static methods
   }
@@ -125,10 +131,10 @@ public final class UpdateCenterDeserializer {
         }
         Release release = new Release(plugin, pluginVersion);
         plugin.addRelease(release);
-        release.setDownloadUrl(get(p, pluginKey, pluginVersion + ".downloadUrl"));
-        release.setChangelogUrl(get(p, pluginKey, pluginVersion + ".changelogUrl"));
-        release.setDescription(get(p, pluginKey, pluginVersion + ".description"));
-        release.setDate(toDate(get(p, pluginKey, pluginVersion + ".date"), false));
+        release.setDownloadUrl(get(p, pluginKey, pluginVersion + DOWNLOAD_URL_SUFFIX));
+        release.setChangelogUrl(get(p, pluginKey, pluginVersion + CHANGELOG_URL_SUFFIX));
+        release.setDescription(get(p, pluginKey, pluginVersion + DESCRIPTION_SUFFIX));
+        release.setDate(toDate(get(p, pluginKey, pluginVersion + DATE_SUFFIX), false));
         String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
         for (String requiredSonarVersion : requiredSonarVersions) {
           release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
@@ -171,11 +177,10 @@ public final class UpdateCenterDeserializer {
         continue;
       }
       Release release = new Release(sonar, sonarVersion);
-      String sonarPrefix = "sonar.";
-      release.setChangelogUrl(get(p, sonarPrefix + sonarVersion + ".changelogUrl"));
-      release.setDescription(get(p, sonarPrefix + sonarVersion + ".description"));
-      release.setDownloadUrl(get(p, sonarPrefix + sonarVersion + ".downloadUrl"));
-      release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
+      release.setChangelogUrl(get(p, SONAR_PREFIX + sonarVersion + CHANGELOG_URL_SUFFIX));
+      release.setDescription(get(p, SONAR_PREFIX + sonarVersion + DESCRIPTION_SUFFIX));
+      release.setDownloadUrl(get(p, SONAR_PREFIX + sonarVersion + DOWNLOAD_URL_SUFFIX));
+      release.setDate(FormatUtils.toDate(get(p, SONAR_PREFIX + sonarVersion + DATE_SUFFIX), false));
       sonar.addRelease(release);
     }
   }
@@ -189,28 +194,32 @@ public final class UpdateCenterDeserializer {
         if (matcher.matches()) {
           final Version low = Version.create(resolve(matcher.group(1), sonar));
           final Version high = Version.create(resolve(matcher.group(2), sonar));
-          Collection<Version> versions = Collections2.filter(transform(sonar.getReleases(), new Function<Release, Version>() {
-            public Version apply(Release release) {
-              return release != null ? release.getVersion() : null;
-            }
-          }), new Predicate<Version>() {
-            public boolean apply(Version version) {
-              return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
-            }
-          });
-          for (Version version : versions) {
-            result.add(version.toString());
-          }
-          // Include next release if it was used as upper bound even if it is not in current Sonar releases
-          if (sonar.getNextRelease() != null && high.equals(sonar.getNextRelease().getVersion())) {
-            result.add(sonar.getNextRelease().getVersion().toString());
-          }
+          resolveRange(sonar, result, low, high);
         } else {
           result.add(resolve(pattern, sonar));
         }
       }
     }
     return result.toArray(new String[result.size()]);
+  }
+
+  private static void resolveRange(Sonar sonar, List<String> result, final Version low, final Version high) {
+    Collection<Version> versions = Collections2.filter(transform(sonar.getReleases(), new Function<Release, Version>() {
+      public Version apply(Release release) {
+        return release != null ? release.getVersion() : null;
+      }
+    }), new Predicate<Version>() {
+      public boolean apply(Version version) {
+        return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
+      }
+    });
+    for (Version version : versions) {
+      result.add(version.toString());
+    }
+    // Include next release if it was used as upper bound even if it is not in current Sonar releases
+    if (sonar.getNextRelease() != null && high.equals(sonar.getNextRelease().getVersion())) {
+      result.add(sonar.getNextRelease().getVersion().toString());
+    }
   }
 
   private static List<String> split(String requiredSonarVersions) {

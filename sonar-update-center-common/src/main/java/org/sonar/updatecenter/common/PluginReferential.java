@@ -52,7 +52,7 @@ public class PluginReferential {
   }
 
   public static PluginReferential createEmpty() {
-    return PluginReferential.create(Lists.<Plugin>newArrayList());
+    return PluginReferential.create(Lists.<Plugin> newArrayList());
   }
 
   /**
@@ -121,7 +121,7 @@ public class PluginReferential {
       release.setParent(parent);
       parent.addChild(release);
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + release.getKey() + "' is missing.", e);
+      throw new PluginNotFoundException(String.format("The plugin '%s' required by the plugin '%s' is missing.", parentKey, release.getKey()), e);
     }
   }
 
