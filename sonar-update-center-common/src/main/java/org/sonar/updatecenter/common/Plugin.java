@@ -160,7 +160,7 @@ public class Plugin extends Artifact {
   @Override
   public String toString() {
     return new StringBuilder()
-        .append(key)
-        .toString();
+      .append(key)
+      .toString();
   }
 }

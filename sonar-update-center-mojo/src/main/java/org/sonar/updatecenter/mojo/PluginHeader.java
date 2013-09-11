@@ -22,6 +22,7 @@ package org.sonar.updatecenter.mojo;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Sonar;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,30 +31,40 @@ import java.util.Locale;
 
 public class PluginHeader {
 
-  private Plugin plugin;
+  public static class PluginHeaderVersion {
+    private final Release release;
 
-  public PluginHeader(Plugin plugin) {
+    public PluginHeaderVersion(Release release) {
+      this.release = release;
+    }
+
+    public String getVersion() {
+      return release.getVersion().getName();
+    }
+
+    public String getDate() {
+      return formatDate(release.getDate());
+    }
+
+    public String getDownloadUrl() {
+      return release.getDownloadUrl();
+    }
+
+    public String getSonarVersion() {
+      return release.getMinimumRequiredSonarVersion().getName();
+    }
+  }
+
+  private Plugin plugin;
+  private Sonar sonar;
+
+  public PluginHeader(Plugin plugin, Sonar sonar) {
     this.plugin = plugin;
+    this.sonar = sonar;
   }
 
   public String getName() {
     return plugin.getName();
-  }
-
-  public String getVersion() {
-    return getRelease().getVersion().getName();
-  }
-
-  public String getDate() {
-    return formatDate(getRelease().getDate());
-  }
-
-  public String getDownloadUrl() {
-    return getRelease().getDownloadUrl();
-  }
-
-  public String getSonarVersion() {
-    return getRelease().getMinimumRequiredSonarVersion().getName();
   }
 
   public String getIssueTracker() {
@@ -72,11 +83,11 @@ public class PluginHeader {
     return formatDevelopers(plugin.getDevelopers());
   }
 
-  private String formatLink(String url) {
+  private static String formatLink(String url) {
     return StringUtils.isNotBlank(url) ? "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>" : null;
   }
 
-  private String formatDate(Date date) {
+  private static String formatDate(Date date) {
     return (new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)).format(date);
   }
 
@@ -87,7 +98,22 @@ public class PluginHeader {
     return StringUtils.join(developers, ", ");
   }
 
-  private Release getRelease() {
-    return plugin.getLastRelease();
+  public PluginHeaderVersion getLatestVersion() {
+    return new PluginHeaderVersion(plugin.getLastRelease());
+  }
+
+  public PluginHeaderVersion getLtsVersion() {
+    if (sonar.getLtsRelease() == null) {
+      return null;
+    }
+    Release lastCompatibleWithLts = plugin.getLastCompatibleRelease(sonar.getLtsRelease().getVersion());
+    if (!plugin.getLastRelease().equals(lastCompatibleWithLts)) {
+      return new PluginHeaderVersion(lastCompatibleWithLts);
+    }
+    return null;
+  }
+
+  public String getSonarLtsVersion() {
+    return sonar.getLtsRelease() != null ? sonar.getLtsRelease().getVersion().toString() : null;
   }
 }
