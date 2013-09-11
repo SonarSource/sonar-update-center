@@ -139,10 +139,32 @@ public final class UpdateCenterDeserializer {
   }
 
   private static void parseSonar(Properties p, boolean ignoreSnapshots, Sonar sonar) {
+    parseSonarReleases(p, ignoreSnapshots, sonar);
+    parseSonarNextVersion(p, sonar);
+    parseSonarLtsVersion(p, sonar);
+  }
+
+  private static void parseSonarNextVersion(Properties p, Sonar sonar) {
     String nextVersion = get(p, "sonar.nextVersion");
     if (StringUtils.isNotBlank(nextVersion)) {
-      sonar.setNextRelease(new Release(sonar, nextVersion));
+      sonar.setNextRelease(nextVersion);
     }
+    if (sonar.getNextRelease() != null && sonar.getReleases().last().compareTo(sonar.getNextRelease()) >= 0) {
+      throw new IllegalStateException("sonar.nextVersion seems outdated. Update or remove it.");
+    }
+  }
+
+  private static void parseSonarLtsVersion(Properties p, Sonar sonar) {
+    String ltsVersion = get(p, "sonar.ltsVersion");
+    if (StringUtils.isNotBlank(ltsVersion)) {
+      sonar.setLtsRelease(ltsVersion);
+    }
+    if (sonar.getLtsRelease() != null && !sonar.getReleases().contains(sonar.getLtsRelease())) {
+      throw new IllegalStateException("sonar.ltsVersion seems wrong as it is not listed in sonar.versions");
+    }
+  }
+
+  private static void parseSonarReleases(Properties p, boolean ignoreSnapshots, Sonar sonar) {
     String[] sonarVersions = getArray(p, "sonar.versions");
     for (String sonarVersion : sonarVersions) {
       if (ignoreSnapshots && Version.isSnapshot(sonarVersion)) {
@@ -155,9 +177,6 @@ public final class UpdateCenterDeserializer {
       release.setDownloadUrl(get(p, sonarPrefix + sonarVersion + ".downloadUrl"));
       release.setDate(FormatUtils.toDate(get(p, "sonar." + sonarVersion + ".date"), false));
       sonar.addRelease(release);
-    }
-    if (sonar.getNextRelease() != null && sonar.getReleases().last().compareTo(sonar.getNextRelease()) >= 0) {
-      throw new IllegalStateException("sonar.nextVersion seems outdated. Update or remove it.");
     }
   }
 

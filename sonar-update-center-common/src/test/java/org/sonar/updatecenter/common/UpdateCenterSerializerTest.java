@@ -35,8 +35,9 @@ public class UpdateCenterSerializerTest {
   @Test
   public void test_to_properties() throws IOException, URISyntaxException {
     Sonar sonar = new Sonar();
-    sonar.addRelease(Version.create("2.0"));
-    sonar.addRelease(Version.create("2.1"));
+    sonar.addRelease("2.0");
+    sonar.addRelease("2.1");
+    sonar.setLtsRelease("2.0");
 
     Plugin foo = new Plugin("foo")
         .setName("Foo")
@@ -62,6 +63,7 @@ public class UpdateCenterSerializerTest {
     properties.store(System.out, null);
 
     assertProperty(properties, "sonar.versions", "2.0,2.1");
+    assertProperty(properties, "sonar.ltsVersion", "2.0");
     assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");

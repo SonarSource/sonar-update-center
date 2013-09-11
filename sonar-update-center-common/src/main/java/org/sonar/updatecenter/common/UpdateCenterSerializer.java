@@ -67,6 +67,9 @@ public final class UpdateCenterSerializer {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
     set(p, "sonar.versions", center.getSonar().getVersions());
+    if (center.getSonar().getLtsRelease() != null) {
+      set(p, "sonar.ltsVersion", center.getSonar().getLtsRelease().getVersion().toString());
+    }
     String sonarPrefix = "sonar.";
     for (Release sonarRelease : center.getSonar().getReleases()) {
       set(p, sonarPrefix + sonarRelease.getVersion() + ".downloadUrl", sonarRelease.getDownloadUrl());
@@ -132,6 +135,6 @@ public final class UpdateCenterSerializer {
     for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
-    return requiredStringList.toArray(new String[]{});
+    return requiredStringList.toArray(new String[] {});
   }
 }

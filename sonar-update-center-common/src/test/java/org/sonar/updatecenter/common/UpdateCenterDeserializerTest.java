@@ -282,4 +282,33 @@ public class UpdateCenterDeserializerTest {
       IOUtils.closeQuietly(input);
     }
   }
+
+  // UPC-19
+  @Test
+  public void should_parse_lts() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("2.3"));
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-19
+  @Test
+  public void should_throw_if_lts_invalid() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("sonar.ltsVersion seems wrong as it is not listed in sonar.versions");
+      UpdateCenterDeserializer.fromProperties(props);
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }
