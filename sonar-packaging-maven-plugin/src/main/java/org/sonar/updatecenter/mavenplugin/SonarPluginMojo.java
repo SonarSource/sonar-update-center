@@ -48,7 +48,11 @@ import org.sonar.updatecenter.common.PluginManifest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Build a Sonar Plugin from the current project.
@@ -261,11 +265,11 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
 
   private void checkParentAndRequiresPluginProperties() {
     if (getPluginParent() != null && getRequirePlugins() != null) {
-      throw new IllegalStateException("The plugin '" + getPluginKey() + "' can't be both part of the plugin '" + getPluginParent()
-        + "' and having a dependency on '" + getRequirePlugins() + "'");
+      throw new IllegalStateException(String.format("The plugin '%s' can't be both part of the plugin '%s' and having a dependency on '%s'", getPluginKey(), getPluginParent(),
+        getRequirePlugins()));
     }
     if (getPluginParent() != null && getPluginParent().equals(getPluginKey())) {
-      throw new IllegalStateException("The plugin '" + getPluginKey() + "' can't be his own parent. Please remove the '" + PluginManifest.PARENT + "' property.");
+      throw new IllegalStateException(String.format("The plugin '%s' can't be his own parent. Please remove the '%s' property.", getPluginKey(), PluginManifest.PARENT));
     }
   }
 
@@ -318,11 +322,11 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private String getDevelopers() {
     if (getProject().getDevelopers() != null) {
       return Joiner.on(",").join(
-          Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
-            public String apply(Developer developer) {
-              return developer.getName();
-            }
-          }));
+        Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+          public String apply(Developer developer) {
+            return developer.getName();
+          }
+        }));
     }
     return null;
   }
@@ -342,9 +346,9 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     if (!ids.isEmpty()) {
       getLog().info(getMessage("Following dependencies are packaged in the plugin:", ids));
       getLog().info(new StringBuilder()
-          .append("See following page for more details about plugin dependencies:\n")
-          .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
-          .toString());
+        .append("See following page for more details about plugin dependencies:\n")
+        .append("\n\thttp://docs.codehaus.org/display/SONAR/Coding+a+plugin\n")
+        .toString());
     }
     return libs;
   }
@@ -385,7 +389,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     Set<Artifact> result = new HashSet<Artifact>();
     ArtifactFilter artifactFilter = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME);
     DependencyNode rootNode = dependencyTreeBuilder.buildDependencyTree(getProject(), localRepository, artifactFactory,
-        artifactMetadataSource, artifactFilter, artifactCollector);
+      artifactMetadataSource, artifactFilter, artifactCollector);
     rootNode.accept(new BuildingDependencyNodeVisitor());
     searchForSonarProvidedArtifacts(rootNode, result, false);
     return result;

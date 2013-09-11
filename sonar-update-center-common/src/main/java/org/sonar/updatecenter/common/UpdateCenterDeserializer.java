@@ -47,11 +47,11 @@ import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 public final class UpdateCenterDeserializer {
 
-  private static final String DATE_SUFFIX = ".date";
-  private static final String DESCRIPTION_SUFFIX = ".description";
-  private static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
-  private static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
-  private static final String SONAR_PREFIX = "sonar.";
+  public static final String DATE_SUFFIX = ".date";
+  public static final String DESCRIPTION_SUFFIX = ".description";
+  public static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
+  public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
+  public static final String SONAR_PREFIX = "sonar.";
 
   private UpdateCenterDeserializer() {
     // only static methods
