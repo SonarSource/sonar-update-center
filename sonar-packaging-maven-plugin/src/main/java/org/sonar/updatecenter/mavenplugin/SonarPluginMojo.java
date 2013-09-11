@@ -361,18 +361,20 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     Set<Artifact> result = new HashSet<Artifact>();
     Set<Artifact> providedArtifacts = getSonarProvidedArtifacts();
     for (Artifact artifact : getIncludedArtifacts()) {
-      if ("sonar-plugin".equals(artifact.getType())) {
-        continue;
-      }
-      if (Artifact.SCOPE_PROVIDED.equals(artifact.getScope()) || Artifact.SCOPE_TEST.equals(artifact.getScope())) {
-        continue;
-      }
-      if (containsArtifact(providedArtifacts, artifact)) {
+      if (isSonarPlugin(artifact) || isScopeProvidedOrTest(artifact) || containsArtifact(providedArtifacts, artifact)) {
         continue;
       }
       result.add(artifact);
     }
     return result;
+  }
+
+  private boolean isScopeProvidedOrTest(Artifact artifact) {
+    return Artifact.SCOPE_PROVIDED.equals(artifact.getScope()) || Artifact.SCOPE_TEST.equals(artifact.getScope());
+  }
+
+  private boolean isSonarPlugin(Artifact artifact) {
+    return "sonar-plugin".equals(artifact.getType());
   }
 
   private boolean containsArtifact(Set<Artifact> artifacts, Artifact artifact) {
