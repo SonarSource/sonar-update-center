@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
+import org.sonar.updatecenter.common.Version;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +32,7 @@ import java.util.Locale;
 
 public class PluginHeader {
 
-  public static class PluginHeaderVersion {
+  public class PluginHeaderVersion {
     private final Release release;
 
     public PluginHeaderVersion(Release release) {
@@ -52,6 +53,14 @@ public class PluginHeader {
 
     public String getSonarVersion() {
       return release.getMinimumRequiredSonarVersion().getName();
+    }
+
+    public boolean compatibleWithLts() {
+      String lts = getSonarLtsVersion();
+      if (lts == null) {
+        throw new IllegalStateException("Unable to determine if plugin is compatible wth LTS as LTS version is not defined");
+      }
+      return release.supportSonarVersion(Version.create(lts));
     }
   }
 
@@ -107,7 +116,7 @@ public class PluginHeader {
       return null;
     }
     Release lastCompatibleWithLts = plugin.getLastCompatibleRelease(sonar.getLtsRelease().getVersion());
-    if (!plugin.getLastRelease().equals(lastCompatibleWithLts)) {
+    if (lastCompatibleWithLts != null && !plugin.getLastRelease().equals(lastCompatibleWithLts)) {
       return new PluginHeaderVersion(lastCompatibleWithLts);
     }
     return null;

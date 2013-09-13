@@ -20,10 +20,10 @@
             <strong>${pluginHeader.getLatestVersion().getVersion()}</strong> ( ${pluginHeader.getLatestVersion().getDate()} )<br/>
             <br/>
             <#if pluginHeader.getSonarLtsVersion()?? >
-            <#if pluginHeader.getLtsVersion()?? >
-            Not compatible
-            <#else>
+            <#if pluginHeader.getLatestVersion().compatibleWithLts() >
             Compatible
+            <#else>
+            Not compatible
             </#if>
             with LTS version (SonarQube ${pluginHeader.getSonarLtsVersion()})
             <br/>

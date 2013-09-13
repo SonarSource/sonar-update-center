@@ -89,27 +89,36 @@ public class PluginHeadersTest {
 
   // UPC-20
   @Test
-  public void shouldGenerateHtmlWithoutCompatibleWithLts() throws Exception {
-    File file = generateWithLts(true);
-    assertThat(file).hasSameContentAs(getExpectedFile("normal-without-lts.html"));
+  public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(true, true);
+    assertThat(file).hasSameContentAs(getExpectedFile("latest_plugin_version_compatible_with_lts.html"));
   }
 
   // UPC-20
   @Test
-  public void shouldGenerateHtmlWithCompatibleWithLts() throws Exception {
-    File file = generateWithLts(false);
-    assertThat(file).hasSameContentAs(getExpectedFile("normal-with-lts.html"));
+  public void shouldGenerateHtml_old_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(false, true);
+    assertThat(file).hasSameContentAs(getExpectedFile("old_plugin_version_compatible_with_lts.html"));
   }
 
-  private File generateWithLts(boolean latestCompatibleWithLts) throws ParseException, IOException {
+  // UPC-20
+  @Test
+  public void shouldGenerateHtml_no_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(false, false);
+    assertThat(file).hasSameContentAs(getExpectedFile("no_plugin_version_compatible_with_lts.html"));
+  }
+
+  private File generateWithLts(boolean latestCompatibleWithLts, boolean atLeastOneCompatibleWithLts) throws ParseException, IOException {
     sonar.setLtsRelease("3.0");
     Plugin plugin = new Plugin(PLUGIN_KEY);
-    Version version1 = Version.create("1.0");
-    Release release1 = new Release(plugin, version1);
-    release1.setDate(getDate());
-    release1.setDownloadUrl("download_url1");
-    release1.addRequiredSonarVersions("3.0");
-    plugin.addRelease(release1);
+    if (atLeastOneCompatibleWithLts) {
+      Version version1 = Version.create("1.0");
+      Release release1 = new Release(plugin, version1);
+      release1.setDate(getDate());
+      release1.setDownloadUrl("download_url1");
+      release1.addRequiredSonarVersions("3.0");
+      plugin.addRelease(release1);
+    }
     Version version2 = Version.create("2.0");
     Release release2 = new Release(plugin, version2);
     release2.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
