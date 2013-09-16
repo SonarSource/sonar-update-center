@@ -9,13 +9,16 @@ import org.junit.rules.TemporaryFolder;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Sonar;
+import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -31,15 +34,30 @@ public class PluginHeadersTest {
 
   private File outputFolder;
 
+  private PluginReferential pluginReferential;
+
+  private UpdateCenter center;
+
+  private PluginHeaders pluginHeaders;
+
+  private Sonar sonar;
+
   @Before
   public void before() throws Exception {
     outputFolder = temporaryFolder.newFolder();
+    sonar = new Sonar();
+  }
+
+  private void prepareMocks(Plugin... plugins) throws IOException {
+    pluginReferential = plugins.length > 0 ? PluginReferential.create(Arrays.asList(plugins)) : PluginReferential.createEmpty();
+    center = UpdateCenter.create(pluginReferential, sonar);
+    pluginHeaders = new PluginHeaders(center, outputFolder, mock(Log.class));
   }
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
-    PluginReferential pluginReferential = PluginReferential.create(Collections.<Plugin> emptyList());
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks();
+
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(1);
@@ -61,13 +79,69 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
     File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
+  }
+
+  // UPC-20
+  @Test
+  public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(true, true);
+    assertThat(file).hasSameContentAs(getExpectedFile("latest_plugin_version_compatible_with_lts.html"));
+  }
+
+  // UPC-20
+  @Test
+  public void shouldGenerateHtml_old_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(false, true);
+    assertThat(file).hasSameContentAs(getExpectedFile("old_plugin_version_compatible_with_lts.html"));
+  }
+
+  // UPC-20
+  @Test
+  public void shouldGenerateHtml_no_plugin_version_compatible_with_lts() throws Exception {
+    File file = generateWithLts(false, false);
+    assertThat(file).hasSameContentAs(getExpectedFile("no_plugin_version_compatible_with_lts.html"));
+  }
+
+  private File generateWithLts(boolean latestCompatibleWithLts, boolean atLeastOneCompatibleWithLts) throws ParseException, IOException {
+    sonar.setLtsRelease("3.0");
+    Plugin plugin = new Plugin(PLUGIN_KEY);
+    if (atLeastOneCompatibleWithLts) {
+      Version version1 = Version.create("1.0");
+      Release release1 = new Release(plugin, version1);
+      release1.setDate(getDate());
+      release1.setDownloadUrl("download_url1");
+      release1.addRequiredSonarVersions("3.0");
+      plugin.addRelease(release1);
+    }
+    Version version2 = Version.create("2.0");
+    Release release2 = new Release(plugin, version2);
+    release2.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
+    release2.setDownloadUrl("download_url2");
+    if (latestCompatibleWithLts) {
+      release2.addRequiredSonarVersions("3.0", "4.0");
+    }
+    else {
+      release2.addRequiredSonarVersions("4.0");
+    }
+    plugin.addRelease(release2);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
+
+    prepareMocks(plugin);
+    pluginHeaders.generateHtml();
+
+    assertThat(outputFolder.list()).hasSize(2);
+    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    return file;
   }
 
   class FilenameFilterForGeneratedHtml implements FilenameFilter {
@@ -91,8 +165,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev1", "dev2"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -115,8 +188,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -139,8 +211,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -163,8 +234,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(null);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -187,8 +257,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl(null);
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);
@@ -212,8 +281,7 @@ public class PluginHeadersTest {
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(plugin));
-    PluginHeaders pluginHeaders = new PluginHeaders(pluginReferential, outputFolder, mock(Log.class));
+    prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(2);

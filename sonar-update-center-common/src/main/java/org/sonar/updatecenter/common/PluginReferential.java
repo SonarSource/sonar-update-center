@@ -52,7 +52,7 @@ public class PluginReferential {
   }
 
   public static PluginReferential createEmpty() {
-    return PluginReferential.create(Lists.<Plugin>newArrayList());
+    return PluginReferential.create(Lists.<Plugin> newArrayList());
   }
 
   /**
@@ -121,7 +121,7 @@ public class PluginReferential {
       release.setParent(parent);
       parent.addChild(release);
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + parentKey + "' required by the plugin '" + release.getKey() + "' is missing.", e);
+      throw new PluginNotFoundException(String.format("The plugin '%s' required by the plugin '%s' is missing.", parentKey, release.getKey()), e);
     }
   }
 
@@ -129,8 +129,8 @@ public class PluginReferential {
     try {
       return pluginParent.getRelease(release.getVersion());
     } catch (NoSuchElementException e) {
-      throw new IncompatiblePluginVersionException("The plugins '" + release.getKey() + "' and '" + pluginParent.key +
-        "' must have exactly the same version as they belong to the same group.", e);
+      throw new IncompatiblePluginVersionException(String.format("The plugins '%s' and '%s' must have exactly the same version as they belong to the same group.",
+        release.getKey(), pluginParent.key), e);
     }
   }
 
@@ -145,12 +145,12 @@ public class PluginReferential {
       } else {
         Release latest = requiredPlugin.getLastRelease();
         if (latest != null) {
-          throw new IncompatiblePluginVersionException("The plugin '" + requiredPlugin.getKey() + "' is in version " + latest.getVersion().getName()
-            + " whereas the plugin '" + release.getArtifact().getKey() + "' requires a least a version " + requiredMinimumReleaseVersion + ".");
+          throw new IncompatiblePluginVersionException(String.format("The plugin '%s' is in version %s whereas the plugin '%s' requires a least a version %s.",
+            requiredPlugin.getKey(), latest.getVersion().getName(), release.getArtifact().getKey(), requiredMinimumReleaseVersion));
         }
       }
     } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException("The plugin '" + requiredPluginReleaseKey + "' required by '" + release.getArtifact().getKey() + "' is missing.", e);
+      throw new PluginNotFoundException(String.format("The plugin '%s' required by '%s' is missing.", requiredPluginReleaseKey, release.getArtifact().getKey()), e);
     }
   }
 

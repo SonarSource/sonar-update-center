@@ -21,7 +21,9 @@
 package org.sonar.updatecenter.common;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.IOException;
@@ -34,6 +36,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterDeserializerTest {
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Test
   public void read_infos_from_froperties() throws IOException {
@@ -200,6 +205,47 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
+  // UPC-15
+  @Test
+  public void should_resolve_latest_using_sonar_next() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-latest-and-next.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
+      SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(8);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
+
+      Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(4);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-15
+  @Test
+  public void should_throw_if_sonar_next_outdated() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-next-outdated.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("sonar.nextVersion seems outdated. Update or remove it.");
+      UpdateCenterDeserializer.fromProperties(props);
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
   // UPC-10
   @Test
   public void should_filter_snapshots() throws IOException {
@@ -232,6 +278,35 @@ public class UpdateCenterDeserializerTest {
 
       assertThat(clirr.doesContainVersion(Version.create("1.2-SNAPSHOT"))).isFalse();
 
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-19
+  @Test
+  public void should_parse_lts() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("2.3"));
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-19
+  @Test
+  public void should_throw_if_lts_invalid() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("sonar.ltsVersion seems wrong as it is not listed in sonar.versions");
+      UpdateCenterDeserializer.fromProperties(props);
     } finally {
       IOUtils.closeQuietly(input);
     }

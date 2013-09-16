@@ -26,6 +26,10 @@ import org.apache.commons.lang.StringUtils;
  */
 public final class PluginKeyUtils {
 
+  private static final String SONAR_PLUGIN_SUFFIX = "-sonar-plugin";
+  private static final String SONAR_PREFIX = "sonar-";
+  private static final String PLUGIN_SUFFIX = "-plugin";
+
   private PluginKeyUtils() {
     // only static methods
   }
@@ -34,12 +38,12 @@ public final class PluginKeyUtils {
     if (mavenArtifactId == null) {
       return null;
     }
-    
+
     String key = mavenArtifactId;
-    if (StringUtils.startsWith(mavenArtifactId, "sonar-") && StringUtils.endsWith(mavenArtifactId, "-plugin")) {
-      key = StringUtils.removeEnd(StringUtils.removeStart(mavenArtifactId, "sonar-"), "-plugin");
-    } else if (StringUtils.endsWith(mavenArtifactId, "-sonar-plugin")) {
-      key = StringUtils.removeEnd(mavenArtifactId, "-sonar-plugin");
+    if (StringUtils.startsWith(mavenArtifactId, SONAR_PREFIX) && StringUtils.endsWith(mavenArtifactId, PLUGIN_SUFFIX)) {
+      key = StringUtils.removeEnd(StringUtils.removeStart(mavenArtifactId, SONAR_PREFIX), PLUGIN_SUFFIX);
+    } else if (StringUtils.endsWith(mavenArtifactId, SONAR_PLUGIN_SUFFIX)) {
+      key = StringUtils.removeEnd(mavenArtifactId, SONAR_PLUGIN_SUFFIX);
     }
     return keepLettersAndDigits(key);
   }

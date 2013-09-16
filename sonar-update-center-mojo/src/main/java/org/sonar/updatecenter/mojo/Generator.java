@@ -112,7 +112,7 @@ class Generator {
     } catch (IOException e) {
       throw new IllegalStateException("Fail to create the working directory: " + htmlOutputDir.getAbsolutePath(), e);
     }
-    PluginHeaders pluginHeaders = new PluginHeaders(center.getUpdateCenterPluginReferential(), htmlOutputDir, log);
+    PluginHeaders pluginHeaders = new PluginHeaders(center, htmlOutputDir, log);
     pluginHeaders.generateHtml();
   }
 

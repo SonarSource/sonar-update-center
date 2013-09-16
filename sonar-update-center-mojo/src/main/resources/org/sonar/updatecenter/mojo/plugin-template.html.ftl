@@ -16,19 +16,37 @@
     </tr>
     <tr>
         <td><strong>Latest version</strong></td>
-        <td><strong>${pluginHeader.getVersion()}</strong> ( ${pluginHeader.getDate()} )</td>
-    </tr>
-    <tr>
-        <td><strong>Requires Sonar version</strong></td>
         <td>
-            <strong>${pluginHeader.getSonarVersion()}</strong> or higher
+            <strong>${pluginHeader.getLatestVersion().getVersion()}</strong> ( ${pluginHeader.getLatestVersion().getDate()} )<br/>
+            <br/>
+            <#if pluginHeader.getSonarLtsVersion()?? >
+            <#if pluginHeader.getLatestVersion().compatibleWithLts() >
+            Compatible
+            <#else>
+            Not compatible
+            </#if>
+            with LTS version (SonarQube ${pluginHeader.getSonarLtsVersion()})
+            <br/>
+            </#if>
+            Requires SonarQube ${pluginHeader.getLatestVersion().getSonarVersion()} or higher
             ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
+            <br/>
+            Download: <a href="${pluginHeader.getLatestVersion().getDownloadUrl()}">${pluginHeader.getLatestVersion().getDownloadUrl()}</a>
         </td>
     </tr>
+    <#if pluginHeader.getLtsVersion()?? >
     <tr>
-        <td><strong>Download</strong></td>
-        <td><a href="${pluginHeader.getDownloadUrl()}">${pluginHeader.getDownloadUrl()}</a></td>
+        <td><strong>Compatible with LTS version</strong></td>
+        <td>
+            <strong>${pluginHeader.getLtsVersion().getVersion()}</strong> ( ${pluginHeader.getLtsVersion().getDate()} )<br/>
+            <br/>
+            Requires SonarQube ${pluginHeader.getLtsVersion().getSonarVersion()} or higher
+            ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
+            <br/>
+            Download: <a href="${pluginHeader.getLtsVersion().getDownloadUrl()}">${pluginHeader.getLtsVersion().getDownloadUrl()}</a>
+        </td>
     </tr>
+    </#if>
     <#if pluginHeader.getLicense()?? >
     <tr>
         <td><strong>License</strong></td>
