@@ -239,8 +239,30 @@ public class UpdateCenterDeserializerTest {
       Properties props = new Properties();
       props.load(input);
       thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("sonar.nextVersion seems outdated. Update or remove it.");
+      thrown.expectMessage("sonar.nextVersions seems outdated. 2.8 is already listed in sonar.versions. Update or remove it.");
       UpdateCenterDeserializer.fromProperties(props);
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-24
+  @Test
+  public void should_resolve_latest_with_multiple_sonar_next() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-multiple-next.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+
+      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
+      SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(6);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("3.7");
+      assertThat(requiredSonarVersion).onProperty("name").contains("3.7.3");
+      assertThat(requiredSonarVersion).onProperty("name").contains("4.0");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("4.1");
+
     } finally {
       IOUtils.closeQuietly(input);
     }

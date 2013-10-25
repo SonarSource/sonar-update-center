@@ -19,21 +19,33 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 public class Sonar extends Artifact {
 
-  private Release nextRelease;
+  private SortedSet<Release> nextReleases = new TreeSet<Release>();
   private Release ltsRelease;
 
   public Sonar() {
     super("sonar");
   }
 
-  public void setNextRelease(String nextVersion) {
-    this.nextRelease = new Release(this, Version.create(nextVersion));
+  public final Release addNextRelease(Release release) {
+    nextReleases.add(release);
+    return release;
   }
 
-  public Release getNextRelease() {
-    return nextRelease;
+  public final Release addNextRelease(Version version) {
+    return addNextRelease(new Release(this, version));
+  }
+
+  public final Release addNextRelease(String version) {
+    return addNextRelease(new Release(this, version));
+  }
+
+  public SortedSet<Release> getNextReleases() {
+    return nextReleases;
   }
 
   public void setLtsRelease(String ltsVersion) {
@@ -42,6 +54,16 @@ public class Sonar extends Artifact {
 
   public Release getLtsRelease() {
     return ltsRelease;
+  }
+
+  /**
+   * Return the concatenation of releases and next releases
+   */
+  public SortedSet<Release> getAllReleases() {
+    SortedSet<Release> all = new TreeSet<Release>();
+    all.addAll(getReleases());
+    all.addAll(getNextReleases());
+    return all;
   }
 
   /**

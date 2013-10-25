@@ -146,17 +146,17 @@ public final class UpdateCenterDeserializer {
 
   private static void parseSonar(Properties p, boolean ignoreSnapshots, Sonar sonar) {
     parseSonarReleases(p, ignoreSnapshots, sonar);
-    parseSonarNextVersion(p, sonar);
+    parseSonarNextVersions(p, sonar);
     parseSonarLtsVersion(p, sonar);
   }
 
-  private static void parseSonarNextVersion(Properties p, Sonar sonar) {
-    String nextVersion = get(p, "sonar.nextVersion");
-    if (StringUtils.isNotBlank(nextVersion)) {
-      sonar.setNextRelease(nextVersion);
-    }
-    if (sonar.getNextRelease() != null && sonar.getReleases().last().compareTo(sonar.getNextRelease()) >= 0) {
-      throw new IllegalStateException("sonar.nextVersion seems outdated. Update or remove it.");
+  private static void parseSonarNextVersions(Properties p, Sonar sonar) {
+    String[] nextVersions = getArray(p, "sonar.nextVersions");
+    for (String nextVersion : nextVersions) {
+      Release r = sonar.addNextRelease(nextVersion);
+      if (sonar.getReleases().contains(r)) {
+        throw new IllegalStateException("sonar.nextVersions seems outdated. " + r.getVersion().toString() + " is already listed in sonar.versions. Update or remove it.");
+      }
     }
   }
 
@@ -204,7 +204,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private static void resolveRange(Sonar sonar, List<String> result, final Version low, final Version high) {
-    Collection<Version> versions = Collections2.filter(transform(sonar.getReleases(), new Function<Release, Version>() {
+    Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       public Version apply(Release release) {
         return release != null ? release.getVersion() : null;
       }
@@ -215,10 +215,6 @@ public final class UpdateCenterDeserializer {
     });
     for (Version version : versions) {
       result.add(version.toString());
-    }
-    // Include next release if it was used as upper bound even if it is not in current Sonar releases
-    if (sonar.getNextRelease() != null && high.equals(sonar.getNextRelease().getVersion())) {
-      result.add(sonar.getNextRelease().getVersion().toString());
     }
   }
 
@@ -246,10 +242,7 @@ public final class UpdateCenterDeserializer {
 
   private static String resolve(String version, Sonar sonar) {
     if ("LATEST".equals(version)) {
-      if (sonar.getNextRelease() != null) {
-        return sonar.getNextRelease().getVersion().toString();
-      }
-      return sonar.getReleases().last().getVersion().toString();
+      return sonar.getAllReleases().last().getVersion().toString();
     }
     return version;
   }
