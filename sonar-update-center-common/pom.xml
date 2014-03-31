@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>sonar-update-center-common</artifactId>
-  <name>Sonar :: Update Center :: Common</name>
+  <name>SonarSource :: Update Center :: Common</name>
 
   <dependencies>
     <dependency>
