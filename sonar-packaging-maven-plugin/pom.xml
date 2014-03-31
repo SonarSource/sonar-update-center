@@ -9,7 +9,7 @@
   </parent>
   <artifactId>sonar-packaging-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Sonar :: Update Center :: Packaging Mojo</name>
+  <name>SonarSource :: Update Center :: Packaging Mojo</name>
 
   <properties>
     <mavenVersion>2.0.9</mavenVersion>
