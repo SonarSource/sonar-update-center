@@ -19,7 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -53,5 +60,30 @@ public class SonarUpdateTest {
     assertThat(update1).isEqualTo(update1);
     assertThat(update1).isEqualTo(new SonarUpdate(new Release(new Sonar(), "2.2")));
     assertThat(update1).isNotEqualTo(update2);
+  }
+
+  @Test
+  public void testUpdateJava() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/SonarUpdateTest/update-center.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+
+      center.setInstalledSonarVersion(Version.create("3.7.4"));
+      List<Plugin> plugins = new ArrayList<Plugin>();
+      Plugin java = new Plugin("java");
+      java.addRelease("2.0");
+      plugins.add(java);
+      center.registerInstalledPlugins(PluginReferential.create(plugins));
+
+      List<SonarUpdate> sonarUpdates = center.findSonarUpdates();
+      SonarUpdate sonar4_2 = sonarUpdates.get(4);
+      assertThat(sonar4_2.getRelease().getVersion().toString()).isEqualTo("4.2");
+      assertThat(sonar4_2.getPluginsToUpgrade().size()).isEqualTo(1);
+      assertThat(sonar4_2.getPluginsToUpgrade().get(0).getVersion().toString()).isEqualTo("2.1");
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
   }
 }
