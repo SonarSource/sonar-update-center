@@ -1,20 +1,20 @@
 /*
- * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
- * mailto:contact AT sonarsource DOT com
+ * SonarSource :: Update Center :: Maven Plugin
+ * Copyright (C) 2010 SonarSource
+ * dev@sonar.codehaus.org
  *
- * Sonar is free software; you can redistribute it and/or
+ * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
  *
- * Sonar is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Sonar; if not, write to the Free Software
+ * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 package org.sonar.updatecenter.mojo;
@@ -40,8 +40,8 @@ public class GenerateMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3-20110822.091313-2.jar"), outputDir);
 
-    File inputFile = resource("update-center-template.properties");
-    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    File inputFile = resource("update-center-template/update-center.properties");
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setDevMode(true).execute();
 
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
@@ -49,7 +49,9 @@ public class GenerateMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2,0.3-SNAPSHOT");
+    assertThat(output).contains("artifactsize.versions=0.2");
+    assertThat(output).contains("artifactsize.publicVersions=0.2");
+    assertThat(output).contains("artifactsize.devVersion=0.3-SNAPSHOT");
 
     // metadata loaded from jar manifest
     assertThat(output).contains("artifactsize.organization=SonarSource");
@@ -63,15 +65,15 @@ public class GenerateMojoTest {
   }
 
   @Test
-  public void generate_properties_and_no_html() throws Exception {
+  public void generate_dev_properties_and_no_html() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3-20110822.091313-2.jar"), outputDir);
 
-    File inputFile = resource("update-center-template.properties");
-    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setGenerateHeaders(false).execute();
+    File inputFile = resource("update-center-template/update-center.properties");
+    new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).setGenerateHeaders(false).setDevMode(true).execute();
 
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
@@ -79,7 +81,9 @@ public class GenerateMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2,0.3-SNAPSHOT");
+    assertThat(output).contains("artifactsize.versions=0.2");
+    assertThat(output).contains("artifactsize.publicVersions=0.2");
+    assertThat(output).contains("artifactsize.devVersion=0.3-SNAPSHOT");
 
     // metadata loaded from jar manifest
     assertThat(output).contains("artifactsize.organization=SonarSource");
@@ -96,7 +100,7 @@ public class GenerateMojoTest {
     // plugin is already cached
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
 
-    File inputFile = resource("update-center-template.properties");
+    File inputFile = resource("update-center-template/update-center.properties");
     new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
     // verify that properties file is generated
@@ -128,7 +132,7 @@ public class GenerateMojoTest {
     FileUtils.copyFileToDirectory(resource("dotnet-plugin-1.0.jar"), outputDir);
     FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.0.jar"), outputDir);
 
-    File inputFile = resource("update-center-template-for-requires-and-parent.properties");
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
     new GenerateMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
     // verify that properties file is generated

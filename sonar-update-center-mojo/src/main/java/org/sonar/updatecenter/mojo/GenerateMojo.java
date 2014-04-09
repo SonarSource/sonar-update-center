@@ -1,20 +1,20 @@
 /*
- * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2011 SonarSource
- * mailto:contact AT sonarsource DOT com
+ * SonarSource :: Update Center :: Maven Plugin
+ * Copyright (C) 2010 SonarSource
+ * dev@sonar.codehaus.org
  *
- * Sonar is free software; you can redistribute it and/or
+ * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
  *
- * Sonar is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Sonar; if not, write to the Free Software
+ * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
 package org.sonar.updatecenter.mojo;
@@ -55,9 +55,16 @@ public class GenerateMojo extends AbstractMojo {
    */
   private boolean generateHeaders = true;
 
+  /**
+   * Should we consider private and dev versions
+   *
+   * @parameter expression="${devMode}"
+   */
+  private boolean devMode = false;
+
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, devMode, getLog());
       new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
@@ -79,6 +86,12 @@ public class GenerateMojo extends AbstractMojo {
   @VisibleForTesting
   GenerateMojo setGenerateHeaders(boolean b) {
     this.generateHeaders = b;
+    return this;
+  }
+
+  @VisibleForTesting
+  GenerateMojo setDevMode(boolean devMode) {
+    this.devMode = devMode;
     return this;
   }
 }

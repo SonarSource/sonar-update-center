@@ -1,23 +1,22 @@
 /*
- * Sonar, open source software quality management tool.
- * Copyright (C) 2008-2012 SonarSource
- * mailto:contact AT sonarsource DOT com
+ * SonarSource :: Update Center :: Common
+ * Copyright (C) 2010 SonarSource
+ * dev@sonar.codehaus.org
  *
- * Sonar is free software; you can redistribute it and/or
+ * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
  *
- * Sonar is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Sonar; if not, write to the Free Software
+ * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02
  */
-
 package org.sonar.updatecenter.common;
 
 import org.apache.commons.io.FileUtils;
@@ -72,6 +71,9 @@ public final class UpdateCenterSerializer {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
     set(p, "publicVersions", center.getSonar().getVersions());
+    if (center.getSonar().getDevRelease() != null) {
+      set(p, "devVersion", center.getSonar().getDevRelease().getVersion().toString());
+    }
     // For backward compatibility
     set(p, "sonar.versions", center.getSonar().getVersions());
     if (center.getSonar().getLtsRelease() != null) {
@@ -129,6 +131,9 @@ public final class UpdateCenterSerializer {
       set(p, plugin, release.getVersion() + ".requirePlugins", StringUtils.join(getRequiredList(release), ","));
     }
     set(p, plugin, "publicVersions", releaseKeys);
+    if (plugin.getDevRelease() != null) {
+      set(p, plugin, "devVersion", plugin.getDevRelease().getVersion().toString());
+    }
     // For backward compatibility
     set(p, plugin, "versions", releaseKeys);
   }
