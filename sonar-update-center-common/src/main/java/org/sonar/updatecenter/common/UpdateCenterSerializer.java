@@ -71,12 +71,20 @@ public final class UpdateCenterSerializer {
   public static Properties toProperties(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
+    set(p, "publicVersions", center.getSonar().getVersions());
+    // For backward compatibility
     set(p, "sonar.versions", center.getSonar().getVersions());
     if (center.getSonar().getLtsRelease() != null) {
-      set(p, "sonar.ltsVersion", center.getSonar().getLtsRelease().getVersion().toString());
+      set(p, "ltsVersion", center.getSonar().getLtsRelease().getVersion().toString());
     }
 
     for (Release sonarRelease : center.getSonar().getReleases()) {
+      set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
+      set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
+      set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
+      set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
+
+      // For backward compatibility
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
@@ -111,6 +119,8 @@ public final class UpdateCenterSerializer {
       if (release.getParent() != null) {
         set(p, plugin, release.getVersion() + ".parent", release.getParent().getKey());
       }
+      set(p, plugin, release.getVersion() + ".sqVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
+      // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
       set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrl());
       set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrl());
@@ -118,6 +128,8 @@ public final class UpdateCenterSerializer {
       set(p, plugin, release.getVersion() + DATE_SUFFIX, FormatUtils.toString(release.getDate(), false));
       set(p, plugin, release.getVersion() + ".requirePlugins", StringUtils.join(getRequiredList(release), ","));
     }
+    set(p, plugin, "publicVersions", releaseKeys);
+    // For backward compatibility
     set(p, plugin, "versions", releaseKeys);
   }
 

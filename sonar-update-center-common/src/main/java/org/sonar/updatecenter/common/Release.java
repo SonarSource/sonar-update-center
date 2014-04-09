@@ -44,6 +44,7 @@ public class Release implements Comparable<Release> {
   private String description;
   private String downloadUrl;
   private String changelogUrl;
+  private boolean isPublic;
 
   private Release parent;
   private Set<Release> children;
@@ -218,6 +219,14 @@ public class Release implements Comparable<Release> {
     return Version.createRelease(version.toString());
   }
 
+  public boolean isPublic() {
+    return isPublic;
+  }
+
+  public void setPublic(boolean isPublic) {
+    this.isPublic = isPublic;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -249,11 +258,11 @@ public class Release implements Comparable<Release> {
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-        .append("version", version)
-        .append("downloadUrl", downloadUrl)
-        .append("changelogUrl", changelogUrl)
-        .append("description", description)
-        .toString();
+      .append("version", version)
+      .append("downloadUrl", downloadUrl)
+      .append("changelogUrl", changelogUrl)
+      .append("description", description)
+      .toString();
   }
 
   public int compareTo(Release o) {

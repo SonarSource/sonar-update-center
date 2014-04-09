@@ -24,10 +24,14 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -146,9 +150,20 @@ public class UpdateCenterDeserializerTest {
   public void should_throw_exception_when_parent_is_missing() {
     Properties props = new Properties();
     props.put("plugins", "foo");
+    props.put("ltsVersion", "2.2");
+    props.put("devVersion", "2.3-SNAPSHOT");
+    props.put("publicVersions", "2.2");
+    props.put("2.2.changelogUrl", "http://changelog");
+    props.put("2.2.description", "2.2");
+    props.put("2.2.downloadUrl", "http://2.2");
+    props.put("2.2.date", "12-12-2012");
     props.put("foo.name", "Foo");
-    props.put("foo.versions", "1.1");
+    props.put("foo.publicVersions", "1.1");
     props.put("foo.1.1.parent", "bar");
+    props.put("foo.1.1.downloadUrl", "http://foo-1.1");
+    props.put("foo.1.1.changelogUrl", "http://changelog");
+    props.put("foo.1.1.description", "foo");
+    props.put("foo.1.1.date", "12-12-2012");
     UpdateCenterDeserializer.fromProperties(props);
   }
 
@@ -207,12 +222,12 @@ public class UpdateCenterDeserializerTest {
 
   // UPC-15
   @Test
-  public void should_resolve_latest_using_sonar_next() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-latest-and-next.properties");
+  public void should_resolve_latest_using_sonar_devVersion() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-latest-and-devVersion.properties");
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props, Mode.DEV);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
@@ -225,80 +240,6 @@ public class UpdateCenterDeserializerTest {
       assertThat(requiredSonarVersion).hasSize(4);
       assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
       assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
-
-    } finally {
-      IOUtils.closeQuietly(input);
-    }
-  }
-
-  // UPC-15
-  @Test
-  public void should_throw_if_sonar_next_outdated() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-next-outdated.properties");
-    try {
-      Properties props = new Properties();
-      props.load(input);
-      thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("sonar.nextVersions seems outdated. 2.8 is already listed in sonar.versions. Update or remove it.");
-      UpdateCenterDeserializer.fromProperties(props);
-    } finally {
-      IOUtils.closeQuietly(input);
-    }
-  }
-
-  // UPC-24
-  @Test
-  public void should_resolve_latest_with_multiple_sonar_next() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-multiple-next.properties");
-    try {
-      Properties props = new Properties();
-      props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
-
-      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
-      SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
-      assertThat(requiredSonarVersion).hasSize(6);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("3.7");
-      assertThat(requiredSonarVersion).onProperty("name").contains("3.7.3");
-      assertThat(requiredSonarVersion).onProperty("name").contains("4.0");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("4.1");
-
-    } finally {
-      IOUtils.closeQuietly(input);
-    }
-  }
-
-  // UPC-10
-  @Test
-  public void should_filter_snapshots() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-snapshots.properties");
-    try {
-      Properties props = new Properties();
-      props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props, false);
-
-      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"), Version.create("2.4-SNAPSHOT"));
-      assertThat(center.getSonar().getRelease(Version.create("2.4-SNAPSHOT")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.4-SNAPSHOT.zip");
-
-      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
-      assertThat(clirr.getName()).isEqualTo("Clirr");
-      assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
-      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"), Version.create("1.2-SNAPSHOT"));
-
-      assertThat(clirr.getSourcesUrl()).isNull();
-      assertThat(clirr.getDevelopers()).isEmpty();
-
-      assertThat(clirr.getRelease(Version.create("1.2-SNAPSHOT")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.2-SNAPSHOT.jar");
-
-      center = UpdateCenterDeserializer.fromProperties(props, true);
-
-      assertThat(center.getSonar().getVersions()).excludes(Version.create("2.4-SNAPSHOT"));
-      assertThat(center.getSonar().doesContainVersion(Version.create("2.4-SNAPSHOT"))).isFalse();
-
-      clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
-      assertThat(clirr.getVersions()).excludes(Version.create("1.2-SNAPSHOT"));
-
-      assertThat(clirr.doesContainVersion(Version.create("1.2-SNAPSHOT"))).isFalse();
 
     } finally {
       IOUtils.closeQuietly(input);
@@ -327,10 +268,30 @@ public class UpdateCenterDeserializerTest {
       Properties props = new Properties();
       props.load(input);
       thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("sonar.ltsVersion seems wrong as it is not listed in sonar.versions");
+      thrown.expectMessage("ltsVersion seems wrong as it is not listed in SonarQube versions");
       UpdateCenterDeserializer.fromProperties(props);
     } finally {
       IOUtils.closeQuietly(input);
     }
+  }
+
+  // UPC-29
+  @Test
+  public void should_load_new_format_in_dev_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
+    UpdateCenter center = UpdateCenterDeserializer.fromProperties(new File(url.toURI()), Mode.DEV);
+    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
+  }
+
+  // UPC-29
+  @Test
+  public void should_load_new_format_in_prod_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
+    UpdateCenter center = UpdateCenterDeserializer.fromProperties(new File(url.toURI()), Mode.PROD);
+    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
   }
 }

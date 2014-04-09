@@ -24,45 +24,29 @@ import java.util.TreeSet;
 
 public class Sonar extends Artifact {
 
-  private SortedSet<Release> nextReleases = new TreeSet<Release>();
-  private Release ltsRelease;
+  private Release ltsVersion;
 
   public Sonar() {
     super("sonar");
   }
 
-  public final Release addNextRelease(Release release) {
-    nextReleases.add(release);
-    return release;
-  }
-
-  public final Release addNextRelease(Version version) {
-    return addNextRelease(new Release(this, version));
-  }
-
-  public final Release addNextRelease(String version) {
-    return addNextRelease(new Release(this, version));
-  }
-
-  public SortedSet<Release> getNextReleases() {
-    return nextReleases;
-  }
-
   public void setLtsRelease(String ltsVersion) {
-    this.ltsRelease = new Release(this, Version.create(ltsVersion));
+    this.ltsVersion = new Release(this, Version.create(ltsVersion));
   }
 
   public Release getLtsRelease() {
-    return ltsRelease;
+    return ltsVersion;
   }
 
   /**
-   * Return the concatenation of releases and next releases
+   * Return the concatenation of releases and next release
    */
   public SortedSet<Release> getAllReleases() {
     SortedSet<Release> all = new TreeSet<Release>();
     all.addAll(getReleases());
-    all.addAll(getNextReleases());
+    if (getDevRelease() != null) {
+      all.add(getDevRelease());
+    }
     return all;
   }
 

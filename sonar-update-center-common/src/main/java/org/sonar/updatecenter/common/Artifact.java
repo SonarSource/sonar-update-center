@@ -29,6 +29,7 @@ public abstract class Artifact implements Comparable<Artifact> {
 
   protected String key;
   protected SortedSet<Release> releases = new TreeSet<Release>();
+  private Release devRelease;
 
   protected Artifact(String key) {
     this.key = key;
@@ -41,6 +42,23 @@ public abstract class Artifact implements Comparable<Artifact> {
   public final Artifact setKey(String key) {
     this.key = key;
     return this;
+  }
+
+  public final Release setDevRelease(Release release) {
+    devRelease = release;
+    return release;
+  }
+
+  public final Release setDevRelease(Version version) {
+    return setDevRelease(new Release(this, version));
+  }
+
+  public final Release setDevRelease(String version) {
+    return setDevRelease(new Release(this, version));
+  }
+
+  public Release getDevRelease() {
+    return devRelease;
   }
 
   public final Release addRelease(Release release) {
@@ -95,7 +113,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   public final SortedSet<Release> getReleasesGreaterThan(Version version) {
     TreeSet<Release> result = new TreeSet<Release>();
     for (Release release : releases) {
-      if (release.getVersion().compareTo(version)>0) {
+      if (release.getVersion().compareTo(version) > 0) {
         result.add(release);
       }
     }

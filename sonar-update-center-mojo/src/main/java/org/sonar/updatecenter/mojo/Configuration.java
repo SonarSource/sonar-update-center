@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer;
+import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +32,9 @@ import java.io.IOException;
 class Configuration {
 
   private File outputDir, inputFile;
-  private boolean ignoreSnapshots;
   private boolean generateHeaders;
 
-  Configuration(File outputDir, File inputFile, boolean ignoreSnapshots, boolean generateHeaders, Log log) {
-    this.ignoreSnapshots = ignoreSnapshots;
+  Configuration(File outputDir, File inputFile, boolean generateHeaders, Log log) {
     this.generateHeaders = generateHeaders;
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
     Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
@@ -75,7 +74,7 @@ class Configuration {
 
   UpdateCenter getUpdateCenter() {
     try {
-      return UpdateCenterDeserializer.fromProperties(getInputFile(), ignoreSnapshots);
+      return UpdateCenterDeserializer.fromProperties(getInputFile(), Mode.INPUT);
 
     } catch (IOException e) {
       throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);

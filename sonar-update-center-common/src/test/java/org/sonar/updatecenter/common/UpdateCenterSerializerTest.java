@@ -40,22 +40,22 @@ public class UpdateCenterSerializerTest {
     sonar.setLtsRelease("2.0");
 
     Plugin foo = new Plugin("foo")
-        .setName("Foo")
-        .setOrganizationUrl("http://www.sonarsource.org");
+      .setName("Foo")
+      .setOrganizationUrl("http://www.sonarsource.org");
     foo.addRelease(
-        new Release(foo, Version.create("1.2"))
-            .addRequiredSonarVersions(Version.create("2.0"))
-            .addRequiredSonarVersions(Version.create("2.1"))
-    );
+      new Release(foo, Version.create("1.2"))
+        .addRequiredSonarVersions(Version.create("2.0"))
+        .addRequiredSonarVersions(Version.create("2.1"))
+      );
 
     Plugin bar = new Plugin("bar")
-        .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
-        .setDevelopers(Arrays.asList("dev1", "dev2"));
+      .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
+      .setDevelopers(Arrays.asList("dev1", "dev2"));
     bar.addRelease(
-        new Release(bar, Version.create("1.2"))
-            .addRequiredSonarVersions(Version.create("2.0"))
-            .addRequiredSonarVersions(Version.create("2.1"))
-    );
+      new Release(bar, Version.create("1.2"))
+        .addRequiredSonarVersions(Version.create("2.0"))
+        .addRequiredSonarVersions(Version.create("2.1"))
+      );
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
 
     UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
@@ -63,15 +63,18 @@ public class UpdateCenterSerializerTest {
     properties.store(System.out, null);
 
     assertProperty(properties, "sonar.versions", "2.0,2.1");
-    assertProperty(properties, "sonar.ltsVersion", "2.0");
+    assertProperty(properties, "publicVersions", "2.0,2.1");
+    assertProperty(properties, "ltsVersion", "2.0");
     assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "bar.versions", "1.2");
+    assertProperty(properties, "bar.publicVersions", "1.2");
     assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
     assertProperty(properties, "bar.developers", "dev1,dev2");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.sqVersions", "2.0,2.1");
   }
 
   @Test
@@ -81,8 +84,8 @@ public class UpdateCenterSerializerTest {
     sonar.addRelease(Version.create("2.1"));
 
     Plugin foo = new Plugin("foo")
-        .setName("Foo")
-        .setOrganizationUrl("http://www.sonarsource.org");
+      .setName("Foo")
+      .setOrganizationUrl("http://www.sonarsource.org");
     Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
     foo.addRelease(foo12);
 
@@ -134,7 +137,7 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
     Iterable requirePlugins = Splitter.on(",").split(properties.getProperty("bar.1.2.requirePlugins"));
-    assertThat(requirePlugins).containsOnly("foo:1.2","test:1.0");
+    assertThat(requirePlugins).containsOnly("foo:1.2", "test:1.0");
   }
 
   private void assertProperty(Properties props, String key, String value) {

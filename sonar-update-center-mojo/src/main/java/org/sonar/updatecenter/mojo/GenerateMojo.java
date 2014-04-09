@@ -49,14 +49,6 @@ public class GenerateMojo extends AbstractMojo {
   private File inputFile;
 
   /**
-   * Ignore snapshots in the inputFile
-   *
-   * @parameter expression="${ignoreSnapshots}"
-   * @required
-   */
-  private boolean ignoreSnapshots;
-
-  /**
    * Should we generate HTML header files
    *
    * @parameter expression="${generateHeaders}"
@@ -65,7 +57,7 @@ public class GenerateMojo extends AbstractMojo {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, ignoreSnapshots, generateHeaders, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, getLog());
       new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
@@ -81,12 +73,6 @@ public class GenerateMojo extends AbstractMojo {
   @VisibleForTesting
   GenerateMojo setInputFile(File f) {
     this.inputFile = f;
-    return this;
-  }
-
-  @VisibleForTesting
-  GenerateMojo setIgnoreSnapshots(boolean b) {
-    this.ignoreSnapshots = b;
     return this;
   }
 
