@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,6 +113,8 @@ public final class UpdateCenterDeserializer {
 
     parsePlugins(p, mode, sonar, plugins);
 
+    validatePublicPluginSQVersionOverlap(plugins);
+
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
       for (Release release : plugin.getReleases()) {
@@ -130,6 +133,24 @@ public final class UpdateCenterDeserializer {
       }
     }
     return UpdateCenter.create(pluginReferential, sonar).setDate(date);
+  }
+
+  private static void validatePublicPluginSQVersionOverlap(List<Plugin> plugins) {
+    for (Plugin plugin : plugins) {
+      Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+      for (Release r : plugin.getReleases()) {
+        if (r.isPublic()) {
+          for (Version v : r.getRequiredSonarVersions()) {
+            if (sonarVersion.containsKey(v)) {
+              throw new IllegalStateException("SQ version " + v + " is declared compatible with two public versions of " + plugin.getName() + " plugin: " + r.getVersion()
+                + " and "
+                + sonarVersion.get(v).getVersion());
+            }
+            sonarVersion.put(v, r);
+          }
+        }
+      }
+    }
   }
 
   private static void parsePlugins(Properties p, Mode mode, Sonar sonar, List<Plugin> plugins) {

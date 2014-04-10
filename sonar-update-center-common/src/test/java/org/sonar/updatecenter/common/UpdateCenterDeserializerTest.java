@@ -296,4 +296,22 @@ public class UpdateCenterDeserializerTest {
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
   }
+
+  // UPC-29
+  @Test
+  public void should_fail_if_overlap_in_sqVersion_of_public_releases() throws IOException {
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("SQ version 2.7.1 is declared compatible with two public versions of Clirr plugin: 1.1 and 1.0");
+
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-overlap-sqVersion.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenterDeserializer.fromProperties(props);
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }
