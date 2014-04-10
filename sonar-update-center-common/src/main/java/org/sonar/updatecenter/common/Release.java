@@ -45,6 +45,8 @@ public class Release implements Comparable<Release> {
   private String downloadUrl;
   private String changelogUrl;
   private boolean isPublic;
+  private String groupId;
+  private String artifactId;
 
   private Release parent;
   private Set<Release> children;
@@ -226,6 +228,22 @@ public class Release implements Comparable<Release> {
 
   public void setPublic(boolean isPublic) {
     this.isPublic = isPublic;
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  public String getArtifactId() {
+    return artifactId;
+  }
+
+  public void setArtifactId(String artifactId) {
+    this.artifactId = artifactId;
   }
 
   @Override

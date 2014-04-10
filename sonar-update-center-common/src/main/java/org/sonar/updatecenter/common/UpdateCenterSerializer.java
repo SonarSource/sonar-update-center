@@ -35,6 +35,8 @@ import static org.sonar.updatecenter.common.UpdateCenterDeserializer.CHANGELOG_U
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DATE_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DESCRIPTION_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_URL_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_GROUPID_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.SONAR_PREFIX;
 
 public final class UpdateCenterSerializer {
@@ -128,6 +130,8 @@ public final class UpdateCenterSerializer {
       set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrl());
       set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrl());
       set(p, plugin, release.getVersion() + DESCRIPTION_SUFFIX, release.getDescription());
+      set(p, plugin, release.getVersion() + MAVEN_GROUPID_SUFFIX, release.getGroupId());
+      set(p, plugin, release.getVersion() + MAVEN_ARTIFACTID_SUFFIX, release.getArtifactId());
       set(p, plugin, release.getVersion() + DATE_SUFFIX, FormatUtils.toString(release.getDate(), false));
       set(p, plugin, release.getVersion() + ".requirePlugins", StringUtils.join(getRequiredList(release), ","));
     }

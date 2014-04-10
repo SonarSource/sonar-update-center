@@ -50,6 +50,8 @@ public final class UpdateCenterDeserializer {
 
   public static final String DATE_SUFFIX = ".date";
   public static final String DESCRIPTION_SUFFIX = ".description";
+  public static final String MAVEN_GROUPID_SUFFIX = ".mavenGroupId";
+  public static final String MAVEN_ARTIFACTID_SUFFIX = ".mavenArtifactId";
   public static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
   public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
   public static final String SONAR_PREFIX = "sonar.";
@@ -204,6 +206,8 @@ public final class UpdateCenterDeserializer {
     release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
     release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
     release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
+    release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
+    release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
     release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
     String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
     for (String requiredSonarVersion : requiredSonarVersions) {
