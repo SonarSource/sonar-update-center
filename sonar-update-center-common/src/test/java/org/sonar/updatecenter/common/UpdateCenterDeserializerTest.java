@@ -329,4 +329,29 @@ public class UpdateCenterDeserializerTest {
       IOUtils.closeQuietly(input);
     }
   }
+
+  // UPC-30
+  @Test
+  public void should_override_defaults() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-override-defaults.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+      Release sonar2_2 = updateCenter.getSonar().getRelease("2.2");
+      Release sonar2_3 = updateCenter.getSonar().getRelease("2.3");
+      assertThat(sonar2_2.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(sonar2_3.getChangelogUrl()).isEqualTo("http://changelog2.3");
+
+      Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
+      Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
+      Release clirr1_1 = clirr.getRelease(Version.create("1.1"));
+      assertThat(clirr1_0.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(clirr1_1.getChangelogUrl()).isEqualTo("http://changelog1.1");
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }

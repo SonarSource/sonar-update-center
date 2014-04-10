@@ -53,6 +53,7 @@ public final class UpdateCenterDeserializer {
   public static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
   public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
   public static final String SONAR_PREFIX = "sonar.";
+  public static final String DEFAULTS_PREFIX = "defaults";
   public static final String PLUGINS = "plugins";
   private Mode mode;
   private boolean ignoreError;
@@ -200,10 +201,10 @@ public final class UpdateCenterDeserializer {
   private Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, String pluginVersion) {
     Release release = new Release(plugin, pluginVersion);
     release.setPublic(isPublicRelease);
-    release.setDownloadUrl(get(p, pluginKey, pluginVersion + DOWNLOAD_URL_SUFFIX, isPublicRelease));
-    release.setChangelogUrl(get(p, pluginKey, pluginVersion + CHANGELOG_URL_SUFFIX, isPublicRelease));
-    release.setDescription(get(p, pluginKey, pluginVersion + DESCRIPTION_SUFFIX, isPublicRelease));
-    release.setDate(toDate(get(p, pluginKey, pluginVersion + DATE_SUFFIX, isPublicRelease), false));
+    release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
+    release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
+    release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
+    release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
     String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
     for (String requiredSonarVersion : requiredSonarVersions) {
       release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
@@ -226,13 +227,13 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parseSonarDevVersions(Properties p, Sonar sonar) {
-    String devVersion = getOrFail(p, "devVersion");
+    String devVersion = get(p, "devVersion", true);
     Release release = parseSonarVersion(p, sonar, false, devVersion);
     sonar.setDevRelease(release);
   }
 
   private void parseSonarLtsVersion(Properties p, Sonar sonar) {
-    String ltsVersion = getOrFail(p, "ltsVersion");
+    String ltsVersion = get(p, "ltsVersion", true);
     sonar.setLtsRelease(ltsVersion);
     if (!sonar.getReleases().contains(sonar.getLtsRelease())) {
       reportError("ltsVersion seems wrong as it is not listed in SonarQube versions");
@@ -256,10 +257,10 @@ public final class UpdateCenterDeserializer {
   private Release parseSonarVersion(Properties p, Sonar sonar, boolean isPublicRelease, String sonarVersion) {
     Release release = new Release(sonar, sonarVersion);
     release.setPublic(isPublicRelease);
-    release.setChangelogUrl(get(p, sonarVersion + CHANGELOG_URL_SUFFIX, isPublicRelease));
-    release.setDescription(get(p, sonarVersion + DESCRIPTION_SUFFIX, isPublicRelease));
-    release.setDownloadUrl(get(p, sonarVersion + DOWNLOAD_URL_SUFFIX, isPublicRelease));
-    release.setDate(FormatUtils.toDate(get(p, sonarVersion + DATE_SUFFIX, isPublicRelease), false));
+    release.setChangelogUrl(getOrDefault(p, sonarVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
+    release.setDescription(getOrDefault(p, sonarVersion, DESCRIPTION_SUFFIX, isPublicRelease));
+    release.setDownloadUrl(getOrDefault(p, sonarVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
+    release.setDate(FormatUtils.toDate(getOrDefault(p, sonarVersion, DATE_SUFFIX, isPublicRelease), false));
     return release;
   }
 
@@ -343,13 +344,19 @@ public final class UpdateCenterDeserializer {
     return version;
   }
 
-  private String get(Properties props, String key, boolean validate) {
-    return validate ? getOrFail(props, key) : get(props, key);
+  private String getOrDefault(Properties props, String sqVersion, String suffix, boolean required) {
+    String key = sqVersion + suffix;
+    String defaultKey = DEFAULTS_PREFIX + suffix;
+    String value = getOrDefault(props, key, defaultKey);
+    if (StringUtils.isBlank(value) && required) {
+      reportError(key + " should be defined");
+    }
+    return value;
   }
 
-  private String getOrFail(Properties props, String key) {
-    String value = props.getProperty(key);
-    if (StringUtils.isBlank(value)) {
+  private String get(Properties props, String key, boolean required) {
+    String value = get(props, key);
+    if (StringUtils.isBlank(value) && required) {
       reportError(key + " should be defined");
     }
     return value;
@@ -359,12 +366,21 @@ public final class UpdateCenterDeserializer {
     return StringUtils.defaultIfEmpty(props.getProperty(key), null);
   }
 
-  private String get(Properties props, String pluginKey, String field, boolean validate) {
-    return validate ? getOrFail(props, pluginKey, field) : get(props, pluginKey, field);
+  private String getOrDefault(Properties props, String key, String defaultKey) {
+    if (props.containsKey(key)) {
+      return props.getProperty(key);
+    }
+    return StringUtils.defaultIfEmpty(props.getProperty(defaultKey), null);
   }
 
-  private String getOrFail(Properties p, String pluginKey, String field) {
-    return getOrFail(p, pluginKey + "." + field);
+  private String getOrDefault(Properties props, String pluginKey, String version, String suffix, boolean required) {
+    String key = pluginKey + "." + version + suffix;
+    String defaultKey = pluginKey + "." + DEFAULTS_PREFIX + suffix;
+    String value = getOrDefault(props, key, defaultKey);
+    if (StringUtils.isBlank(value) && required) {
+      reportError(key + " should be defined");
+    }
+    return value;
   }
 
   private String get(Properties p, String pluginKey, String field) {
