@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-
 public class PluginTest {
 
   @Test
@@ -33,7 +32,7 @@ public class PluginTest {
 
     plugin.merge(manifest);
 
-    assertThat(plugin.getLicense()).isEqualTo("LGPL2"); // initial definition is reference
+    assertThat(plugin.getLicense()).isEqualTo("LGPL3"); // UPC-32 don't override manifest
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
     assertThat(plugin.getDescription()).isEqualTo("Parser");
   }
@@ -53,7 +52,7 @@ public class PluginTest {
   @Test
   public void should_add_developers() {
     Plugin plugin = new Plugin("squid");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[]{"Dev1"});
+    PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[] {"Dev1"});
 
     plugin.merge(manifest);
 

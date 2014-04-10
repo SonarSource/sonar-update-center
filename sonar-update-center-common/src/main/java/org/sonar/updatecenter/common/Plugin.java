@@ -144,14 +144,14 @@ public class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
-      description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
-      organization = StringUtils.defaultIfEmpty(organization, manifest.getOrganization());
-      organizationUrl = StringUtils.defaultIfEmpty(organizationUrl, manifest.getOrganizationUrl());
-      issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
-      license = StringUtils.defaultIfEmpty(license, manifest.getLicense());
-      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
-      termsConditionsUrl = StringUtils.defaultIfEmpty(termsConditionsUrl, manifest.getTermsConditionsUrl());
-      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
+      description = StringUtils.defaultIfEmpty(manifest.getDescription(), description);
+      organization = StringUtils.defaultIfEmpty(manifest.getOrganization(), organization);
+      organizationUrl = StringUtils.defaultIfEmpty(manifest.getOrganizationUrl(), organizationUrl);
+      issueTrackerUrl = StringUtils.defaultIfEmpty(manifest.getIssueTrackerUrl(), issueTrackerUrl);
+      license = StringUtils.defaultIfEmpty(manifest.getLicense(), license);
+      homepageUrl = StringUtils.defaultIfEmpty(manifest.getHomepage(), homepageUrl);
+      termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl);
+      sourcesUrl = StringUtils.defaultIfEmpty(manifest.getSourcesUrl(), sourcesUrl);
       developers = Arrays.asList(manifest.getDevelopers());
     }
     return this;
