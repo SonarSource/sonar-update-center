@@ -32,12 +32,10 @@ import java.io.IOException;
 class Configuration {
 
   private File outputDir, inputFile;
-  private boolean generateHeaders;
   private boolean devMode;
   private boolean ignoreErrors;
 
-  Configuration(File outputDir, File inputFile, boolean generateHeaders, boolean devMode, boolean ignoreErrors, Log log) {
-    this.generateHeaders = generateHeaders;
+  Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, Log log) {
     this.devMode = devMode;
     this.ignoreErrors = ignoreErrors;
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
@@ -70,10 +68,6 @@ class Configuration {
 
   File getInputFile() {
     return inputFile;
-  }
-
-  boolean shouldGenerateHeaders() {
-    return generateHeaders;
   }
 
   UpdateCenter getUpdateCenter() {

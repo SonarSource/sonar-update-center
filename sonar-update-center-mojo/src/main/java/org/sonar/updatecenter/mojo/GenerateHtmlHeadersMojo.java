@@ -27,10 +27,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import java.io.File;
 
 /**
- * @goal generate
+ * @goal generate-html
  * @requiresProject false
  */
-public class GenerateMojo extends AbstractMojo {
+public class GenerateHtmlHeadersMojo extends AbstractMojo {
 
   /**
    * The directory that contains generated files and cache of plugins.
@@ -49,13 +49,6 @@ public class GenerateMojo extends AbstractMojo {
   private File inputFile;
 
   /**
-   * Should we generate HTML header files
-   *
-   * @parameter expression="${generateHeaders}"
-   */
-  private boolean generateHeaders = true;
-
-  /**
    * Should we consider private and dev versions
    *
    * @parameter expression="${devMode}"
@@ -71,33 +64,27 @@ public class GenerateMojo extends AbstractMojo {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, devMode, ignoreErrors, getLog());
-      new Generator(configuration, getLog()).generate();
+      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, getLog());
+      new Generator(configuration, getLog()).generateHtml();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
     }
   }
 
   @VisibleForTesting
-  GenerateMojo setOutputDir(File d) {
+  GenerateHtmlHeadersMojo setOutputDir(File d) {
     this.outputDir = d;
     return this;
   }
 
   @VisibleForTesting
-  GenerateMojo setInputFile(File f) {
+  GenerateHtmlHeadersMojo setInputFile(File f) {
     this.inputFile = f;
     return this;
   }
 
   @VisibleForTesting
-  GenerateMojo setGenerateHeaders(boolean b) {
-    this.generateHeaders = b;
-    return this;
-  }
-
-  @VisibleForTesting
-  GenerateMojo setDevMode(boolean devMode) {
+  GenerateHtmlHeadersMojo setDevMode(boolean devMode) {
     this.devMode = devMode;
     return this;
   }

@@ -48,13 +48,16 @@ class Generator {
     this.log = log;
   }
 
-  void generate() throws IOException, URISyntaxException {
+  void generateHtml() throws IOException, URISyntaxException {
+    UpdateCenter center = configuration.getUpdateCenter();
+    downloadReleases(center);
+    generateHtmlHeader(center);
+  }
+
+  void generateMetadata() throws IOException, URISyntaxException {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
-    if (configuration.shouldGenerateHeaders()) {
-      generateHtmlHeader(center);
-    }
   }
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
