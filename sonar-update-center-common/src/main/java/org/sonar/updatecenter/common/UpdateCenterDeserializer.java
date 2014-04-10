@@ -119,12 +119,12 @@ public final class UpdateCenterDeserializer {
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
       for (Release release : plugin.getReleases()) {
-        String parentKey = get(p, plugin.getKey(), release.getVersion().getName() + ".parent");
+        String parentKey = get(p, plugin.getKey(), release.getVersion().getName() + ".parent", false);
         if (parentKey != null) {
           pluginReferential.setParent(release, parentKey);
         }
 
-        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins"), ""), ",");
+        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins", false), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
           Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
           String requiredPluginReleaseKey = split.next();
@@ -170,16 +170,16 @@ public final class UpdateCenterDeserializer {
     String[] pluginKeys = getArray(p, "plugins");
     for (String pluginKey : pluginKeys) {
       Plugin plugin = new Plugin(pluginKey);
-      plugin.setName(get(p, pluginKey, "name"));
-      plugin.setDescription(get(p, pluginKey, "description"));
-      plugin.setCategory(get(p, pluginKey, "category"));
-      plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl"));
-      plugin.setLicense(get(p, pluginKey, "license"));
-      plugin.setOrganization(get(p, pluginKey, "organization"));
-      plugin.setOrganizationUrl(get(p, pluginKey, "organizationUrl"));
-      plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl"));
-      plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl"));
-      plugin.setSourcesUrl(get(p, pluginKey, "scm"));
+      plugin.setName(get(p, pluginKey, "name", false));
+      plugin.setDescription(get(p, pluginKey, "description", false));
+      plugin.setCategory(get(p, pluginKey, "category", false));
+      plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl", false));
+      plugin.setLicense(get(p, pluginKey, "license", false));
+      plugin.setOrganization(get(p, pluginKey, "organization", false));
+      plugin.setOrganizationUrl(get(p, pluginKey, "organizationUrl", false));
+      plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl", false));
+      plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl", false));
+      plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
       plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
       parsePluginReleases(p, sonar, pluginKey, plugin, "publicVersions", true);
@@ -210,6 +210,9 @@ public final class UpdateCenterDeserializer {
     release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
     release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
     String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
+    if (requiredSonarVersions.length == 0) {
+      reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion + " should declare compatible SQ versions");
+    }
     for (String requiredSonarVersion : requiredSonarVersions) {
       release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
     }
@@ -217,9 +220,11 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
-    String devVersion = get(p, pluginKey, "devVersion");
-    Release release = parsePlugin(p, sonar, pluginKey, plugin, false, devVersion);
-    plugin.setDevRelease(release);
+    String devVersion = get(p, pluginKey, "devVersion", false);
+    if (StringUtils.isNotBlank(devVersion)) {
+      Release release = parsePlugin(p, sonar, pluginKey, plugin, false, devVersion);
+      plugin.setDevRelease(release);
+    }
   }
 
   private void parseSonar(Properties p, Sonar sonar) {
@@ -269,7 +274,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
-    String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions");
+    String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", true);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
     List<String> result = new LinkedList<String>();
     for (String pattern : patterns) {
@@ -387,8 +392,13 @@ public final class UpdateCenterDeserializer {
     return value;
   }
 
-  private String get(Properties p, String pluginKey, String field) {
-    return get(p, pluginKey + "." + field);
+  private String get(Properties p, String pluginKey, String field, boolean required) {
+    String key = pluginKey + "." + field;
+    String value = get(p, key);
+    if (StringUtils.isBlank(value) && required) {
+      reportError(key + " should be defined");
+    }
+    return value;
   }
 
   private String[] getArray(Properties props, String key) {

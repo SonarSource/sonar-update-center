@@ -165,6 +165,7 @@ public class UpdateCenterDeserializerTest {
     props.put("foo.1.1.changelogUrl", "http://changelog");
     props.put("foo.1.1.description", "foo");
     props.put("foo.1.1.date", "12-12-2012");
+    props.put("foo.1.1.sqVersions", "2.2");
     new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
   }
 
