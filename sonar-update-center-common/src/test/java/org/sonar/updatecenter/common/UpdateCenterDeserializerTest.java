@@ -44,7 +44,7 @@ public class UpdateCenterDeserializerTest {
   public ExpectedException thrown = ExpectedException.none();
 
   @Test
-  public void read_infos_from_froperties() throws IOException {
+  public void read_infos_from_properties() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates.properties");
     try {
       Properties props = new Properties();
@@ -177,9 +177,9 @@ public class UpdateCenterDeserializerTest {
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
-      assertThat(requiredSonarVersion).hasSize(5);
+      assertThat(requiredSonarVersion).hasSize(6);
       assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.7");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.7.1");
 
       Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
       requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
@@ -281,7 +281,10 @@ public class UpdateCenterDeserializerTest {
     UpdateCenter center = UpdateCenterDeserializer.fromProperties(new File(url.toURI()), Mode.DEV);
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
-    assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
+    Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
+    assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
+    assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
+    assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
   }
 
   // UPC-29

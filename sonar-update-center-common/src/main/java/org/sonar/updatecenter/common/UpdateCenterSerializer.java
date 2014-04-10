@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -70,7 +69,10 @@ public final class UpdateCenterSerializer {
   public static Properties toProperties(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
-    set(p, "publicVersions", center.getSonar().getVersions());
+    set(p, "publicVersions", center.getSonar().getPublicVersions());
+    if (!center.getSonar().getPrivateVersions().isEmpty()) {
+      set(p, "privateVersions", center.getSonar().getPrivateVersions());
+    }
     if (center.getSonar().getDevRelease() != null) {
       set(p, "devVersion", center.getSonar().getDevRelease().getVersion().toString());
     }
@@ -80,7 +82,7 @@ public final class UpdateCenterSerializer {
       set(p, "ltsVersion", center.getSonar().getLtsRelease().getVersion().toString());
     }
 
-    for (Release sonarRelease : center.getSonar().getReleases()) {
+    for (Release sonarRelease : center.getSonar().getAllReleases()) {
       set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
       set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
@@ -115,27 +117,30 @@ public final class UpdateCenterSerializer {
     set(p, plugin, "scm", plugin.getSourcesUrl());
     set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
 
-    List<String> releaseKeys = new ArrayList<String>();
-    for (Release release : plugin.getReleases()) {
-      releaseKeys.add(release.getVersion().toString());
+    for (Release release : plugin.getAllReleases()) {
       if (release.getParent() != null) {
         set(p, plugin, release.getVersion() + ".parent", release.getParent().getKey());
       }
       set(p, plugin, release.getVersion() + ".sqVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
       // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
+
       set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrl());
       set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrl());
       set(p, plugin, release.getVersion() + DESCRIPTION_SUFFIX, release.getDescription());
       set(p, plugin, release.getVersion() + DATE_SUFFIX, FormatUtils.toString(release.getDate(), false));
       set(p, plugin, release.getVersion() + ".requirePlugins", StringUtils.join(getRequiredList(release), ","));
     }
-    set(p, plugin, "publicVersions", releaseKeys);
+    set(p, plugin, "publicVersions", plugin.getPublicVersions());
+    if (!plugin.getPrivateVersions().isEmpty()) {
+      set(p, plugin, "privateVersions", plugin.getPrivateVersions());
+    }
     if (plugin.getDevRelease() != null) {
+      // Plugins don't have private versions
       set(p, plugin, "devVersion", plugin.getDevRelease().getVersion().toString());
     }
     // For backward compatibility
-    set(p, plugin, "versions", releaseKeys);
+    set(p, plugin, "versions", plugin.getVersions());
   }
 
   public static void toProperties(UpdateCenter sonar, File toFile) {

@@ -19,9 +19,6 @@
  */
 package org.sonar.updatecenter.common;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 public class Sonar extends Artifact {
 
   private Release ltsVersion;
@@ -39,18 +36,6 @@ public class Sonar extends Artifact {
   }
 
   /**
-   * Return the concatenation of releases and next release
-   */
-  public SortedSet<Release> getAllReleases() {
-    SortedSet<Release> all = new TreeSet<Release>();
-    all.addAll(getReleases());
-    if (getDevRelease() != null) {
-      all.add(getDevRelease());
-    }
-    return all;
-  }
-
-  /**
    * shortcut only for sonar, no need to have other fields than version
    */
   public Sonar setReleases(String[] versions) {
@@ -58,5 +43,18 @@ public class Sonar extends Artifact {
       addRelease(new Release(this, Version.create(version)));
     }
     return this;
+  }
+
+  /**
+   * 
+   * @param versionOrAliases Any version or keywords "DEV", "LTS" or "LATEST_RELEASE"
+   * @return
+   */
+  @Override
+  public Release getRelease(String versionOrAliases) {
+    if ("LTS".equals(versionOrAliases)) {
+      return getLtsRelease();
+    }
+    return super.getRelease(versionOrAliases);
   }
 }

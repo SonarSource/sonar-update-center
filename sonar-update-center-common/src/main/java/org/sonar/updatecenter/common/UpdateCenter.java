@@ -28,7 +28,11 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.SortedSet;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -106,6 +110,18 @@ public class UpdateCenter {
     return availables;
   }
 
+  public List<Plugin> findAllCompatiblePlugins() {
+    Version adjustedSonarVersion = getAdjustedSonarVersion();
+    List<Plugin> availables = newArrayList();
+    for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
+      Release release = plugin.getLastCompatible(adjustedSonarVersion);
+      if (release != null) {
+        availables.add(plugin);
+      }
+    }
+    return availables;
+  }
+
   public List<PluginUpdate> findPluginUpdates() {
     List<PluginUpdate> updates = newArrayList();
     for (Release installedRelease : getInstalledMasterReleases()) {
@@ -121,7 +137,7 @@ public class UpdateCenter {
     return updates;
   }
 
-  private PluginUpdate getPluginUpdate(Plugin plugin, Release nextRelease){
+  private PluginUpdate getPluginUpdate(Plugin plugin, Release nextRelease) {
     PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
     try {
       if (pluginUpdate.isCompatible()) {

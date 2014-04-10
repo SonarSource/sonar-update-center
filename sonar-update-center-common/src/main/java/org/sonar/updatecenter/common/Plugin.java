@@ -157,6 +157,19 @@ public class Plugin extends Artifact {
     return this;
   }
 
+  public Release getReleaseForSonarVersion(String alias, Version sonarVersion) {
+    if ("LATEST_COMPATIBLE".equals(alias)) {
+      return getLastCompatibleRelease(sonarVersion);
+    }
+    if ("LATEST_COMPATIBLE_RELEASE".equals(alias)) {
+      return getLastCompatibleRelease(sonarVersion);
+    }
+    if ("OLDEST_COMPATIBLE".equals(alias)) {
+      return getFirstCompatible(sonarVersion);
+    }
+    throw new UnsupportedOperationException(alias + " is not a supported alias for plugin");
+  }
+
   @Override
   public String toString() {
     return new StringBuilder()

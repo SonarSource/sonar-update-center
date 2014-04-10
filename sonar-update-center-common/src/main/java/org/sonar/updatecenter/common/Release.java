@@ -59,6 +59,7 @@ public class Release implements Comparable<Release> {
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
+    this.isPublic = true;
 
     this.requiredSonarVersions = newTreeSet();
     this.children = newHashSet();

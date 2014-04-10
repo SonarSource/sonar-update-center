@@ -95,8 +95,19 @@ public abstract class Artifact implements Comparable<Artifact> {
     return false;
   }
 
-  public final Release getRelease(String version) {
-    return getRelease(Version.create(version));
+  /**
+   * 
+   * @param versionOrAliases Any version or keywords "DEV" or "LATEST_RELEASE"
+   * @return
+   */
+  public Release getRelease(String versionOrAliases) {
+    if ("DEV".equals(versionOrAliases)) {
+      return getDevRelease();
+    }
+    if ("LATEST_RELEASE".equals(versionOrAliases)) {
+      return getLastRelease();
+    }
+    return getRelease(Version.create(versionOrAliases));
   }
 
   public final SortedSet<Release> getReleases() {
@@ -120,6 +131,9 @@ public abstract class Artifact implements Comparable<Artifact> {
     return result;
   }
 
+  /**
+   * @return both public and private versions
+   */
   public final SortedSet<Version> getVersions() {
     SortedSet<Version> versions = new TreeSet<Version>();
     for (Release release : releases) {
@@ -128,18 +142,66 @@ public abstract class Artifact implements Comparable<Artifact> {
     return versions;
   }
 
+  public final SortedSet<Version> getPublicVersions() {
+    SortedSet<Version> versions = new TreeSet<Version>();
+    for (Release release : releases) {
+      if (release.isPublic()) {
+        versions.add(release.getVersion());
+      }
+    }
+    return versions;
+  }
+
+  public final SortedSet<Version> getPrivateVersions() {
+    SortedSet<Version> versions = new TreeSet<Version>();
+    for (Release release : releases) {
+      if (!release.isPublic()) {
+        versions.add(release.getVersion());
+      }
+    }
+    return versions;
+  }
+
   public final Release getLastRelease() {
     return releases.isEmpty() ? null : releases.last();
   }
 
-  public final Release getLastCompatibleRelease(Version sonarVersion) {
+  /**
+   * @return Greatest plugin release version that is compatible with provided SQ version
+   */
+  public final Release getLastCompatibleRelease(Version sqVersion) {
     Release result = null;
     for (Release r : releases) {
+      if (r.supportSonarVersion(sqVersion)) {
+        result = r;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Same as {@link #getLastCompatibleRelease(Version)} but include {@link #devRelease} if available
+   */
+  public final Release getLastCompatible(Version sonarVersion) {
+    Release result = null;
+    for (Release r : getAllReleases()) {
       if (r.supportSonarVersion(sonarVersion)) {
         result = r;
       }
     }
     return result;
+  }
+
+  /**
+   * Lowest plugin version (including dev) that is compatible with provided SQ version
+   */
+  public final Release getFirstCompatible(Version sonarVersion) {
+    for (Release r : getAllReleases()) {
+      if (r.supportSonarVersion(sonarVersion)) {
+        return r;
+      }
+    }
+    return null;
   }
 
   @CheckForNull
@@ -160,6 +222,18 @@ public abstract class Artifact implements Comparable<Artifact> {
       }
     }
     return result;
+  }
+
+  /**
+   * Return the concatenation of releases and dev release
+   */
+  public SortedSet<Release> getAllReleases() {
+    SortedSet<Release> all = new TreeSet<Release>();
+    all.addAll(getReleases());
+    if (getDevRelease() != null) {
+      all.add(getDevRelease());
+    }
+    return all;
   }
 
   @Override
