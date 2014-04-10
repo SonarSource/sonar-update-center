@@ -49,7 +49,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
@@ -74,7 +74,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getDevelopers()).hasSize(3);
@@ -91,7 +91,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getSourcesUrl()).isEqualTo("scm:svn:https://svn.codehaus.org/sonar-plugins/tags/sonar-clirr-plugin-1.1");
@@ -107,7 +107,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(1);
 
@@ -128,7 +128,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(3);
 
@@ -163,7 +163,7 @@ public class UpdateCenterDeserializerTest {
     props.put("foo.1.1.changelogUrl", "http://changelog");
     props.put("foo.1.1.description", "foo");
     props.put("foo.1.1.date", "12-12-2012");
-    UpdateCenterDeserializer.fromProperties(props);
+    new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
   }
 
   // UPC-6
@@ -173,7 +173,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
@@ -200,7 +200,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
@@ -226,7 +226,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = UpdateCenterDeserializer.fromProperties(props, Mode.DEV);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
@@ -252,7 +252,7 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter center = UpdateCenterDeserializer.fromProperties(props);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
       assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("2.3"));
     } finally {
       IOUtils.closeQuietly(input);
@@ -268,7 +268,7 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       thrown.expect(IllegalStateException.class);
       thrown.expectMessage("ltsVersion seems wrong as it is not listed in SonarQube versions");
-      UpdateCenterDeserializer.fromProperties(props);
+      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -278,7 +278,7 @@ public class UpdateCenterDeserializerTest {
   @Test
   public void should_load_new_format_in_dev_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
-    UpdateCenter center = UpdateCenterDeserializer.fromProperties(new File(url.toURI()), Mode.DEV);
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
@@ -291,7 +291,7 @@ public class UpdateCenterDeserializerTest {
   @Test
   public void should_load_new_format_in_prod_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
-    UpdateCenter center = UpdateCenterDeserializer.fromProperties(new File(url.toURI()), Mode.PROD);
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
@@ -308,7 +308,22 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenterDeserializer.fromProperties(props);
+      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-29
+  @Test
+  public void should_ignore_errors() throws IOException {
+
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-overlap-sqVersion.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+      new UpdateCenterDeserializer(Mode.PROD, true).fromProperties(props);
 
     } finally {
       IOUtils.closeQuietly(input);

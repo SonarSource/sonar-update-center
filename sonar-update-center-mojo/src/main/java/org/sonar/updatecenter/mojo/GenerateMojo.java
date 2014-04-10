@@ -62,9 +62,16 @@ public class GenerateMojo extends AbstractMojo {
    */
   private boolean devMode = false;
 
+  /**
+   * Should we fail fast on errors
+   *
+   * @parameter expression="${ignoreErrors}"
+   */
+  private boolean ignoreErrors = false;
+
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, devMode, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, generateHeaders, devMode, ignoreErrors, getLog());
       new Generator(configuration, getLog()).generate();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);

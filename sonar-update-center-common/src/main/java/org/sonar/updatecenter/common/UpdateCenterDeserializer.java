@@ -54,27 +54,29 @@ public final class UpdateCenterDeserializer {
   public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
   public static final String SONAR_PREFIX = "sonar.";
   public static final String PLUGINS = "plugins";
+  private Mode mode;
+  private boolean ignoreError;
 
-  private UpdateCenterDeserializer() {
-    // only static methods
+  public UpdateCenterDeserializer(Mode mode, boolean ignoreError) {
+    this.mode = mode;
+    this.ignoreError = ignoreError;
   }
 
   public static enum Mode {
+    /**
+     * Will ignore devVersion and privateVersions
+     */
     PROD,
     DEV
   }
 
-  public static UpdateCenter fromProperties(File file) throws IOException {
-    return fromProperties(file, Mode.PROD);
-  }
-
-  public static UpdateCenter fromProperties(File file, Mode mode) throws IOException {
+  public UpdateCenter fromProperties(File file) throws IOException {
     FileInputStream in = FileUtils.openInputStream(file);
     try {
       Properties props = new Properties();
       props.load(in);
       loadPluginProperties(file, props);
-      UpdateCenter pluginReferential = fromProperties(props, mode);
+      UpdateCenter pluginReferential = fromProperties(props);
       pluginReferential.setDate(new Date(file.lastModified()));
       return pluginReferential;
 
@@ -83,7 +85,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static void loadPluginProperties(File file, Properties props) throws IOException {
+  private void loadPluginProperties(File file, Properties props) throws IOException {
     String[] pluginKeys = getArray(props, "plugins");
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
@@ -100,18 +102,14 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  public static UpdateCenter fromProperties(Properties p) {
-    return fromProperties(p, Mode.PROD);
-  }
-
-  public static UpdateCenter fromProperties(Properties p, Mode mode) {
+  public UpdateCenter fromProperties(Properties p) {
     Sonar sonar = new Sonar();
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
     List<Plugin> plugins = newArrayList();
 
-    parseSonar(p, mode, sonar);
+    parseSonar(p, sonar);
 
-    parsePlugins(p, mode, sonar, plugins);
+    parsePlugins(p, sonar, plugins);
 
     validatePublicPluginSQVersionOverlap(plugins);
 
@@ -135,14 +133,22 @@ public final class UpdateCenterDeserializer {
     return UpdateCenter.create(pluginReferential, sonar).setDate(date);
   }
 
-  private static void validatePublicPluginSQVersionOverlap(List<Plugin> plugins) {
+  private void reportError(String message) {
+    if (ignoreError) {
+      System.err.println(message);
+    } else {
+      throw new IllegalStateException(message);
+    }
+  }
+
+  private void validatePublicPluginSQVersionOverlap(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
       Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
       for (Release r : plugin.getReleases()) {
         if (r.isPublic()) {
           for (Version v : r.getRequiredSonarVersions()) {
             if (sonarVersion.containsKey(v)) {
-              throw new IllegalStateException("SQ version " + v + " is declared compatible with two public versions of " + plugin.getName() + " plugin: " + r.getVersion()
+              reportError("SQ version " + v + " is declared compatible with two public versions of " + pluginName(plugin) + " plugin: " + r.getVersion()
                 + " and "
                 + sonarVersion.get(v).getVersion());
             }
@@ -153,7 +159,11 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static void parsePlugins(Properties p, Mode mode, Sonar sonar, List<Plugin> plugins) {
+  private String pluginName(Plugin plugin) {
+    return StringUtils.isNotBlank(plugin.getName()) ? plugin.getName() : plugin.getKey();
+  }
+
+  private void parsePlugins(Properties p, Sonar sonar, List<Plugin> plugins) {
     String[] pluginKeys = getArray(p, "plugins");
     for (String pluginKey : pluginKeys) {
       Plugin plugin = new Plugin(pluginKey);
@@ -179,7 +189,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key, boolean isPublicRelease) {
+  private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key, boolean isPublicRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
       Release release = parsePlugin(p, sonar, pluginKey, plugin, isPublicRelease, pluginVersion);
@@ -187,7 +197,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, String pluginVersion) {
+  private Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, String pluginVersion) {
     Release release = new Release(plugin, pluginVersion);
     release.setPublic(isPublicRelease);
     release.setDownloadUrl(get(p, pluginKey, pluginVersion + DOWNLOAD_URL_SUFFIX, isPublicRelease));
@@ -201,49 +211,49 @@ public final class UpdateCenterDeserializer {
     return release;
   }
 
-  private static void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
+  private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
     String devVersion = get(p, pluginKey, "devVersion");
     Release release = parsePlugin(p, sonar, pluginKey, plugin, false, devVersion);
     plugin.setDevRelease(release);
   }
 
-  private static void parseSonar(Properties p, Mode mode, Sonar sonar) {
-    parseSonarVersions(p, sonar, mode);
+  private void parseSonar(Properties p, Sonar sonar) {
+    parseSonarVersions(p, sonar);
     if (mode == Mode.DEV) {
       parseSonarDevVersions(p, sonar);
     }
     parseSonarLtsVersion(p, sonar);
   }
 
-  private static void parseSonarDevVersions(Properties p, Sonar sonar) {
+  private void parseSonarDevVersions(Properties p, Sonar sonar) {
     String devVersion = getOrFail(p, "devVersion");
     Release release = parseSonarVersion(p, sonar, false, devVersion);
     sonar.setDevRelease(release);
   }
 
-  private static void parseSonarLtsVersion(Properties p, Sonar sonar) {
+  private void parseSonarLtsVersion(Properties p, Sonar sonar) {
     String ltsVersion = getOrFail(p, "ltsVersion");
     sonar.setLtsRelease(ltsVersion);
     if (!sonar.getReleases().contains(sonar.getLtsRelease())) {
-      throw new IllegalStateException("ltsVersion seems wrong as it is not listed in SonarQube versions");
+      reportError("ltsVersion seems wrong as it is not listed in SonarQube versions");
     }
   }
 
-  private static void parseSonarVersions(Properties p, Sonar sonar, Mode mode) {
+  private void parseSonarVersions(Properties p, Sonar sonar) {
     parseSonarVersions(p, sonar, "publicVersions", true);
     if (mode == Mode.DEV) {
       parseSonarVersions(p, sonar, "privateVersions", false);
     }
   }
 
-  private static void parseSonarVersions(Properties p, Sonar sonar, String key, boolean isPublicRelease) {
+  private void parseSonarVersions(Properties p, Sonar sonar, String key, boolean isPublicRelease) {
     for (String sonarVersion : getArray(p, key)) {
       Release release = parseSonarVersion(p, sonar, isPublicRelease, sonarVersion);
       sonar.addRelease(release);
     }
   }
 
-  private static Release parseSonarVersion(Properties p, Sonar sonar, boolean isPublicRelease, String sonarVersion) {
+  private Release parseSonarVersion(Properties p, Sonar sonar, boolean isPublicRelease, String sonarVersion) {
     Release release = new Release(sonar, sonarVersion);
     release.setPublic(isPublicRelease);
     release.setChangelogUrl(get(p, sonarVersion + CHANGELOG_URL_SUFFIX, isPublicRelease));
@@ -253,7 +263,7 @@ public final class UpdateCenterDeserializer {
     return release;
   }
 
-  private static String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
+  private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
     String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions");
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
     List<String> result = new LinkedList<String>();
@@ -272,7 +282,7 @@ public final class UpdateCenterDeserializer {
     return result.toArray(new String[result.size()]);
   }
 
-  private static void resolveRange(Sonar sonar, List<String> result, final Version low, final Version high) {
+  private void resolveRange(Sonar sonar, List<String> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       public Version apply(Release release) {
         return release != null ? release.getVersion() : null;
@@ -287,7 +297,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static List<String> split(String requiredSonarVersions) {
+  private List<String> split(String requiredSonarVersions) {
     List<String> splitted = new ArrayList<String>();
     int skipCommas = 0;
     String s = "";
@@ -305,11 +315,13 @@ public final class UpdateCenterDeserializer {
         s += c;
       }
     }
-    splitted.add(s);
+    if (StringUtils.isNotBlank(s)) {
+      splitted.add(s);
+    }
     return splitted;
   }
 
-  private static String resolve(String version, Sonar sonar) {
+  private String resolve(String version, Sonar sonar) {
     if ("LATEST".equals(version)) {
       return sonar.getAllReleases().last().getVersion().toString();
     }
@@ -331,39 +343,39 @@ public final class UpdateCenterDeserializer {
     return version;
   }
 
-  private static String get(Properties props, String key, boolean validate) {
+  private String get(Properties props, String key, boolean validate) {
     return validate ? getOrFail(props, key) : get(props, key);
   }
 
-  private static String getOrFail(Properties props, String key) {
+  private String getOrFail(Properties props, String key) {
     String value = props.getProperty(key);
     if (StringUtils.isBlank(value)) {
-      throw new IllegalStateException(key + " should be defined");
+      reportError(key + " should be defined");
     }
     return value;
   }
 
-  private static String get(Properties props, String key) {
+  private String get(Properties props, String key) {
     return StringUtils.defaultIfEmpty(props.getProperty(key), null);
   }
 
-  private static String get(Properties props, String pluginKey, String field, boolean validate) {
+  private String get(Properties props, String pluginKey, String field, boolean validate) {
     return validate ? getOrFail(props, pluginKey, field) : get(props, pluginKey, field);
   }
 
-  private static String getOrFail(Properties p, String pluginKey, String field) {
+  private String getOrFail(Properties p, String pluginKey, String field) {
     return getOrFail(p, pluginKey + "." + field);
   }
 
-  private static String get(Properties p, String pluginKey, String field) {
+  private String get(Properties p, String pluginKey, String field) {
     return get(p, pluginKey + "." + field);
   }
 
-  private static String[] getArray(Properties props, String key) {
+  private String[] getArray(Properties props, String key) {
     return StringUtils.split(StringUtils.defaultIfEmpty(props.getProperty(key), ""), ",");
   }
 
-  private static String[] getArray(Properties p, String pluginKey, String field) {
+  private String[] getArray(Properties p, String pluginKey, String field) {
     return getArray(p, pluginKey + "." + field);
   }
 
