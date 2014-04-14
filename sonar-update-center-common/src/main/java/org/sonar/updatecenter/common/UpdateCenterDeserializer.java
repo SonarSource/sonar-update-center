@@ -57,6 +57,9 @@ public final class UpdateCenterDeserializer {
   public static final String SONAR_PREFIX = "sonar.";
   public static final String DEFAULTS_PREFIX = "defaults";
   public static final String PLUGINS = "plugins";
+  private static final String PUBLIC_VERSIONS = "publicVersions";
+  private static final String PRIVATE_VERSIONS = "privateVersions";
+  private static final String DEV_VERSION = "devVersion";
   private Mode mode;
   private boolean ignoreError;
 
@@ -89,7 +92,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void loadPluginProperties(File file, Properties props) throws IOException {
-    String[] pluginKeys = getArray(props, "plugins");
+    String[] pluginKeys = getArray(props, PLUGINS);
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
       FileInputStream pluginFis = FileUtils.openInputStream(pluginFile);
@@ -146,18 +149,20 @@ public final class UpdateCenterDeserializer {
 
   private void validatePublicPluginSQVersionOverlap(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
-      Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
-      for (Release r : plugin.getReleases()) {
-        if (r.isPublic()) {
-          for (Version v : r.getRequiredSonarVersions()) {
-            if (sonarVersion.containsKey(v)) {
-              reportError("SQ version " + v + " is declared compatible with two public versions of " + pluginName(plugin) + " plugin: " + r.getVersion()
-                + " and "
-                + sonarVersion.get(v).getVersion());
-            }
-            sonarVersion.put(v, r);
-          }
+      validatePublicPluginSQVersionOverlap(plugin);
+    }
+  }
+
+  private void validatePublicPluginSQVersionOverlap(Plugin plugin) {
+    Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+    for (Release r : plugin.getPublicReleases()) {
+      for (Version v : r.getRequiredSonarVersions()) {
+        if (sonarVersion.containsKey(v)) {
+          reportError("SQ version " + v + " is declared compatible with two public versions of " + pluginName(plugin) + " plugin: " + r.getVersion()
+            + " and "
+            + sonarVersion.get(v).getVersion());
         }
+        sonarVersion.put(v, r);
       }
     }
   }
@@ -182,9 +187,9 @@ public final class UpdateCenterDeserializer {
       plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
       plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
-      parsePluginReleases(p, sonar, pluginKey, plugin, "publicVersions", true);
+      parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true);
       if (mode == Mode.DEV) {
-        parsePluginReleases(p, sonar, pluginKey, plugin, "privateVersions", false);
+        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false);
         parsePluginDevVersions(p, sonar, pluginKey, plugin);
       }
 
@@ -220,7 +225,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
-    String devVersion = get(p, pluginKey, "devVersion", false);
+    String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
       Release release = parsePlugin(p, sonar, pluginKey, plugin, false, devVersion);
       plugin.setDevRelease(release);
@@ -236,7 +241,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parseSonarDevVersions(Properties p, Sonar sonar) {
-    String devVersion = get(p, "devVersion", true);
+    String devVersion = get(p, DEV_VERSION, true);
     Release release = parseSonarVersion(p, sonar, false, devVersion);
     sonar.setDevRelease(release);
   }
@@ -250,9 +255,9 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parseSonarVersions(Properties p, Sonar sonar) {
-    parseSonarVersions(p, sonar, "publicVersions", true);
+    parseSonarVersions(p, sonar, PUBLIC_VERSIONS, true);
     if (mode == Mode.DEV) {
-      parseSonarVersions(p, sonar, "privateVersions", false);
+      parseSonarVersions(p, sonar, PRIVATE_VERSIONS, false);
     }
   }
 
@@ -336,21 +341,25 @@ public final class UpdateCenterDeserializer {
       return sonar.getAllReleases().last().getVersion().toString();
     }
     if (version.endsWith("*")) {
-      String prefix = version.substring(0, version.length() - 1);
-      String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
-      Release found = null;
-      for (Release r : sonar.getAllReleases()) {
-        if (r.getVersion().toString().equals(prefixWithoutDot) || r.getVersion().toString().startsWith(prefix)) {
-          found = r;
-        }
-      }
-      if (found != null) {
-        return found.getVersion().toString();
-      } else {
-        throw new IllegalStateException("Unable to resolve " + version);
-      }
+      return resolveWithWildcard(version, sonar);
     }
     return version;
+  }
+
+  private String resolveWithWildcard(String version, Sonar sonar) {
+    String prefix = version.substring(0, version.length() - 1);
+    String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
+    Release found = null;
+    for (Release r : sonar.getAllReleases()) {
+      if (r.getVersion().toString().equals(prefixWithoutDot) || r.getVersion().toString().startsWith(prefix)) {
+        found = r;
+      }
+    }
+    if (found != null) {
+      return found.getVersion().toString();
+    } else {
+      throw new IllegalStateException("Unable to resolve " + version);
+    }
   }
 
   private String getOrDefault(Properties props, String sqVersion, String suffix, boolean required) {
@@ -358,15 +367,19 @@ public final class UpdateCenterDeserializer {
     String defaultKey = DEFAULTS_PREFIX + suffix;
     String value = getOrDefault(props, key, defaultKey);
     if (StringUtils.isBlank(value) && required) {
-      reportError(key + " should be defined");
+      reportUndefined(key);
     }
     return value;
+  }
+
+  private void reportUndefined(String key) {
+    reportError(key + " should be defined");
   }
 
   private String get(Properties props, String key, boolean required) {
     String value = get(props, key);
     if (StringUtils.isBlank(value) && required) {
-      reportError(key + " should be defined");
+      reportUndefined(key);
     }
     return value;
   }
@@ -387,7 +400,7 @@ public final class UpdateCenterDeserializer {
     String defaultKey = pluginKey + "." + DEFAULTS_PREFIX + suffix;
     String value = getOrDefault(props, key, defaultKey);
     if (StringUtils.isBlank(value) && required) {
-      reportError(key + " should be defined");
+      reportUndefined(key);
     }
     return value;
   }
@@ -396,7 +409,7 @@ public final class UpdateCenterDeserializer {
     String key = pluginKey + "." + field;
     String value = get(p, key);
     if (StringUtils.isBlank(value) && required) {
-      reportError(key + " should be defined");
+      reportUndefined(key);
     }
     return value;
   }
