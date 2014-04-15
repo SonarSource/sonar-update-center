@@ -76,14 +76,34 @@ public final class UpdateCenterDeserializer {
     DEV
   }
 
-  public UpdateCenter fromProperties(File file) throws IOException {
-    FileInputStream in = FileUtils.openInputStream(file);
+  /**
+   * Load configuration with one file for each plugin
+   */
+  public UpdateCenter fromManyFiles(File mainFile) throws IOException {
+    FileInputStream in = FileUtils.openInputStream(mainFile);
     try {
       Properties props = new Properties();
       props.load(in);
-      loadPluginProperties(file, props);
+      loadPluginProperties(mainFile, props);
       UpdateCenter pluginReferential = fromProperties(props);
-      pluginReferential.setDate(new Date(file.lastModified()));
+      pluginReferential.setDate(new Date(mainFile.lastModified()));
+      return pluginReferential;
+
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
+  /**
+   * Load configuration with one single file containing everything
+   */
+  public UpdateCenter fromSingleFile(File mainFile) throws IOException {
+    FileInputStream in = FileUtils.openInputStream(mainFile);
+    try {
+      Properties props = new Properties();
+      props.load(in);
+      UpdateCenter pluginReferential = fromProperties(props);
+      pluginReferential.setDate(new Date(mainFile.lastModified()));
       return pluginReferential;
 
     } finally {

@@ -281,7 +281,7 @@ public class UpdateCenterDeserializerTest {
   @Test
   public void should_load_new_format_in_dev_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
-    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(new File(url.toURI()));
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
@@ -294,7 +294,7 @@ public class UpdateCenterDeserializerTest {
   @Test
   public void should_load_new_format_in_prod_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
-    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(new File(url.toURI()));
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();

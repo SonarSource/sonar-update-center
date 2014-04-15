@@ -72,7 +72,7 @@ class Configuration {
 
   UpdateCenter getUpdateCenter() {
     try {
-      return new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors).fromProperties(getInputFile());
+      return new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors).fromManyFiles(getInputFile());
 
     } catch (IOException e) {
       throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);
