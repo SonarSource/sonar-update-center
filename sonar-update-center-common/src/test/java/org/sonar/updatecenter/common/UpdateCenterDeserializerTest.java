@@ -357,4 +357,40 @@ public class UpdateCenterDeserializerTest {
       IOUtils.closeQuietly(input);
     }
   }
+
+  // UPC-29
+  @Test
+  public void should_fail_if_duplicate_sq_version() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-duplicate.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("Duplicate version for SonarQube: 2.8");
+
+      new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-29
+  @Test
+  public void should_fail_if_duplicate_plugin_version() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-duplicate-plugin.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("Duplicate version for plugin clirr: 1.1");
+
+      new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }

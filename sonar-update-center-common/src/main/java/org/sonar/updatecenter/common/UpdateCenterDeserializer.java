@@ -201,7 +201,11 @@ public final class UpdateCenterDeserializer {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
       Release release = parsePlugin(p, sonar, pluginKey, plugin, isPublicRelease, pluginVersion);
-      plugin.addRelease(release);
+      if (!plugin.getAllReleases().contains(release)) {
+        plugin.addRelease(release);
+      } else {
+        reportError("Duplicate version for plugin " + pluginKey + ": " + pluginVersion);
+      }
     }
   }
 
@@ -264,7 +268,11 @@ public final class UpdateCenterDeserializer {
   private void parseSonarVersions(Properties p, Sonar sonar, String key, boolean isPublicRelease) {
     for (String sonarVersion : getArray(p, key)) {
       Release release = parseSonarVersion(p, sonar, isPublicRelease, sonarVersion);
-      sonar.addRelease(release);
+      if (!sonar.getAllReleases().contains(release)) {
+        sonar.addRelease(release);
+      } else {
+        reportError("Duplicate version for SonarQube: " + sonarVersion);
+      }
     }
   }
 
