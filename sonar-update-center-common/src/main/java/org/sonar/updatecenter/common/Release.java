@@ -230,7 +230,7 @@ public class Release implements Comparable<Release> {
     this.isPublic = isPublic;
   }
 
-  public String getGroupId() {
+  public String groupId() {
     return groupId;
   }
 
@@ -238,7 +238,7 @@ public class Release implements Comparable<Release> {
     this.groupId = groupId;
   }
 
-  public String getArtifactId() {
+  public String artifactId() {
     return artifactId;
   }
 
