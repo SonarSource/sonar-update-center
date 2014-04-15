@@ -33,26 +33,7 @@ public class GenerateHtmlHeadersMojoTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
-  public void generate_dev_html() throws Exception {
-    File outputDir = temp.newFolder();
-
-    // plugin is already cached
-    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
-    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3-20110822.091313-2.jar"), outputDir);
-
-    File inputFile = resource("update-center-template/update-center.properties");
-    new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).setDevMode(true).execute();
-
-    // html headers
-    File htmlHeader = new File(outputDir, "html/artifactsize.html");
-    assertThat(htmlHeader).exists().isFile();
-    assertThat(new File(outputDir, "html/style.css")).exists().isFile();
-    String html = FileUtils.readFileToString(htmlHeader);
-    assertThat(html).contains("<title>Artifact Size</title>");
-  }
-
-  @Test
-  public void generate_prod_html_without() throws Exception {
+  public void generate_prod_html_without_private() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached

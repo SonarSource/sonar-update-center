@@ -49,13 +49,6 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
   private File inputFile;
 
   /**
-   * Should we consider private and dev versions
-   *
-   * @parameter expression="${devMode}"
-   */
-  private boolean devMode = false;
-
-  /**
    * Should we fail fast on errors
    *
    * @parameter expression="${ignoreErrors}"
@@ -64,7 +57,7 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, getLog());
       new Generator(configuration, getLog()).generateHtml();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
@@ -80,12 +73,6 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
   @VisibleForTesting
   GenerateHtmlHeadersMojo setInputFile(File f) {
     this.inputFile = f;
-    return this;
-  }
-
-  @VisibleForTesting
-  GenerateHtmlHeadersMojo setDevMode(boolean devMode) {
-    this.devMode = devMode;
     return this;
   }
 }
