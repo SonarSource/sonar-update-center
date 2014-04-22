@@ -78,7 +78,7 @@ public abstract class Artifact implements Comparable<Artifact> {
    * @throws java.util.NoSuchElementException if release could not be found
    */
   public final Release getRelease(Version version) {
-    for (Release release : getReleases()) {
+    for (Release release : getAllReleases()) {
       if (release.getVersion().equals(version)) {
         return release;
       }
@@ -87,7 +87,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   }
 
   public boolean doesContainVersion(Version version) {
-    for (Release release : getReleases()) {
+    for (Release release : getAllReleases()) {
       if (release.getVersion().equals(version)) {
         return true;
       }
