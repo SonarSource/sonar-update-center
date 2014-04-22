@@ -83,7 +83,7 @@ public abstract class Artifact implements Comparable<Artifact> {
         return release;
       }
     }
-    throw new NoSuchElementException();
+    throw new NoSuchElementException("Unable to find a release of plugin " + key + " with version " + version);
   }
 
   public boolean doesContainVersion(Version version) {
@@ -100,6 +100,7 @@ public abstract class Artifact implements Comparable<Artifact> {
    * @param versionOrAliases Any version or keywords "DEV" or "LATEST_RELEASE"
    * @return
    */
+  @CheckForNull
   public Release getRelease(String versionOrAliases) {
     if ("DEV".equals(versionOrAliases)) {
       return getDevRelease();

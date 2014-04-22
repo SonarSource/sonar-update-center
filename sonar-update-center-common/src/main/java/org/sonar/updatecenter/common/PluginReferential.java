@@ -52,7 +52,7 @@ public class PluginReferential {
   }
 
   public static PluginReferential createEmpty() {
-    return PluginReferential.create(Lists.<Plugin> newArrayList());
+    return PluginReferential.create(Lists.<Plugin>newArrayList());
   }
 
   /**
@@ -74,11 +74,15 @@ public class PluginReferential {
    * @throws NoSuchElementException if plugin could not be found
    */
   public Plugin findPlugin(final String key) {
-    return Iterables.find(plugins, new Predicate<Plugin>() {
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(key);
-      }
-    });
+    try {
+      return Iterables.find(plugins, new Predicate<Plugin>() {
+        public boolean apply(Plugin input) {
+          return input.getKey().equals(key);
+        }
+      });
+    } catch (NoSuchElementException e) {
+      throw new NoSuchElementException("Unable to find plugin with key " + key);
+    }
   }
 
   public boolean doesContainPlugin(final String key) {
