@@ -157,6 +157,8 @@ public class UpdateCenterDeserializerTest {
     props.put("2.2.downloadUrl", "http://2.2");
     props.put("2.2.date", "12-12-2012");
     props.put("foo.name", "Foo");
+    props.put("foo.description", "Foo");
+    props.put("foo.category", "Foo");
     props.put("foo.publicVersions", "1.1");
     props.put("foo.defaults.mavenGroupId", "com.foo");
     props.put("foo.defaults.mavenArtifactId", "sonar-foo-plugin");

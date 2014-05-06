@@ -196,8 +196,8 @@ public final class UpdateCenterDeserializer {
     for (String pluginKey : pluginKeys) {
       Plugin plugin = new Plugin(pluginKey);
       plugin.setName(get(p, pluginKey, "name", false));
-      plugin.setDescription(get(p, pluginKey, "description", false));
-      plugin.setCategory(get(p, pluginKey, "category", false));
+      plugin.setDescription(get(p, pluginKey, "description", true));
+      plugin.setCategory(get(p, pluginKey, "category", true));
       plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl", false));
       plugin.setLicense(get(p, pluginKey, "license", false));
       plugin.setOrganization(get(p, pluginKey, "organization", false));
