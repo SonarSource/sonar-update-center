@@ -98,9 +98,8 @@ public abstract class Artifact implements Comparable<Artifact> {
   /**
    * 
    * @param versionOrAliases Any version or keywords "DEV" or "LATEST_RELEASE"
-   * @return
+   * @throws java.util.NoSuchElementException if release could not be found
    */
-  @CheckForNull
   public Release getRelease(String versionOrAliases) {
     if ("DEV".equals(versionOrAliases)) {
       return getDevRelease();
