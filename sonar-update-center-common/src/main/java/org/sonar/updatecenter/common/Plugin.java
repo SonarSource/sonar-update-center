@@ -158,12 +158,6 @@ public class Plugin extends Artifact {
   }
 
   public Release getReleaseForSonarVersion(String alias, Version sonarVersion) {
-    if ("LATEST_COMPATIBLE".equals(alias)) {
-      return getLastCompatibleRelease(sonarVersion);
-    }
-    if ("LATEST_COMPATIBLE_RELEASE".equals(alias)) {
-      return getLastCompatibleRelease(sonarVersion);
-    }
     if ("OLDEST_COMPATIBLE".equals(alias)) {
       return getFirstCompatible(sonarVersion);
     }
