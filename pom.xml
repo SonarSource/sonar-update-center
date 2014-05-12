@@ -6,12 +6,12 @@
     <groupId>org.codehaus.sonar-plugins</groupId>
     <artifactId>parent</artifactId>
     <version>18</version>
-    <relativePath/>
+    <relativePath />
   </parent>
   
   <groupId>org.codehaus.sonar</groupId>
   <artifactId>sonar-update-center</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.10</version>
   <packaging>pom</packaging>
   <name>Sonar :: Update Center</name>
   <url>http://www.sonarsource.org</url>
@@ -58,7 +58,7 @@
     <connection>scm:git:git@github.com:SonarSource/sonar-update-center.git</connection>
     <developerConnection>scm:git:git@github.com:SonarSource/sonar-update-center.git</developerConnection>
     <url>https://github.com/SonarSource/sonar-update-center</url>
-    <tag>HEAD</tag>
+    <tag>1.10</tag>
   </scm>
 
   <issueManagement>
