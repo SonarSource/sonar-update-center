@@ -107,16 +107,21 @@ public class UpdateCenterDeserializerTest {
     try {
       Properties props = new Properties();
       props.load(input);
-      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
 
       assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(1);
 
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
-      Release release = clirr.getRelease("1.1");
-      assertThat(release.getChildren()).hasSize(1);
-      assertThat(release.getChild("motionchart")).isNotNull();
-      assertThat(release.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
+      Release clirr11 = clirr.getRelease("1.1");
+      assertThat(clirr11.getChildren()).hasSize(1);
+      assertThat(clirr11.getChild("motionchart")).isNotNull();
+      assertThat(clirr11.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
+
+      Release clirr12S = clirr.getRelease("1.2-SNAPSHOT");
+      assertThat(clirr12S.getChildren()).hasSize(1);
+      assertThat(clirr12S.getChild("motionchart")).isNotNull();
+      assertThat(clirr12S.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
     } finally {
       IOUtils.closeQuietly(input);
     }
