@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mavenplugin;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
@@ -49,6 +50,13 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
    * @readonly
    */
   private MavenProject project;
+
+  /**
+   *  @parameter expression="${session}"
+   *  @required
+   *  @readonly
+   */
+  private MavenSession session;
 
   /**
    * Directory containing the generated JAR.
@@ -169,6 +177,10 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return project;
   }
 
+  protected final MavenSession getSession() {
+    return session;
+  }
+
   protected final File getOutputDirectory() {
     return outputDirectory;
   }
@@ -240,7 +252,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return skipDependenciesPackaging;
   }
 
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({"unchecked"})
   protected Set<Artifact> getDependencyArtifacts() {
     return getProject().getDependencyArtifacts();
   }
@@ -255,7 +267,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     return result;
   }
 
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({"unchecked"})
   protected Set<Artifact> getIncludedArtifacts() {
     Set<Artifact> result = new HashSet<Artifact>();
     Set<Artifact> artifacts = getProject().getArtifacts();
@@ -273,7 +285,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     if (dependencies != null) {
       for (Artifact dep : dependencies) {
         if (SONAR_GROUPID.equals(dep.getGroupId()) && SONAR_PLUGIN_API_ARTIFACTID.equals(dep.getArtifactId())
-            && SONAR_PLUGIN_API_TYPE.equals(dep.getType())) {
+          && SONAR_PLUGIN_API_TYPE.equals(dep.getType())) {
           return dep;
         }
       }

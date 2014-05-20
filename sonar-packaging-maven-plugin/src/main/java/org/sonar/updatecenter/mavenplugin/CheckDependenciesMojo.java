@@ -53,8 +53,12 @@ public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
 
     if (sonarApi == null) {
       throw new MojoExecutionException(
-          SONAR_GROUPID + ":" + SONAR_PLUGIN_API_ARTIFACTID + " should be declared in dependencies"
-      );
+        SONAR_GROUPID + ":" + SONAR_PLUGIN_API_ARTIFACTID + " should be declared in dependencies");
+    }
+
+    if (!Artifact.SCOPE_PROVIDED.equals(sonarApi.getScope())) {
+      throw new MojoExecutionException(
+        SONAR_GROUPID + ":" + SONAR_PLUGIN_API_ARTIFACTID + " should be declared with scope '" + Artifact.SCOPE_PROVIDED + "'");
     }
   }
 
@@ -68,9 +72,9 @@ public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
     if (!ids.isEmpty()) {
       StringBuilder message = new StringBuilder();
       message.append("Dependencies on the following log libraries should be excluded or declared with scope 'provided':")
-          .append("\n\t")
-          .append(StringUtils.join(ids, ", "))
-          .append('\n');
+        .append("\n\t")
+        .append(StringUtils.join(ids, ", "))
+        .append('\n');
       getLog().warn(message.toString());
     }
   }
