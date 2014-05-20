@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.SortedSet;
 
@@ -395,6 +396,33 @@ public class UpdateCenterDeserializerTest {
       thrown.expectMessage("Duplicate version for plugin clirr: 1.1");
 
       new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
+
+  // UPC-28
+  @Test
+  public void test_plugin_with_only_private_and_dev_version() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/plugin-with-only-private-and-devVersion.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+
+      UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+
+      Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
+      clirr.getRelease(Version.create("1.0"));
+      clirr.getRelease(Version.create("1.1"));
+      clirr.getRelease(Version.create("1.2-SNAPSHOT"));
+
+      updateCenter = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+      thrown.expect(NoSuchElementException.class);
+      thrown.expectMessage("Unable to find plugin with key clirr");
+
+      updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
 
     } finally {
       IOUtils.closeQuietly(input);
