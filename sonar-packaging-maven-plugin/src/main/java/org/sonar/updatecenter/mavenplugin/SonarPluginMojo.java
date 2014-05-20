@@ -33,7 +33,11 @@ import org.apache.maven.model.Developer;
 import org.apache.maven.model.License;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
@@ -55,69 +59,49 @@ import java.util.Set;
  * Build a Sonar Plugin from the current project.
  *
  * @author Evgeny Mandrikov
- * @goal sonar-plugin
- * @phase package
- * @requiresProject
- * @requiresDependencyResolution runtime
- * @threadSafe
  */
+@Mojo(name = "sonar-plugin", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
 public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private static final String LIB_DIR = "META-INF/lib/";
   private static final String[] DEFAULT_EXCLUDES = new String[] {"**/package.html"};
   private static final String[] DEFAULT_INCLUDES = new String[] {"**/**"};
   /**
    * The Jar archiver.
-   *
-   * @component role="org.codehaus.plexus.archiver.Archiver" role-hint="jar"
    */
+  @Component(role = org.codehaus.plexus.archiver.Archiver.class, hint = "jar")
   protected JarArchiver jarArchiver;
+
   /**
    * List of files to include. Specified as fileset patterns which are relative to the input directory whose contents
    * is being packaged into the JAR.
-   *
-   * @parameter
    */
+  @Parameter
   private String[] includes;
+
   /**
    * List of files to exclude. Specified as fileset patterns which are relative to the input directory whose contents
    * is being packaged into the JAR.
-   *
-   * @parameter
    */
+  @Parameter
   private String[] excludes;
+
   /**
    * The archive configuration to use.
    * See <a href="http://maven.apache.org/shared/maven-archiver/index.html">Maven Archiver Reference</a>.
-   *
-   * @parameter
    */
+  @Parameter
   private MavenArchiveConfiguration archive = new MavenArchiveConfiguration();
-  /**
-   * @component
-   * @required
-   * @readonly
-   */
-  private DependencyGraphBuilder dependencyGraphBuilder;
 
-  /**
-   * @component
-   * @required
-   * @readonly
-   */
+  @Component
   private DependencyTreeBuilder dependencyTreeBuilder;
 
   /**
    * The artifact repository to use.
-   *
-   * @parameter expression="${localRepository}"
-   * @required
-   * @readonly
    */
+  @Parameter(defaultValue = "${localRepository}", readonly = true)
   private ArtifactRepository localRepository;
 
-  /**
-   * @parameter expression="${sonar.addMavenDescriptor}"
-   */
+  @Parameter(property = "sonar.addMavenDescriptor")
   private boolean addMavenDescriptor = true;
 
   protected static File getJarFile(File basedir, String finalName, String classifier) {

@@ -23,6 +23,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
@@ -44,133 +46,101 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
 
   /**
    * The Maven project.
-   * 
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
    */
+  @Component
   private MavenProject project;
 
   /**
-   *  @parameter expression="${session}"
-   *  @required
-   *  @readonly
+   *  Maven Session
    */
+  @Component
   private MavenSession session;
 
   /**
    * Directory containing the generated JAR.
-   * 
-   * @parameter expression="${project.build.directory}"
-   * @required
    */
+  @Parameter(property = "project.build.directory", required = true)
   private File outputDirectory;
 
   /**
    * Directory containing the classes and resource files that should be packaged into the JAR.
-   * 
-   * @parameter expression="${project.build.outputDirectory}"
-   * @required
    */
+  @Parameter(property = "project.build.outputDirectory", required = true)
   private File classesDirectory;
 
   /**
-   * The directory where the app is built.
-   * 
-   * @parameter expression="${project.build.directory}/${project.build.finalName}"
-   * @required
-   */
+  * The directory where the app is built.
+  */
+  @Parameter(defaultValue = "${project.build.directory}/${project.build.finalName}", required = true)
   private File appDirectory;
 
   /**
    * Name of the generated JAR.
-   * 
-   * @parameter alias="jarName" expression="${jar.finalName}" default-value="${project.build.finalName}"
-   * @required
    */
+  @Parameter(alias = "jarName", property = "project.build.finalName", required = true)
   private String finalName;
 
   /**
    * Classifier to add to the artifact generated. If given, the artifact will be an attachment instead.
-   * 
-   * @parameter
    */
+  @Parameter
   private String classifier;
 
-  /**
-   * @component
-   */
+  @Component
   protected MavenProjectHelper projectHelper;
 
   /**
    * Plugin key.
-   * 
-   * @parameter expression="${sonar.pluginKey}"
    */
+  @Parameter(property = "sonar.pluginKey")
   protected String pluginKey;
 
-  /**
-   * @parameter expression="${sonar.pluginTermsConditionsUrl}"
-   */
+  @Parameter(property = "sonar.pluginTermsConditionsUrl")
   private String pluginTermsConditionsUrl;
 
   /**
    * Name of plugin class.
-   * 
-   * @parameter expression="${sonar.pluginClass}"
-   * @required
    */
+  @Parameter(property = "sonar.pluginClass", required = true)
   private String pluginClass;
 
-  /**
-   * @parameter expression="${sonar.pluginName}" default-value="${project.name}"
-   */
+  @Parameter(property = "sonar.pluginName", required = true, defaultValue = "${project.name}")
   private String pluginName;
 
   /**
    * Plugin parent.
-   *
-   * @parameter expression="${sonar.pluginParent}"
    */
+  @Parameter(property = "sonar.pluginParent")
   protected String pluginParent;
 
   /**
    * Plugin's dependencies.
-   *
-   * @parameter expression="${sonar.requirePlugins}"
    */
+  @Parameter(property = "sonar.requirePlugins")
   protected String requirePlugins;
 
-  /**
-   * @parameter expression="${sonar.pluginDescription}" default-value="${project.description}"
-   */
+  @Parameter(property = "sonar.pluginDescription", defaultValue = "${project.description}")
   private String pluginDescription;
 
-  /**
-   * @parameter expression="${sonar.pluginUrl}" default-value="${project.url}"
-   */
+  @Parameter(property = "sonar.pluginUrl", defaultValue = "${project.url}")
   private String pluginUrl;
 
-  /**
-   * @parameter default-value="${project.issueManagement.url}"
-   */
+  @Parameter(defaultValue = "${project.issueManagement.url}")
   private String pluginIssueTrackerUrl;
 
   /**
-   * @parameter
    * @since 0.3
    */
+  @Parameter
   private boolean useChildFirstClassLoader = false;
 
   /**
-   * @parameter
    * @since 1.1
    */
+  @Parameter
   private String basePlugin;
 
-  /**
-   * @parameter expression="${sonar.skipDependenciesPackaging}"
-   */
+  @Parameter(property = "sonar.skipDependenciesPackaging")
   private boolean skipDependenciesPackaging = false;
 
   protected final MavenProject getProject() {

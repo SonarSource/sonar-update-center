@@ -24,17 +24,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Evgeny Mandrikov
- * @goal check-dependencies
- * @requiresDependencyResolution runtime
- * @phase initialize
- * @threadSafe
  */
+@Mojo(name = "check-dependencies", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
 public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
 
   private static final String[] GWT_ARTIFACT_IDS = {"gwt-user", "gwt-dev", "sonar-gwt-api"};
