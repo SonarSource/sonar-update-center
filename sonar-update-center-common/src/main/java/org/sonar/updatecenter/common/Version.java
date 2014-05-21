@@ -146,12 +146,25 @@ public class Version implements Comparable<Version> {
   /**
    * Creates a version without the qualifier part. For example 1.2.3-SNAPSHOT
    * and 2.0-RC1 are converted to 1.2.3 and 2.0.
+   * @deprecated use {@link #removeQualifier()}
    */
+  @Deprecated
   public static Version createRelease(String version) {
-    return new Version(StringUtils.substringBefore(version, "-"));
+    return create(version).removeQualifier();
   }
 
   public static boolean isSnapshot(String version) {
     return StringUtils.endsWith(version, "SNAPSHOT");
+  }
+
+  public Version removeQualifier() {
+    return new Version(StringUtils.substringBefore(this.toString(), "-"));
+  }
+
+  /**
+   * Two versions are compatible when they are identical except for qualifier.
+   */
+  public boolean isCompatibleWith(Version version) {
+    return this.removeQualifier().equals(version.removeQualifier());
   }
 }

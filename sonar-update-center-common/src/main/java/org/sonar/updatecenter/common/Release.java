@@ -55,7 +55,7 @@ public class Release implements Comparable<Release> {
   /**
    * from oldest to newest sonar versions
    */
-  private SortedSet<Version> requiredSonarVersions;
+  private SortedSet<Version> compatibleSqVersions;
   private Date date;
 
   public Release(Artifact artifact, Version version) {
@@ -63,7 +63,7 @@ public class Release implements Comparable<Release> {
     this.version = version;
     this.isPublic = true;
 
-    this.requiredSonarVersions = newTreeSet();
+    this.compatibleSqVersions = newTreeSet();
     this.children = newHashSet();
     this.outgoingDependencies = newHashSet();
     this.incomingDependencies = newHashSet();
@@ -100,16 +100,22 @@ public class Release implements Comparable<Release> {
   }
 
   public SortedSet<Version> getRequiredSonarVersions() {
-    return requiredSonarVersions;
+    return compatibleSqVersions;
   }
 
-  public boolean supportSonarVersion(Version version) {
-    return requiredSonarVersions.contains(version);
+  public boolean supportSonarVersion(Version providedSqVersion) {
+    // Compare versions without qualifier
+    for (Version sqVersion : compatibleSqVersions) {
+      if (sqVersion.isCompatibleWith(providedSqVersion)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public Release addRequiredSonarVersions(Version... versions) {
     if (versions != null) {
-      requiredSonarVersions.addAll(Arrays.asList(versions));
+      compatibleSqVersions.addAll(Arrays.asList(versions));
     }
     return this;
   }
@@ -117,22 +123,22 @@ public class Release implements Comparable<Release> {
   public Release addRequiredSonarVersions(String... versions) {
     if (versions != null) {
       for (String v : versions) {
-        requiredSonarVersions.add(Version.create(v));
+        compatibleSqVersions.add(Version.create(v));
       }
     }
     return this;
   }
 
   public Version getLastRequiredSonarVersion() {
-    if (!requiredSonarVersions.isEmpty()) {
-      return requiredSonarVersions.last();
+    if (!compatibleSqVersions.isEmpty()) {
+      return compatibleSqVersions.last();
     }
     return null;
   }
 
   public Version getMinimumRequiredSonarVersion() {
-    if (!requiredSonarVersions.isEmpty()) {
-      return requiredSonarVersions.first();
+    if (!compatibleSqVersions.isEmpty()) {
+      return compatibleSqVersions.first();
     }
     return null;
   }

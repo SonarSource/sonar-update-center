@@ -48,7 +48,7 @@ public class Sonar extends Artifact {
   /**
    * 
    * @param versionOrAliases Any version or keywords "DEV", "LTS" or "LATEST_RELEASE"
-   * @return
+   * @throws java.util.NoSuchElementException if release could not be found
    */
   @Override
   public Release getRelease(String versionOrAliases) {

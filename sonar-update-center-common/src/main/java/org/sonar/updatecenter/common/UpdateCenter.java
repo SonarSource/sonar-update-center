@@ -84,11 +84,10 @@ public class UpdateCenter {
   }
 
   public List<PluginUpdate> findAvailablePlugins() {
-    Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<PluginUpdate> availables = newArrayList();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       if (!isInstalled(plugin)) {
-        Release release = plugin.getLastCompatibleRelease(adjustedSonarVersion);
+        Release release = plugin.getLastCompatibleRelease(installedSonarVersion);
         if (release != null) {
           if (release.isMaster()) {
             try {
@@ -100,7 +99,7 @@ public class UpdateCenter {
             }
           }
         } else {
-          release = plugin.getLastCompatibleReleaseIfUpgrade(adjustedSonarVersion);
+          release = plugin.getLastCompatibleReleaseIfUpgrade(installedSonarVersion);
           if (release != null && release.isMaster()) {
             availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
           }
@@ -110,12 +109,14 @@ public class UpdateCenter {
     return availables;
   }
 
+  /**
+   * Return all plugins with at least one version compatible with SQ. For ecosystems only parent plugin is returned.
+   */
   public List<Plugin> findAllCompatiblePlugins() {
-    Version adjustedSonarVersion = getAdjustedSonarVersion();
     List<Plugin> availables = newArrayList();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
-      Release release = plugin.getLastCompatible(adjustedSonarVersion);
-      if (release != null) {
+      Release release = plugin.getLastCompatible(installedSonarVersion);
+      if (release != null && release.getParent() == null) {
         availables.add(plugin);
       }
     }
@@ -138,7 +139,7 @@ public class UpdateCenter {
   }
 
   private PluginUpdate getPluginUpdate(Plugin plugin, Release nextRelease) {
-    PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, getAdjustedSonarVersion());
+    PluginUpdate pluginUpdate = PluginUpdate.createForPluginRelease(nextRelease, installedSonarVersion);
     try {
       if (pluginUpdate.isCompatible()) {
         pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), nextRelease.getVersion()));
@@ -163,7 +164,7 @@ public class UpdateCenter {
     try {
       if (!contain(pluginKey, installablePlugins) && !contain(pluginKey, checkedPlugins)) {
         Plugin plugin = updateCenterPluginReferential.findPlugin(pluginKey);
-        Release pluginRelease = plugin.getLastCompatibleRelease(getAdjustedSonarVersion());
+        Release pluginRelease = plugin.getLastCompatibleRelease(installedSonarVersion);
         if (pluginRelease != null) {
           if (pluginRelease.getVersion().compareTo(minimumVersion) < 0) {
             throw new IncompatiblePluginVersionException("Plugin " + pluginKey + " is needed to be installed at version greater or equal " + minimumVersion);
@@ -252,15 +253,6 @@ public class UpdateCenter {
   @VisibleForTesting
   PluginReferential getInstalledPluginReferential() {
     return installedPluginReferential;
-  }
-
-  /**
-   * Update center declares RELEASE versions of Sonar, for instance 3.2 but not 3.2-SNAPSHOT.
-   * We assume that SNAPSHOT, milestones and release candidates of Sonar support the
-   * same plugins than related RELEASE.
-   */
-  private Version getAdjustedSonarVersion() {
-    return Version.createRelease(installedSonarVersion.toString());
   }
 
   private boolean isInstalled(final Release releaseToFind) {

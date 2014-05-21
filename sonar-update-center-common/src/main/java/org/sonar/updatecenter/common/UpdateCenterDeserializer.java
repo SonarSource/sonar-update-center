@@ -318,7 +318,7 @@ public final class UpdateCenterDeserializer {
         if (matcher.matches()) {
           final Version low = Version.create(resolve(matcher.group(1), sonar));
           final Version high = Version.create(resolve(matcher.group(2), sonar));
-          resolveRange(sonar, result, low, high);
+          resolveRangeOfRequiredSQVersion(sonar, result, low, high);
         } else {
           result.add(resolve(pattern, sonar));
         }
@@ -327,7 +327,7 @@ public final class UpdateCenterDeserializer {
     return result.toArray(new String[result.size()]);
   }
 
-  private void resolveRange(Sonar sonar, List<String> result, final Version low, final Version high) {
+  private void resolveRangeOfRequiredSQVersion(Sonar sonar, List<String> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       public Version apply(Release release) {
         return release != null ? release.getVersion() : null;
