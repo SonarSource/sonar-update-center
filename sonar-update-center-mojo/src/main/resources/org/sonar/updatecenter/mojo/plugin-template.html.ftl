@@ -25,10 +25,10 @@
             <#else>
             Not compatible
             </#if>
-            with LTS version (SonarQube ${pluginHeader.getSonarLtsVersion()})
+            with LTS version (SonarQube&#0153; ${pluginHeader.getSonarLtsVersion()})
             <br/>
             </#if>
-            Requires SonarQube ${pluginHeader.getLatestVersion().getSonarVersion()} or higher
+            Requires SonarQube&#0153; ${pluginHeader.getLatestVersion().getSonarVersion()} or higher
             ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
             <br/>
             Download: <a href="${pluginHeader.getLatestVersion().getDownloadUrl()}">${pluginHeader.getLatestVersion().getDownloadUrl()}</a>
@@ -40,7 +40,7 @@
         <td>
             <strong>${pluginHeader.getLtsVersion().getVersion()}</strong> ( ${pluginHeader.getLtsVersion().getDate()} )<br/>
             <br/>
-            Requires SonarQube ${pluginHeader.getLtsVersion().getSonarVersion()} or higher
+            Requires SonarQube&#0153; ${pluginHeader.getLtsVersion().getSonarVersion()} or higher
             ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
             <br/>
             Download: <a href="${pluginHeader.getLtsVersion().getDownloadUrl()}">${pluginHeader.getLtsVersion().getDownloadUrl()}</a>
