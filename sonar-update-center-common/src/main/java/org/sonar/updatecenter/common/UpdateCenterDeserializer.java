@@ -213,7 +213,7 @@ public final class UpdateCenterDeserializer {
         parsePluginDevVersions(p, sonar, pluginKey, plugin);
       }
 
-      if (plugin.getAllReleases().size() > 0) {
+      if (!plugin.getAllReleases().isEmpty()) {
         plugins.add(plugin);
       }
     }

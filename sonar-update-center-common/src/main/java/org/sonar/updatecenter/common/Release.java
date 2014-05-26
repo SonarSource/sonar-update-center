@@ -225,7 +225,7 @@ public class Release implements Comparable<Release> {
   }
 
   public Version getAdjustedVersion() {
-    return Version.createRelease(version.toString());
+    return version.removeQualifier();
   }
 
   public boolean isPublic() {
