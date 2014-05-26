@@ -3,19 +3,20 @@ body {
   font-size: 9pt;
 }
 a {
-  color: #036;
+  color: #326CA6;
+  text-decoration: none;
 }
 table {
   border-collapse: collapse;
   width: 100%;
 }
-table td {
-  border: 1px #CCC solid;
-  padding: 3px;
+table td, table th {
+  border: 1px solid #DDD;
+  padding: 7px 10px;
   font-size: 9pt;
-}
-th {
   text-align: left;
+  color: #333;
+  vertical-align: top;
 }
 .button {
   background: #3C78B5;
