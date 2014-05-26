@@ -15,7 +15,7 @@
         <td>${pluginHeader.getName()}</td>
     </tr>
     <tr>
-        <td><strong>Latest version</strong></td>
+        <td style="white-space:nowrap"><strong>Latest version</strong></td>
         <td>
             <strong>${pluginHeader.getLatestVersion().getVersion()}</strong> ( ${pluginHeader.getLatestVersion().getDate()} )<br/>
             <br/>
@@ -36,7 +36,7 @@
     </tr>
     <#if pluginHeader.getLtsVersion()?? >
     <tr>
-        <td><strong>Compatible with LTS version</strong></td>
+        <td style="white-space:nowrap"><strong>Compatible with LTS version</strong></td>
         <td>
             <strong>${pluginHeader.getLtsVersion().getVersion()}</strong> ( ${pluginHeader.getLtsVersion().getDate()} )<br/>
             <br/>
@@ -61,7 +61,7 @@
     </#if>
     <#if pluginHeader.getIssueTracker()?? >
     <tr>
-        <td><strong>Issue tracker</strong></td>
+        <td style="white-space:nowrap"><strong>Issue tracker</strong></td>
         <td>${pluginHeader.getIssueTracker()}</td>
     </tr>
     </#if>
