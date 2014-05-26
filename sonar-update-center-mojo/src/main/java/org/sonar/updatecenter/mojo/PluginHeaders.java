@@ -50,21 +50,24 @@ class PluginHeaders {
 
   private void init() throws IOException {
     Preconditions.checkArgument(outputDirectory.exists());
-    FileUtils.copyURLToFile(getClass().getResource("/style.css"), new File(outputDirectory, "style.css"));
+    FileUtils.copyURLToFile(getClass().getResource("/style-confluence.css"), new File(outputDirectory, "style-confluence.css"));
   }
 
   void generateHtml() throws IOException {
     init();
     List<Plugin> plugins = center.getUpdateCenterPluginReferential().getPlugins();
     for (Plugin plugin : plugins) {
-      File file = new File(outputDirectory, plugin.getKey() + ".html");
-      log.info("Generate html header of plugin " + plugin.getKey() + " in: " + file);
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
-      print(pluginHeader, file);
+      File file = new File(outputDirectory, plugin.getKey() + "-confluence.html");
+      log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
+      print(pluginHeader, file, "plugin-confluence-template.html.ftl");
+      file = new File(outputDirectory, plugin.getKey() + "-sonarsource.html");
+      log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
+      print(pluginHeader, file, "plugin-sonarsource-template.html.ftl");
     }
   }
 
-  private void print(PluginHeader pluginHeader, File toFile) {
+  private void print(PluginHeader pluginHeader, File toFile, String templateName) {
     Writer writer = null;
     try {
       freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -75,7 +78,7 @@ class PluginHeaders {
       Map<String, Object> root = Maps.newHashMap();
       root.put("pluginHeader", pluginHeader);
 
-      Template template = cfg.getTemplate("plugin-template.html.ftl");
+      Template template = cfg.getTemplate(templateName);
       writer = new FileWriter(toFile);
       template.process(root, writer);
       writer.flush();

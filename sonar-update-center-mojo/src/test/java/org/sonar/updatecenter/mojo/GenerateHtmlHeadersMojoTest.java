@@ -43,9 +43,9 @@ public class GenerateHtmlHeadersMojoTest {
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
     // html headers
-    File htmlHeader = new File(outputDir, "html/artifactsize.html");
+    File htmlHeader = new File(outputDir, "html/artifactsize-confluence.html");
     assertThat(htmlHeader).exists().isFile();
-    assertThat(new File(outputDir, "html/style.css")).exists().isFile();
+    assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
     String html = FileUtils.readFileToString(htmlHeader);
     assertThat(html).contains("<title>Artifact Size</title>");
   }

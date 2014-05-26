@@ -27,6 +27,7 @@ import org.sonar.updatecenter.common.Version;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,6 +71,10 @@ public class PluginHeader {
   public PluginHeader(Plugin plugin, Sonar sonar) {
     this.plugin = plugin;
     this.sonar = sonar;
+  }
+
+  public String getKey() {
+    return plugin.getKey();
   }
 
   public String getName() {
@@ -120,6 +125,15 @@ public class PluginHeader {
       return new PluginHeaderVersion(lastCompatibleWithLts);
     }
     return null;
+  }
+
+  public List<PluginHeaderVersion> getAllVersions() {
+    List<PluginHeaderVersion> result = new LinkedList<PluginHeader.PluginHeaderVersion>();
+    for (Release r : plugin.getAllReleases()) {
+      // Add in reverse order to have greater version on top
+      result.add(0, new PluginHeaderVersion(r));
+    }
+    return result;
   }
 
   public String getSonarLtsVersion() {

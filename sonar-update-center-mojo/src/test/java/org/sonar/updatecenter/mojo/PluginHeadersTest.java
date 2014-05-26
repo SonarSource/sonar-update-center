@@ -80,7 +80,7 @@ public class PluginHeadersTest {
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(1);
-    assertThat(outputFolder.list()[0]).contains("style.css");
+    assertThat(outputFolder.list()).containsOnly("style-confluence.css");
   }
 
   @Test
@@ -101,8 +101,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
   }
 
@@ -158,14 +158,14 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     return file;
   }
 
-  class FilenameFilterForGeneratedHtml implements FilenameFilter {
+  class FilenameFilterForConfluenceGeneratedHtml implements FilenameFilter {
     public boolean accept(File file, String s) {
-      return (PLUGIN_KEY + ".html").equals(s);
+      return (PLUGIN_KEY + "-confluence.html").equals(s);
     }
   }
 
@@ -187,8 +187,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
   }
 
@@ -210,8 +210,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
   }
 
@@ -233,8 +233,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
   }
 
@@ -256,8 +256,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).hasSize(3);
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-developper.html"));
   }
 
@@ -279,8 +279,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    File file = outputFolder.listFiles(new FilenameFilterForGeneratedHtml())[0];
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "style-confluence.css");
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
   }
 
@@ -303,7 +303,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
+    assertThat(outputFolder.list()).hasSize(3);
   }
 
   private File getExpectedFile(String fileName) {

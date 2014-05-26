@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="generator" content="Sonar Update Center"/>
     <style type="text/css">
-        @import url("style.css");
+        @import url("style-confluence.css");
     </style>
 </head>
 <body>
@@ -34,41 +34,41 @@
             Download: <a href="${pluginHeader.getLatestVersion().getDownloadUrl()}">${pluginHeader.getLatestVersion().getDownloadUrl()}</a>
         </td>
     </tr>
-    <#if pluginHeader.getLtsVersion()?? >
+    <#if pluginHeader.ltsVersion?? >
     <tr>
         <td style="white-space:nowrap"><strong>Compatible with LTS version</strong></td>
         <td>
-            <strong>${pluginHeader.getLtsVersion().getVersion()}</strong> ( ${pluginHeader.getLtsVersion().getDate()} )<br/>
+            <strong>${pluginHeader.ltsVersion.getVersion()}</strong> ( ${pluginHeader.ltsVersion.getDate()} )<br/>
             <br/>
-            Requires SonarQube&#0153; ${pluginHeader.getLtsVersion().getSonarVersion()} or higher
+            Requires SonarQube&#0153; ${pluginHeader.ltsVersion.getSonarVersion()} or higher
             ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
             <br/>
-            Download: <a href="${pluginHeader.getLtsVersion().getDownloadUrl()}">${pluginHeader.getLtsVersion().getDownloadUrl()}</a>
+            Download: <a href="${pluginHeader.getLtsVersion().getDownloadUrl()}">${pluginHeader.ltsVersion.getDownloadUrl()}</a>
         </td>
     </tr>
     </#if>
-    <#if pluginHeader.getLicense()?? >
+    <#if pluginHeader.license?? >
     <tr>
         <td><strong>License</strong></td>
-        <td>${pluginHeader.getLicense()}</td>
+        <td>${pluginHeader.license}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getDevelopers()?? >
+    <#if pluginHeader.developers?? >
     <tr>
         <td><strong>Developers</strong></td>
-        <td>${pluginHeader.getDevelopers()}</td>
+        <td>${pluginHeader.developers}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getIssueTracker()?? >
+    <#if pluginHeader.issueTracker?? >
     <tr>
         <td style="white-space:nowrap"><strong>Issue tracker</strong></td>
-        <td>${pluginHeader.getIssueTracker()}</td>
+        <td>${pluginHeader.issueTracker}</td>
     </tr>
     </#if>
-    <#if pluginHeader.getSources()?? >
+    <#if pluginHeader.sources?? >
     <tr>
         <td><strong>Sources</strong></td>
-        <td>${pluginHeader.getSources()}</td>
+        <td>${pluginHeader.sources}</td>
     </tr>
     </#if>
 </table>
