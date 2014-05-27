@@ -45,6 +45,7 @@ public class Release implements Comparable<Release> {
   private String downloadUrl;
   private String changelogUrl;
   private boolean isPublic;
+  private boolean isArchived;
   private String groupId;
   private String artifactId;
 
@@ -62,6 +63,7 @@ public class Release implements Comparable<Release> {
     this.artifact = artifact;
     this.version = version;
     this.isPublic = true;
+    this.isArchived = false;
 
     this.compatibleSqVersions = newTreeSet();
     this.children = newHashSet();
@@ -234,6 +236,14 @@ public class Release implements Comparable<Release> {
 
   public void setPublic(boolean isPublic) {
     this.isPublic = isPublic;
+  }
+
+  public boolean isArchived() {
+    return isArchived;
+  }
+
+  public void setArchived(boolean isArchived) {
+    this.isArchived = isArchived;
   }
 
   public String groupId() {

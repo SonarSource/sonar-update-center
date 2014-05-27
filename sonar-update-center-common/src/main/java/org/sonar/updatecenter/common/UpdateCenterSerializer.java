@@ -139,8 +139,11 @@ public final class UpdateCenterSerializer {
     if (!plugin.getPrivateVersions().isEmpty()) {
       set(p, plugin, "privateVersions", plugin.getPrivateVersions());
     }
+    if (!plugin.getArchivedVersions().isEmpty()) {
+      set(p, plugin, "archivedVersions", plugin.getArchivedVersions());
+    }
     if (plugin.getDevRelease() != null) {
-      // Plugins don't have private versions
+      // Some Plugins don't have dev version
       set(p, plugin, "devVersion", plugin.getDevRelease().getVersion().toString());
     }
     // For backward compatibility

@@ -59,6 +59,7 @@ public final class UpdateCenterDeserializer {
   public static final String PLUGINS = "plugins";
   private static final String PUBLIC_VERSIONS = "publicVersions";
   private static final String PRIVATE_VERSIONS = "privateVersions";
+  private static final String ARCHIVED_VERSIONS = "archivedVersions";
   private static final String DEV_VERSION = "devVersion";
   private Mode mode;
   private boolean ignoreError;
@@ -207,11 +208,12 @@ public final class UpdateCenterDeserializer {
       plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
       plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
-      parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true);
+      parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true, false);
       if (mode == Mode.DEV) {
-        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false);
+        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false, false);
         parsePluginDevVersions(p, sonar, pluginKey, plugin);
       }
+      parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, true);
 
       if (!plugin.getAllReleases().isEmpty()) {
         plugins.add(plugin);
@@ -219,10 +221,10 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key, boolean isPublicRelease) {
+  private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key, boolean isPublicRelease, boolean isArchivedRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
-      Release release = parsePlugin(p, sonar, pluginKey, plugin, isPublicRelease, pluginVersion);
+      Release release = parsePlugin(p, sonar, pluginKey, plugin, isPublicRelease, isArchivedRelease, pluginVersion);
       if (!plugin.getAllReleases().contains(release)) {
         plugin.addRelease(release);
       } else {
@@ -231,17 +233,18 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, String pluginVersion) {
+  private Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
     Release release = new Release(plugin, pluginVersion);
     release.setPublic(isPublicRelease);
+    release.setArchived(isArchivedRelease);
     release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
     release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
     release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
     release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
     release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
     release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
-    String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar);
-    if (requiredSonarVersions.length == 0) {
+    String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
+    if (!isArchivedRelease && requiredSonarVersions.length == 0) {
       reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion + " should declare compatible SQ versions");
     }
     for (String requiredSonarVersion : requiredSonarVersions) {
@@ -253,7 +256,7 @@ public final class UpdateCenterDeserializer {
   private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
     String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
-      Release release = parsePlugin(p, sonar, pluginKey, plugin, false, devVersion);
+      Release release = parsePlugin(p, sonar, pluginKey, plugin, false, false, devVersion);
       plugin.setDevRelease(release);
     }
   }
@@ -308,8 +311,8 @@ public final class UpdateCenterDeserializer {
     return release;
   }
 
-  private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar) {
-    String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", true);
+  private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar, boolean isArchived) {
+    String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", !isArchived);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
     List<String> result = new LinkedList<String>();
     for (String pattern : patterns) {

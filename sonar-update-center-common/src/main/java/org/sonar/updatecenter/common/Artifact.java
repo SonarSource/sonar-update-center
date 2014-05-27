@@ -132,12 +132,14 @@ public abstract class Artifact implements Comparable<Artifact> {
   }
 
   /**
-   * @return both public and private versions
+   * @return both public and private versions but not archived versions
    */
   public final SortedSet<Version> getVersions() {
     SortedSet<Version> versions = new TreeSet<Version>();
     for (Release release : releases) {
-      versions.add(release.getVersion());
+      if (!release.isArchived()) {
+        versions.add(release.getVersion());
+      }
     }
     return versions;
   }
@@ -166,6 +168,16 @@ public abstract class Artifact implements Comparable<Artifact> {
     SortedSet<Version> versions = new TreeSet<Version>();
     for (Release release : releases) {
       if (!release.isPublic()) {
+        versions.add(release.getVersion());
+      }
+    }
+    return versions;
+  }
+
+  public final SortedSet<Version> getArchivedVersions() {
+    SortedSet<Version> versions = new TreeSet<Version>();
+    for (Release release : releases) {
+      if (release.isArchived()) {
         versions.add(release.getVersion());
       }
     }
