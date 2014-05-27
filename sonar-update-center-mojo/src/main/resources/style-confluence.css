@@ -18,6 +18,9 @@ table td, table th {
   color: #333;
   vertical-align: top;
 }
+table th {
+  background-color: #F0F0F0;
+}
 .button {
   background: #3C78B5;
   text-align: center;

@@ -27,12 +27,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.mojo.CompatibilityMatrix.SQVersion;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -51,23 +55,57 @@ class PluginHeaders {
   private void init() throws IOException {
     Preconditions.checkArgument(outputDirectory.exists());
     FileUtils.copyURLToFile(getClass().getResource("/style-confluence.css"), new File(outputDirectory, "style-confluence.css"));
+    FileUtils.copyURLToFile(getClass().getResource("/error.png"), new File(outputDirectory, "error.png"));
   }
 
   void generateHtml() throws IOException {
     init();
     List<Plugin> plugins = center.getUpdateCenterPluginReferential().getPlugins();
+    CompatibilityMatrix matrix = new CompatibilityMatrix();
+    for (Release sq : center.getSonar().getAllReleases()) {
+      matrix.getSqVersions().add(new SQVersion(sq.getVersion().toString(), center.getSonar().getLtsRelease().equals(sq), sq.getDate()));
+    }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
+      Map<String, Object> dataModel = Maps.newHashMap();
+      dataModel.put("pluginHeader", pluginHeader);
+
       File file = new File(outputDirectory, plugin.getKey() + "-confluence.html");
       log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
-      print(pluginHeader, file, "plugin-confluence-template.html.ftl");
+      print(dataModel, file, "plugin-confluence-template.html.ftl");
+
       file = new File(outputDirectory, plugin.getKey() + "-sonarsource.html");
       log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
-      print(pluginHeader, file, "plugin-sonarsource-template.html.ftl");
+      print(dataModel, file, "plugin-sonarsource-template.html.ftl");
+
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl());
+      matrix.getPlugins().add(matrixPlugin);
+
+      for (Release sq : center.getSonar().getAllReleases()) {
+        Release lastCompatible = plugin.getLastCompatible(sq.getVersion());
+        if (lastCompatible != null) {
+          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.getVersion().toString());
+        }
+      }
+    }
+
+    Collections.sort(matrix.getPlugins(), new Comparator<CompatibilityMatrix.Plugin>() {
+      @Override
+      public int compare(org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o1, org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o2) {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
+
+    if (!matrix.getPlugins().isEmpty()) {
+      File file = new File(outputDirectory, "compatibility-matrix.html");
+      Map<String, Object> dataModel = Maps.newHashMap();
+      dataModel.put("matrix", matrix);
+      log.info("Generate compatibility matrix in: " + file);
+      print(dataModel, file, "matrix-template.html.ftl");
     }
   }
 
-  private void print(PluginHeader pluginHeader, File toFile, String templateName) {
+  private void print(Map<String, Object> dataModel, File toFile, String templateName) {
     Writer writer = null;
     try {
       freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -75,15 +113,12 @@ class PluginHeaders {
       cfg.setClassForTemplateLoading(PluginHeader.class, "");
       cfg.setObjectWrapper(new DefaultObjectWrapper());
 
-      Map<String, Object> root = Maps.newHashMap();
-      root.put("pluginHeader", pluginHeader);
-
       Template template = cfg.getTemplate(templateName);
       writer = new FileWriter(toFile);
-      template.process(root, writer);
+      template.process(dataModel, writer);
       writer.flush();
     } catch (Exception e) {
-      throw new IllegalStateException("Fail to generate HTML header to: " + toFile, e);
+      throw new IllegalStateException("Fail to generate HTML to: " + toFile, e);
 
     } finally {
       IOUtils.closeQuietly(writer);

@@ -179,6 +179,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   /**
    * @return Greatest plugin release version that is compatible with provided SQ version
    */
+  @CheckForNull
   public final Release getLastCompatibleRelease(Version sqVersion) {
     Release result = null;
     for (Release r : releases) {
@@ -192,6 +193,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   /**
    * Same as {@link #getLastCompatibleRelease(Version)} but include {@link #devRelease} if available
    */
+  @CheckForNull
   public final Release getLastCompatible(Version sonarVersion) {
     Release result = null;
     for (Release r : getAllReleases()) {
@@ -205,6 +207,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   /**
    * Lowest plugin version (including dev) that is compatible with provided SQ version
    */
+  @CheckForNull
   public final Release getFirstCompatible(Version sonarVersion) {
     for (Release r : getAllReleases()) {
       if (r.supportSonarVersion(sonarVersion)) {
@@ -224,6 +227,7 @@ public abstract class Artifact implements Comparable<Artifact> {
     return null;
   }
 
+  @CheckForNull
   public final Release getLastCompatibleReleaseIfUpgrade(Version sonarVersion) {
     Release result = null;
     for (Release r : releases) {
