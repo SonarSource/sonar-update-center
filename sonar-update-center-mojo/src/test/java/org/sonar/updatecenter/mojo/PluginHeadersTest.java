@@ -65,6 +65,14 @@ public class PluginHeadersTest {
   public void before() throws Exception {
     outputFolder = temporaryFolder.newFolder();
     sonar = new Sonar();
+    sonar.addRelease("3.0");
+    sonar.addRelease("3.7");
+    sonar.addRelease("3.7.1");
+    sonar.addRelease("3.7.2");
+    sonar.addRelease("3.7.4");
+    sonar.addRelease("4.0");
+
+    sonar.setLtsRelease("3.7.4");
   }
 
   private void prepareMocks(Plugin... plugins) throws IOException {
@@ -239,7 +247,7 @@ public class PluginHeadersTest {
   }
 
   @Test
-  public void shouldWriteUnknownWhenNoDeveloper() throws Exception {
+  public void shouldWriteAuthor() throws Exception {
     Plugin plugin = new Plugin(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
@@ -251,14 +259,15 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(null);
+    plugin.setOrganization("SonarSource");
+    plugin.setOrganizationUrl("http://sonarsource.com");
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(5);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("without-developper.html"));
+    assertThat(file).hasSameContentAs(getExpectedFile("with-author.html"));
   }
 
   @Test

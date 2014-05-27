@@ -16,7 +16,7 @@
         <#list matrix.sqVersions as sqVersion>
         <th>
           ${sqVersion.version}
-          <#if sqVersion.isLts?? >
+          <#if sqVersion.isLts() >
           </br> <strong>LTS</strong>
           </#if>
         </th>
@@ -25,7 +25,7 @@
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
         <#list matrix.sqVersions as sqVersion>
-        <td>${sqVersion.releaseDate?date}</td>
+        <td>${(sqVersion.releaseDate?date)!}</td>
         </#list>
     </tr>
   </thead>
@@ -41,8 +41,8 @@
         </strong></td>
         <#list matrix.sqVersions as sqVersion>
         <td>
-          <#if plugin.supports(sqVersion.version)?? >
-          ${plugin.compatibleVersionBySqVersion[sqVersion.version]}
+          <#if plugin.supports(sqVersion.version) >
+          ${plugin.supportedVersion(sqVersion.version)}
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png"></img>
           </#if>

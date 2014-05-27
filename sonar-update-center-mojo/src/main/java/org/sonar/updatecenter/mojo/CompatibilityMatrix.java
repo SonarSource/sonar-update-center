@@ -89,6 +89,10 @@ public class CompatibilityMatrix {
       return compatibleVersionBySqVersion.containsKey(sqVersion);
     }
 
+    public String supportedVersion(String sqVersion) {
+      return compatibleVersionBySqVersion.get(sqVersion);
+    }
+
   }
 
 }

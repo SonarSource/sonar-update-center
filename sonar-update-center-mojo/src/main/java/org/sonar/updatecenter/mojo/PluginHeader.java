@@ -52,8 +52,21 @@ public class PluginHeader {
       return release.getDownloadUrl();
     }
 
-    public String getSonarVersion() {
-      return release.getMinimumRequiredSonarVersion().getName();
+    public String getSonarVersionRange() {
+      String min = release.getMinimumRequiredSonarVersion().toString();
+      String max = release.getLastRequiredSonarVersion().toString();
+      String latest = sonar.getLastRelease().getVersion().toString();
+      StringBuilder sb = new StringBuilder();
+      sb.append(min);
+      if (max.equals(latest)) {
+        sb.append("+");
+      } else if (!max.equals(min)) {
+        sb.append(" - ").append(max);
+      }
+      if (release.supportSonarVersion(sonar.getLtsRelease().getVersion())) {
+        sb.append(" (LTS)");
+      }
+      return sb.toString();
     }
 
     public boolean compatibleWithLts() {
@@ -93,8 +106,12 @@ public class PluginHeader {
     return plugin.getLicense();
   }
 
-  public String getDevelopers() {
-    return formatDevelopers(plugin.getDevelopers());
+  public String getOrganization() {
+    return plugin.getOrganization();
+  }
+
+  public String getOrganizationUrl() {
+    return plugin.getOrganizationUrl();
   }
 
   private static String formatLink(String url) {
@@ -103,28 +120,6 @@ public class PluginHeader {
 
   private static String formatDate(Date date) {
     return (new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)).format(date);
-  }
-
-  private String formatDevelopers(List<String> developers) {
-    if (developers == null || developers.isEmpty()) {
-      return null;
-    }
-    return StringUtils.join(developers, ", ");
-  }
-
-  public PluginHeaderVersion getLatestVersion() {
-    return new PluginHeaderVersion(plugin.getLastRelease());
-  }
-
-  public PluginHeaderVersion getLtsVersion() {
-    if (sonar.getLtsRelease() == null) {
-      return null;
-    }
-    Release lastCompatibleWithLts = plugin.getLastCompatibleRelease(sonar.getLtsRelease().getVersion());
-    if (lastCompatibleWithLts != null && !plugin.getLastRelease().equals(lastCompatibleWithLts)) {
-      return new PluginHeaderVersion(lastCompatibleWithLts);
-    }
-    return null;
   }
 
   public List<PluginHeaderVersion> getAllVersions() {

@@ -14,49 +14,22 @@
         <td><strong>Name</strong></td>
         <td>${pluginHeader.getName()}</td>
     </tr>
-    <tr>
-        <td style="white-space:nowrap"><strong>Latest version</strong></td>
-        <td>
-            <strong>${pluginHeader.getLatestVersion().getVersion()}</strong> ( ${pluginHeader.getLatestVersion().getDate()} )<br/>
-            <br/>
-            <#if pluginHeader.getSonarLtsVersion()?? >
-            <#if pluginHeader.getLatestVersion().compatibleWithLts() >
-            Compatible
-            <#else>
-            Not compatible
-            </#if>
-            with LTS version (SonarQube&#0153; ${pluginHeader.getSonarLtsVersion()})
-            <br/>
-            </#if>
-            Requires SonarQube&#0153; ${pluginHeader.getLatestVersion().getSonarVersion()} or higher
-            ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
-            <br/>
-            Download: <a href="${pluginHeader.getLatestVersion().getDownloadUrl()}">${pluginHeader.getLatestVersion().getDownloadUrl()}</a>
-        </td>
-    </tr>
-    <#if pluginHeader.ltsVersion?? >
-    <tr>
-        <td style="white-space:nowrap"><strong>Compatible with LTS version</strong></td>
-        <td>
-            <strong>${pluginHeader.ltsVersion.getVersion()}</strong> ( ${pluginHeader.ltsVersion.getDate()} )<br/>
-            <br/>
-            Requires SonarQube&#0153; ${pluginHeader.ltsVersion.getSonarVersion()} or higher
-            ( check <a href="http://docs.codehaus.org/display/SONAR/Plugin+version+matrix" target="_top">version compatibility</a> )
-            <br/>
-            Download: <a href="${pluginHeader.getLtsVersion().getDownloadUrl()}">${pluginHeader.ltsVersion.getDownloadUrl()}</a>
-        </td>
-    </tr>
-    </#if>
     <#if pluginHeader.license?? >
     <tr>
         <td><strong>License</strong></td>
         <td>${pluginHeader.license}</td>
     </tr>
     </#if>
-    <#if pluginHeader.developers?? >
+    <#if pluginHeader.organization?? >
     <tr>
-        <td><strong>Developers</strong></td>
-        <td>${pluginHeader.developers}</td>
+        <td><strong>Author</strong></td>
+        <td>
+          <#if pluginHeader.organizationUrl?? >
+            <a href="${pluginHeader.organizationUrl}">${pluginHeader.organization}</a>
+          <#else>
+            ${pluginHeader.organization}
+          </#if>
+        </td>
     </tr>
     </#if>
     <#if pluginHeader.issueTracker?? >
@@ -71,6 +44,32 @@
         <td>${pluginHeader.sources}</td>
     </tr>
     </#if>
+</table>
+<br/>
+<table>
+  <thead>
+    <tr>
+      <td><strong>Version</strong></td>
+      <td><strong>Date</strong></td>
+      <td><strong>Description</strong></td>
+      <td><strong>SonarQube</strong></td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+  </thead>
+              
+  <tbody>
+    <#list pluginHeader.getAllVersions() as pluginVersion>
+    <tr class="nobar">
+      <td class="version">${pluginVersion.getVersion()}</td>
+      <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
+      <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
+      <td class="other"><#if pluginVersion.getSonarVersionRange()?? >${pluginVersion.getSonarVersionRange()}</#if></td>
+      <td class="other"><#if pluginVersion.changelogUrl?? ><a href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
+      <td><#if pluginVersion.downloadUrl?? ><a href="${pluginVersion.downloadUrl}">Download</a></#if></td> 
+    </tr>
+    </#list>
+  </tbody>
 </table>
 </body>
 </html>

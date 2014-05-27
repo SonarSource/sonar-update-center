@@ -53,12 +53,7 @@
                 <td class="version">${pluginVersion.getVersion()}</td>
                 <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
                 <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
-                <td class="other"><#if pluginVersion.sonarVersion?? >${pluginVersion.sonarVersion}+
-                    <#if pluginHeader.getSonarLtsVersion()?? && pluginVersion.sonarVersion == pluginHeader.getSonarLtsVersion()>
-                    (LTS)
-                    </#if>
-                  </#if>
-                </td>
+                <td class="other"><#if pluginVersion.sonarVersionRange?? >${pluginVersion.sonarVersionRange}</#if></td>
                 <td class="other"><#if pluginVersion.changelogUrl?? ><a href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
                 <td><#if pluginVersion.downloadUrl?? ><a href="#" class="highlight" onClick="return checkTC(this, '${pluginHeader.getKey()}', '${pluginVersion.downloadUrl}')">Download</a></#if></td> 
               </tr>
