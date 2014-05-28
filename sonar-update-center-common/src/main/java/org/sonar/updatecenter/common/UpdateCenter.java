@@ -86,23 +86,24 @@ public class UpdateCenter {
   public List<PluginUpdate> findAvailablePlugins() {
     List<PluginUpdate> availables = newArrayList();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
-      if (!isInstalled(plugin)) {
-        Release release = plugin.getLastCompatibleRelease(installedSonarVersion);
-        if (release != null) {
-          if (release.isMaster()) {
-            try {
-              PluginUpdate pluginUpdate = PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE);
-              pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), release.getVersion()));
-              availables.add(pluginUpdate);
-            } catch (IncompatiblePluginVersionException e) {
-              availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
-            }
+      if (isInstalled(plugin)) {
+        continue;
+      }
+      Release release = plugin.getLastCompatibleRelease(installedSonarVersion);
+      if (release != null) {
+        if (release.isMaster()) {
+          try {
+            PluginUpdate pluginUpdate = PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE);
+            pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), release.getVersion()));
+            availables.add(pluginUpdate);
+          } catch (IncompatiblePluginVersionException e) {
+            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
           }
-        } else {
-          release = plugin.getLastCompatibleReleaseIfUpgrade(installedSonarVersion);
-          if (release != null && release.isMaster()) {
-            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
-          }
+        }
+      } else {
+        release = plugin.getLastCompatibleReleaseIfUpgrade(installedSonarVersion);
+        if (release != null && release.isMaster()) {
+          availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
         }
       }
     }
@@ -225,22 +226,8 @@ public class UpdateCenter {
         Release release = plugin.getRelease(installedRelease.getAdjustedVersion());
         if (release.supportSonarVersion(sonarRelease.getVersion())) {
           update.addCompatiblePlugin(plugin);
-
         } else {
-          // search for a compatible plugin upgrade
-          boolean ok = false;
-          Release compatibleRelease = null;
-          for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
-            if (greaterPluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
-              compatibleRelease = greaterPluginRelease;
-              ok = true;
-            }
-          }
-          if (ok) {
-            update.addPluginToUpgrade(compatibleRelease);
-          } else {
-            update.addIncompatiblePlugin(plugin);
-          }
+          searchCompatiblePluginUpgrade(sonarRelease, update, installedRelease, plugin);
         }
       } catch (NoSuchElementException e) {
         LOG.info("The plugin '" + installedRelease.getArtifact().getKey() +
@@ -248,6 +235,22 @@ public class UpdateCenter {
       }
     }
     return update;
+  }
+
+  private void searchCompatiblePluginUpgrade(Release sonarRelease, SonarUpdate update, Release installedRelease, Plugin plugin) {
+    boolean ok = false;
+    Release compatibleRelease = null;
+    for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {
+      if (greaterPluginRelease.supportSonarVersion(sonarRelease.getVersion())) {
+        compatibleRelease = greaterPluginRelease;
+        ok = true;
+      }
+    }
+    if (ok) {
+      update.addPluginToUpgrade(compatibleRelease);
+    } else {
+      update.addIncompatiblePlugin(plugin);
+    }
   }
 
   @VisibleForTesting

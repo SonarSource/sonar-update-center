@@ -105,12 +105,15 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   private boolean addMavenDescriptor = true;
 
   protected static File getJarFile(File basedir, String finalName, String classifier) {
-    if (classifier == null) {
-      classifier = "";
-    } else if (StringUtils.isNotBlank(classifier) && !classifier.startsWith("-")) {
-      classifier = "-" + classifier;
+    String suffix;
+    if (StringUtils.isBlank(classifier)) {
+      suffix = "";
+    } else if (classifier.startsWith("-")) {
+      suffix = classifier;
+    } else {
+      suffix = "-" + classifier;
     }
-    return new File(basedir, finalName + classifier + ".jar");
+    return new File(basedir, finalName + suffix + ".jar");
   }
 
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -371,21 +374,24 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return result;
   }
 
-  private void searchForSonarProvidedArtifacts(DependencyNode dependency, Set<Artifact> sonarArtifacts, boolean isProvidedBySonar) {
+  private void searchForSonarProvidedArtifacts(DependencyNode dependency, Set<Artifact> sonarArtifacts, boolean isParentProvided) {
     if (dependency != null) {
-      // skip check on root node - see SONAR-1815
+      boolean provided;
       if (dependency.getParent() != null) {
-        isProvidedBySonar = isProvidedBySonar ||
+        // skip check on root node - see SONAR-1815
+        provided = isParentProvided ||
           ("org.codehaus.sonar".equals(dependency.getArtifact().getGroupId()) && !Artifact.SCOPE_TEST.equals(dependency.getArtifact().getScope()));
+      } else {
+        provided = isParentProvided;
       }
 
-      if (isProvidedBySonar) {
+      if (provided) {
         sonarArtifacts.add(dependency.getArtifact());
       }
 
       if (!Artifact.SCOPE_TEST.equals(dependency.getArtifact().getScope())) {
         for (Object childDep : dependency.getChildren()) {
-          searchForSonarProvidedArtifacts((DependencyNode) childDep, sonarArtifacts, isProvidedBySonar);
+          searchForSonarProvidedArtifacts((DependencyNode) childDep, sonarArtifacts, provided);
         }
       }
     }

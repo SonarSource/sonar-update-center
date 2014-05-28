@@ -122,7 +122,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   }
 
   public final SortedSet<Release> getReleasesGreaterThan(Version version) {
-    TreeSet<Release> result = new TreeSet<Release>();
+    SortedSet<Release> result = new TreeSet<Release>();
     for (Release release : releases) {
       if (release.getVersion().compareTo(version) > 0) {
         result.add(release);
