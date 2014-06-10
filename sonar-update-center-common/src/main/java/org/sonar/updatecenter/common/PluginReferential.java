@@ -118,12 +118,13 @@ public class PluginReferential {
     return removablePlugins;
   }
 
-  public void setParent(Release release, String parentKey) {
+  public PluginReferential setParent(Release release, String parentKey) {
     try {
       Plugin pluginParent = findPlugin(parentKey);
       Release parent = getParentRelease(release, pluginParent);
       release.setParent(parent);
       parent.addChild(release);
+      return this;
     } catch (NoSuchElementException e) {
       throw new PluginNotFoundException(String.format("The plugin '%s' required by the plugin '%s' is missing.", parentKey, release.getKey()), e);
     }
