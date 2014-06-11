@@ -25,7 +25,7 @@
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
         <#list matrix.sqVersions as sqVersion>
-        <td>${(sqVersion.releaseDate?string("MMM yyyy"))!}</td>
+        <td>${(sqVersion.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>

@@ -19,10 +19,12 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CompatibilityMatrix {
@@ -63,8 +65,12 @@ public class CompatibilityMatrix {
       return isLts;
     }
 
-    public Date getReleaseDate() {
-      return releaseDate;
+    public String getReleaseDate() {
+      return releaseDate != null ? formatDate(releaseDate) : null;
+    }
+
+    private static String formatDate(Date date) {
+      return (new SimpleDateFormat("MMM yyyy", Locale.ENGLISH)).format(date);
     }
   }
 

@@ -51,7 +51,7 @@ public class GenerateMetadataMojoTest {
     // metadata loaded from properties template
     assertThat(output).contains("artifactsize.versions=0.2");
     assertThat(output).contains("artifactsize.publicVersions=0.2");
-    assertThat(output).contains("artifactsize.devVersion=0.3-SNAPSHOT");
+    assertThat(output).contains("artifactsize.devVersion=1.0-SNAPSHOT");
 
     // metadata loaded from jar manifest
     assertThat(output).contains("artifactsize.organization=SonarSource");

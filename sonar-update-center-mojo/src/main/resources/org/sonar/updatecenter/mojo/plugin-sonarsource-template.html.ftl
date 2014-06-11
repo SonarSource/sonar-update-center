@@ -11,7 +11,6 @@
 <body>
   <div id="main">
     <div id="content">
-      <h1 class="pagetitle">${pluginHeader.getName()}<br/>  Downloads</h1>         
       <div id="page-content">
 
        
@@ -49,7 +48,7 @@
               
             <tbody id="select-${pluginHeader.getKey()}">
               <#list pluginHeader.getAllVersions() as pluginVersion>
-              <tr class="nobar">
+              <tr class="<#if pluginVersion_index = 0 >nobar<#else>bar</#if>">
                 <td class="version">${pluginVersion.getVersion()}</td>
                 <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
                 <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>

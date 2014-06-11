@@ -38,6 +38,7 @@ public class GenerateHtmlHeadersMojoTest {
 
     // plugin is already cached
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
 
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();

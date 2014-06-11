@@ -52,6 +52,14 @@ public class PluginHeader {
       return release.getDownloadUrl();
     }
 
+    public String getChangelogUrl() {
+      return release.getChangelogUrl();
+    }
+
+    public String getDescription() {
+      return release.getDescription();
+    }
+
     public String getSonarVersionRange() {
       String min = release.getMinimumRequiredSonarVersion().toString();
       String max = release.getLastRequiredSonarVersion().toString();
@@ -119,7 +127,7 @@ public class PluginHeader {
   }
 
   private static String formatDate(Date date) {
-    return (new SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)).format(date);
+    return (new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)).format(date);
   }
 
   public List<PluginHeaderVersion> getAllVersions() {
