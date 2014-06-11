@@ -15,7 +15,7 @@
         <th><strong>SonarQube Version</strong></th>
         <#list matrix.sqVersions as sqVersion>
         <th>
-          ${sqVersion.version}
+          ${sqVersion.displayVersion}
           <#if sqVersion.isLts() >
           </br> <strong>LTS</strong>
           </#if>

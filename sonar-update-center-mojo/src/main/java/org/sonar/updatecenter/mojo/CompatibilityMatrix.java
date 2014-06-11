@@ -39,18 +39,24 @@ public class CompatibilityMatrix {
   }
 
   public static class SQVersion {
-    private final String version;
+    private final String displayVersion;
+    private final String realVersion;
     private final boolean isLts;
     private final Date releaseDate;
 
-    public SQVersion(String version, boolean isLts, Date releaseDate) {
-      this.version = version;
+    public SQVersion(String displayVersion, String realVersion, boolean isLts, Date releaseDate) {
+      this.displayVersion = displayVersion;
+      this.realVersion = realVersion;
       this.isLts = isLts;
       this.releaseDate = releaseDate;
     }
 
-    public String getVersion() {
-      return version;
+    public String getDisplayVersion() {
+      return displayVersion;
+    }
+
+    public String getRealVersion() {
+      return realVersion;
     }
 
     public boolean isLts() {

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,8 +63,15 @@ class PluginHeaders {
     init();
     List<Plugin> plugins = center.getUpdateCenterPluginReferential().getPlugins();
     CompatibilityMatrix matrix = new CompatibilityMatrix();
+
+    // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
+    Map<String, Release> majorVersions = new HashMap<String, Release>();
     for (Release sq : center.getSonar().getAllReleases()) {
-      matrix.getSqVersions().add(new SQVersion(sq.getVersion().toString(), center.getSonar().getLtsRelease().equals(sq), sq.getDate()));
+      String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
+      majorVersions.put(displayVersion, sq);
+    }
+    for (Map.Entry<String, Release> sq : majorVersions.entrySet()) {
+      matrix.getSqVersions().add(new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq), sq.getValue().getDate()));
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
