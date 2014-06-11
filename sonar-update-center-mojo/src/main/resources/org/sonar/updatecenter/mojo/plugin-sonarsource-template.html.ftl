@@ -9,6 +9,10 @@
         
         /* Reset some sonarsource styles because we are in the iframe */
         
+        body {
+          min-width: 0;
+        }
+        
         #content {
           width: 100%; 
         }
