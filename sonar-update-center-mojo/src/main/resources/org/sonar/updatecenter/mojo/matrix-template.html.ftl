@@ -41,8 +41,8 @@
         </strong></td>
         <#list matrix.sqVersions as sqVersion>
         <td>
-          <#if plugin.supports(sqVersion.version) >
-          ${plugin.supportedVersion(sqVersion.version)}
+          <#if plugin.supports(sqVersion.realVersion) >
+          ${plugin.supportedVersion(sqVersion.realVersion)}
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png"></img>
           </#if>
