@@ -100,7 +100,7 @@ class PluginHeaders {
     Collections.sort(matrix.getPlugins(), new Comparator<CompatibilityMatrix.Plugin>() {
       @Override
       public int compare(org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o1, org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o2) {
-        return o1.getName().compareTo(o2.getName());
+        return o1.getName().compareToIgnoreCase(o2.getName());
       }
     });
 
