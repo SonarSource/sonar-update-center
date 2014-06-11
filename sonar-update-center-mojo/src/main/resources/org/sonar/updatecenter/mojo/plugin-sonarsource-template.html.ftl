@@ -6,6 +6,21 @@
     <meta name="generator" content="Sonar Update Center"/>
     <style type="text/css">
         @import url("http://www.sonarsource.com/wp-content/themes/sonarsource/style.css");
+        
+        /* Reset some sonarsource styles because we are in the iframe */
+        
+        #content {
+          width: 100%; 
+        }
+        
+        #page-content {
+          width: 100%;
+          padding-right: 0;
+          border-right: none;
+          float: none;
+          margin-right: 0;
+          padding-bottom: 0;
+        }
     </style>
 </head>
 <body>

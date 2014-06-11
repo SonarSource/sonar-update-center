@@ -17,7 +17,7 @@
         <th>
           ${sqVersion.displayVersion}
           <#if sqVersion.isLts() >
-          </br> <strong>LTS</strong>
+          </br> <strong>(LTS)</strong>
           </#if>
         </th>
         </#list>
