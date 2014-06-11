@@ -25,7 +25,7 @@
         <td><strong>Author</strong></td>
         <td>
           <#if pluginHeader.organizationUrl?? >
-            <a href="${pluginHeader.organizationUrl}">${pluginHeader.organization}</a>
+            <a target="_top" href="${pluginHeader.organizationUrl}">${pluginHeader.organization}</a>
           <#else>
             ${pluginHeader.organization}
           </#if>
@@ -35,13 +35,13 @@
     <#if pluginHeader.issueTracker?? >
     <tr>
         <td style="white-space:nowrap"><strong>Issue tracker</strong></td>
-        <td>${pluginHeader.issueTracker}</td>
+        <td><a target="_top" href="${pluginHeader.issueTracker}">${pluginHeader.issueTracker}</a></td>
     </tr>
     </#if>
     <#if pluginHeader.sources?? >
     <tr>
         <td><strong>Sources</strong></td>
-        <td>${pluginHeader.sources}</td>
+        <td><a target="_top" href="${pluginHeader.sources}">${pluginHeader.sources}</a></td>
     </tr>
     </#if>
 </table>
@@ -65,8 +65,8 @@
       <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
       <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
       <td class="other"><#if pluginVersion.getSonarVersionRange()?? >${pluginVersion.getSonarVersionRange()}</#if></td>
-      <td class="other"><#if pluginVersion.changelogUrl?? ><a href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
-      <td><#if pluginVersion.downloadUrl?? ><a href="${pluginVersion.downloadUrl}">Download</a></#if></td> 
+      <td class="other"><#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
+      <td><#if pluginVersion.downloadUrl?? ><a target="_top" href="${pluginVersion.downloadUrl}">Download</a></#if></td> 
     </tr>
     </#list>
   </tbody>

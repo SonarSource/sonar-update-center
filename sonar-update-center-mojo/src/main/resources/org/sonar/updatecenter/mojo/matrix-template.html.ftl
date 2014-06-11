@@ -34,7 +34,7 @@
     <tr>
         <td><strong>
         <#if plugin.homepageUrl?? >
-        <a href="${plugin.homepageUrl}">${plugin.name}</a>
+        <a target="_top" href="${plugin.homepageUrl}">${plugin.name}</a>
         <#else>
         ${plugin.name}
         </#if>

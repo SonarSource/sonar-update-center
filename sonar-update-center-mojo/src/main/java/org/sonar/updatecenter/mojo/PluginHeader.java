@@ -19,7 +19,6 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import org.apache.commons.lang.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
@@ -103,11 +102,11 @@ public class PluginHeader {
   }
 
   public String getIssueTracker() {
-    return formatLink(plugin.getIssueTrackerUrl());
+    return plugin.getIssueTrackerUrl();
   }
 
   public String getSources() {
-    return formatLink(plugin.getSourcesUrl());
+    return plugin.getSourcesUrl();
   }
 
   public String getLicense() {
@@ -120,10 +119,6 @@ public class PluginHeader {
 
   public String getOrganizationUrl() {
     return plugin.getOrganizationUrl();
-  }
-
-  private static String formatLink(String url) {
-    return StringUtils.isNotBlank(url) ? "<a href=\"" + url + "\" target=\"_top\">" + url + "</a>" : null;
   }
 
   private static String formatDate(Date date) {
