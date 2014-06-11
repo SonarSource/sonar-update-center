@@ -60,7 +60,7 @@
               
   <tbody>
     <#list pluginHeader.getAllVersions() as pluginVersion>
-    <tr class="<#if pluginVersion_index = 0 >nobar<#else>bar</#if>">
+    <tr>
       <td class="version">${pluginVersion.getVersion()}</td>
       <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
       <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
