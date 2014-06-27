@@ -296,6 +296,7 @@ public class UpdateCenterDeserializerTest {
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
     assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
     assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
+    assertThat(phpPlugin.getArchivedVersions()).onProperty("name").containsOnly("2.0");
   }
 
   // UPC-29
