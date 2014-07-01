@@ -55,13 +55,19 @@ class HttpDownloader {
   File downloadFile(URL fileURL, File toFile) {
     log.info("Download " + fileURL + " in " + toFile);
     try {
-      HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
-      if (fileURL.getUserInfo() != null) {
-        request.header("Authorization", "Basic " + com.github.kevinsawicki.http.HttpRequest.Base64.encode(fileURL.getUserInfo()));
+      if ("file".equals(fileURL.getProtocol())) {
+        File src = new File(fileURL.toURI());
+        FileUtils.copyFile(src, toFile);
       }
+      else {
+        HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
+        if (fileURL.getUserInfo() != null) {
+          request.header("Authorization", "Basic " + com.github.kevinsawicki.http.HttpRequest.Base64.encode(fileURL.getUserInfo()));
+        }
 
-      if (!request.receive(toFile).ok()) {
-        throw new IllegalStateException(request.message());
+        if (!request.receive(toFile).ok()) {
+          throw new IllegalStateException(request.message());
+        }
       }
     } catch (Exception e) {
       FileUtils.deleteQuietly(toFile);

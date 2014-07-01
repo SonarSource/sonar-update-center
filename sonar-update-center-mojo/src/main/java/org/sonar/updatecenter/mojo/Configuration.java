@@ -34,6 +34,7 @@ class Configuration {
   private File outputDir, inputFile;
   private boolean devMode;
   private boolean ignoreErrors;
+  private UpdateCenter updateCenter;
 
   Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, Log log) {
     this.devMode = devMode;
@@ -48,6 +49,11 @@ class Configuration {
     this.outputDir = outputDir;
     this.inputFile = inputFile;
     log(log);
+    try {
+      this.updateCenter = new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors).fromManyFiles(inputFile);
+    } catch (IOException e) {
+      throw new IllegalStateException("Can not read properties from: " + inputFile, e);
+    }
   }
 
   private void log(Log log) {
@@ -71,11 +77,6 @@ class Configuration {
   }
 
   UpdateCenter getUpdateCenter() {
-    try {
-      return new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors).fromManyFiles(getInputFile());
-
-    } catch (IOException e) {
-      throw new IllegalStateException("Can not read properties from: " + getInputFile(), e);
-    }
+    return this.updateCenter;
   }
 }

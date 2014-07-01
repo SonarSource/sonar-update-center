@@ -110,6 +110,9 @@ public abstract class Artifact implements Comparable<Artifact> {
     return getRelease(Version.create(versionOrAliases));
   }
 
+  /**
+   * Don't include dev version.
+   */
   public final SortedSet<Release> getReleases() {
     return releases;
   }
@@ -123,8 +126,8 @@ public abstract class Artifact implements Comparable<Artifact> {
 
   public final SortedSet<Release> getReleasesGreaterThan(Version version) {
     SortedSet<Release> result = new TreeSet<Release>();
-    for (Release release : releases) {
-      if (release.getVersion().compareTo(version) > 0) {
+    for (Release release : getAllReleases()) {
+      if (release.getVersion().compareToIgnoreQualifier(version) > 0) {
         result.add(release);
       }
     }
@@ -184,8 +187,9 @@ public abstract class Artifact implements Comparable<Artifact> {
     return versions;
   }
 
+  @CheckForNull
   public final Release getLastRelease() {
-    return releases.isEmpty() ? null : releases.last();
+    return getAllReleases().isEmpty() ? null : getAllReleases().last();
   }
 
   /**
@@ -194,7 +198,7 @@ public abstract class Artifact implements Comparable<Artifact> {
   @CheckForNull
   public final Release getLastCompatibleRelease(Version sqVersion) {
     Release result = null;
-    for (Release r : releases) {
+    for (Release r : getAllReleases()) {
       if (r.supportSonarVersion(sqVersion)) {
         result = r;
       }
@@ -231,8 +235,8 @@ public abstract class Artifact implements Comparable<Artifact> {
 
   @CheckForNull
   public final Release getMinimalRelease(Version minimalVersion) {
-    for (Release r : releases) {
-      if (r.getVersion().compareTo(minimalVersion) >= 0) {
+    for (Release r : getAllReleases()) {
+      if (r.getVersion().compareToIgnoreQualifier(minimalVersion) >= 0) {
         return r;
       }
     }
@@ -242,8 +246,8 @@ public abstract class Artifact implements Comparable<Artifact> {
   @CheckForNull
   public final Release getLastCompatibleReleaseIfUpgrade(Version sonarVersion) {
     Release result = null;
-    for (Release r : releases) {
-      if (r.getLastRequiredSonarVersion() != null && r.getLastRequiredSonarVersion().compareTo(sonarVersion) >= 0) {
+    for (Release r : getAllReleases()) {
+      if (r.getLastRequiredSonarVersion() != null && r.getLastRequiredSonarVersion().compareToIgnoreQualifier(sonarVersion) >= 0) {
         result = r;
       }
     }

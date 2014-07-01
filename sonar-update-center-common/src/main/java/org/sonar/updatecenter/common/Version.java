@@ -112,6 +112,20 @@ public class Version implements Comparable<Version> {
   }
 
   public int compareTo(Version other) {
+    int c = compareToIgnoreQualifier(other);
+    if (c == 0) {
+      if ("".equals(qualifier)) {
+        c = ("".equals(other.qualifier) ? 0 : 1);
+      } else if ("".equals(other.qualifier)) {
+        c = -1;
+      } else {
+        c = qualifier.compareTo(other.qualifier);
+      }
+    }
+    return c;
+  }
+
+  public int compareToIgnoreQualifier(Version other) {
     int c = normalizedMajor.compareTo(other.normalizedMajor);
     if (c == 0) {
       c = normalizedMinor.compareTo(other.normalizedMinor);
@@ -120,15 +134,6 @@ public class Version implements Comparable<Version> {
         if (c == 0) {
           c = normalizedPatch2.compareTo(other.normalizedPatch2);
         }
-      }
-    }
-    if (c == 0) {
-      if ("".equals(qualifier)) {
-        c = ("".equals(other.qualifier) ? 0 : 1);
-      } else if ("".equals(other.qualifier)) {
-        c = -1;
-      } else {
-        c = qualifier.compareTo(other.qualifier);
       }
     }
     return c;
