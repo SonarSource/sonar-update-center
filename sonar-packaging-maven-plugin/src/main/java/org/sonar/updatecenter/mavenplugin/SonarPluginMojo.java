@@ -310,7 +310,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
   }
 
   private String getDefaultFinalName(Artifact artifact) {
-    return artifact.getArtifactId() + "-" + artifact.getVersion() + "." + artifact.getArtifactHandler().getExtension();
+    return artifact.getFile().getName();
   }
 
   private Set<Artifact> getNotProvidedDependencies() throws DependencyTreeBuilderException {
