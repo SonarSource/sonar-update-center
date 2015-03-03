@@ -1,0 +1,15 @@
+import java.io.*;
+
+File file;
+
+file = new File( basedir, "target/test-1.0/META-INF/lib/saxon-9.1.0.8.jar" );
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find included JAR: " + file );
+}
+
+file = new File( basedir, "target/test-1.0/META-INF/lib/saxon-9.1.0.8-xpath.jar" );
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find included JAR: " + file );
+}
