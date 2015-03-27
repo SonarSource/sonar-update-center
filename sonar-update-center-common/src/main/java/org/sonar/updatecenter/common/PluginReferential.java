@@ -61,7 +61,8 @@ public class PluginReferential {
   public List<Plugin> getLastMasterReleasePlugins() {
     return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
       public boolean apply(Plugin input) {
-        return input.getLastRelease().isMaster();
+        Release lastRelease = input.getLastRelease();
+        return lastRelease != null && lastRelease.isMaster();
       }
     }));
   }
@@ -107,12 +108,14 @@ public class PluginReferential {
     Plugin plugin = findPlugin(pluginKey);
     if (plugin != null) {
       Release pluginRelease = plugin.getLastRelease();
-      removablePlugins.add(plugin.getKey());
-      for (Release child : pluginRelease.getChildren()) {
-        removablePlugins.add(child.getKey());
-      }
-      for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
-        removablePlugins.addAll(findLastReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
+      if (pluginRelease != null) {
+        removablePlugins.add(plugin.getKey());
+        for (Release child : pluginRelease.getChildren()) {
+          removablePlugins.add(child.getKey());
+        }
+        for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
+          removablePlugins.addAll(findLastReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
+        }
       }
     }
     return removablePlugins;
