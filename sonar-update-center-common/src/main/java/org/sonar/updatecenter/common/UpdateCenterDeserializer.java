@@ -143,11 +143,6 @@ public final class UpdateCenterDeserializer {
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
       for (Release release : plugin.getAllReleases()) {
-        String parentKey = get(p, plugin.getKey(), release.getVersion().getName() + ".parent", false);
-        if (parentKey != null) {
-          pluginReferential.setParent(release, parentKey);
-        }
-
         String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins", false), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
           Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();

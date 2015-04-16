@@ -57,29 +57,6 @@ public class PluginReferentialTest {
   }
 
   @Test
-  public void should_register_groups_containing_plugins() {
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
-    foo.addRelease(foo10);
-
-    // foobis depends upon foo
-    Plugin foobis = new Plugin("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1");
-    foobis.addRelease(foobis10);
-
-    Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
-    bar.addRelease(bar10);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar));
-    pluginReferential.setParent(foobis10, "foo");
-
-    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
-    assertThat(pluginReferential.findPlugin("foo").getRelease("1.0").getChildren()).hasSize(1);
-    assertThat(pluginReferential.findPlugin("bar").getRelease("1.0").getChildren()).hasSize(0);
-  }
-
-  @Test
   public void should_return_releases_keys_to_remove() {
     // Standalone plugin
     Plugin test = new Plugin("test");
@@ -104,39 +81,11 @@ public class PluginReferentialTest {
     barbis.addRelease(barbis10);
 
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
-    pluginReferential.setParent(barbis10, "bar");
     pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
     List<String> installablePlugins = pluginReferential.findLastReleasesWithDependencies("foo");
-    assertThat(installablePlugins).hasSize(4);
-    assertThat(installablePlugins).contains("foo", "foobis", "bar", "barbis");
-  }
-
-  @Test(expected = PluginNotFoundException.class)
-  public void should_throw_exception_if_plugin_parent_does_not_exist() {
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
-    foo.addRelease(foo10);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
-    pluginReferential.setParent(foo10, "not_found");
-  }
-
-  @Test(expected = IncompatiblePluginVersionException.class)
-  public void should_throw_exception_if_child_has_not_same_version_as_parent() {
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0");
-    Release foo11 = new Release(foo, "1.1");
-    foo.addRelease(foo10);
-    foo.addRelease(foo11);
-
-    Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.9");
-    bar.addRelease(bar10);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
-    pluginReferential.setParent(bar10, "foo");
+    assertThat(installablePlugins).containsOnly("foo", "foobis", "bar");
   }
 
   @Test

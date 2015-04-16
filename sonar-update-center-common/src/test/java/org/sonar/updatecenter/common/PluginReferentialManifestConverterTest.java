@@ -20,7 +20,6 @@
 package org.sonar.updatecenter.common;
 
 import org.junit.Test;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
@@ -35,28 +34,5 @@ public class PluginReferentialManifestConverterTest {
     PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, bar));
 
     assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
-    assertThat(pluginReferential.getLastMasterReleasePlugins().get(0).getLastRelease().getParent()).isNull();
-    assertThat(pluginReferential.getLastMasterReleasePlugins().get(1).getLastRelease().getParent()).isNull();
   }
-
-  @Test
-  public void should_return_plugins_with_children(){
-    PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0");
-    PluginManifest fooBis = new PluginManifest().setKey("foobis").setVersion("1.0").setParent("foo");
-    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("2.0").setRequirePlugins(new String[]{"foo:1.0"});
-
-    PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, fooBis, bar));
-
-    assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
-    assertThat(pluginReferential.findPlugin("foo").getLastRelease().getChildren()).hasSize(1);
-    assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("2.0")).getOutgoingDependencies()).hasSize(1);
-  }
-
-  @Test(expected = PluginNotFoundException.class)
-  public void should_throw_exception_when_parent_is_missing(){
-    PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0").setParent("not found");
-
-    PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo));
-  }
-
 }

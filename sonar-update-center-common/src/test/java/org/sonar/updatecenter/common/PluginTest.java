@@ -28,7 +28,7 @@ public class PluginTest {
   @Test
   public void should_merge_with_manifest() {
     Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser").setParent("parent");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser");
 
     plugin.merge(manifest);
 

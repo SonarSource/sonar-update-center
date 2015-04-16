@@ -50,7 +50,6 @@ public final class PluginManifest {
   public static final String TERMS_CONDITIONS_URL = "Plugin-TermsConditionsUrl";
   public static final String BUILD_DATE = "Plugin-BuildDate";
   public static final String ISSUE_TRACKER_URL = "Plugin-IssueTrackerUrl";
-  public static final String PARENT = "Plugin-Parent";
   public static final String REQUIRE_PLUGINS = "Plugin-RequirePlugins";
 
   /**
@@ -97,7 +96,6 @@ public final class PluginManifest {
   private String implementationBuild;
   private String sourcesUrl;
   private String[] developers;
-  private String parent;
   private String[] requirePlugins;
 
   /**
@@ -161,8 +159,6 @@ public final class PluginManifest {
     String devs = attributes.getValue(DEVELOPERS);
     this.developers = StringUtils.split(StringUtils.defaultString(devs), ',');
 
-    this.parent = attributes.getValue(PARENT);
-
     String requires = attributes.getValue(REQUIRE_PLUGINS);
     this.requirePlugins = StringUtils.split(StringUtils.defaultString(requires), ',');
   }
@@ -182,21 +178,6 @@ public final class PluginManifest {
 
   public PluginManifest setName(String name) {
     this.name = name;
-    return this;
-  }
-
-  /**
-   * @since 3.5
-   */
-  public String getParent() {
-    return parent;
-  }
-
-  /**
-   * @since 3.5
-   */
-  public PluginManifest setParent(String parent) {
-    this.parent = parent;
     return this;
   }
 

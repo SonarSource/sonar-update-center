@@ -45,15 +45,6 @@ public class ReleaseTest {
   }
 
   @Test
-  public void should_return_master(){
-    Release release = new Release(new Plugin("squid"), "1.0");
-    assertThat(release.isMaster()).isTrue();
-
-    release = new Release(new Plugin("squid"), "1.0").setParent(new Release(new Plugin("foo"), "1.0"));
-    assertThat(release.isMaster()).isFalse();
-  }
-
-  @Test
   public void should_add_required_sonar_versions(){
     Release release = new Release(new Plugin("squid"), "1.0");
     release.addRequiredSonarVersions("2.0");

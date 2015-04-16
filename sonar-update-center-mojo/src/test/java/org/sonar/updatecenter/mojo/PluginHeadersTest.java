@@ -293,28 +293,6 @@ public class PluginHeadersTest {
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
   }
 
-  @Test
-  public void should_generate_html_for_child_plugin() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
-    Version version = Version.create("1.0");
-    Release release = new Release(plugin, version);
-    release.setDate(getDate());
-    release.setDownloadUrl("download_url");
-    release.addRequiredSonarVersions("3.0");
-    release.setParent(new Release(new Plugin("parent"), "1.0"));
-    plugin.addRelease(release);
-    plugin.setName("name");
-    plugin.setIssueTrackerUrl("issue_url");
-    plugin.setLicense("licence");
-    plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
-
-    prepareMocks(plugin);
-    pluginHeaders.generateHtml();
-
-    assertThat(outputFolder.list()).hasSize(5);
-  }
-
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
   }

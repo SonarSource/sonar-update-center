@@ -78,35 +78,6 @@ public class UpdateCenterSerializerTest {
   }
 
   @Test
-  public void should_return_parent() throws IOException, URISyntaxException {
-    Sonar sonar = new Sonar();
-    sonar.addRelease(Version.create("2.0"));
-    sonar.addRelease(Version.create("2.1"));
-
-    Plugin foo = new Plugin("foo")
-      .setName("Foo")
-      .setOrganizationUrl("http://www.sonarsource.org");
-    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
-    foo.addRelease(foo12);
-
-    Plugin bar = new Plugin("bar");
-    Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
-    bar.addRelease(bar12);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
-    pluginReferential.setParent(bar12, "foo");
-
-    UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
-    Properties properties = UpdateCenterSerializer.toProperties(center);
-    properties.store(System.out, null);
-
-    assertProperty(properties, "plugins", "bar,foo");
-    assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
-    assertProperty(properties, "bar.1.2.parent", "foo");
-  }
-
-  @Test
   public void should_return_required_releases() throws IOException {
     Sonar sonar = new Sonar();
     sonar.addRelease(Version.create("2.0"));

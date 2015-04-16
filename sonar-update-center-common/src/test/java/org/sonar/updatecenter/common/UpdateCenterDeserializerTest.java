@@ -103,32 +103,6 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void should_add_children() throws IOException {
-    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-parent.properties");
-    try {
-      Properties props = new Properties();
-      props.load(input);
-      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
-
-      assertThat(pluginReferential.getUpdateCenterPluginReferential().getLastMasterReleasePlugins()).hasSize(1);
-
-      Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
-      assertThat(clirr.getName()).isEqualTo("Clirr");
-      Release clirr11 = clirr.getRelease("1.1");
-      assertThat(clirr11.getChildren()).hasSize(1);
-      assertThat(clirr11.getChild("motionchart")).isNotNull();
-      assertThat(clirr11.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
-
-      Release clirr12S = clirr.getRelease("1.2-SNAPSHOT");
-      assertThat(clirr12S.getChildren()).hasSize(1);
-      assertThat(clirr12S.getChild("motionchart")).isNotNull();
-      assertThat(clirr12S.getChild("motionchart").getParent().getKey()).isEqualTo("clirr");
-    } finally {
-      IOUtils.closeQuietly(input);
-    }
-  }
-
-  @Test
   public void should_add_dependencies() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-requires-plugins.properties");
     try {
@@ -149,32 +123,6 @@ public class UpdateCenterDeserializerTest {
     } finally {
       IOUtils.closeQuietly(input);
     }
-  }
-
-  @Test(expected = PluginNotFoundException.class)
-  public void should_throw_exception_when_parent_is_missing() {
-    Properties props = new Properties();
-    props.put("plugins", "foo");
-    props.put("ltsVersion", "2.2");
-    props.put("devVersion", "2.3-SNAPSHOT");
-    props.put("publicVersions", "2.2");
-    props.put("2.2.changelogUrl", "http://changelog");
-    props.put("2.2.description", "2.2");
-    props.put("2.2.downloadUrl", "http://2.2");
-    props.put("2.2.date", "12-12-2012");
-    props.put("foo.name", "Foo");
-    props.put("foo.description", "Foo");
-    props.put("foo.category", "Foo");
-    props.put("foo.publicVersions", "1.1");
-    props.put("foo.defaults.mavenGroupId", "com.foo");
-    props.put("foo.defaults.mavenArtifactId", "sonar-foo-plugin");
-    props.put("foo.1.1.parent", "bar");
-    props.put("foo.1.1.downloadUrl", "http://foo-1.1");
-    props.put("foo.1.1.changelogUrl", "http://changelog");
-    props.put("foo.1.1.description", "foo");
-    props.put("foo.1.1.date", "12-12-2012");
-    props.put("foo.1.1.sqVersions", "2.2");
-    new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
   }
 
   // UPC-6

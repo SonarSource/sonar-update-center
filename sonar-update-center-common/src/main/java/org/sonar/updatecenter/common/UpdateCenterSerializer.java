@@ -120,9 +120,6 @@ public final class UpdateCenterSerializer {
     set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
 
     for (Release release : plugin.getAllReleases()) {
-      if (release.getParent() != null) {
-        set(p, plugin, release.getVersion() + ".parent", release.getParent().getKey());
-      }
       set(p, plugin, release.getVersion() + ".sqVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
       // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
