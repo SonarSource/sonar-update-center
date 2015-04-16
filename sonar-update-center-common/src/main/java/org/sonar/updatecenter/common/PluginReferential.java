@@ -62,7 +62,7 @@ public class PluginReferential {
     return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
       public boolean apply(Plugin input) {
         Release lastRelease = input.getLastRelease();
-        return lastRelease != null && lastRelease.isMaster();
+        return lastRelease != null;
       }
     }));
   }
@@ -110,36 +110,12 @@ public class PluginReferential {
       Release pluginRelease = plugin.getLastRelease();
       if (pluginRelease != null) {
         removablePlugins.add(plugin.getKey());
-        for (Release child : pluginRelease.getChildren()) {
-          removablePlugins.add(child.getKey());
-        }
         for (Release incomingDependencies : pluginRelease.getIncomingDependencies()) {
           removablePlugins.addAll(findLastReleasesWithDependencies(incomingDependencies.getArtifact().getKey()));
         }
       }
     }
     return removablePlugins;
-  }
-
-  public PluginReferential setParent(Release release, String parentKey) {
-    try {
-      Plugin pluginParent = findPlugin(parentKey);
-      Release parent = getParentRelease(release, pluginParent);
-      release.setParent(parent);
-      parent.addChild(release);
-      return this;
-    } catch (NoSuchElementException e) {
-      throw new PluginNotFoundException(String.format("The plugin '%s' required by the plugin '%s' is missing.", parentKey, release.getKey()), e);
-    }
-  }
-
-  private Release getParentRelease(Release release, Plugin pluginParent) {
-    try {
-      return pluginParent.getRelease(release.getVersion());
-    } catch (NoSuchElementException e) {
-      throw new IncompatiblePluginVersionException(String.format("The plugins '%s' and '%s' must have exactly the same version as they belong to the same group.",
-        release.getKey(), pluginParent.key), e);
-    }
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {

@@ -91,18 +91,17 @@ public class UpdateCenter {
       }
       Release release = plugin.getLastCompatibleRelease(installedSonarVersion);
       if (release != null) {
-        if (release.isMaster()) {
-          try {
-            PluginUpdate pluginUpdate = PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE);
-            pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), release.getVersion()));
-            availables.add(pluginUpdate);
-          } catch (IncompatiblePluginVersionException e) {
-            availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
-          }
+        try {
+          PluginUpdate pluginUpdate = PluginUpdate.createWithStatus(release, PluginUpdate.Status.COMPATIBLE);
+          pluginUpdate.setDependencies(findInstallablePlugins(plugin.getKey(), release.getVersion()));
+          availables.add(pluginUpdate);
+        } catch (IncompatiblePluginVersionException e) {
+          availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.DEPENDENCIES_REQUIRE_SONAR_UPGRADE));
         }
+
       } else {
         release = plugin.getLastCompatibleReleaseIfUpgrade(installedSonarVersion);
-        if (release != null && release.isMaster()) {
+        if (release != null) {
           availables.add(PluginUpdate.createWithStatus(release, PluginUpdate.Status.REQUIRE_SONAR_UPGRADE));
         }
       }
@@ -117,7 +116,7 @@ public class UpdateCenter {
     List<Plugin> availables = newArrayList();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       Release release = plugin.getLastCompatible(installedSonarVersion);
-      if (release != null && release.getParent() == null) {
+      if (release != null) {
         availables.add(plugin);
       }
     }
@@ -181,9 +180,6 @@ public class UpdateCenter {
   private void addInstallableRelease(Release pluginRelease, Set<Release> installablePlugins, Set<Release> checkedPlugins) {
     addReleaseIfNotAlreadyInstalled(pluginRelease, installablePlugins);
     checkedPlugins.add(pluginRelease);
-    for (Release child : pluginRelease.getChildren()) {
-      addReleaseIfNotAlreadyInstalled(child, installablePlugins);
-    }
     for (Release outgoingDependency : pluginRelease.getOutgoingDependencies()) {
       addInstallablePlugins(outgoingDependency.getArtifact().getKey(), outgoingDependency.getVersion(), installablePlugins, checkedPlugins);
     }

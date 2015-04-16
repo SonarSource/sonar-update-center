@@ -228,35 +228,6 @@ public class UpdateCenterTest {
   }
 
   @Test
-  public void return_only_master_plugins_when_getting_available_plugins() {
-    Plugin test = new Plugin("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/test-1.0.jar");
-    test.addRelease(test10);
-
-    Plugin foo = new Plugin("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-1.0.jar");
-    foo.addRelease(foo10);
-
-    Plugin fooChild = new Plugin("bar");
-    Release fooChild10 = new Release(fooChild, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/foo-child-1.0.jar");
-    fooChild.addRelease(fooChild10);
-
-    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, fooChild, test));
-    pluginReferential.setParent(fooChild10, "foo");
-
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
-      .setInstalledSonarVersion(Version.create("2.1"))
-      .registerInstalledPlugins(PluginReferential.create(newArrayList((Plugin) new Plugin("test").addRelease("1.0").getArtifact())));
-
-    List<PluginUpdate> availables = updateCenter.findAvailablePlugins();
-    assertThat(availables).hasSize(1);
-    assertThat(availables.get(0).getRelease()).isEqualTo(foo10);
-    assertThat(availables.get(0).isCompatible()).isTrue();
-    assertThat(availables.get(0).getPlugin().getLastRelease().getChildren()).hasSize(1);
-  }
-
-  @Test
   public void return_latest_releases_to_download() {
     Plugin bar = new Plugin("bar");
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
@@ -318,36 +289,6 @@ public class UpdateCenterTest {
       .setInstalledSonarVersion(Version.create("2.1"));
 
     updateCenter.findInstallablePlugins("not_found", Version.create("1.1"));
-  }
-
-  @Test
-  public void return_releases_to_download_with_children() {
-    Plugin bar = new Plugin("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.0.jar");
-    Release bar11 = new Release(bar, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/bar-1.1.jar");
-    bar.addRelease(bar10);
-    bar.addRelease(bar11);
-    Plugin barbis = new Plugin("barbis");
-    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.0.jar");
-    Release barbis11 = new Release(barbis, "1.1").addRequiredSonarVersions("2.1").setDownloadUrl("http://server/barbis-1.1.jar");
-    barbis.addRelease(barbis10);
-    barbis.addRelease(barbis11);
-
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar));
-    pluginReferential.setParent(barbis10, "bar");
-    pluginReferential.setParent(barbis11, "bar");
-
-    Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
-      PluginReferential.create(newArrayList(
-        (Plugin) new Plugin("bar").addRelease("1.0").getArtifact()
-      )));
-
-    List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
-    assertThat(installablePlugins).hasSize(2);
-    assertThat(getRelease("bar", "1.1", installablePlugins)).isNotNull();
-    assertThat(getRelease("barbis", "1.1", installablePlugins)).isNotNull();
   }
 
   @Test

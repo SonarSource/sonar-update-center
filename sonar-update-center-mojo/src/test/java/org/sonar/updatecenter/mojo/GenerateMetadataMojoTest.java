@@ -83,7 +83,7 @@ public class GenerateMetadataMojoTest {
   }
 
   @Test
-  public void generate_properties_with_requires_plugins_and_parent_properties() throws Exception {
+  public void generate_properties_with_requires_plugins() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached
@@ -100,12 +100,10 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0");
-    assertThat(output).contains("fxcop.1.0.parent=dotnet");
-    assertThat(output).contains("parent");
   }
 
   @Test
-  public void generate_properties_with_requires_plugins_and_parent_properties_dev_mode() throws Exception {
+  public void generate_properties_with_requires_plugins_dev_mode() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached
@@ -131,8 +129,6 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     assertThat(output).contains("csharp.1.1-SNAPSHOT.requirePlugins=dotnet\\:1.1");
-    assertThat(output).contains("fxcop.1.1-SNAPSHOT.parent=dotnet");
-    assertThat(output).contains("parent");
   }
 
   private File resource(String filename) {

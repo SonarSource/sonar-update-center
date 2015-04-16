@@ -46,14 +46,6 @@ public class PluginReferentialManifestConverter {
     }
 
     PluginReferential pluginReferential = PluginReferential.create(plugins);
-    for (PluginManifest pluginManifest : pluginManifestList) {
-      Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
-      String parentKey = pluginManifest.getParent();
-      if (StringUtils.isNotBlank(parentKey)) {
-        Release release = plugin.getLastRelease();
-        pluginReferential.setParent(release, parentKey);
-      }
-    }
 
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());

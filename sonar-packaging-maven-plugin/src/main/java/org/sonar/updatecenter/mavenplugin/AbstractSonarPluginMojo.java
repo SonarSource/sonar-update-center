@@ -108,12 +108,6 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
   private String pluginName;
 
   /**
-   * Plugin parent.
-   */
-  @Parameter(property = "sonar.pluginParent")
-  protected String pluginParent;
-
-  /**
    * Plugin's dependencies.
    */
   @Parameter(property = "sonar.requirePlugins")
@@ -184,10 +178,6 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
 
   protected final String getPluginName() {
     return pluginName;
-  }
-
-  protected final String getPluginParent() {
-    return pluginParent;
   }
 
   protected final String getRequirePlugins() {

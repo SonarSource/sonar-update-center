@@ -91,9 +91,6 @@ class Generator {
 
   private void updateReleaseRequirePluginsAndParentProperties(PluginReferential pluginReferential, File jar, Release release) throws IOException {
     PluginManifest releaseManifest = new PluginManifest(jar);
-    if (!Strings.isNullOrEmpty(releaseManifest.getParent())) {
-      pluginReferential.setParent(release, releaseManifest.getParent());
-    }
     if (releaseManifest.getRequirePlugins() != null) {
       for (String requirePlugin : releaseManifest.getRequirePlugins()) {
         Iterator<String> split = Splitter.on(':').split(requirePlugin).iterator();

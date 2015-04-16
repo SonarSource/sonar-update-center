@@ -49,8 +49,6 @@ public class Release implements Comparable<Release> {
   private String groupId;
   private String artifactId;
 
-  private Release parent;
-  private Set<Release> children;
   private Set<Release> outgoingDependencies;
   private Set<Release> incomingDependencies;
   /**
@@ -66,7 +64,6 @@ public class Release implements Comparable<Release> {
     this.isArchived = false;
 
     this.compatibleSqVersions = newTreeSet();
-    this.children = newHashSet();
     this.outgoingDependencies = newHashSet();
     this.incomingDependencies = newHashSet();
   }
@@ -172,34 +169,6 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
-  public Release getParent() {
-    return parent;
-  }
-
-  public Release setParent(Release parent) {
-    this.parent = parent;
-    return this;
-  }
-
-  public Collection<Release> getChildren() {
-    return children;
-  }
-
-  public Release addChild(Release release) {
-    children.add(release);
-    return this;
-  }
-
-  @Nullable
-  @VisibleForTesting
-  Release getChild(final String key) {
-    return Iterables.find(children, new Predicate<Release>() {
-      public boolean apply(Release input) {
-        return input.getArtifact().getKey().equals(key);
-      }
-    }, null);
-  }
-
   public Set<Release> getOutgoingDependencies() {
     return ImmutableSortedSet.copyOf(outgoingDependencies);
   }
@@ -216,10 +185,6 @@ public class Release implements Comparable<Release> {
   public Release addIncomingDependency(Release required) {
     incomingDependencies.add(required);
     return this;
-  }
-
-  public boolean isMaster() {
-    return getParent() == null;
   }
 
   public String getKey() {

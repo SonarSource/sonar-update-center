@@ -43,7 +43,6 @@ public class PluginManifestTest {
 
     assertThat(manifest.getKey()).isEqualTo("checkstyle");
     assertThat(manifest.getName()).isEqualTo("Checkstyle");
-    assertThat(manifest.getParent()).isNull();
     assertThat(manifest.getRequirePlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.getVersion().length()).isGreaterThan(1);
@@ -61,7 +60,6 @@ public class PluginManifestTest {
 
     assertThat(manifest.getKey()).isNull();
     assertThat(manifest.getName()).isNull();
-    assertThat(manifest.getParent()).isNull();
     assertThat(manifest.getRequirePlugins()).isEmpty();
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
@@ -87,15 +85,6 @@ public class PluginManifestTest {
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     assertThat(manifest.getSourcesUrl()).isEqualTo("https://github.com/SonarSource/project");
-  }
-
-  @Test
-  public void should_add_parent() throws URISyntaxException, IOException {
-    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-parent.jar");
-
-    PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
-
-    assertThat(manifest.getParent()).isEqualTo("java");
   }
 
   @Test

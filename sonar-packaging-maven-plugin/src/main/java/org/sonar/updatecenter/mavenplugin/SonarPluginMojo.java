@@ -182,9 +182,6 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       addManifestProperty("Description", PluginManifest.DESCRIPTION, getPluginDescription());
       addManifestProperty("Version", PluginManifest.VERSION, getProject().getVersion());
       addManifestProperty("Main class", PluginManifest.MAIN_CLASS, getPluginClass());
-      if (getPluginParent() != null) {
-        addManifestProperty("Parent", PluginManifest.PARENT, getPluginParent());
-      }
       if (getRequirePlugins() != null) {
         addManifestProperty("Require plugins", PluginManifest.REQUIRE_PLUGINS, getRequirePlugins());
       }
@@ -222,23 +219,11 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
         }
       }
 
-      checkParentAndRequiresPluginProperties();
-
       archiver.createArchive(getSession(), getProject(), archive);
       return jarFile;
 
     } catch (Exception e) {
       throw new MojoExecutionException("Error assembling Sonar-plugin: " + e.getMessage(), e);
-    }
-  }
-
-  private void checkParentAndRequiresPluginProperties() {
-    if (getPluginParent() != null && getRequirePlugins() != null) {
-      throw new IllegalStateException(String.format("The plugin '%s' can't be both part of the plugin '%s' and having a dependency on '%s'", getPluginKey(), getPluginParent(),
-        getRequirePlugins()));
-    }
-    if (getPluginParent() != null && getPluginParent().equals(getPluginKey())) {
-      throw new IllegalStateException(String.format("The plugin '%s' can't be his own parent. Please remove the '%s' property.", getPluginKey(), PluginManifest.PARENT));
     }
   }
 
