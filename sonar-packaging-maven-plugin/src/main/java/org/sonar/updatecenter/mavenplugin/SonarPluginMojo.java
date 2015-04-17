@@ -116,6 +116,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return new File(basedir, finalName + suffix + ".jar");
   }
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     checkMandatoryAttributes();
 
@@ -223,7 +224,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
       return jarFile;
 
     } catch (Exception e) {
-      throw new MojoExecutionException("Error assembling Sonar-plugin: " + e.getMessage(), e);
+      throw new MojoExecutionException("Error assembling Sonar-plugin", e);
     }
   }
 
@@ -277,6 +278,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     if (getProject().getDevelopers() != null) {
       return Joiner.on(",").join(
         Iterables.transform(getProject().getDevelopers(), new Function<Developer, String>() {
+          @Override
           public String apply(Developer developer) {
             return developer.getName();
           }

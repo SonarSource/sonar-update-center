@@ -327,10 +327,12 @@ public final class UpdateCenterDeserializer {
 
   private void resolveRangeOfRequiredSQVersion(Sonar sonar, List<String> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
+      @Override
       public Version apply(Release release) {
         return release != null ? release.getVersion() : null;
       }
     }), new Predicate<Version>() {
+      @Override
       public boolean apply(Version version) {
         return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
       }

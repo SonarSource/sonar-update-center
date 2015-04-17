@@ -137,8 +137,8 @@ public class VersionTest {
   }
 
   @Test
-  public void createRelease() {
-    Version version = Version.createRelease("1.2.3-SNAPSHOT");
+  public void removeQualifier() {
+    Version version = Version.create("1.2.3-SNAPSHOT").removeQualifier();
 
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("2");

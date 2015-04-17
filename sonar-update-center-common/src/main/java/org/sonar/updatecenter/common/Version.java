@@ -111,6 +111,7 @@ public class Version implements Comparable<Version> {
     return result;
   }
 
+  @Override
   public int compareTo(Version other) {
     int c = compareToIgnoreQualifier(other);
     if (c == 0) {
@@ -146,16 +147,6 @@ public class Version implements Comparable<Version> {
 
   public static Version create(String version) {
     return new Version(version);
-  }
-
-  /**
-   * Creates a version without the qualifier part. For example 1.2.3-SNAPSHOT
-   * and 2.0-RC1 are converted to 1.2.3 and 2.0.
-   * @deprecated use {@link #removeQualifier()}
-   */
-  @Deprecated
-  public static Version createRelease(String version) {
-    return create(version).removeQualifier();
   }
 
   public static boolean isSnapshot(String version) {

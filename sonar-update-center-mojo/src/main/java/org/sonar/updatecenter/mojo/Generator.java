@@ -20,7 +20,6 @@
 package org.sonar.updatecenter.mojo;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;

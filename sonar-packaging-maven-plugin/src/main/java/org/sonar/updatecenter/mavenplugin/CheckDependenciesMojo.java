@@ -40,6 +40,7 @@ public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
   private static final String[] GWT_ARTIFACT_IDS = {"gwt-user", "gwt-dev", "sonar-gwt-api"};
   private static final String[] LOG_GROUP_IDS = {"log4j", "commons-logging"};
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (!isSkipDependenciesPackaging()) {
       checkApiDependency();

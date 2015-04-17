@@ -283,6 +283,7 @@ public abstract class Artifact implements Comparable<Artifact> {
     return key.hashCode();
   }
 
+  @Override
   public final int compareTo(Artifact other) {
     if (key == null) {
       return -1;

@@ -55,6 +55,7 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
    */
   private boolean ignoreErrors = false;
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, getLog());

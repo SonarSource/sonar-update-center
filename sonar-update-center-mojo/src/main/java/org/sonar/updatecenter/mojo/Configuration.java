@@ -32,13 +32,9 @@ import java.io.IOException;
 class Configuration {
 
   private File outputDir, inputFile;
-  private boolean devMode;
-  private boolean ignoreErrors;
   private UpdateCenter updateCenter;
 
   Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, Log log) {
-    this.devMode = devMode;
-    this.ignoreErrors = ignoreErrors;
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
     Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
     try {

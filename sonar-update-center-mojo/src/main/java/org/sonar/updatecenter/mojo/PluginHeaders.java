@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
@@ -32,8 +33,10 @@ import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.CompatibilityMatrix.SQVersion;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Comparator;
@@ -123,7 +126,7 @@ class PluginHeaders {
       cfg.setObjectWrapper(new DefaultObjectWrapper());
 
       Template template = cfg.getTemplate(templateName);
-      writer = new FileWriter(toFile);
+      writer = new OutputStreamWriter(new FileOutputStream(toFile), Charsets.UTF_8);
       template.process(dataModel, writer);
       writer.flush();
     } catch (Exception e) {

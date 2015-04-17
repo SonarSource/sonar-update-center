@@ -19,17 +19,11 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import javax.annotation.Nullable;
-
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
@@ -265,6 +259,7 @@ public class Release implements Comparable<Release> {
       .toString();
   }
 
+  @Override
   public int compareTo(Release o) {
     return getVersion().compareTo(o.getVersion());
   }

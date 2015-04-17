@@ -58,8 +58,7 @@ class HttpDownloader {
       if ("file".equals(fileURL.getProtocol())) {
         File src = new File(fileURL.toURI());
         FileUtils.copyFile(src, toFile);
-      }
-      else {
+      } else {
         HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
         if (fileURL.getUserInfo() != null) {
           request.header("Authorization", "Basic " + com.github.kevinsawicki.http.HttpRequest.Base64.encode(fileURL.getUserInfo()));

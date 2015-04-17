@@ -62,6 +62,7 @@ public class GenerateMetadataMojo extends AbstractMojo {
    */
   private boolean ignoreErrors = false;
 
+  @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, getLog());

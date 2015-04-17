@@ -193,6 +193,7 @@ public class UpdateCenter {
 
   private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
     return Iterables.any(installablePlugins, new Predicate<Release>() {
+      @Override
       public boolean apply(Release input) {
         return input.getKey().equals(pluginKey);
       }

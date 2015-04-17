@@ -62,7 +62,11 @@ public class PluginHeader {
     public String getSonarVersionRange() {
       String min = release.getMinimumRequiredSonarVersion().toString();
       String max = release.getLastRequiredSonarVersion().toString();
-      String latest = sonar.getLastRelease().getVersion().toString();
+      String latest = null;
+      Release lastRelease = sonar.getLastRelease();
+      if (lastRelease != null) {
+        latest = lastRelease.getVersion().toString();
+      }
       StringBuilder sb = new StringBuilder();
       sb.append(min);
       if (max.equals(latest)) {

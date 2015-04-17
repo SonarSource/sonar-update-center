@@ -90,6 +90,7 @@ public final class SonarUpdate implements Comparable<SonarUpdate> {
     return release.hashCode();
   }
 
+  @Override
   public int compareTo(SonarUpdate su) {
     return release.compareTo(su.release);
   }

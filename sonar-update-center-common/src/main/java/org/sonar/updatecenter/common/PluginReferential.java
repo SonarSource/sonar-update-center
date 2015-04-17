@@ -60,6 +60,7 @@ public class PluginReferential {
    */
   public List<Plugin> getLastMasterReleasePlugins() {
     return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
+      @Override
       public boolean apply(Plugin input) {
         Release lastRelease = input.getLastRelease();
         return lastRelease != null;
@@ -77,6 +78,7 @@ public class PluginReferential {
   public Plugin findPlugin(final String key) {
     try {
       return Iterables.find(plugins, new Predicate<Plugin>() {
+        @Override
         public boolean apply(Plugin input) {
           return input.getKey().equals(key);
         }
@@ -88,6 +90,7 @@ public class PluginReferential {
 
   public boolean doesContainPlugin(final String key) {
     return Iterables.any(plugins, new Predicate<Plugin>() {
+      @Override
       public boolean apply(Plugin input) {
         return input.getKey().equals(key);
       }
@@ -144,6 +147,7 @@ public class PluginReferential {
       checkDependencyCycle(release, releases);
     } catch (DependencyCycleException e) {
       List<String> releaseKeys = newArrayList(Iterables.transform(releases, new Function<Release, String>() {
+        @Override
         public String apply(Release input) {
           return input.getArtifact().getKey();
         }
