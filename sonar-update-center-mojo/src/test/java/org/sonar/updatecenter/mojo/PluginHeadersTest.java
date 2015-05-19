@@ -109,9 +109,17 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
+
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
+
+    file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHeaderHtml())[0];
+    assertThat(file).hasSameContentAs(getExpectedFile("normal_header.html"));
+
+    file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedVersionsHtml())[0];
+    assertThat(file).hasSameContentAs(getExpectedFile("normal_versions.html"));
+
   }
 
   // UPC-20
@@ -166,7 +174,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     return file;
   }
@@ -176,6 +184,19 @@ public class PluginHeadersTest {
       return (PLUGIN_KEY + "-confluence.html").equals(s);
     }
   }
+
+  class FilenameFilterForConfluenceGeneratedHeaderHtml implements FilenameFilter {
+    public boolean accept(File file, String s) {
+      return (PLUGIN_KEY + "-header-confluence.html").equals(s);
+    }
+  }
+
+  class FilenameFilterForConfluenceGeneratedVersionsHtml implements FilenameFilter {
+    public boolean accept(File file, String s) {
+      return (PLUGIN_KEY + "-version-confluence.html").equals(s);
+    }
+  }
+
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
@@ -195,7 +216,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
   }
@@ -218,7 +239,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
   }
@@ -241,7 +262,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
   }
@@ -265,7 +286,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(5);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("with-author.html"));
   }
@@ -288,7 +309,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html","key-header-confluence.html","key-versions-confluence.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
   }

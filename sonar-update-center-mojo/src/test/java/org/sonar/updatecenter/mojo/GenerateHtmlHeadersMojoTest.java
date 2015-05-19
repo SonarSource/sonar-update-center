@@ -43,12 +43,19 @@ public class GenerateHtmlHeadersMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    // html headers
+    // html confluence
+    File htmlConfluence = new File(outputDir, "html/artifactsize-confluence.html");
+    assertThat(htmlConfluence).exists().isFile();
+    String html = FileUtils.readFileToString(htmlConfluence);
+    assertThat(html).contains("<title>Artifact Size</title>");
+
+    // html header
     File htmlHeader = new File(outputDir, "html/artifactsize-confluence.html");
     assertThat(htmlHeader).exists().isFile();
-    assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
-    String html = FileUtils.readFileToString(htmlHeader);
+    html = FileUtils.readFileToString(htmlHeader);
     assertThat(html).contains("<title>Artifact Size</title>");
+
+    assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
   }
 
   private File resource(String filename) {
