@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import freemarker.log.Logger;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import org.apache.commons.io.Charsets;
@@ -85,13 +86,9 @@ class PluginHeaders {
       log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-confluence-template.html.ftl");
 
-      file = new File(outputDirectory, plugin.getKey() + "-header-confluence.html");
-      log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
-      print(dataModel, file, "plugin-header-confluence-template.html.ftl");
-
-      file = new File(outputDirectory, plugin.getKey() + "-versions-confluence.html");
-      log.info("Generate confluence html versions of plugin " + plugin.getKey() + " in: " + file);
-      print(dataModel, file, "plugin-versions-confluence-template.html.ftl");
+      file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
+      log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
+      print(dataModel, file, "plugin-confluence-include-template.html.ftl");
 
       file = new File(outputDirectory, plugin.getKey() + "-sonarsource.html");
       log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
@@ -127,7 +124,7 @@ class PluginHeaders {
   private void print(Map<String, Object> dataModel, File toFile, String templateName) {
     Writer writer = null;
     try {
-      freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
+      freemarker.log.Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);
       freemarker.template.Configuration cfg = new freemarker.template.Configuration();
       cfg.setClassForTemplateLoading(PluginHeader.class, "");
       cfg.setObjectWrapper(new DefaultObjectWrapper());

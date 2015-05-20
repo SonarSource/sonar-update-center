@@ -49,11 +49,11 @@ public class GenerateHtmlHeadersMojoTest {
     String html = FileUtils.readFileToString(htmlConfluence);
     assertThat(html).contains("<title>Artifact Size</title>");
 
-    // html header
-    File htmlHeader = new File(outputDir, "html/artifactsize-confluence.html");
-    assertThat(htmlHeader).exists().isFile();
-    html = FileUtils.readFileToString(htmlHeader);
-    assertThat(html).contains("<title>Artifact Size</title>");
+    // html confluence include
+    File htmlConfluenceInclude = new File(outputDir, "html/artifactsize-confluence-include.html");
+    assertThat(htmlConfluenceInclude).exists().isFile();
+    html = FileUtils.readFileToString(htmlConfluenceInclude);
+    assertThat(html).contains("<strong>Artifact Size");
 
     assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
   }

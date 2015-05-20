@@ -109,23 +109,22 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
 
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHeaderHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("normal_header.html"));
+// TODO create the file
 
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedVersionsHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("normal_versions.html"));
-
+    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+//    assertThat(file).hasSameContentAs(getExpectedFile("normal_include.html"));
   }
 
   // UPC-20
   @Test
   public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {
     File file = generateWithLts(true, true);
+    // TODO rework to handle two files
     assertThat(file).hasSameContentAs(getExpectedFile("latest_plugin_version_compatible_with_lts.html"));
   }
 
@@ -133,6 +132,7 @@ public class PluginHeadersTest {
   @Test
   public void shouldGenerateHtml_old_plugin_version_compatible_with_lts() throws Exception {
     File file = generateWithLts(false, true);
+    // TODO rework to handle two files
     assertThat(file).hasSameContentAs(getExpectedFile("old_plugin_version_compatible_with_lts.html"));
   }
 
@@ -140,6 +140,7 @@ public class PluginHeadersTest {
   @Test
   public void shouldGenerateHtml_no_plugin_version_compatible_with_lts() throws Exception {
     File file = generateWithLts(false, false);
+    // TODO rework to handle two files
     assertThat(file).hasSameContentAs(getExpectedFile("no_plugin_version_compatible_with_lts.html"));
   }
 
@@ -174,7 +175,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
+    // TODO rework
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     return file;
   }
@@ -185,18 +187,11 @@ public class PluginHeadersTest {
     }
   }
 
-  class FilenameFilterForConfluenceGeneratedHeaderHtml implements FilenameFilter {
+  class FilenameFilterForConfluenceIncludeGeneratedHtml implements FilenameFilter {
     public boolean accept(File file, String s) {
-      return (PLUGIN_KEY + "-header-confluence.html").equals(s);
+      return (PLUGIN_KEY + "-confluence-include.html").equals(s);
     }
   }
-
-  class FilenameFilterForConfluenceGeneratedVersionsHtml implements FilenameFilter {
-    public boolean accept(File file, String s) {
-      return (PLUGIN_KEY + "-version-confluence.html").equals(s);
-    }
-  }
-
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
@@ -216,9 +211,13 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
+
+    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+// TODO create the file
+//    assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev-include.html"));
   }
 
   @Test
@@ -239,9 +238,13 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
+
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
+
+    // TODO create the file
+//    assertThat(file).hasSameContentAs(getExpectedFile("without-licence-include.html"));
   }
 
   @Test
@@ -262,9 +265,14 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
+
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
+
+    // TODO create the file
+   // file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+   //  assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url-include.html"));
   }
 
   @Test
@@ -286,9 +294,13 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("with-author.html"));
+
+    // TODO create the file
+    // file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    //  assertThat(file).hasSameContentAs(getExpectedFile("with-author-include.html"));
   }
 
   @Test
@@ -309,9 +321,13 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html","key-header-confluence.html","key-versions-confluence.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html","key-confluence.html","key-confluence-include.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
+
+    // TODO create the file
+    // file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    //  assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url-include.html"));
   }
 
   private File getExpectedFile(String fileName) {
