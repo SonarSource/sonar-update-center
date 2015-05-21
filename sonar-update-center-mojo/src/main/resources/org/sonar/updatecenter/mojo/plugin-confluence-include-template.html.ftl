@@ -43,25 +43,28 @@ ${pluginHeader.license}
     <#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if>
     <#if pluginHeader.getNbVersions() gt 1 >
         <#if pluginVersion.getVersion() = pluginHeader.getLastVersionString() >
-            <span id="moreVersionsLink">
-                <#if pluginVersion.changelogUrl?? || pluginVersion.downloadUrl?? >
-                    &#8211;
-                </#if>
-                <a   onclick="return showMoreVersions()" href=""> Show more versions
-                <script type="text/javascript">// <![CDATA[
-                function showMoreVersions() {
-                    AJS.$('#moreVersions').show();
-                    AJS.$('#moreVersionsLink').hide();
-                    return false;
-                }
-                // ]]&gt;</script>
-            </a></span>
-        </div>
-        <div id="moreVersions" style="display:none">
+        <span id="moreVersionsLink">
+            <#if pluginVersion.changelogUrl?? || pluginVersion.downloadUrl?? >
+                &#8211;
+            </#if>
+            <a   onclick="return showMoreVersions()" href=""> Show more versions
+            <script type="text/javascript">// <![CDATA[
+            function showMoreVersions() {
+                AJS.$('#moreVersions').show();
+                AJS.$('#moreVersionsLink').hide();
+                return false;
+            }
+            // ]]&gt;</script>
+        </a></span>
+    </div> <#-- Close the div style -->
+</div> <#-- Close the div last version -->
+<div id="moreVersions" style="display:none">
+        <#else>
+    </div> <#-- Close the div style -->
         </#if>
     <#else>
-    </div>
+    </div> <#-- Close the div style -->
     </#if>
 </#list>
-</div>
+</div> <#-- Close the div either last or more version -->
 
