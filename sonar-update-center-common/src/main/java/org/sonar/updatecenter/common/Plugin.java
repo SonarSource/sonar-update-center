@@ -147,12 +147,15 @@ public class Plugin extends Artifact {
       description = StringUtils.defaultIfEmpty(manifest.getDescription(), description);
       organization = StringUtils.defaultIfEmpty(manifest.getOrganization(), organization);
       organizationUrl = StringUtils.defaultIfEmpty(manifest.getOrganizationUrl(), organizationUrl);
-      issueTrackerUrl = StringUtils.defaultIfEmpty(manifest.getIssueTrackerUrl(), issueTrackerUrl);
-      license = StringUtils.defaultIfEmpty(manifest.getLicense(), license);
-      homepageUrl = StringUtils.defaultIfEmpty(manifest.getHomepage(), homepageUrl);
-      termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl);
-      sourcesUrl = StringUtils.defaultIfEmpty(manifest.getSourcesUrl(), sourcesUrl);
-      developers = Arrays.asList(manifest.getDevelopers());
+      issueTrackerUrl = StringUtils.defaultIfEmpty(manifest.getIssueTrackerUrl(), issueTrackerUrl); // update center
+      license = StringUtils.defaultIfEmpty(manifest.getLicense(), license); // POM
+
+//  MAVEN package met docURL dans MANIFEST, puis la ligne ci-dessous définit l'ordre
+// il suffirait d'intervertir les deux arguments
+      homepageUrl = StringUtils.defaultIfEmpty(manifest.getHomepage(), homepageUrl); // update center
+      termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl); // POM
+      sourcesUrl = StringUtils.defaultIfEmpty(manifest.getSourcesUrl(), sourcesUrl);// update center
+      developers = Arrays.asList(manifest.getDevelopers()); // POM
     }
     return this;
   }
