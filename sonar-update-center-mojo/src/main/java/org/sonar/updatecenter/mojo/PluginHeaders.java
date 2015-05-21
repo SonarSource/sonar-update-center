@@ -21,7 +21,6 @@ package org.sonar.updatecenter.mojo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import freemarker.log.Logger;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import org.apache.commons.io.Charsets;
@@ -124,7 +123,7 @@ class PluginHeaders {
   private void print(Map<String, Object> dataModel, File toFile, String templateName) {
     Writer writer = null;
     try {
-      freemarker.log.Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);
+      freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
       freemarker.template.Configuration cfg = new freemarker.template.Configuration();
       cfg.setClassForTemplateLoading(PluginHeader.class, "");
       cfg.setObjectWrapper(new DefaultObjectWrapper());
