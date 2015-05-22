@@ -143,7 +143,12 @@ public class PluginHeader {
   }
 
   public String getLastVersionString() {
-    return plugin.getLastRelease().getVersion().getName();
+    Release lastRelease = plugin.getLastRelease();
+    if (lastRelease != null) {
+      return lastRelease.getVersion().getName();
+    } else {
+      return null;
+    }
   }
 
   public String getSonarLtsVersion() {
