@@ -144,18 +144,19 @@ public class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
+
+      // precedence to the manifest file
       description = StringUtils.defaultIfEmpty(manifest.getDescription(), description);
       organization = StringUtils.defaultIfEmpty(manifest.getOrganization(), organization);
       organizationUrl = StringUtils.defaultIfEmpty(manifest.getOrganizationUrl(), organizationUrl);
-      issueTrackerUrl = StringUtils.defaultIfEmpty(manifest.getIssueTrackerUrl(), issueTrackerUrl); // update center
-      license = StringUtils.defaultIfEmpty(manifest.getLicense(), license); // POM
+      license = StringUtils.defaultIfEmpty(manifest.getLicense(), license);
+      termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl);
+      developers = Arrays.asList(manifest.getDevelopers());
 
-//  MAVEN package met docURL dans MANIFEST, puis la ligne ci-dessous définit l'ordre
-// il suffirait d'intervertir les deux arguments
-      homepageUrl = StringUtils.defaultIfEmpty(manifest.getHomepage(), homepageUrl); // update center
-      termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl); // POM
-      sourcesUrl = StringUtils.defaultIfEmpty(manifest.getSourcesUrl(), sourcesUrl);// update center
-      developers = Arrays.asList(manifest.getDevelopers()); // POM
+      // precedence to the update center file
+      issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
+      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
+      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
     }
     return this;
   }
