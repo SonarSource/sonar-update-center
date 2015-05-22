@@ -24,6 +24,7 @@ import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.Version;
 
+import javax.annotation.CheckForNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -142,6 +143,7 @@ public class PluginHeader {
     return plugin.getAllReleases().size();
   }
 
+  @CheckForNull
   public String getLastVersionString() {
     Release lastRelease = plugin.getLastRelease();
     if (lastRelease != null) {
