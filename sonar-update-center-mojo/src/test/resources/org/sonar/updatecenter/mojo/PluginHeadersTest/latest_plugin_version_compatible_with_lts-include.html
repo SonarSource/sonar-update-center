@@ -1,0 +1,42 @@
+licence &#8211; <a target="_top" href="issue_url">Issue Tracker</a> &#8211; <a target="_top" href="sources_url">Sources</a>
+<br>
+<span style="font-size:smaller;">
+<span id="moreVersionsLink" >
+<a   onclick="return showMoreVersions()" href=""> More versions
+    <script type="text/javascript">// <![CDATA[
+    function showMoreVersions() {
+        AJS.$('#moreVersions').show();
+        AJS.$('#moreVersionsLink').hide();
+        AJS.$('#lessVersionsLink').show();
+        return false;
+    }
+    // ]]&gt;</script>
+</a></span>
+<span id="lessVersionsLink" style="display:none">
+<a   onclick="return showLessVersions()" href=""> Less versions
+    <script type="text/javascript">// <![CDATA[
+    function showLessVersions() {
+        AJS.$('#moreVersions').hide();
+        AJS.$('#moreVersionsLink').show();
+        AJS.$('#lessVersionsLink').hide();
+        return false;
+    }
+    // ]]&gt;</script>
+</a></span>
+</span>
+<br>
+<div id="lastVersion">
+    <div style="padding-top:10px;padding-bottom:5px">
+        <span style="font-size:larger;"><strong>name 2.0</strong></span> &#8211; Dec 12, 2013 &#8211; Compatible with SonarQube 3.0+ (LTS)
+        <br>
+        <a target="_top" href="download_url2">Download</a>
+    </div>
+</div>
+<div id="moreVersions" style="display:none">
+    <div style="padding-top:10px;padding-bottom:5px">
+        <span style="font-size:larger;"><strong>name 1.0</strong></span> &#8211; Dec 12, 2012 &#8211; Compatible with SonarQube 3.0 (LTS)
+        <br>
+        <a target="_top" href="download_url1">Download</a>
+    </div>
+</div>
+

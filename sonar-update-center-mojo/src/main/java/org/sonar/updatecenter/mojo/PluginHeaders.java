@@ -74,7 +74,7 @@ class PluginHeaders {
     }
     for (Map.Entry<String, Release> sq : majorVersions.entrySet()) {
       matrix.getSqVersions().add(
-        new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
+              new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
@@ -84,6 +84,10 @@ class PluginHeaders {
       File file = new File(outputDirectory, plugin.getKey() + "-confluence.html");
       log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-confluence-template.html.ftl");
+
+      file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
+      log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
+      print(dataModel, file, "plugin-confluence-include-template.html.ftl");
 
       file = new File(outputDirectory, plugin.getKey() + "-sonarsource.html");
       log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);

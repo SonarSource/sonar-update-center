@@ -69,7 +69,7 @@ public final class UpdateCenterDeserializer {
     this.ignoreError = ignoreError;
   }
 
-  public static enum Mode {
+  public enum Mode {
     /**
      * Will ignore devVersion and privateVersions
      */
