@@ -32,18 +32,18 @@ ${pluginHeader.license}
     function showMoreVersions() {
         AJS.$('#moreVersions').show();
         AJS.$('#moreVersionsLink').hide();
-        AJS.$('#lessVersionsLink').show();
+        AJS.$('#fewerVersionsLink').show();
         return false;
     }
     // ]]&gt;</script>
 </a></span>
-<span id="lessVersionsLink" style="display:none">
-<a   onclick="return showLessVersions()" href=""> Less versions
+<span id="fewerVersionsLink" style="display:none">
+<a   onclick="return showFewerVersions()" href=""> Fewer versions
     <script type="text/javascript">// <![CDATA[
-    function showLessVersions() {
+    function showFewerVersions() {
         AJS.$('#moreVersions').hide();
         AJS.$('#moreVersionsLink').show();
-        AJS.$('#lessVersionsLink').hide();
+        AJS.$('#fewerVersionsLink').hide();
         return false;
     }
     // ]]&gt;</script>
