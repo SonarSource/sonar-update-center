@@ -27,14 +27,40 @@ public class PluginTest {
 
   @Test
   public void should_merge_with_manifest() {
-    Plugin plugin = new Plugin("squid").setLicense("LGPL2").setOrganization("SonarSource");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setLicense("LGPL3").setDescription("Parser");
+    Plugin plugin = new Plugin("squid")
+            .setLicense("LGPL2")
+            .setDescription("description")
+            .setOrganization("organization")
+            .setOrganizationUrl("organizationUrl")
+            .setTermsConditionsUrl("termsconditions")
+            .setIssueTrackerUrl("issueTrackerUrl")
+            .setHomepageUrl("homepage")
+            .setSourcesUrl("sourceURL");
+
+    PluginManifest manifest = new PluginManifest()
+            .setKey("squid")
+            .setLicense("LGPL3")
+            .setOrganization("organization_manifest")
+            .setOrganizationUrl("organizationUrl_manifest")
+            .setTermsConditionsUrl("termsconditions_manifest")
+            .setDescription("description_manifest")
+            .setHomepage("homepage_manifest")
+            .setSourcesUrl("sourceURL_manifest")
+            .setIssueTrackerUrl("issueTrackerUrl_manifest");
 
     plugin.merge(manifest);
 
+    // precedence to the manifest file (=POM)
     assertThat(plugin.getLicense()).isEqualTo("LGPL3"); // UPC-32 don't override manifest
-    assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
-    assertThat(plugin.getDescription()).isEqualTo("Parser");
+    assertThat(plugin.getDescription()).isEqualTo("description_manifest");
+    assertThat(plugin.getOrganization()).isEqualTo("organization_manifest");
+    assertThat(plugin.getOrganizationUrl()).isEqualTo("organizationUrl_manifest");
+    assertThat(plugin.getTermsConditionsUrl()).isEqualTo("termsconditions_manifest");
+
+    // precedence to the update center
+    assertThat(plugin.getIssueTrackerUrl()).isEqualTo("issueTrackerUrl");
+    assertThat(plugin.getHomepageUrl()).isEqualTo("homepage");
+    assertThat(plugin.getSourcesUrl()).isEqualTo("sourceURL");
   }
 
   @Test
@@ -75,5 +101,4 @@ public class PluginTest {
 
     assertThat(plugin.toString()).isEqualTo("squid");
   }
-
 }

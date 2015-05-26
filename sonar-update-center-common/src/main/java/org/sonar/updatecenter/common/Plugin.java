@@ -144,15 +144,19 @@ public class Plugin extends Artifact {
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       name = manifest.getName();
+
+      // precedence to the manifest file
       description = StringUtils.defaultIfEmpty(manifest.getDescription(), description);
       organization = StringUtils.defaultIfEmpty(manifest.getOrganization(), organization);
       organizationUrl = StringUtils.defaultIfEmpty(manifest.getOrganizationUrl(), organizationUrl);
-      issueTrackerUrl = StringUtils.defaultIfEmpty(manifest.getIssueTrackerUrl(), issueTrackerUrl);
       license = StringUtils.defaultIfEmpty(manifest.getLicense(), license);
-      homepageUrl = StringUtils.defaultIfEmpty(manifest.getHomepage(), homepageUrl);
       termsConditionsUrl = StringUtils.defaultIfEmpty(manifest.getTermsConditionsUrl(), termsConditionsUrl);
-      sourcesUrl = StringUtils.defaultIfEmpty(manifest.getSourcesUrl(), sourcesUrl);
       developers = Arrays.asList(manifest.getDevelopers());
+
+      // precedence to the update center file
+      issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
+      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
+      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
     }
     return this;
   }
