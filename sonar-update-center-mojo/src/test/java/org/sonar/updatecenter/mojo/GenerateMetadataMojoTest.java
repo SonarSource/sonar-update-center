@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.SystemStreamLog;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,6 +36,7 @@ public class GenerateMetadataMojoTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
+  @Ignore("Disabled as repository.codehaus.org is shutdown. Test must not depend on 3rd-party systems.")
   public void generate_dev_properties_and_no_html() throws Exception {
     File outputDir = temp.newFolder();
 
@@ -60,6 +62,7 @@ public class GenerateMetadataMojoTest {
   }
 
   @Test
+  @Ignore("Disabled as repository.codehaus.org is shutdown. Test must not depend on 3rd-party systems.")
   public void generate_prod_properties() throws Exception {
     File outputDir = temp.newFolder();
 
