@@ -70,7 +70,7 @@ public class PluginTest {
 
     plugin.merge(manifest);
 
-    assertThat(plugin.getLicense());
+    assertThat(plugin.getLicense()).isNull();
     assertThat(plugin.getKey()).isEqualTo("squid");
     assertThat(plugin.getOrganization()).isEqualTo("SonarSource");
   }
