@@ -156,7 +156,7 @@ public class PluginReferential {
     }
   }
 
-  private void checkDependencyCycle(Release release, List<Release> releases) {
+  private static void checkDependencyCycle(Release release, List<Release> releases) {
     for (Release outgoingDependency : release.getOutgoingDependencies()) {
       if (releases.contains(outgoingDependency)) {
         throw new DependencyCycleException();

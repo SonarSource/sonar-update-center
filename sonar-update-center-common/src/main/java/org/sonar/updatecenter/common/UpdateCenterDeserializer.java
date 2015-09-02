@@ -183,7 +183,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private String pluginName(Plugin plugin) {
+  private static String pluginName(Plugin plugin) {
     return StringUtils.isNotBlank(plugin.getName()) ? plugin.getName() : plugin.getKey();
   }
 
@@ -342,8 +342,8 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private List<String> split(String requiredSonarVersions) {
-    List<String> splitted = new ArrayList<String>();
+  private static List<String> split(String requiredSonarVersions) {
+    List<String> splitted = new ArrayList<>();
     int skipCommas = 0;
     String s = "";
     for (char c : requiredSonarVersions.toCharArray()) {
@@ -376,7 +376,7 @@ public final class UpdateCenterDeserializer {
     return version;
   }
 
-  private String resolveWithWildcard(String version, Sonar sonar) {
+  private static String resolveWithWildcard(String version, Sonar sonar) {
     String prefix = version.substring(0, version.length() - 1);
     String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
     Release found = null;
@@ -414,11 +414,11 @@ public final class UpdateCenterDeserializer {
     return value;
   }
 
-  private String get(Properties props, String key) {
+  private static String get(Properties props, String key) {
     return StringUtils.defaultIfEmpty(props.getProperty(key), null);
   }
 
-  private String getOrDefault(Properties props, String key, String defaultKey) {
+  private static String getOrDefault(Properties props, String key, String defaultKey) {
     if (props.containsKey(key)) {
       return props.getProperty(key);
     }
@@ -444,11 +444,11 @@ public final class UpdateCenterDeserializer {
     return value;
   }
 
-  private String[] getArray(Properties props, String key) {
+  private static String[] getArray(Properties props, String key) {
     return StringUtils.split(StringUtils.defaultIfEmpty(props.getProperty(key), ""), ",");
   }
 
-  private String[] getArray(Properties p, String pluginKey, String field) {
+  private static String[] getArray(Properties p, String pluginKey, String field) {
     return getArray(p, pluginKey + "." + field);
   }
 

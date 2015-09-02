@@ -19,71 +19,19 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.io.File;
+import java.net.URL;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.SystemStreamLog;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.net.URL;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 public class GenerateMetadataMojoTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
-
-  @Test
-  @Ignore("Disabled as repository.codehaus.org is shutdown. Test must not depend on 3rd-party systems.")
-  public void generate_dev_properties_and_no_html() throws Exception {
-    File outputDir = temp.newFolder();
-
-    // plugin is already cached
-    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
-    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3-20110822.091313-2.jar"), outputDir);
-
-    File inputFile = resource("update-center-template/update-center.properties");
-    new GenerateMetadataMojo().setInputFile(inputFile).setOutputDir(outputDir).setDevMode(true).execute();
-
-    // verify that properties file is generated
-    File outputFile = new File(outputDir, "sonar-updates.properties");
-    assertThat(outputFile).exists().isFile();
-    String output = FileUtils.readFileToString(outputFile);
-
-    // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2");
-    assertThat(output).contains("artifactsize.publicVersions=0.2");
-    assertThat(output).contains("artifactsize.devVersion=1.0-SNAPSHOT");
-
-    // metadata loaded from jar manifest
-    assertThat(output).contains("artifactsize.organization=SonarSource");
-  }
-
-  @Test
-  @Ignore("Disabled as repository.codehaus.org is shutdown. Test must not depend on 3rd-party systems.")
-  public void generate_prod_properties() throws Exception {
-    File outputDir = temp.newFolder();
-
-    // plugin is already cached
-    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
-
-    File inputFile = resource("update-center-template/update-center.properties");
-    new GenerateMetadataMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
-
-    // verify that properties file is generated
-    File outputFile = new File(outputDir, "sonar-updates.properties");
-    assertThat(outputFile).exists().isFile();
-    String output = FileUtils.readFileToString(outputFile);
-
-    // metadata loaded from properties template
-    assertThat(output).contains("artifactsize.versions=0.2");
-    assertThat(output).excludes("0.3-SNAPSHOT");
-
-    // metadata loaded from jar manifest
-    assertThat(output).contains("artifactsize.organization=SonarSource");
-  }
 
   @Test
   public void generate_properties_with_requires_plugins() throws Exception {

@@ -88,7 +88,7 @@ class Generator {
     }
   }
 
-  private void updateReleaseRequirePluginsAndParentProperties(PluginReferential pluginReferential, File jar, Release release) throws IOException {
+  private static void updateReleaseRequirePluginsAndParentProperties(PluginReferential pluginReferential, File jar, Release release) throws IOException {
     PluginManifest releaseManifest = new PluginManifest(jar);
     if (releaseManifest.getRequirePlugins() != null) {
       for (String requirePlugin : releaseManifest.getRequirePlugins()) {

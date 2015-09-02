@@ -234,7 +234,7 @@ public class UpdateCenter {
     return update;
   }
 
-  private void searchCompatiblePluginUpgrade(Release sonarRelease, SonarUpdate update, Release installedRelease, Plugin plugin) {
+  private static void searchCompatiblePluginUpgrade(Release sonarRelease, SonarUpdate update, Release installedRelease, Plugin plugin) {
     boolean ok = false;
     Release compatibleRelease = null;
     for (Release greaterPluginRelease : plugin.getReleasesGreaterThan(installedRelease.getVersion())) {

@@ -309,12 +309,12 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return libs;
   }
 
-  private String getDefaultFinalName(Artifact artifact) {
+  private static String getDefaultFinalName(Artifact artifact) {
     return artifact.getFile().getName();
   }
 
   private Set<Artifact> getNotProvidedDependencies() throws DependencyTreeBuilderException {
-    Set<Artifact> result = new HashSet<Artifact>();
+    Set<Artifact> result = new HashSet<>();
     Set<Artifact> providedArtifacts = getSonarProvidedArtifacts();
     for (Artifact artifact : getIncludedArtifacts()) {
       boolean include = true;
@@ -332,15 +332,15 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return result;
   }
 
-  private boolean isScopeProvidedOrTest(Artifact artifact) {
+  private static boolean isScopeProvidedOrTest(Artifact artifact) {
     return Artifact.SCOPE_PROVIDED.equals(artifact.getScope()) || Artifact.SCOPE_TEST.equals(artifact.getScope());
   }
 
-  private boolean isSonarPlugin(Artifact artifact) {
+  private static boolean isSonarPlugin(Artifact artifact) {
     return "sonar-plugin".equals(artifact.getType());
   }
 
-  private boolean containsArtifact(Set<Artifact> artifacts, Artifact artifact) {
+  private static boolean containsArtifact(Set<Artifact> artifacts, Artifact artifact) {
     for (Artifact a : artifacts) {
       if (StringUtils.equals(a.getGroupId(), artifact.getGroupId()) &&
         StringUtils.equals(a.getArtifactId(), artifact.getArtifactId())) {
@@ -361,7 +361,7 @@ public class SonarPluginMojo extends AbstractSonarPluginMojo {
     return result;
   }
 
-  private void searchForSonarProvidedArtifacts(DependencyNode dependency, Set<Artifact> sonarArtifacts, boolean isParentProvided) {
+  private static void searchForSonarProvidedArtifacts(DependencyNode dependency, Set<Artifact> sonarArtifacts, boolean isParentProvided) {
     if (dependency != null) {
       boolean provided;
       if (dependency.getParent() != null) {

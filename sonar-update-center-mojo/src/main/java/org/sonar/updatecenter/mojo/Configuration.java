@@ -31,7 +31,8 @@ import java.io.IOException;
 
 class Configuration {
 
-  private File outputDir, inputFile;
+  private File outputDir;
+  private File inputFile;
   private UpdateCenter updateCenter;
 
   Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, Log log) {
