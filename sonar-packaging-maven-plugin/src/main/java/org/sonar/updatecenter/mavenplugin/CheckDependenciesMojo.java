@@ -19,6 +19,8 @@
  */
 package org.sonar.updatecenter.mavenplugin;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.Artifact;
@@ -28,12 +30,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * @author Evgeny Mandrikov
- */
 @Mojo(name = "check-dependencies", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
 public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
 
@@ -54,12 +50,12 @@ public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
 
     if (sonarApi == null) {
       throw new MojoExecutionException(
-        SONAR_GROUPID + ":" + SONAR_PLUGIN_API_ARTIFACTID + " should be declared in dependencies");
+        SONAR_PLUGIN_API_ARTIFACTID + " must be declared in dependencies");
     }
 
     if (!Artifact.SCOPE_PROVIDED.equals(sonarApi.getScope())) {
       throw new MojoExecutionException(
-        SONAR_GROUPID + ":" + SONAR_PLUGIN_API_ARTIFACTID + " should be declared with scope '" + Artifact.SCOPE_PROVIDED + "'");
+        SONAR_PLUGIN_API_ARTIFACTID + " must be declared with scope '" + Artifact.SCOPE_PROVIDED + "'");
     }
   }
 
@@ -81,7 +77,7 @@ public class CheckDependenciesMojo extends AbstractSonarPluginMojo {
   }
 
   private void checkGwtDependencies() {
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = new ArrayList<>();
     for (Artifact dep : getDependencyArtifacts(Artifact.SCOPE_COMPILE)) {
       if (ArrayUtils.contains(GWT_ARTIFACT_IDS, dep.getArtifactId())) {
         ids.add(dep.getDependencyConflictId());

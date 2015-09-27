@@ -40,7 +40,6 @@ import java.util.Set;
  */
 public abstract class AbstractSonarPluginMojo extends AbstractMojo {
 
-  public static final String SONAR_GROUPID = "org.codehaus.sonar";
   public static final String SONAR_PLUGIN_API_ARTIFACTID = "sonar-plugin-api";
   public static final String SONAR_PLUGIN_API_TYPE = "jar";
 
@@ -244,7 +243,7 @@ public abstract class AbstractSonarPluginMojo extends AbstractMojo {
     Set<Artifact> dependencies = getDependencyArtifacts();
     if (dependencies != null) {
       for (Artifact dep : dependencies) {
-        if (SONAR_GROUPID.equals(dep.getGroupId()) && SONAR_PLUGIN_API_ARTIFACTID.equals(dep.getArtifactId())
+        if (SONAR_PLUGIN_API_ARTIFACTID.equals(dep.getArtifactId())
           && SONAR_PLUGIN_API_TYPE.equals(dep.getType())) {
           return dep;
         }
