@@ -51,7 +51,6 @@
   <modules>
     <module>sonar-update-center-common</module>
     <module>sonar-update-center-mojo</module>
-    <module>sonar-packaging-maven-plugin</module>
   </modules>
 
   <scm>
