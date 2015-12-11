@@ -312,11 +312,14 @@ public final class UpdateCenterDeserializer {
     List<String> result = new LinkedList<String>();
     for (String pattern : patterns) {
       if (pattern != null) {
-        Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
-        if (matcher.matches()) {
-          final Version low = Version.create(resolve(matcher.group(1), sonar));
-          final Version high = Version.create(resolve(matcher.group(2), sonar));
+        Matcher setMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
+        Matcher simpleEltMatcher = Pattern.compile("\\[(.*)\\]").matcher(pattern);
+        if (setMatcher.matches() ) {
+          final Version low = Version.create(resolve(setMatcher.group(1), sonar));
+          final Version high = Version.create(resolve(setMatcher.group(2), sonar));
           resolveRangeOfRequiredSQVersion(sonar, result, low, high);
+        } else if(simpleEltMatcher.matches() ) {
+          result.add(resolve(simpleEltMatcher.group(1), sonar));
         } else {
           result.add(resolve(pattern, sonar));
         }

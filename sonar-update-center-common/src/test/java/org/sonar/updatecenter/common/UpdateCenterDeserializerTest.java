@@ -64,6 +64,9 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getDevelopers()).isEmpty();
 
       assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+      assertThat(clirr.getRelease(Version.create("1.0")).getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      assertThat(clirr.getRelease(Version.create("1.0")).getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -239,12 +242,19 @@ public class UpdateCenterDeserializerTest {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
+
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
     assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
     assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
     assertThat(phpPlugin.getArchivedVersions()).onProperty("name").containsOnly("2.0");
+
+    Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
+    assertThat(ssqvPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("1.1-SNAPSHOT"));
+    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+
   }
 
   // UPC-29
@@ -255,6 +265,20 @@ public class UpdateCenterDeserializerTest {
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("ssqv").getDevRelease()).isNull();
+
+    Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
+    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    SortedSet<Version> requiredSonarVersion10 = ssqvPlugin.getRelease(Version.create("1.0")).getRequiredSonarVersions();
+    assertThat(requiredSonarVersion10).hasSize(1);
+    assertThat(requiredSonarVersion10.first().toString()).isEqualTo("3.7");
+    assertThat(requiredSonarVersion10.last().toString()).isEqualTo("3.7");
+
+    SortedSet<Version> requiredSonarVersion11 = ssqvPlugin.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+    assertThat(requiredSonarVersion11).hasSize(1);
+    assertThat(requiredSonarVersion11.first().toString()).isEqualTo("4.0");
+    assertThat(requiredSonarVersion11.last().toString()).isEqualTo("4.0");
+
   }
 
   // UPC-29
