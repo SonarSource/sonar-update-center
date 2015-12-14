@@ -67,7 +67,7 @@ class PluginHeaders {
     CompatibilityMatrix matrix = new CompatibilityMatrix();
 
     // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
-    Map<String, Release> majorVersions = new LinkedHashMap<String, Release>();
+    Map<String, Release> majorVersions = new LinkedHashMap<>();
     for (Release sq : center.getSonar().getAllReleases()) {
       String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
       majorVersions.put(displayVersion, sq);
