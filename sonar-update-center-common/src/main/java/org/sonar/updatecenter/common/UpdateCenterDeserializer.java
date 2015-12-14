@@ -95,24 +95,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  /**
-   * Load configuration with one single file containing everything
-   */
-  public UpdateCenter fromSingleFile(File mainFile) throws IOException {
-    FileInputStream in = FileUtils.openInputStream(mainFile);
-    try {
-      Properties props = new Properties();
-      props.load(in);
-      UpdateCenter pluginReferential = fromProperties(props);
-      pluginReferential.setDate(new Date(mainFile.lastModified()));
-      return pluginReferential;
-
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-  }
-
-  private void loadPluginProperties(File file, Properties props) throws IOException {
+  private static void loadPluginProperties(File file, Properties props) throws IOException {
     String[] pluginKeys = getArray(props, PLUGINS);
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
@@ -170,7 +153,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void validatePublicPluginSQVersionOverlap(Plugin plugin) {
-    Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+    Map<Version, Release> sonarVersion = new HashMap<>();
     for (Release r : plugin.getPublicReleases()) {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
@@ -360,7 +343,7 @@ public final class UpdateCenterDeserializer {
         if (c == ']') {
           skipCommas--;
         }
-        s += c;
+        s += Character.toString(c);
       }
     }
     if (StringUtils.isNotBlank(s)) {
@@ -369,7 +352,7 @@ public final class UpdateCenterDeserializer {
     return splitted;
   }
 
-  private String resolve(String version, Sonar sonar) {
+  private static String resolve(String version, Sonar sonar) {
     if ("LATEST".equals(version)) {
       return sonar.getAllReleases().last().getVersion().toString();
     }
