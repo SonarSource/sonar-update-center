@@ -81,11 +81,7 @@ class PluginHeaders {
       Map<String, Object> dataModel = Maps.newHashMap();
       dataModel.put("pluginHeader", pluginHeader);
 
-      File file = new File(outputDirectory, plugin.getKey() + "-confluence.html");
-      log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
-      print(dataModel, file, "plugin-confluence-template.html.ftl");
-
-      file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
+      File file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
       log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-confluence-include-template.html.ftl");
 
