@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -204,7 +203,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_parse_lts() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties");
@@ -218,7 +216,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_throw_if_lts_invalid() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties");
@@ -231,6 +228,16 @@ public class UpdateCenterDeserializerTest {
     } finally {
       IOUtils.closeQuietly(input);
     }
+  }
+
+
+  @Test
+  public void should_throw_if_lts_version_is_not_exactly_latest_SQ_version() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/latest-plugin-must-have-latest-sq-as-sqversion/update-center.properties");
+    new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("latest SQ version must be only version compatible with latest plugin version");
   }
 
   // UPC-29
