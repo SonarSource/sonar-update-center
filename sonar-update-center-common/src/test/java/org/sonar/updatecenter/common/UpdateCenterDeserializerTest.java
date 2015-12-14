@@ -58,6 +58,7 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
+      assertThat(clirr.getIssueTrackerUrl()).isEqualTo("http://jira.codehaus.org/issueTracker/for/clirr");
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
       assertThat(clirr.getSourcesUrl()).isNull();
@@ -239,7 +240,11 @@ public class UpdateCenterDeserializerTest {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
-    assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
+
+    Plugin abapPlugin = center.getUpdateCenterPluginReferential().findPlugin("abap");
+    assertThat(abapPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
+    assertThat(abapPlugin.getIssueTrackerUrl()).isEqualTo("http://issue.tracker.url/from/properties/file");
+
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
     assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
