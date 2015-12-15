@@ -194,6 +194,50 @@ public class PluginHeadersTest {
     return returned;
   }
 
+
+  @Test
+  public void shouldHaveNoDownloadLinkIfArchivedVersion() throws Exception {
+    Plugin plugin = new Plugin(PLUGIN_KEY);
+
+    Version version10 = Version.create("1.0");
+    Release release10 = new Release(plugin, version10);
+    release10.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
+    release10.setDownloadUrl("download_url");
+    release10.addRequiredSonarVersions("3.0");
+    release10.setDescription("Archived version");
+    release10.setArchived(true);
+
+    plugin.addRelease(release10);
+
+    Version version11 = Version.create("1.1");
+    Release release11 = new Release(plugin, version11);
+    release11.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("15-12-2015"));
+    release11.setDownloadUrl("download_url");
+    release11.addRequiredSonarVersions("3.0");
+    release11.setDescription("Non-archived version");
+    release11.setArchived(false);
+
+    plugin.addRelease(release11);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setOrganization("SonarSource");
+    plugin.setOrganizationUrl("http://sonarsource.com");
+
+    prepareMocks(plugin);
+    pluginHeaders.generateHtml();
+
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
+
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    String flattenFile = flatHtmlFile(file);
+    String flattenExpectedFile = flatHtmlFile(getExpectedFile("archived-version-have-no-download-link-include.html"));
+    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+  }
+
+
   class FilenameFilterForConfluenceIncludeGeneratedHtml implements FilenameFilter {
     public boolean accept(File file, String s) {
       return (PLUGIN_KEY + "-confluence-include.html").equals(s);
@@ -330,6 +374,7 @@ public class PluginHeadersTest {
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-sources-url-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
+
 
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
