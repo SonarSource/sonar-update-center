@@ -201,6 +201,7 @@ public final class UpdateCenterDeserializer {
       plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl", false));
       plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl", false));
       plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
+      plugin.setSupported(Boolean.valueOf(get(p, pluginKey, "supported", false)));
       plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
       parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true, false);

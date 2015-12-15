@@ -36,6 +36,7 @@ public class Plugin extends Artifact {
   private String category;
   private String issueTrackerUrl;
   private String sourcesUrl;
+  private boolean supported = false;
   private List<String> developers;
 
   public Plugin(String key) {
@@ -141,8 +142,18 @@ public class Plugin extends Artifact {
     return this;
   }
 
+  public boolean isSupported() {
+    return supported;
+  }
+
+  public Plugin setSupported(boolean supported) {
+    this.supported = supported;
+    return this;
+  }
+
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
+      // from the manifest
       name = manifest.getName();
 
       // precedence to the manifest file
@@ -157,6 +168,9 @@ public class Plugin extends Artifact {
       issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
       homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
       sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
+
+      // from the properties file
+      // supported
     }
     return this;
   }

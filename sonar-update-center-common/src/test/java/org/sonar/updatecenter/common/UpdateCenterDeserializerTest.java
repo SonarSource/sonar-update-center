@@ -58,12 +58,16 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
+      assertThat(clirr.isSupported()).isTrue();
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
       assertThat(clirr.getSourcesUrl()).isNull();
       assertThat(clirr.getDevelopers()).isEmpty();
 
       assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+
+      Plugin motionchart = center.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      assertThat(motionchart.isSupported()).isFalse();
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -241,6 +245,7 @@ public class UpdateCenterDeserializerTest {
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
+    assertThat(phpPlugin.isSupported()).isTrue();
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
     assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
     assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
