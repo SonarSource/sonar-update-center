@@ -27,8 +27,7 @@ ${pluginHeader.license}
 <br>
 <span style="font-size:smaller;">
 <span id="moreVersionsLink" >
-<a   onclick="return showMoreVersions()" href=""> More versions
-    <script type="text/javascript">// <![CDATA[
+<a   onclick="return showMoreVersions()" href=""> More versions<script type="text/javascript">// <![CDATA[
     function showMoreVersions() {
         AJS.$('#moreVersions').show();
         AJS.$('#moreVersionsLink').hide();
@@ -38,8 +37,7 @@ ${pluginHeader.license}
     // ]]&gt;</script>
 </a></span>
 <span id="fewerVersionsLink" style="display:none">
-<a   onclick="return showFewerVersions()" href=""> Fewer versions
-    <script type="text/javascript">// <![CDATA[
+<a   onclick="return showFewerVersions()" href=""> Fewer versions<script type="text/javascript">// <![CDATA[
     function showFewerVersions() {
         AJS.$('#moreVersions').hide();
         AJS.$('#moreVersionsLink').show();
