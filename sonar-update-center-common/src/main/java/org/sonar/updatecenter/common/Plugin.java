@@ -146,7 +146,6 @@ public class Plugin extends Artifact {
       name = manifest.getName();
 
       // precedence to the manifest file
-      description = StringUtils.defaultIfEmpty(manifest.getDescription(), description);
       organization = StringUtils.defaultIfEmpty(manifest.getOrganization(), organization);
       organizationUrl = StringUtils.defaultIfEmpty(manifest.getOrganizationUrl(), organizationUrl);
       license = StringUtils.defaultIfEmpty(manifest.getLicense(), license);
@@ -154,9 +153,10 @@ public class Plugin extends Artifact {
       developers = Arrays.asList(manifest.getDevelopers());
 
       // precedence to the update center file
+      description =     StringUtils.defaultIfEmpty(description, manifest.getDescription() );
       issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
-      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
-      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
+      homepageUrl =     StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
+      sourcesUrl =      StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
     }
     return this;
   }
