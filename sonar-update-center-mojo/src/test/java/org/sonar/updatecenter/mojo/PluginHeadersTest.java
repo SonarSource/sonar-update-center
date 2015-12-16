@@ -89,8 +89,8 @@ public class PluginHeadersTest {
 
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(2);
-    assertThat(outputFolder.list()).containsOnly("style-confluence.css", "error.png");
+    assertThat(outputFolder.list()).hasSize(3);
+    assertThat(outputFolder.list()).containsOnly("style-confluence.css", "error.png", "onde-sonar-16.png");
   }
 
   @Test
@@ -107,18 +107,20 @@ public class PluginHeadersTest {
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
+    plugin.setSupported(true);
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    //  6 files:
+    //  7 files:
     //  - style-confluence.css
     //  - error.png
+    //  - onde-sonar-16.png
     //  - compatibility-matrix.html
     //  - PLUGIN_KEY-confluence.html
     //  - PLUGIN_KEY-confluence-include.html
     //  - PLUGIN_KEY-sonarsource.html
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(7);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
@@ -198,8 +200,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-    Map<String, File> returned = new HashMap<String, File>(2);
+    assertThat(outputFolder.list()).hasSize(7);
+    Map<String, File> returned = new HashMap<>(2);
     returned.put("confluenceHtml", outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0]);
     returned.put("confluenceIncludeHtml", outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0]);
 
@@ -236,7 +238,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(7);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
@@ -265,7 +267,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(7);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
@@ -294,7 +296,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(7);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
@@ -324,7 +326,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(7);
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("with-author.html"));
 
@@ -352,7 +354,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "key-confluence-include.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "key-confluence-include.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
 
