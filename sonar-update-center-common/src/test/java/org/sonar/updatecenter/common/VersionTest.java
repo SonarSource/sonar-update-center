@@ -46,6 +46,21 @@ public class VersionTest {
   }
 
   @Test
+  public void test_fields_fromString() {
+    Version version = Version.create("1.2","LATEST");
+    assertThat(version.getMajor()).isEqualTo("1");
+    assertThat(version.getMinor()).isEqualTo("2");
+    assertThat(version.getPatch()).isEqualTo("0");
+    assertThat(version.getPatch2()).isEqualTo("0");
+    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getFromString()).isEqualTo("LATEST");
+
+    Version copiedVersion = Version.create(version, "COPY" );
+    copiedVersion.equals(version);
+    assertThat(copiedVersion.getFromString()).isEqualTo("COPY");
+  }
+
+  @Test
   public void compare_releases() {
     Version version12 = Version.create("1.2");
     Version version121 = Version.create("1.2.1");

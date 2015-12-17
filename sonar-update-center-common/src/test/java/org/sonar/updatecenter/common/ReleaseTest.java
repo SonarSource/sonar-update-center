@@ -50,6 +50,8 @@ public class ReleaseTest {
     release.addRequiredSonarVersions("2.0");
     assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
 
+    assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
+
     release.addRequiredSonarVersions((String[]) null);
     assertThat(release.getRequiredSonarVersions()).hasSize(1);
 
@@ -89,4 +91,17 @@ public class ReleaseTest {
     assertThat(squid10).isNotEqualTo(squid20);
     assertThat(squid10).isNotEqualTo(bar10);
   }
+
+  @Test
+  public void should_have_version_from_string(){
+    Release release = new Release(new Plugin("squid"), "1.0");
+    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
+    assertThat(release.getRequiredSonarVersions()).hasSize(3);
+    assertThat(release.getSonarVersionFromString("mystring") ).hasSize(0);
+
+    release.addRequiredSonarVersions( Version.create("3.0", "mystring"));
+    assertThat(release.getSonarVersionFromString("mystring") ).hasSize(1);
+    // TODO check 3.0
+  }
+
 }

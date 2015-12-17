@@ -140,6 +140,8 @@ public final class UpdateCenterDeserializer {
 
     validatePublicPluginSQVersionOverlap(plugins);
 
+    validateLATESTonLatestPluginVersion(plugins);
+
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
       for (Release release : plugin.getAllReleases()) {
@@ -170,7 +172,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void validatePublicPluginSQVersionOverlap(Plugin plugin) {
-    Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+    Map<Version, Release> sonarVersion = new HashMap<>();
     for (Release r : plugin.getPublicReleases()) {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
@@ -179,6 +181,18 @@ public final class UpdateCenterDeserializer {
             + sonarVersion.get(v).getVersion());
         }
         sonarVersion.put(v, r);
+      }
+    }
+  }
+
+  private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
+    for (Plugin plugin : plugins) {
+      for (Release r : plugin.getReleases()) {
+        Version [] versionsWLatest = r.getSonarVersionFromString("LATEST");
+        // only latest release may depend on LATEST SQ
+        if( ! r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0 ) {
+          reportError("Only the latest release of plugin " + pluginName(plugin) + " may depend on LATEST SonarQube");
+        }
       }
     }
   }
@@ -210,6 +224,7 @@ public final class UpdateCenterDeserializer {
       }
       parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, true);
 
+      // do not add plugin without any version
       if (!plugin.getAllReleases().isEmpty()) {
         plugins.add(plugin);
       }
@@ -219,7 +234,7 @@ public final class UpdateCenterDeserializer {
   private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key, boolean isPublicRelease, boolean isArchivedRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
-      Release release = parsePlugin(p, sonar, pluginKey, plugin, isPublicRelease, isArchivedRelease, pluginVersion);
+      Release release = parsePluginRelease(p, sonar, pluginKey, plugin, isPublicRelease, isArchivedRelease, pluginVersion);
       if (!plugin.getAllReleases().contains(release)) {
         plugin.addRelease(release);
       } else {
@@ -228,7 +243,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private Release parsePlugin(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
+  private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
     Release release = new Release(plugin, pluginVersion);
     release.setPublic(isPublicRelease);
     release.setArchived(isArchivedRelease);
@@ -238,12 +253,12 @@ public final class UpdateCenterDeserializer {
     release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
     release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
     release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
-    String[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
+    Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
     if (!isArchivedRelease && requiredSonarVersions.length == 0) {
       reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion + " should declare compatible SQ versions");
     }
-    for (String requiredSonarVersion : requiredSonarVersions) {
-      release.addRequiredSonarVersions(Version.create(requiredSonarVersion));
+    for (Version requiredSonarVersion : requiredSonarVersions) {
+      release.addRequiredSonarVersions(requiredSonarVersion);
     }
     return release;
   }
@@ -251,7 +266,7 @@ public final class UpdateCenterDeserializer {
   private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
     String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
-      Release release = parsePlugin(p, sonar, pluginKey, plugin, false, false, devVersion);
+      Release release = parsePluginRelease(p, sonar, pluginKey, plugin, false, false, devVersion);
       plugin.setDevRelease(release);
     }
   }
@@ -306,26 +321,26 @@ public final class UpdateCenterDeserializer {
     return release;
   }
 
-  private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar, boolean isArchived) {
+  private Version[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar, boolean isArchived) {
     String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", !isArchived);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
-    List<String> result = new LinkedList<String>();
+    List<Version> result = new LinkedList<>();
     for (String pattern : patterns) {
       if (pattern != null) {
         Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
         if (matcher.matches()) {
-          final Version low = Version.create(resolve(matcher.group(1), sonar));
-          final Version high = Version.create(resolve(matcher.group(2), sonar));
+          final Version low = resolveKeywordAndStar(matcher.group(1), sonar);
+          final Version high = resolveKeywordAndStar(matcher.group(2), sonar);
           resolveRangeOfRequiredSQVersion(sonar, result, low, high);
         } else {
-          result.add(resolve(pattern, sonar));
+          result.add(resolveKeywordAndStar(pattern, sonar));
         }
       }
     }
-    return result.toArray(new String[result.size()]);
+    return result.toArray(new Version[result.size()]);
   }
 
-  private void resolveRangeOfRequiredSQVersion(Sonar sonar, List<String> result, final Version low, final Version high) {
+  private void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       @Override
       public Version apply(Release release) {
@@ -338,7 +353,9 @@ public final class UpdateCenterDeserializer {
       }
     });
     for (Version version : versions) {
-      result.add(version.toString());
+      String fromString = version.equals(low) ? low.getFromString() :
+                            version.equals(high) ? high.getFromString()  : "";
+      result.add(Version.create(version, fromString));
     }
   }
 
@@ -366,18 +383,17 @@ public final class UpdateCenterDeserializer {
     return splitted;
   }
 
-  private String resolve(String version, Sonar sonar) {
-    if ("LATEST".equals(version)) {
-      return sonar.getAllReleases().last().getVersion().toString();
+  private Version resolveKeywordAndStar(String versionStr, Sonar sonar) {
+    if ("LATEST".equals(versionStr)) {
+      return Version.create(sonar.getAllReleases().last().getVersion(), "LATEST");
+    } else if (versionStr.endsWith("*")) {
+      return resolveWithWildcard(versionStr, sonar);
     }
-    if (version.endsWith("*")) {
-      return resolveWithWildcard(version, sonar);
-    }
-    return version;
+    return Version.create(versionStr);
   }
 
-  private static String resolveWithWildcard(String version, Sonar sonar) {
-    String prefix = version.substring(0, version.length() - 1);
+  private static Version resolveWithWildcard(String versionStr, Sonar sonar) {
+    String prefix = versionStr.substring(0, versionStr.length() - 1);
     String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
     Release found = null;
     for (Release r : sonar.getAllReleases()) {
@@ -386,9 +402,9 @@ public final class UpdateCenterDeserializer {
       }
     }
     if (found != null) {
-      return found.getVersion().toString();
+      return Version.create(found.getVersion(), "*");
     } else {
-      throw new IllegalStateException("Unable to resolve " + version);
+      throw new IllegalStateException("Unable to resolve " + versionStr);
     }
   }
 

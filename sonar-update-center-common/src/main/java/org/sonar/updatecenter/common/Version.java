@@ -33,8 +33,9 @@ public class Version implements Comparable<Version> {
   private String patch2 = "0";
   private String qualifier;
   private String name;
+  private String fromString;
 
-  private Version(String version) {
+  private Version(String version, String fromString) {
     this.name = StringUtils.trimToEmpty(version);
     this.qualifier = StringUtils.substringAfter(this.name, "-");
     String numbers = StringUtils.substringBefore(this.name, "-");
@@ -55,6 +56,7 @@ public class Version implements Comparable<Version> {
       patch2 = split[3];
       normalizedPatch2 = normalizePart(patch2);
     }
+    this.fromString = fromString;
   }
 
   private static String normalizePart(String part) {
@@ -83,6 +85,10 @@ public class Version implements Comparable<Version> {
 
   public String getQualifier() {
     return qualifier;
+  }
+
+  public String getFromString( ) {
+    return fromString;
   }
 
   @Override
@@ -145,16 +151,19 @@ public class Version implements Comparable<Version> {
     return name;
   }
 
-  public static Version create(String version) {
-    return new Version(version);
-  }
+  public static Version create(String versionStr ) { return new Version(versionStr, versionStr); }
+
+  public static Version create(String versionStr, String fromString ) { return new Version(versionStr, fromString); }
+
+  public static Version create(Version version, String fromString ) { return new Version(version.name, fromString); }
 
   public static boolean isSnapshot(String version) {
     return StringUtils.endsWith(version, "SNAPSHOT");
   }
 
   public Version removeQualifier() {
-    return new Version(StringUtils.substringBefore(this.toString(), "-"));
+    String versionStringBeforeQualifier = StringUtils.substringBefore(this.toString(), "-");
+    return new Version(versionStringBeforeQualifier, versionStringBeforeQualifier);
   }
 
   /**
