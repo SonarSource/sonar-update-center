@@ -47,16 +47,25 @@ public class VersionTest {
 
   @Test
   public void test_fields_fromString() {
-    Version version = Version.create("1.2","LATEST");
+
+    Version version = Version.create("1.2");
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("0");
     assertThat(version.getPatch2()).isEqualTo("0");
     assertThat(version.getQualifier()).isEqualTo("");
-    assertThat(version.getFromString()).isEqualTo("LATEST");
+    assertThat(version.getFromString()).isEqualTo("1.2");
 
-    Version copiedVersion = Version.create(version, "COPY" );
-    copiedVersion.equals(version);
+    Version versionWFromString = Version.create("1.2","LATEST");
+    assertThat(versionWFromString.getMajor()).isEqualTo("1");
+    assertThat(versionWFromString.getMinor()).isEqualTo("2");
+    assertThat(versionWFromString.getPatch()).isEqualTo("0");
+    assertThat(versionWFromString.getPatch2()).isEqualTo("0");
+    assertThat(versionWFromString.getQualifier()).isEqualTo("");
+    assertThat(versionWFromString.getFromString()).isEqualTo("LATEST");
+
+    Version copiedVersion = Version.create(versionWFromString, "COPY" );
+    copiedVersion.equals(versionWFromString);
     assertThat(copiedVersion.getFromString()).isEqualTo("COPY");
   }
 

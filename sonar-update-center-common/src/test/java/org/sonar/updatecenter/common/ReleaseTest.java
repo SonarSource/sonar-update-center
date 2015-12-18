@@ -50,8 +50,6 @@ public class ReleaseTest {
     release.addRequiredSonarVersions("2.0");
     assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
 
-    assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
-
     release.addRequiredSonarVersions((String[]) null);
     assertThat(release.getRequiredSonarVersions()).hasSize(1);
 
@@ -100,8 +98,9 @@ public class ReleaseTest {
     assertThat(release.getSonarVersionFromString("mystring") ).hasSize(0);
 
     release.addRequiredSonarVersions( Version.create("3.0", "mystring"));
-    assertThat(release.getSonarVersionFromString("mystring") ).hasSize(1);
-    // TODO check 3.0
+    Version[] sqVersions= release.getSonarVersionFromString("mystring");
+    assertThat(sqVersions).hasSize(1);
+    assertThat(sqVersions[0]).isEqualTo(Version.create("3.0"));
   }
 
 }
