@@ -131,6 +131,12 @@ public class PluginHeadersTest {
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+
+    file = outputFolder.listFiles(new FilenameFilterForSonarSourceGeneratedHtml())[0];
+    flattenFile = flatHtmlFile(file);
+    flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-sonarsource.html"));
+    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+
   }
 
   // UPC-20
@@ -219,6 +225,14 @@ public class PluginHeadersTest {
       return (PLUGIN_KEY + "-confluence-include.html").equals(s);
     }
   }
+
+
+  class FilenameFilterForSonarSourceGeneratedHtml implements FilenameFilter {
+    public boolean accept(File file, String s) {
+      return (PLUGIN_KEY + "-sonarsource.html").equals(s);
+    }
+  }
+
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
