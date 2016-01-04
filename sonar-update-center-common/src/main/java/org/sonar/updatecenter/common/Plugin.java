@@ -153,10 +153,10 @@ public class Plugin extends Artifact {
       developers = Arrays.asList(manifest.getDevelopers());
 
       // precedence to the update center file
-      description =     StringUtils.defaultIfEmpty(description, manifest.getDescription() );
+      description = StringUtils.defaultIfEmpty(description, manifest.getDescription());
       issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
-      homepageUrl =     StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
-      sourcesUrl =      StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
+      homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
+      sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
     }
     return this;
   }
