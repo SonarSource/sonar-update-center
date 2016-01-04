@@ -111,12 +111,12 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    //  5 files:
-    //  - style-confluence.css
-    //  - error.png
-    //  - compatibility-matrix.html
-    //  - PLUGIN_KEY-confluence-include.html
-    //  - PLUGIN_KEY-sonarsource.html
+    // 5 files:
+    // - style-confluence.css
+    // - error.png
+    // - compatibility-matrix.html
+    // - PLUGIN_KEY-confluence-include.html
+    // - PLUGIN_KEY-sonarsource.html
     assertThat(outputFolder.list()).hasSize(5);
 
     // since Freemarker transformation, confluence include data files are not easy to read
@@ -194,7 +194,6 @@ public class PluginHeadersTest {
     return returned;
   }
 
-
   @Test
   public void shouldHaveNoDownloadLinkIfArchivedVersion() throws Exception {
     Plugin plugin = new Plugin(PLUGIN_KEY);
@@ -236,7 +235,6 @@ public class PluginHeadersTest {
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("archived-version-have-no-download-link-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
-
 
   class FilenameFilterForConfluenceIncludeGeneratedHtml implements FilenameFilter {
     public boolean accept(File file, String s) {
@@ -374,7 +372,6 @@ public class PluginHeadersTest {
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-sources-url-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
-
 
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
