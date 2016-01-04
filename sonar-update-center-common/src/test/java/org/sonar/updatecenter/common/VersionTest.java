@@ -56,7 +56,7 @@ public class VersionTest {
     assertThat(version.getQualifier()).isEqualTo("");
     assertThat(version.getFromString()).isEqualTo("1.2");
 
-    Version versionWFromString = Version.create("1.2","LATEST");
+    Version versionWFromString = Version.create("1.2", "LATEST");
     assertThat(versionWFromString.getMajor()).isEqualTo("1");
     assertThat(versionWFromString.getMinor()).isEqualTo("2");
     assertThat(versionWFromString.getPatch()).isEqualTo("0");
@@ -64,7 +64,7 @@ public class VersionTest {
     assertThat(versionWFromString.getQualifier()).isEqualTo("");
     assertThat(versionWFromString.getFromString()).isEqualTo("LATEST");
 
-    Version copiedVersion = Version.create(versionWFromString, "COPY" );
+    Version copiedVersion = Version.create(versionWFromString, "COPY");
     copiedVersion.equals(versionWFromString);
     assertThat(copiedVersion.getFromString()).isEqualTo("COPY");
   }

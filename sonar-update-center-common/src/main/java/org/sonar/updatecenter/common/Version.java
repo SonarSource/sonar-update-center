@@ -87,7 +87,7 @@ public class Version implements Comparable<Version> {
     return qualifier;
   }
 
-  public String getFromString( ) {
+  public String getFromString() {
     return fromString;
   }
 
@@ -151,11 +151,17 @@ public class Version implements Comparable<Version> {
     return name;
   }
 
-  public static Version create(String versionStr ) { return new Version(versionStr, versionStr); }
+  public static Version create(String versionStr) {
+    return new Version(versionStr, versionStr);
+  }
 
-  public static Version create(String versionStr, String fromString ) { return new Version(versionStr, fromString); }
+  public static Version create(String versionStr, String fromString) {
+    return new Version(versionStr, fromString);
+  }
 
-  public static Version create(Version version, String fromString ) { return new Version(version.name, fromString); }
+  public static Version create(Version version, String fromString) {
+    return new Version(version.name, fromString);
+  }
 
   public static boolean isSnapshot(String version) {
     return StringUtils.endsWith(version, "SNAPSHOT");

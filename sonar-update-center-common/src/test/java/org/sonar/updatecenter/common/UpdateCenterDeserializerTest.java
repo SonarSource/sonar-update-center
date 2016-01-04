@@ -241,7 +241,8 @@ public class UpdateCenterDeserializerTest {
 
   @Test
   public void should_not_load_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
-    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
+    URL url = getClass().getResource(
+      "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
 
     thrown.expect(IllegalStateException.class);
     thrown.expectMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");

@@ -45,7 +45,7 @@ public class ReleaseTest {
   }
 
   @Test
-  public void should_add_required_sonar_versions(){
+  public void should_add_required_sonar_versions() {
     Release release = new Release(new Plugin("squid"), "1.0");
     release.addRequiredSonarVersions("2.0");
     assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
@@ -58,7 +58,7 @@ public class ReleaseTest {
   }
 
   @Test
-  public void should_return_last_required_sonar_version(){
+  public void should_return_last_required_sonar_version() {
     Release release = new Release(new Plugin("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.1"));
@@ -68,7 +68,7 @@ public class ReleaseTest {
   }
 
   @Test
-  public void should_return_minimum_required_sonar_version(){
+  public void should_return_minimum_required_sonar_version() {
     Release release = new Release(new Plugin("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("1.9"));
@@ -78,7 +78,7 @@ public class ReleaseTest {
   }
 
   @Test
-  public void test_equal(){
+  public void test_equal() {
     Release squid10 = new Release(new Plugin("squid"), "1.0");
     Release squid10bis = new Release(new Plugin("squid"), "1.0");
     Release squid20 = new Release(new Plugin("squid"), "2.0");
@@ -91,14 +91,14 @@ public class ReleaseTest {
   }
 
   @Test
-  public void should_have_version_from_string(){
+  public void should_have_version_from_string() {
     Release release = new Release(new Plugin("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getRequiredSonarVersions()).hasSize(3);
-    assertThat(release.getSonarVersionFromString("mystring") ).hasSize(0);
+    assertThat(release.getSonarVersionFromString("mystring")).hasSize(0);
 
-    release.addRequiredSonarVersions( Version.create("3.0", "mystring"));
-    Version[] sqVersions= release.getSonarVersionFromString("mystring");
+    release.addRequiredSonarVersions(Version.create("3.0", "mystring"));
+    Version[] sqVersions = release.getSonarVersionFromString("mystring");
     assertThat(sqVersions).hasSize(1);
     assertThat(sqVersions[0]).isEqualTo(Version.create("3.0"));
   }

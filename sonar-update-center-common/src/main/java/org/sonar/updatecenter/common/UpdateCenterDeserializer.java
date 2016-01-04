@@ -188,9 +188,9 @@ public final class UpdateCenterDeserializer {
   private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
       for (Release r : plugin.getReleases()) {
-        Version [] versionsWLatest = r.getSonarVersionFromString("LATEST");
+        Version[] versionsWLatest = r.getSonarVersionFromString("LATEST");
         // only latest release may depend on LATEST SQ
-        if( ! r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0 ) {
+        if (!r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin) + " may depend on LATEST SonarQube");
         }
       }
@@ -353,8 +353,14 @@ public final class UpdateCenterDeserializer {
       }
     });
     for (Version version : versions) {
-      String fromString = version.equals(low) ? low.getFromString() :
-                            version.equals(high) ? high.getFromString()  : "";
+      String fromString;
+      if( version.equals(low) ) {
+        fromString = low.getFromString();
+      } else if ( version.equals(high) ) {
+        fromString = high.getFromString();
+      } else {
+        fromString = "";
+      }
       result.add(Version.create(version, fromString));
     }
   }
