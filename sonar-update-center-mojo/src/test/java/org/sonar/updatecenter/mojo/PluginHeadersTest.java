@@ -111,12 +111,12 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    //  5 files:
-    //  - style-confluence.css
-    //  - error.png
-    //  - compatibility-matrix.html
-    //  - PLUGIN_KEY-confluence-include.html
-    //  - PLUGIN_KEY-sonarsource.html
+    // 5 files:
+    // - style-confluence.css
+    // - error.png
+    // - compatibility-matrix.html
+    // - PLUGIN_KEY-confluence-include.html
+    // - PLUGIN_KEY-sonarsource.html
     assertThat(outputFolder.list()).hasSize(5);
 
     // since Freemarker transformation, confluence include data files are not easy to read

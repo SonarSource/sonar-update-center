@@ -74,7 +74,7 @@ class PluginHeaders {
     }
     for (Map.Entry<String, Release> sq : majorVersions.entrySet()) {
       matrix.getSqVersions().add(
-              new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
+        new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
