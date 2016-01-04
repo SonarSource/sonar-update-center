@@ -143,7 +143,9 @@ public class PluginHeader {
     return plugin.getAllReleases().size();
   }
 
-  public boolean isSupported() { return plugin.isSupported(); }
+  public boolean isSupported() {
+    return plugin.isSupported();
+  }
 
   @CheckForNull
   public String getLastVersionString() {

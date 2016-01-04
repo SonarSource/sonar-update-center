@@ -80,10 +80,9 @@ public class CompatibilityMatrix {
     private final String homepageUrl;
     private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
-
     private final boolean isSupported;
 
-    public Plugin(String name, String homepageUrl, boolean isSupported ) {
+    public Plugin(String name, String homepageUrl, boolean isSupported) {
       this.name = name;
       this.homepageUrl = homepageUrl;
       this.isSupported = isSupported;
@@ -108,7 +107,6 @@ public class CompatibilityMatrix {
     public String supportedVersion(String sqVersion) {
       return compatibleVersionBySqVersion.get(sqVersion);
     }
-
 
     public boolean isSupported() {
       return isSupported;

@@ -112,14 +112,14 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    //  7 files:
-    //  - style-confluence.css
-    //  - error.png
-    //  - onde-sonar-16.png
-    //  - compatibility-matrix.html
-    //  - PLUGIN_KEY-confluence.html
-    //  - PLUGIN_KEY-confluence-include.html
-    //  - PLUGIN_KEY-sonarsource.html
+    // 7 files:
+    // - style-confluence.css
+    // - error.png
+    // - onde-sonar-16.png
+    // - compatibility-matrix.html
+    // - PLUGIN_KEY-confluence.html
+    // - PLUGIN_KEY-confluence-include.html
+    // - PLUGIN_KEY-sonarsource.html
     assertThat(outputFolder.list()).hasSize(7);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
@@ -226,13 +226,11 @@ public class PluginHeadersTest {
     }
   }
 
-
   class FilenameFilterForSonarSourceGeneratedHtml implements FilenameFilter {
     public boolean accept(File file, String s) {
       return (PLUGIN_KEY + "-sonarsource.html").equals(s);
     }
   }
-
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
@@ -368,10 +366,10 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "key-confluence-include.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "key-confluence-include.html", "key-confluence.html", "style-confluence.css",
+      "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
     assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
-
 
     file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
