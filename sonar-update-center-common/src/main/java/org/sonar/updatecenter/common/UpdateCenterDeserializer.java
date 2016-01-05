@@ -112,7 +112,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private void loadPluginProperties(File file, Properties props) throws IOException {
+  private static void loadPluginProperties(File file, Properties props) throws IOException {
     String[] pluginKeys = getArray(props, PLUGINS);
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
@@ -170,7 +170,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void validatePublicPluginSQVersionOverlap(Plugin plugin) {
-    Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+    Map<Version, Release> sonarVersion = new HashMap<>();
     for (Release r : plugin.getPublicReleases()) {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
@@ -310,7 +310,7 @@ public final class UpdateCenterDeserializer {
   private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar, boolean isArchived) {
     String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", !isArchived);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
-    List<String> result = new LinkedList<String>();
+    List<String> result = new LinkedList<>();
     for (String pattern : patterns) {
       if (pattern != null) {
         Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);

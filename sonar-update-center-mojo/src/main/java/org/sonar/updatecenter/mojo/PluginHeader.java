@@ -131,7 +131,7 @@ public class PluginHeader {
   }
 
   public List<PluginHeaderVersion> getAllVersions() {
-    List<PluginHeaderVersion> result = new LinkedList<PluginHeader.PluginHeaderVersion>();
+    List<PluginHeaderVersion> result = new LinkedList<>();
     for (Release r : plugin.getAllReleases()) {
       // Add in reverse order to have greater version on top
       result.add(0, new PluginHeaderVersion(r));
