@@ -4,24 +4,30 @@
     <#else>
     ${pluginHeader.organization}
     </#if>
-    <#if pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? >
+    <#if pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.license?? >
 ${pluginHeader.license}
-    <#if pluginHeader.issueTracker?? || pluginHeader.sources?? >
+    <#if pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.issueTracker?? >
 <a target="_top" href="${pluginHeader.issueTracker}">Issue Tracker</a>
-    <#if pluginHeader.sources?? >
+    <#if pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.sources?? >
 <a target="_top" href="${pluginHeader.sources}">Sources</a>
+    <#if pluginHeader.isSupportedBySonarSource() >
+    &#8211;
+    </#if>
+</#if>
+<#if pluginHeader.isSupportedBySonarSource() >
+Supported by SonarSource
 </#if>
 <#if pluginHeader.getNbVersions() gt 1 >
 <br>
@@ -48,7 +54,7 @@ ${pluginHeader.license}
 </a></span>
 </span>
 </#if>
-<#if pluginHeader.organization?? || pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? ||  pluginHeader.getNbVersions() gt 1>
+<#if pluginHeader.organization?? || pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() || pluginHeader.getNbVersions() gt 1>
 <br>
 </#if>
 <div id="lastVersion">

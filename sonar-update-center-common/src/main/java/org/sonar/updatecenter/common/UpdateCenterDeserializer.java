@@ -184,6 +184,7 @@ public final class UpdateCenterDeserializer {
       plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl", false));
       plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl", false));
       plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
+      plugin.setSupportedBySonarSource(Boolean.valueOf(get(p, pluginKey, "supportedBySonarSource", false)));
       plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
 
       parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true, false);
@@ -292,7 +293,7 @@ public final class UpdateCenterDeserializer {
   private String[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion, Sonar sonar, boolean isArchived) {
     String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", !isArchived);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
-    List<String> result = new LinkedList<String>();
+    List<String> result = new LinkedList<>();
     for (String pattern : patterns) {
       if (pattern != null) {
         Matcher multipleEltMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);

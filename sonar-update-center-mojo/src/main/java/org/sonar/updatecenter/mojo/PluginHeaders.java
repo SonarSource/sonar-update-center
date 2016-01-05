@@ -59,6 +59,7 @@ class PluginHeaders {
     Preconditions.checkArgument(outputDirectory.exists());
     FileUtils.copyURLToFile(getClass().getResource("/style-confluence.css"), new File(outputDirectory, "style-confluence.css"));
     FileUtils.copyURLToFile(getClass().getResource("/error.png"), new File(outputDirectory, "error.png"));
+    FileUtils.copyURLToFile(getClass().getResource("/onde-sonar-16.png"), new File(outputDirectory, "onde-sonar-16.png"));
   }
 
   void generateHtml() throws IOException {
@@ -89,7 +90,9 @@ class PluginHeaders {
       log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-sonarsource-template.html.ftl");
 
-      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl());
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName()
+        , plugin.getHomepageUrl()
+        , plugin.isSupportedBySonarSource());
       matrix.getPlugins().add(matrixPlugin);
 
       for (Release sq : center.getSonar().getAllReleases()) {

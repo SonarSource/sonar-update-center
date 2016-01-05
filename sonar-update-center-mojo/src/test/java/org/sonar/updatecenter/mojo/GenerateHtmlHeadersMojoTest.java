@@ -49,7 +49,15 @@ public class GenerateHtmlHeadersMojoTest {
     String html = FileUtils.readFileToString(htmlConfluenceInclude);
     assertThat(html).contains("<strong>Artifact Size");
 
+    File htmlSonarSource = new File(outputDir, "html/artifactsize-sonarsource.html");
+    assertThat(htmlSonarSource).exists().isFile();
+    html = FileUtils.readFileToString(htmlSonarSource);
+    assertThat(html).contains("<title>Artifact Size");
+
     assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
+    assertThat(new File(outputDir, "html/error.png")).exists().isFile();
+    assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();
+
   }
 
   private File resource(String filename) {

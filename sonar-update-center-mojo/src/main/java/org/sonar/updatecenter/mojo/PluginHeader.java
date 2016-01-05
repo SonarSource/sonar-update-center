@@ -135,7 +135,7 @@ public class PluginHeader {
   }
 
   public List<PluginHeaderVersion> getAllVersions() {
-    List<PluginHeaderVersion> result = new LinkedList<PluginHeader.PluginHeaderVersion>();
+    List<PluginHeaderVersion> result = new LinkedList<>();
     for (Release r : plugin.getAllReleases()) {
       // Add in reverse order to have greater version on top
       result.add(0, new PluginHeaderVersion(r));
@@ -145,6 +145,10 @@ public class PluginHeader {
 
   public int getNbVersions() {
     return plugin.getAllReleases().size();
+  }
+
+  public boolean isSupportedBySonarSource() {
+    return plugin.isSupportedBySonarSource();
   }
 
   @CheckForNull

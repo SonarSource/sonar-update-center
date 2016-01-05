@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +58,7 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
       assertThat(clirr.getIssueTrackerUrl()).isEqualTo("http://jira.codehaus.org/issueTracker/for/clirr");
+      assertThat(clirr.isSupportedBySonarSource()).isTrue();
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
       assertThat(clirr.getSourcesUrl()).isNull();
@@ -67,6 +67,9 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
       assertThat(clirr.getRelease(Version.create("1.0")).getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
       assertThat(clirr.getRelease(Version.create("1.0")).getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+
+      Plugin motionchart = center.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      assertThat(motionchart.isSupportedBySonarSource()).isFalse();
 
     } finally {
       IOUtils.closeQuietly(input);
@@ -249,6 +252,7 @@ public class UpdateCenterDeserializerTest {
     assertThat(abapPlugin.getIssueTrackerUrl()).isEqualTo("http://issue.tracker.url/from/properties/file");
 
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
+    assertThat(phpPlugin.isSupportedBySonarSource()).isTrue();
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
     assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
     assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");

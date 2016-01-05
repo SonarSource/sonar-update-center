@@ -68,7 +68,7 @@ class Generator {
       File masterJar = null;
       for (Release release : plugin.getAllReleases()) {
         if (StringUtils.isNotBlank(release.getDownloadUrl())) {
-          boolean forceDownload = plugin.getDevRelease() == release;
+          boolean forceDownload = release.equals(plugin.getDevRelease());
           File jar = downloader.download(release.getDownloadUrl(), forceDownload);
           if (jar != null && jar.exists()) {
             updateReleaseRequirePluginsAndParentProperties(pluginReferential, jar, release);
