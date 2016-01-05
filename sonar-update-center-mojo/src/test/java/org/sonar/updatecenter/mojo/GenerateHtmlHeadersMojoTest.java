@@ -43,16 +43,10 @@ public class GenerateHtmlHeadersMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    // html confluence
-    File htmlConfluence = new File(outputDir, "html/artifactsize-confluence.html");
-    assertThat(htmlConfluence).exists().isFile();
-    String html = FileUtils.readFileToString(htmlConfluence);
-    assertThat(html).contains("<title>Artifact Size</title>");
-
     // html confluence include
     File htmlConfluenceInclude = new File(outputDir, "html/artifactsize-confluence-include.html");
     assertThat(htmlConfluenceInclude).exists().isFile();
-    html = FileUtils.readFileToString(htmlConfluenceInclude);
+    String html = FileUtils.readFileToString(htmlConfluenceInclude);
     assertThat(html).contains("<strong>Artifact Size");
 
     assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();

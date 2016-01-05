@@ -111,21 +111,17 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    //  6 files:
-    //  - style-confluence.css
-    //  - error.png
-    //  - compatibility-matrix.html
-    //  - PLUGIN_KEY-confluence.html
-    //  - PLUGIN_KEY-confluence-include.html
-    //  - PLUGIN_KEY-sonarsource.html
-    assertThat(outputFolder.list()).hasSize(6);
+    // 5 files:
+    // - style-confluence.css
+    // - error.png
+    // - compatibility-matrix.html
+    // - PLUGIN_KEY-confluence-include.html
+    // - PLUGIN_KEY-sonarsource.html
+    assertThat(outputFolder.list()).hasSize(5);
 
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("normal.html"));
-
-    // since Freemarker transformation, confluence include data file are not easy to read
+    // since Freemarker transformation, confluence include data files are not easy to read
     // flatten the file to keep a easy to read reference file.
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
@@ -136,19 +132,14 @@ public class PluginHeadersTest {
   public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {
     Map<String, File> files = generateWithLts(true, true);
 
-    assertThat(files.get("confluenceHtml")).hasSameContentAs(getExpectedFile("latest_plugin_version_compatible_with_lts.html"));
-
     String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("latest_plugin_version_compatible_with_lts-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 
-  // UPC-20
   @Test
   public void shouldGenerateHtml_old_plugin_version_compatible_with_lts() throws Exception {
     Map<String, File> files = generateWithLts(false, true);
-
-    assertThat(files.get("confluenceHtml")).hasSameContentAs(getExpectedFile("old_plugin_version_compatible_with_lts.html"));
 
     String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("old_plugin_version_compatible_with_lts-include.html"));
@@ -160,8 +151,6 @@ public class PluginHeadersTest {
   public void shouldGenerateHtml_no_plugin_version_compatible_with_lts() throws Exception {
 
     Map<String, File> files = generateWithLts(false, false);
-
-    assertThat(files.get("confluenceHtml")).hasSameContentAs(getExpectedFile("no_plugin_version_compatible_with_lts.html"));
 
     String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("no_plugin_version_compatible_with_lts-include.html"));
@@ -198,18 +187,11 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(5);
     Map<String, File> returned = new HashMap<String, File>(2);
-    returned.put("confluenceHtml", outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0]);
     returned.put("confluenceIncludeHtml", outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0]);
 
     return returned;
-  }
-
-  class FilenameFilterForConfluenceGeneratedHtml implements FilenameFilter {
-    public boolean accept(File file, String s) {
-      return (PLUGIN_KEY + "-confluence.html").equals(s);
-    }
   }
 
   class FilenameFilterForConfluenceIncludeGeneratedHtml implements FilenameFilter {
@@ -236,12 +218,9 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(5);
 
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("normal-with-2-dev.html"));
-
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-with-2-dev-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
@@ -265,12 +244,9 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(5);
 
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("without-licence.html"));
-
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-licence-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
@@ -294,12 +270,9 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(5);
 
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("without-issues-url.html"));
-
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-issues-url-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
@@ -324,11 +297,9 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("with-author.html"));
+    assertThat(outputFolder.list()).hasSize(5);
 
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("with-author-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
@@ -352,12 +323,9 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence.html", "key-confluence-include.html", "key-confluence.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceGeneratedHtml())[0];
-    assertThat(file).hasSameContentAs(getExpectedFile("without-sources-url.html"));
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png");
 
-
-    file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-sources-url-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);

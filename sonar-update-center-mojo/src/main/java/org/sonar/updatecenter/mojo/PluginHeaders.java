@@ -67,25 +67,21 @@ class PluginHeaders {
     CompatibilityMatrix matrix = new CompatibilityMatrix();
 
     // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
-    Map<String, Release> majorVersions = new LinkedHashMap<String, Release>();
+    Map<String, Release> majorVersions = new LinkedHashMap<>();
     for (Release sq : center.getSonar().getAllReleases()) {
       String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
       majorVersions.put(displayVersion, sq);
     }
     for (Map.Entry<String, Release> sq : majorVersions.entrySet()) {
       matrix.getSqVersions().add(
-              new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
+        new SQVersion(sq.getKey(), sq.getValue().getVersion().toString(), center.getSonar().getLtsRelease().equals(sq.getValue()), sq.getValue().getDate()));
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
       Map<String, Object> dataModel = Maps.newHashMap();
       dataModel.put("pluginHeader", pluginHeader);
 
-      File file = new File(outputDirectory, plugin.getKey() + "-confluence.html");
-      log.info("Generate confluence html header of plugin " + plugin.getKey() + " in: " + file);
-      print(dataModel, file, "plugin-confluence-template.html.ftl");
-
-      file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
+      File file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
       log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-confluence-include-template.html.ftl");
 
