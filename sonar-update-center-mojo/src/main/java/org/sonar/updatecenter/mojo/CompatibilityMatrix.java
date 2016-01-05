@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class CompatibilityMatrix {
 
-  private List<SQVersion> sqVersions = new ArrayList<CompatibilityMatrix.SQVersion>();
-  private List<Plugin> plugins = new ArrayList<CompatibilityMatrix.Plugin>();
+  private List<SQVersion> sqVersions = new ArrayList<>();
+  private List<Plugin> plugins = new ArrayList<>();
 
   public List<SQVersion> getSqVersions() {
     return sqVersions;

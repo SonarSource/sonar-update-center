@@ -327,7 +327,7 @@ public final class UpdateCenterDeserializer {
     return result.toArray(new Version[result.size()]);
   }
 
-  private void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high) {
+  private static void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       @Override
       public Version apply(Release release) {
