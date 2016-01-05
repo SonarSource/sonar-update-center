@@ -61,7 +61,7 @@ public final class UpdateCenterDeserializer {
   private static final String PRIVATE_VERSIONS = "privateVersions";
   private static final String ARCHIVED_VERSIONS = "archivedVersions";
   private static final String DEV_VERSION = "devVersion";
-  private static final String keyword_LATEST = "LATEST";
+  private static final String LATEST_KEYWORD = "LATEST";
   private Mode mode;
   private boolean ignoreError;
 
@@ -172,11 +172,11 @@ public final class UpdateCenterDeserializer {
   private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
       for (Release r : plugin.getReleases()) {
-        Version[] versionsWLatest = r.getSonarVersionFromString(keyword_LATEST);
+        Version[] versionsWLatest = r.getSonarVersionFromString(LATEST_KEYWORD);
         // only latest release may depend on LATEST SQ
         if (!r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin)
-                      + " may depend on " + keyword_LATEST + " SonarQube");
+                      + " may depend on " + LATEST_KEYWORD + " SonarQube");
         }
       }
     }
@@ -379,8 +379,8 @@ public final class UpdateCenterDeserializer {
   }
 
   private static Version resolveKeywordAndStar(String versionStr, Sonar sonar) {
-    if (keyword_LATEST.equals(versionStr)) {
-      return Version.create(sonar.getAllReleases().last().getVersion(), keyword_LATEST);
+    if (LATEST_KEYWORD.equals(versionStr)) {
+      return Version.create(sonar.getAllReleases().last().getVersion(), LATEST_KEYWORD);
     } else if (versionStr.endsWith("*")) {
       return resolveWithWildcard(versionStr, sonar);
     }
