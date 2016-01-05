@@ -96,7 +96,7 @@ class PluginHeaders {
 
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName()
         , plugin.getHomepageUrl()
-        , plugin.isSupported());
+        , plugin.isSupportedBySonarSource());
       matrix.getPlugins().add(matrixPlugin);
 
       for (Release sq : center.getSonar().getAllReleases()) {

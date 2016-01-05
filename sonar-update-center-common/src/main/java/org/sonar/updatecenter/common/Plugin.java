@@ -36,7 +36,7 @@ public class Plugin extends Artifact {
   private String category;
   private String issueTrackerUrl;
   private String sourcesUrl;
-  private boolean supported = false;
+  private boolean supportedBySonarSource = false;
   private List<String> developers;
 
   public Plugin(String key) {
@@ -142,12 +142,12 @@ public class Plugin extends Artifact {
     return this;
   }
 
-  public boolean isSupported() {
-    return supported;
+  public boolean isSupportedBySonarSource() {
+    return supportedBySonarSource;
   }
 
-  public Plugin setSupported(boolean supported) {
-    this.supported = supported;
+  public Plugin setSupportedBySonarSource(boolean supportedBySonarSource) {
+    this.supportedBySonarSource = supportedBySonarSource;
     return this;
   }
 
@@ -170,7 +170,7 @@ public class Plugin extends Artifact {
       sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
 
       // from the properties file
-      // supported
+      // supportedBySonarSource
     }
     return this;
   }

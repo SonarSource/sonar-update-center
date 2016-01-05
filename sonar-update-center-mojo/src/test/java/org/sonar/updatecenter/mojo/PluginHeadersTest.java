@@ -107,7 +107,7 @@ public class PluginHeadersTest {
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
     plugin.setDevelopers(newArrayList("dev"));
-    plugin.setSupported(true);
+    plugin.setSupportedBySonarSource(true);
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();

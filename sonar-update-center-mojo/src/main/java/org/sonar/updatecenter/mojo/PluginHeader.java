@@ -143,8 +143,8 @@ public class PluginHeader {
     return plugin.getAllReleases().size();
   }
 
-  public boolean isSupported() {
-    return plugin.isSupported();
+  public boolean isSupportedBySonarSource() {
+    return plugin.isSupportedBySonarSource();
   }
 
   @CheckForNull

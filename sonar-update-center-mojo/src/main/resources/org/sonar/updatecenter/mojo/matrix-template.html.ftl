@@ -39,7 +39,7 @@
         ${plugin.name}
         </#if>
         </strong>
-        <#if plugin.isSupported()>
+        <#if plugin.isSupportedBySonarSource()>
         <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png">
         </#if>
         </td>

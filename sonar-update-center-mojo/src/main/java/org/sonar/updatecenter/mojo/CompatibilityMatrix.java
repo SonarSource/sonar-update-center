@@ -80,12 +80,12 @@ public class CompatibilityMatrix {
     private final String homepageUrl;
     private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
-    private final boolean isSupported;
+    private final boolean isSupportedBySonarSource;
 
-    public Plugin(String name, String homepageUrl, boolean isSupported) {
+    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource) {
       this.name = name;
       this.homepageUrl = homepageUrl;
-      this.isSupported = isSupported;
+      this.isSupportedBySonarSource = isSupportedBySonarSource;
     }
 
     public String getName() {
@@ -108,8 +108,8 @@ public class CompatibilityMatrix {
       return compatibleVersionBySqVersion.get(sqVersion);
     }
 
-    public boolean isSupported() {
-      return isSupported;
+    public boolean isSupportedBySonarSource() {
+      return isSupportedBySonarSource;
     }
   }
 
