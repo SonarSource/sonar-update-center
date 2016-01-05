@@ -211,7 +211,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_parse_lts() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties");
@@ -225,7 +224,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_throw_if_lts_invalid() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties");
@@ -240,10 +238,30 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
+  @Test
+  public void should_load_when_LATEST_is_on_latest_plugin_version() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST-is-on-latest-plugin-version/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
+
+    Plugin fooPlugin = center.getUpdateCenterPluginReferential().findPlugin("foo");
+    assertThat(fooPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+  }
+
+  @Test
+  public void should_not_load_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
+    URL url = getClass().getResource(
+      "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");
+
+    new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
+  }
+
   // UPC-29
   @Test
-  public void should_load_new_format_in_dev_mode() throws IOException, URISyntaxException {
-    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
+  public void should_load_split_format_in_dev_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
 
@@ -266,8 +284,8 @@ public class UpdateCenterDeserializerTest {
 
   // UPC-29
   @Test
-  public void should_load_new_format_in_prod_mode() throws IOException, URISyntaxException {
-    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
+  public void should_load_split_format_in_prod_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
