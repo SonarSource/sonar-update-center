@@ -60,6 +60,10 @@ public class PluginHeader {
       return release.getDescription();
     }
 
+    public boolean isArchived() {
+      return release.isArchived();
+    }
+
     public String getSonarVersionRange() {
       String min = release.getMinimumRequiredSonarVersion().toString();
       String max = release.getLastRequiredSonarVersion().toString();

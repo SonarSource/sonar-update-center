@@ -64,7 +64,7 @@ ${pluginHeader.license}
 
     <#if pluginVersion.description?? >${pluginVersion.description}<br></#if>
 
-    <#if pluginVersion.downloadUrl?? ><a target="_top" href="${pluginVersion.downloadUrl}">Download</a>
+    <#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() ><a target="_top" href="${pluginVersion.downloadUrl}">Download</a>
         <#if pluginVersion.changelogUrl?? > &#8211; </#if>
     </#if>
     <#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if>
