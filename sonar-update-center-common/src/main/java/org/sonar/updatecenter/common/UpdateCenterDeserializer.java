@@ -95,24 +95,7 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  /**
-   * Load configuration with one single file containing everything
-   */
-  public UpdateCenter fromSingleFile(File mainFile) throws IOException {
-    FileInputStream in = FileUtils.openInputStream(mainFile);
-    try {
-      Properties props = new Properties();
-      props.load(in);
-      UpdateCenter pluginReferential = fromProperties(props);
-      pluginReferential.setDate(new Date(mainFile.lastModified()));
-      return pluginReferential;
-
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-  }
-
-  private void loadPluginProperties(File file, Properties props) throws IOException {
+  private static void loadPluginProperties(File file, Properties props) throws IOException {
     String[] pluginKeys = getArray(props, PLUGINS);
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
@@ -170,7 +153,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void validatePublicPluginSQVersionOverlap(Plugin plugin) {
-    Map<Version, Release> sonarVersion = new HashMap<Version, Release>();
+    Map<Version, Release> sonarVersion = new HashMap<>();
     for (Release r : plugin.getPublicReleases()) {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
@@ -312,11 +295,14 @@ public final class UpdateCenterDeserializer {
     List<String> result = new LinkedList<String>();
     for (String pattern : patterns) {
       if (pattern != null) {
-        Matcher matcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
-        if (matcher.matches()) {
-          final Version low = Version.create(resolve(matcher.group(1), sonar));
-          final Version high = Version.create(resolve(matcher.group(2), sonar));
+        Matcher multipleEltMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
+        Matcher simpleEltMatcher = Pattern.compile("\\[(.*)\\]").matcher(pattern);
+        if (multipleEltMatcher.matches() ) {
+          final Version low = Version.create(resolve(multipleEltMatcher.group(1), sonar));
+          final Version high = Version.create(resolve(multipleEltMatcher.group(2), sonar));
           resolveRangeOfRequiredSQVersion(sonar, result, low, high);
+        } else if(simpleEltMatcher.matches() ) {
+          result.add(resolve(simpleEltMatcher.group(1), sonar));
         } else {
           result.add(resolve(pattern, sonar));
         }
@@ -357,7 +343,7 @@ public final class UpdateCenterDeserializer {
         if (c == ']') {
           skipCommas--;
         }
-        s += c;
+        s += Character.toString(c);
       }
     }
     if (StringUtils.isNotBlank(s)) {
@@ -366,7 +352,7 @@ public final class UpdateCenterDeserializer {
     return splitted;
   }
 
-  private String resolve(String version, Sonar sonar) {
+  private static String resolve(String version, Sonar sonar) {
     if ("LATEST".equals(version)) {
       return sonar.getAllReleases().last().getVersion().toString();
     }
