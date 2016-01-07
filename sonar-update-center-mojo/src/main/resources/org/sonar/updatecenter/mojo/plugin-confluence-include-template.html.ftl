@@ -40,8 +40,7 @@ Supported by SonarSource
         AJS.$('#fewerVersionsLink').show();
         return false;
     }
-    // ]]&gt;</script>
-</a></span>
+    // ]]&gt;</script></a></span>
 <span id="fewerVersionsLink" style="display:none">
 <a   onclick="return showFewerVersions()" href=""> Fewer versions<script type="text/javascript">// <![CDATA[
     function showFewerVersions() {
@@ -50,8 +49,7 @@ Supported by SonarSource
         AJS.$('#fewerVersionsLink').hide();
         return false;
     }
-    // ]]&gt;</script>
-</a></span>
+    // ]]&gt;</script></a></span>
 </span>
 </#if>
 <#if pluginHeader.organization?? || pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() || pluginHeader.getNbVersions() gt 1>
