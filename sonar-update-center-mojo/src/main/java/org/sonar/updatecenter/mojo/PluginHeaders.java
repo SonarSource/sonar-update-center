@@ -90,6 +90,10 @@ class PluginHeaders {
       log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-sonarsource-template.html.ftl");
 
+      file = new File(outputDirectory, plugin.getKey() + "-sonarsource-include.html");
+      log.info("Generate sonarsource.com include of plugin " + plugin.getKey() + " in: " + file);
+      print(dataModel, file, "plugin-sonarsource-include-template.html.ftl");
+
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName()
         , plugin.getHomepageUrl()
         , plugin.isSupportedBySonarSource());
