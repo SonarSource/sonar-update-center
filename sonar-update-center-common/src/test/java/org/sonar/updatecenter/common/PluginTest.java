@@ -52,12 +52,12 @@ public class PluginTest {
 
     // precedence to the manifest file (=POM)
     assertThat(plugin.getLicense()).isEqualTo("LGPL3"); // UPC-32 don't override manifest
-    assertThat(plugin.getDescription()).isEqualTo("description_manifest");
     assertThat(plugin.getOrganization()).isEqualTo("organization_manifest");
     assertThat(plugin.getOrganizationUrl()).isEqualTo("organizationUrl_manifest");
     assertThat(plugin.getTermsConditionsUrl()).isEqualTo("termsconditions_manifest");
 
     // precedence to the update center
+    assertThat(plugin.getDescription()).isEqualTo("description");
     assertThat(plugin.getIssueTrackerUrl()).isEqualTo("issueTrackerUrl");
     assertThat(plugin.getHomepageUrl()).isEqualTo("homepage");
     assertThat(plugin.getSourcesUrl()).isEqualTo("sourceURL");

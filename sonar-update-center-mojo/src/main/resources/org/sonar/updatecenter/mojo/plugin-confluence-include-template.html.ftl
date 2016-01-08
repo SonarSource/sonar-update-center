@@ -4,53 +4,55 @@
     <#else>
     ${pluginHeader.organization}
     </#if>
-    <#if pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? >
+    <#if pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.license?? >
 ${pluginHeader.license}
-    <#if pluginHeader.issueTracker?? || pluginHeader.sources?? >
+    <#if pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.issueTracker?? >
 <a target="_top" href="${pluginHeader.issueTracker}">Issue Tracker</a>
-    <#if pluginHeader.sources?? >
+    <#if pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() >
     &#8211;
     </#if>
 </#if>
 <#if pluginHeader.sources?? >
 <a target="_top" href="${pluginHeader.sources}">Sources</a>
+    <#if pluginHeader.isSupportedBySonarSource() >
+    &#8211;
+    </#if>
+</#if>
+<#if pluginHeader.isSupportedBySonarSource() >
+Supported by SonarSource
 </#if>
 <#if pluginHeader.getNbVersions() gt 1 >
 <br>
 <span style="font-size:smaller;">
 <span id="moreVersionsLink" >
-<a   onclick="return showMoreVersions()" href=""> More versions
-    <script type="text/javascript">// <![CDATA[
+<a   onclick="return showMoreVersions()" href=""> More versions<script type="text/javascript">// <![CDATA[
     function showMoreVersions() {
         AJS.$('#moreVersions').show();
         AJS.$('#moreVersionsLink').hide();
         AJS.$('#fewerVersionsLink').show();
         return false;
     }
-    // ]]&gt;</script>
-</a></span>
+    // ]]&gt;</script></a></span>
 <span id="fewerVersionsLink" style="display:none">
-<a   onclick="return showFewerVersions()" href=""> Fewer versions
-    <script type="text/javascript">// <![CDATA[
+<a   onclick="return showFewerVersions()" href=""> Fewer versions<script type="text/javascript">// <![CDATA[
     function showFewerVersions() {
         AJS.$('#moreVersions').hide();
         AJS.$('#moreVersionsLink').show();
         AJS.$('#fewerVersionsLink').hide();
         return false;
     }
-    // ]]&gt;</script>
-</a></span>
+    // ]]&gt;</script></a></span>
 </span>
 </#if>
-<#if pluginHeader.organization?? || pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? ||  pluginHeader.getNbVersions() gt 1>
+<#if pluginHeader.organization?? || pluginHeader.license?? || pluginHeader.issueTracker?? || pluginHeader.sources?? || pluginHeader.isSupportedBySonarSource() || pluginHeader.getNbVersions() gt 1>
 <br>
 </#if>
 <div id="lastVersion">

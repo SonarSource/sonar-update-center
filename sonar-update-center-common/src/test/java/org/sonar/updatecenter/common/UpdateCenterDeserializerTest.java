@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,12 +57,20 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
       assertThat(clirr.getDescription()).isEqualTo("Clirr Plugin");
+      assertThat(clirr.getIssueTrackerUrl()).isEqualTo("http://jira.codehaus.org/issueTracker/for/clirr");
+      assertThat(clirr.isSupportedBySonarSource()).isTrue();
       assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
 
       assertThat(clirr.getSourcesUrl()).isNull();
       assertThat(clirr.getDevelopers()).isEmpty();
 
       assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+      assertThat(clirr.getRelease(Version.create("1.0")).getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      assertThat(clirr.getRelease(Version.create("1.0")).getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+
+      Plugin motionchart = center.getUpdateCenterPluginReferential().findPlugin("motionchart");
+      assertThat(motionchart.isSupportedBySonarSource()).isFalse();
+
     } finally {
       IOUtils.closeQuietly(input);
     }
@@ -204,7 +211,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_parse_lts() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties");
@@ -218,7 +224,6 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-19
   @Test
   public void should_throw_if_lts_invalid() throws IOException {
     InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties");
@@ -233,28 +238,72 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
-  // UPC-29
   @Test
-  public void should_load_new_format_in_dev_mode() throws IOException, URISyntaxException {
-    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
-    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
-    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
-    assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
-    Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
-    assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
-    assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
-    assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
-    assertThat(phpPlugin.getArchivedVersions()).onProperty("name").containsOnly("2.0");
+  public void should_load_when_LATEST_is_on_latest_plugin_version() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST-is-on-latest-plugin-version/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
+
+    Plugin fooPlugin = center.getUpdateCenterPluginReferential().findPlugin("foo");
+    assertThat(fooPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+  }
+
+  @Test
+  public void should_not_load_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
+    URL url = getClass().getResource(
+      "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");
+
+    new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
   }
 
   // UPC-29
   @Test
-  public void should_load_new_format_in_prod_mode() throws IOException, URISyntaxException {
-    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/newFormat/update-center.properties");
+  public void should_load_split_format_in_dev_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
+    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+
+    Plugin abapPlugin = center.getUpdateCenterPluginReferential().findPlugin("abap");
+    assertThat(abapPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
+    assertThat(abapPlugin.getIssueTrackerUrl()).isEqualTo("http://issue.tracker.url/from/properties/file");
+
+    Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
+    assertThat(phpPlugin.isSupportedBySonarSource()).isTrue();
+    assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
+    assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
+    assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
+    assertThat(phpPlugin.getArchivedVersions()).onProperty("name").containsOnly("2.0");
+
+    Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
+    assertThat(ssqvPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("1.1-SNAPSHOT"));
+    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+
+  }
+
+  // UPC-29
+  @Test
+  public void should_load_split_format_in_prod_mode() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
     assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
+    assertThat(center.getUpdateCenterPluginReferential().findPlugin("ssqv").getDevRelease()).isNull();
+
+    Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
+    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    SortedSet<Version> requiredSonarVersion10 = ssqvPlugin.getRelease(Version.create("1.0")).getRequiredSonarVersions();
+    assertThat(requiredSonarVersion10).hasSize(1);
+    assertThat(requiredSonarVersion10.first().toString()).isEqualTo("3.7");
+    assertThat(requiredSonarVersion10.last().toString()).isEqualTo("3.7");
+
+    SortedSet<Version> requiredSonarVersion11 = ssqvPlugin.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+    assertThat(requiredSonarVersion11).hasSize(1);
+    assertThat(requiredSonarVersion11.first().toString()).isEqualTo("4.0");
+    assertThat(requiredSonarVersion11.last().toString()).isEqualTo("4.0");
+
   }
 
   // UPC-29

@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class CompatibilityMatrix {
 
-  private List<SQVersion> sqVersions = new ArrayList<CompatibilityMatrix.SQVersion>();
-  private List<Plugin> plugins = new ArrayList<CompatibilityMatrix.Plugin>();
+  private List<SQVersion> sqVersions = new ArrayList<>();
+  private List<Plugin> plugins = new ArrayList<>();
 
   public List<SQVersion> getSqVersions() {
     return sqVersions;
@@ -78,11 +78,14 @@ public class CompatibilityMatrix {
 
     private final String name;
     private final String homepageUrl;
-    private final Map<String, String> compatibleVersionBySqVersion = new HashMap<String, String>();
+    private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
-    public Plugin(String name, String homepageUrl) {
+    private final boolean isSupportedBySonarSource;
+
+    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource) {
       this.name = name;
       this.homepageUrl = homepageUrl;
+      this.isSupportedBySonarSource = isSupportedBySonarSource;
     }
 
     public String getName() {
@@ -105,6 +108,9 @@ public class CompatibilityMatrix {
       return compatibleVersionBySqVersion.get(sqVersion);
     }
 
+    public boolean isSupportedBySonarSource() {
+      return isSupportedBySonarSource;
+    }
   }
 
 }

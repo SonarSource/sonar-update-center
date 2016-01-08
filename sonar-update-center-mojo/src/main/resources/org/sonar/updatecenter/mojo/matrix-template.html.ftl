@@ -38,7 +38,11 @@
         <#else>
         ${plugin.name}
         </#if>
-        </strong></td>
+        </strong>
+        <#if plugin.isSupportedBySonarSource()>
+        <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png">
+        </#if>
+        </td>
         <#list matrix.sqVersions as sqVersion>
         <td>
           <#if plugin.supports(sqVersion.realVersion) >
