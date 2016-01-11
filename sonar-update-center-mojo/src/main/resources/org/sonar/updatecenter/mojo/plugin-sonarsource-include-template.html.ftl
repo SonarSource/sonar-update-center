@@ -10,32 +10,9 @@
         return tc.checked;
     }
 </script>
-
-<h1>Latest version</h1>
-<#list pluginHeader.getAllVersions() as pluginVersion>
-<#if pluginVersion_index = 0 >
-<table class="plugin-downloads">
-    <tr class="nobar">
-        <td class="version">${pluginVersion.getVersion()}</td>
-        <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
-        <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
-        <td class="other">SonarQube <#if pluginVersion.sonarVersionRange?? >${pluginVersion.sonarVersionRange}</#if></td>
-        <td class="other"><#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
-        <td><#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() ><a href="#" class="highlight" onClick="return checkTC(this, '${pluginHeader.getKey()}', '${pluginVersion.downloadUrl}')">Download</a></#if></td>
-    </tr>
-    <tfoot>
-    <tr>
-        <th colspan="6">
-            <input type="checkbox" id="tc-${pluginHeader.getKey()}" name="tc-${pluginHeader.getKey()}"/>I accept the <a
-                target="_blank"
-                href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms
-            and Conditions</a>
-        </th>
-    </tr>
-    </tfoot>
-</table>
-<#if pluginHeader.getNbVersions() gt 1 >
-<h2>
+<h1 style="margin-bottom: 0px;margin-top: 0px;">Download</h1>
+    <#if pluginHeader.getNbVersions() gt 1 >
+<span style="font-size:smaller;">
 <span id="moreVersionsLink">
 	<a onclick="return showMoreVersions()" href="">More versions
         <script type="text/javascript">// <![CDATA[
@@ -58,21 +35,36 @@
         }
         // ]]&gt;</script>
     </a></span>
-</h2>
+</span>
 </#if>
+<div id="lastVersion">
+<#list pluginHeader.getAllVersions() as pluginVersion>
+    <div style="padding-top:5px;padding-bottom:10px">
+    <span><strong>${pluginHeader.getName()} ${pluginVersion.getVersion()}</strong></span>
+    <#if pluginVersion.date?? > &#8211; ${pluginVersion.date}</#if>
+    <#if pluginVersion.getSonarVersionRange()?? > &#8211; Compatible with SonarQube ${pluginVersion.getSonarVersionRange()}</#if>
+    <br>
+    <#if pluginVersion.description?? >${pluginVersion.description}<br></#if>
+    <#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() >
+        <input type="checkbox" id="tc-${pluginHeader.getKey()}-${pluginVersion_index}" name="tc-${pluginHeader.getKey()}-${pluginVersion_index}"/>I accept the <a
+            target="_blank"
+            href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms and Conditions</a>
+        &#8211;
+        <a href="#" class="highlight" onClick="return checkTC(this, '${pluginHeader.getKey()}-${pluginVersion_index}', '${pluginVersion.downloadUrl}')">Download</a>
+        <#if pluginVersion.changelogUrl?? > &#8211; </#if>
+    </#if>
+    <#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if>
+    <#if pluginHeader.getNbVersions() gt 1 >
+        <#if pluginVersion.getVersion() = pluginHeader.getLastVersionString() >
+    </div> <#-- Close the div style -->
+</div> <#-- Close the div last version -->
 <div id="moreVersions" style="display:none">
-    <table class="plugin-downloads">
-<#else>
-        <tr class="bar">
-            <td class="version">${pluginVersion.getVersion()}</td>
-            <td class="other"><#if pluginVersion.date?? >${pluginVersion.date}</#if></td>
-            <td class="description"><#if pluginVersion.description?? >${pluginVersion.description}</#if></td>
-            <td class="other">SonarQube <#if pluginVersion.sonarVersionRange?? >${pluginVersion.sonarVersionRange}</#if></td>
-            <td class="other"><#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if></td>
-            <td><#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() ><a href="#" class="highlight" onClick="return checkTC(this, '${pluginHeader.getKey()}', '${pluginVersion.downloadUrl}')">Download</a></#if></td>
-        </tr>
-</#if>
+        <#else>
+    </div> <#-- Close the div style -->
+        </#if>
+    <#else>
+    </div> <#-- Close the div style -->
+    </#if>
 </#list>
-    </table>
-</div>
+</div> <#-- Close the div either last or more version -->
 
