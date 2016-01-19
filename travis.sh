@@ -16,21 +16,19 @@ function strongEcho {
 
 installTravisTools
 
-build "SonarSource/parent" "30"
-
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   strongEcho 'Build and analyze commit in master'
-  # this commit is master must be built and analyzed (with upload of report)
-  mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify -Pcoverage-per-test -Dmaven.test.redirectTestOutputToFile=false -B -e -V
 
   # Switch to java 8 as the Dory HTTPS certificate is not supported by Java 7
   export JAVA_HOME=/usr/lib/jvm/java-8-oracle
   export PATH=$JAVA_HOME/bin:$PATH
 
-  mvn sonar:sonar -B -e -V \
-     -Dsonar.host.url=$SONAR_HOST_URL \
-     -Dsonar.login=$SONAR_TOKEN
-
+    # this commit is master must be built and analyzed (with upload of report)
+    mvn -B -e -V clean org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar \
+       -Pcoverage-per-test \
+       -Dmaven.test.redirectTestOutputToFile=false \
+       -Dsonar.host.url=$SONAR_HOST_URL \
+       -Dsonar.login=$SONAR_TOKEN
 
 elif [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "$SONAR_GITHUB_OAUTH" ]; then
   # For security reasons environment variables are not available on the pull requests
