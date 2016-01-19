@@ -2,10 +2,21 @@
 
 set -euo pipefail
 
+function installTravisTools {
+  mkdir ~/.local
+  curl -sSL https://github.com/SonarSource/travis-utils/tarball/v21 | tar zx --strip-components 1 -C ~/.local
+  source ~/.local/bin/install
+}
+
+
 function strongEcho {
   echo ""
   echo "================ $1 ================="
 }
+
+installTravisTools
+
+build "SonarSource/parent" "30"
 
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   strongEcho 'Build and analyze commit in master'
