@@ -18,8 +18,7 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 
   mvn sonar:sonar -B -e -V \
      -Dsonar.host.url=$SONAR_HOST_URL \
-     -Dsonar.login=$SONAR_LOGIN \
-     -Dsonar.password=$SONAR_PASSWORD
+     -Dsonar.login=$SONAR_TOKEN
 
 
 elif [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "$SONAR_GITHUB_OAUTH" ]; then
@@ -44,8 +43,7 @@ elif [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "$SONAR_GITHUB_OAUTH" ]; then
       -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
       -Dsonar.github.oauth=$SONAR_GITHUB_OAUTH \
       -Dsonar.host.url=$SONAR_HOST_URL \
-      -Dsonar.login=$SONAR_LOGIN \
-      -Dsonar.password=$SONAR_PASSWORD
+      -Dsonar.login=$SONAR_TOKEN
 
 
 else
