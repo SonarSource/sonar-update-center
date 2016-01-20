@@ -62,21 +62,8 @@
 
   <issueManagement>
     <system>jira</system>
-    <url>http://jira.codehaus.org/browse/SONAR</url>
+    <url>https://jira.sonarsource.com/browse/UPC/</url>
   </issueManagement>
-
-  <distributionManagement>
-    <repository>
-      <id>codehaus-nexus-staging</id>
-      <name>Codehaus Release Repository</name>
-      <url>https://nexus.codehaus.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>sonar-snapshots</id>
-      <url>${sonar.snapshotRepository.url}</url>
-      <uniqueVersion>false</uniqueVersion>
-    </snapshotRepository>
-  </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
