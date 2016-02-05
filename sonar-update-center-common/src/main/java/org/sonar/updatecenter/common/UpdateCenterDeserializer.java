@@ -23,6 +23,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,15 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -171,10 +165,14 @@ public final class UpdateCenterDeserializer {
 
   private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
-      for (Release r : plugin.getReleases()) {
+
+      SortedSet<Release> publicAndArchivedReleases = new TreeSet<>(plugin.getPublicReleases());
+      publicAndArchivedReleases.addAll(plugin.getArchivedReleases());
+
+      for (Release r : publicAndArchivedReleases ) {
         Version[] versionsWLatest = r.getSonarVersionFromString(LATEST_KEYWORD);
         // only latest release may depend on LATEST SQ
-        if (!r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0) {
+        if (!r.equals(publicAndArchivedReleases.last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin)
                       + " may depend on " + LATEST_KEYWORD + " SonarQube");
         }
