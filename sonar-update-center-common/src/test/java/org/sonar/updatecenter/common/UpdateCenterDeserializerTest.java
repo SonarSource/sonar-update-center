@@ -239,7 +239,7 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void should_load_when_LATEST_is_on_latest_plugin_version() throws IOException, URISyntaxException {
+  public void should_load_when_LATEST_is_on_latest_plugin_version_and_on_private_version_Prod() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST-is-on-latest-plugin-version/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
 
@@ -248,7 +248,17 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void should_not_load_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
+  public void should_load_when_LATEST_is_on_latest_plugin_version_and_on_private_version_Dev() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST-is-on-latest-plugin-version/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
+
+    Plugin fooPlugin = center.getUpdateCenterPluginReferential().findPlugin("foo");
+    assertThat(fooPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    assertThat(fooPlugin.getPrivateVersions()).onProperty("name").containsOnly("1.2");
+  }
+
+  @Test
+  public void should_throw_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
     URL url = getClass().getResource(
       "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
 
