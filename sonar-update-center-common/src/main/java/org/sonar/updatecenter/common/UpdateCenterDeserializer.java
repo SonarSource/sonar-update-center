@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,10 +173,14 @@ public final class UpdateCenterDeserializer {
 
   private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
     for (Plugin plugin : plugins) {
-      for (Release r : plugin.getReleases()) {
+
+      SortedSet<Release> publicAndArchivedReleases = new TreeSet<>(plugin.getPublicReleases());
+      publicAndArchivedReleases.addAll(plugin.getArchivedReleases());
+
+      for (Release r : publicAndArchivedReleases ) {
         Version[] versionsWLatest = r.getSonarVersionFromString(LATEST_KEYWORD);
         // only latest release may depend on LATEST SQ
-        if (!r.equals(plugin.getReleases().last()) && versionsWLatest.length > 0) {
+        if (!r.equals(publicAndArchivedReleases.last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin)
                       + " may depend on " + LATEST_KEYWORD + " SonarQube");
         }
