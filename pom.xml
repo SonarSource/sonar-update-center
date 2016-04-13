@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>26</version>
+    <version>31</version>
     <relativePath />
   </parent>
   
@@ -47,6 +47,9 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
+  <properties>
+    <gitRepositoryName>sonar-update-center</gitRepositoryName>
+  </properties>
 
   <modules>
     <module>sonar-update-center-common</module>
