@@ -19,15 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
@@ -77,6 +76,11 @@ public final class PluginManifest {
    */
   public static final String DEVELOPERS = "Plugin-Developers";
 
+  /**
+   * @since 1.16
+   */
+  public static final String SONARLINT_SUPPORTED = "SonarLint-Supported";
+
   private String key;
   private String name;
   private String mainClass;
@@ -97,6 +101,7 @@ public final class PluginManifest {
   private String sourcesUrl;
   private String[] developers;
   private String[] requirePlugins;
+  private boolean sonarlintSupported;
 
   /**
    * Load the manifest from a JAR file.
@@ -149,6 +154,7 @@ public final class PluginManifest {
     this.issueTrackerUrl = attributes.getValue(ISSUE_TRACKER_URL);
     this.buildDate = toDate(attributes.getValue(BUILD_DATE), true);
     this.useChildFirstClassLoader = StringUtils.equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER), "true");
+    this.sonarlintSupported = StringUtils.equalsIgnoreCase(attributes.getValue(SONARLINT_SUPPORTED), "true");
     this.basePlugin = attributes.getValue(BASE_PLUGIN);
     this.implementationBuild = attributes.getValue(IMPLEMENTATION_BUILD);
     this.sourcesUrl = attributes.getValue(SOURCES_URL);
@@ -316,6 +322,21 @@ public final class PluginManifest {
    */
   public PluginManifest setUseChildFirstClassLoader(boolean useChildFirstClassLoader) {
     this.useChildFirstClassLoader = useChildFirstClassLoader;
+    return this;
+  }
+
+  /**
+   * @since 1.16
+   */
+  public boolean isSonarLintSupported() {
+    return sonarlintSupported;
+  }
+
+  /**
+   * @since 1.16
+   */
+  public PluginManifest setSonarLintSupported(boolean sonarlintSupported) {
+    this.sonarlintSupported = sonarlintSupported;
     return this;
   }
 

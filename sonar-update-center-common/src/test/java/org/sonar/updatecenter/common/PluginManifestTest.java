@@ -19,8 +19,6 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -29,6 +27,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -51,11 +50,11 @@ public class PluginManifestTest {
     assertThat(manifest.getMainClass()).isEqualTo("org.sonar.plugins.checkstyle.CheckstylePlugin");
     assertThat(manifest.getVersion().length()).isGreaterThan(1);
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
+    assertThat(manifest.isSonarLintSupported()).isFalse();
     assertThat(manifest.getDependencies()).hasSize(2);
     assertThat(manifest.getDependencies()).containsOnly("META-INF/lib/antlr-2.7.7.jar", "META-INF/lib/checkstyle-5.5.jar");
     assertThat(manifest.getImplementationBuild()).isEqualTo("b9283404030db9ce1529b1fadfb98331686b116d");
   }
-
 
   @Test
   public void accessors() throws URISyntaxException, IOException, ParseException {
@@ -64,16 +63,17 @@ public class PluginManifestTest {
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
 
     manifest.setName("newName");
-    String [] requirePlugins= new String [2];
-    requirePlugins[0]= "requiredPlugin1";
-    requirePlugins[1]= "requiredPlugin2";
-    manifest.setRequirePlugins(requirePlugins ) ;
-    manifest.setSonarVersion("newSonarVersion") ;
-    manifest.setMainClass("newMainClass") ;
+    String[] requirePlugins = new String[2];
+    requirePlugins[0] = "requiredPlugin1";
+    requirePlugins[1] = "requiredPlugin2";
+    manifest.setRequirePlugins(requirePlugins);
+    manifest.setSonarVersion("newSonarVersion");
+    manifest.setMainClass("newMainClass");
     DateFormat formatter = new SimpleDateFormat("yyyy-mm-dd");
     Date macBirthDate = formatter.parse("1984-01-24");
-    manifest.setBuildDate( macBirthDate );
+    manifest.setBuildDate(macBirthDate);
     manifest.setUseChildFirstClassLoader(false);
+    manifest.setSonarLintSupported(true);
     manifest.setBasePlugin("newBasePlugin");
     manifest.setImplementationBuild("newImplementationBuild");
 
@@ -83,10 +83,10 @@ public class PluginManifestTest {
     assertThat(manifest.getMainClass()).isEqualTo("newMainClass");
     assertThat(manifest.getBuildDate().equals(macBirthDate)).isTrue();
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
+    assertThat(manifest.isSonarLintSupported()).isTrue();
     assertThat(manifest.getBasePlugin()).isEqualTo("newBasePlugin");
     assertThat(manifest.getImplementationBuild()).isEqualTo("newImplementationBuild");
   }
-
 
   @Test
   public void do_not_fail_when_no_old_plugin_manifest() throws URISyntaxException, IOException {
@@ -115,7 +115,7 @@ public class PluginManifestTest {
   }
 
   @Test
-     public void should_add_sources_url() throws URISyntaxException, IOException {
+  public void should_add_sources_url() throws URISyntaxException, IOException {
     URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-sources.jar");
 
     PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
