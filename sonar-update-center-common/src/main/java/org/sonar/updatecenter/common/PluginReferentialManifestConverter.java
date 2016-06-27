@@ -36,7 +36,7 @@ public class PluginReferentialManifestConverter {
   public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList) {
     List<Plugin> plugins = newArrayList();
     for (PluginManifest pluginManifest : pluginManifestList) {
-      Plugin plugin = new Plugin(pluginManifest.getKey());
+      Plugin plugin = Plugin.factory(pluginManifest.getKey());
       plugin.merge(pluginManifest);
 
       Release release = new Release(plugin, pluginManifest.getVersion());

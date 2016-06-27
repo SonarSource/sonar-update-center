@@ -28,7 +28,7 @@ public class SonarUpdateTest {
   @Test
   public void incompatibleUpdateIfSomePluginsAreIncompatible() {
     SonarUpdate update = new SonarUpdate(new Release(new Sonar(), "2.3"));
-    update.addIncompatiblePlugin(new Plugin("old"));
+    update.addIncompatiblePlugin(Plugin.factory("old"));
 
     assertThat(update.isIncompatible()).isTrue();
     assertThat(update.hasWarnings()).isTrue();
@@ -38,7 +38,7 @@ public class SonarUpdateTest {
   @Test
   public void incompatibleUpdateIfRequiredPluginUpgrades() {
     SonarUpdate update = new SonarUpdate(new Release(new Sonar(), "2.3"));
-    update.addPluginToUpgrade(new Release(new Plugin("old"), Version.create("0.2")));
+    update.addPluginToUpgrade(new Release(Plugin.factory("old"), Version.create("0.2")));
 
     assertThat(update.isIncompatible()).isFalse();
     assertThat(update.hasWarnings()).isTrue();

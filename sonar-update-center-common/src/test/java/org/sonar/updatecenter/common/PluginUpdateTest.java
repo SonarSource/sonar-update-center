@@ -29,7 +29,7 @@ public class PluginUpdateTest {
   @Test
   public void createForCompatibleRelease() {
     Version sonarVersion = Version.create("2.2");
-    Release pluginRelease = new Release(new Plugin("fake"), "1.0");
+    Release pluginRelease = new Release(Plugin.factory("fake"), "1.0");
     pluginRelease.addRequiredSonarVersions(Version.create("2.1"), Version.create("2.2"), Version.create("2.3"));
 
     PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion);
@@ -43,7 +43,7 @@ public class PluginUpdateTest {
   @Test
   public void createForSonarUpgrade() {
     Version sonarVersion = Version.create("2.0");
-    Release pluginRelease = new Release(new Plugin("fake"), "1.0");
+    Release pluginRelease = new Release(Plugin.factory("fake"), "1.0");
     pluginRelease.addRequiredSonarVersions(Version.create("2.1"), Version.create("2.2"), Version.create("2.3"));
 
     PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion);
@@ -57,7 +57,7 @@ public class PluginUpdateTest {
   @Test
   public void createForIncompatibleReleae() {
     Version sonarVersion = Version.create("2.4");
-    Release pluginRelease = new Release(new Plugin("fake"), "1.0");
+    Release pluginRelease = new Release(Plugin.factory("fake"), "1.0");
     pluginRelease.addRequiredSonarVersions(Version.create("2.1"), Version.create("2.2"), Version.create("2.3"));
 
     // the plugin is only compatible with older versions of sonar

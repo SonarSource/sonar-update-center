@@ -27,7 +27,7 @@ public class ReleaseTest {
 
   @Test
   public void should_contain_filename() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2"));
+    Release release = new Release(Plugin.factory("fake"), Version.create("1.2"));
     assertThat(release.getFilename()).isNull();
 
     release.setDownloadUrl("http://dist.sonarsource.org/foo-1.2.jar");
@@ -36,17 +36,17 @@ public class ReleaseTest {
 
   @Test
   public void should_add_dependencies() {
-    Release release = new Release(new Plugin("fake"), Version.create("1.2"));
-    release.addOutgoingDependency(new Release(new Plugin("foo"), Version.create("1.0")));
+    Release release = new Release(Plugin.factory("fake"), Version.create("1.2"));
+    release.addOutgoingDependency(new Release(Plugin.factory("foo"), Version.create("1.0")));
     assertThat(release.getOutgoingDependencies()).hasSize(1);
 
-    release.addIncomingDependency(new Release(new Plugin("fake2"), Version.create("1.2")));
+    release.addIncomingDependency(new Release(Plugin.factory("fake2"), Version.create("1.2")));
     assertThat(release.getIncomingDependencies()).hasSize(1);
   }
 
   @Test
   public void should_add_required_sonar_versions() {
-    Release release = new Release(new Plugin("squid"), "1.0");
+    Release release = new Release(Plugin.factory("squid"), "1.0");
     release.addRequiredSonarVersions("2.0");
     assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
 
@@ -59,31 +59,31 @@ public class ReleaseTest {
 
   @Test
   public void should_return_last_required_sonar_version() {
-    Release release = new Release(new Plugin("squid"), "1.0");
+    Release release = new Release(Plugin.factory("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.1"));
 
-    Release squid10 = new Release(new Plugin("squid"), "1.0");
+    Release squid10 = new Release(Plugin.factory("squid"), "1.0");
     assertThat(squid10.getLastRequiredSonarVersion()).isNull();
   }
 
   @Test
   public void should_return_minimum_required_sonar_version() {
-    Release release = new Release(new Plugin("squid"), "1.0");
+    Release release = new Release(Plugin.factory("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("1.9"));
 
-    Release squid10 = new Release(new Plugin("squid"), "1.0");
+    Release squid10 = new Release(Plugin.factory("squid"), "1.0");
     assertThat(squid10.getMinimumRequiredSonarVersion()).isNull();
   }
 
   @Test
   public void test_equal() {
-    Release squid10 = new Release(new Plugin("squid"), "1.0");
-    Release squid10bis = new Release(new Plugin("squid"), "1.0");
-    Release squid20 = new Release(new Plugin("squid"), "2.0");
+    Release squid10 = new Release(Plugin.factory("squid"), "1.0");
+    Release squid10bis = new Release(Plugin.factory("squid"), "1.0");
+    Release squid20 = new Release(Plugin.factory("squid"), "2.0");
 
-    Release bar10 = new Release(new Plugin("bar"), "1.0");
+    Release bar10 = new Release(Plugin.factory("bar"), "1.0");
 
     assertThat(squid10).isEqualTo(squid10bis);
     assertThat(squid10).isNotEqualTo(squid20);
@@ -92,7 +92,7 @@ public class ReleaseTest {
 
   @Test
   public void should_have_version_from_string() {
-    Release release = new Release(new Plugin("squid"), "1.0");
+    Release release = new Release(Plugin.factory("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getRequiredSonarVersions()).hasSize(3);
     assertThat(release.getSonarVersionFromString("mystring")).hasSize(0);
