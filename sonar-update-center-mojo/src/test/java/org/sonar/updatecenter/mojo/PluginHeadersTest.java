@@ -399,6 +399,33 @@ public class PluginHeadersTest {
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 
+  @Test
+  public void shouldProcessProperlyNoMoreCompatiblePlugin() throws Exception {
+    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Version version = Version.create("1.0");
+    Release release = new Release(plugin, version);
+    release.setDate(getDate());
+    release.setDownloadUrl("download_url");
+
+    plugin.addRelease(release);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(newArrayList("dev"));
+
+    prepareMocks(plugin);
+    pluginHeaders.generateHtml();
+
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+        "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
+
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    String flattenFile = flatHtmlFile(file);
+    assertThat(flattenFile).doesNotContain("Compatible with SonarQube".replaceAll("\\s", ""));
+  }
+
+
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));
   }

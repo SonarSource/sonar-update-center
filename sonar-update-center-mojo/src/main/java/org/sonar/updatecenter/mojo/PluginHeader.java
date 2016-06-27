@@ -65,24 +65,31 @@ public class PluginHeader {
     }
 
     public String getSonarVersionRange() {
-      String min = release.getMinimumRequiredSonarVersion().toString();
-      String max = release.getLastRequiredSonarVersion().toString();
-      String latest = null;
+      Version latest = null;
       Release lastRelease = sonar.getLastRelease();
       if (lastRelease != null) {
-        latest = lastRelease.getVersion().toString();
+        latest = lastRelease.getVersion();
       }
-      StringBuilder sb = new StringBuilder();
-      sb.append(min);
-      if (max.equals(latest)) {
-        sb.append("+");
-      } else if (!max.equals(min)) {
-        sb.append(" - ").append(max);
+
+      if (release.getRequiredSonarVersions().isEmpty()) {
+        // pathological case but still valid, where no more SQ version for this plugin
+        return null;
+      } else {
+        Version min = release.getMinimumRequiredSonarVersion();
+        Version max = release.getLastRequiredSonarVersion();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(min.toString());
+        if (max.equals(latest)) {
+          sb.append("+");
+        } else if (!max.equals(min)) {
+          sb.append(" - ").append(max.toString());
+        }
+        if (release.supportSonarVersion(sonar.getLtsRelease().getVersion())) {
+          sb.append(" (LTS)");
+        }
+        return sb.toString();
       }
-      if (release.supportSonarVersion(sonar.getLtsRelease().getVersion())) {
-        sb.append(" (LTS)");
-      }
-      return sb.toString();
     }
 
     public boolean compatibleWithLts() {
