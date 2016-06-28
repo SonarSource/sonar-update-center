@@ -49,7 +49,7 @@ public class Plugin extends Artifact {
     if (StringUtils.isAlphanumeric(key)) {
       return new Plugin(key);
     } else {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("plugin key must be alphanumeric, strictly");
     }
   }
 
