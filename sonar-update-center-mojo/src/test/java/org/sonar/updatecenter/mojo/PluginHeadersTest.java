@@ -245,7 +245,7 @@ public class PluginHeadersTest {
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("archived-version-have-no-download-link-include.html"));
+    String flattenExpectedFile = flatHtmlFile(getExpectedFile("archived-version-have-no-SQ-compability-and-no-download-link-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 

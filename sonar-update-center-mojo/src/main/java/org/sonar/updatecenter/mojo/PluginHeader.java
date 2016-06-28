@@ -80,7 +80,7 @@ public class PluginHeader {
         sb.append(" - ").append(max);
       }
       if (release.supportSonarVersion(sonar.getLtsRelease().getVersion())) {
-        sb.append(" (LTS)");
+        sb.append(" (Compatible with LTS)");
       }
       return sb.toString();
     }
