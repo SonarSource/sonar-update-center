@@ -112,26 +112,20 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    // 7 files:
+    // 6 files:
     // - style-confluence.css
     // - error.png
     // - onde-sonar-16.png
     // - compatibility-matrix.html
     // - PLUGIN_KEY-confluence-include.html
-    // - PLUGIN_KEY-sonarsource.html
     // - PLUGIN_KEY-sonarsource-include.html
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     // since Freemarker transformation, confluence include data file are not easy to read
     // flatten the file to keep a easy to read reference file.
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-
-    file = outputFolder.listFiles(new FilenameFilterForSonarSourceGeneratedHtml())[0];
-    flattenFile = flatHtmlFile(file);
-    flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-sonarsource.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
 
     file = outputFolder.listFiles(new FilenameFilterForSonarSourceIncludeGeneratedHtml())[0];
@@ -200,7 +194,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
     Map<String, File> returned = new HashMap<>(2);
     returned.put("confluenceIncludeHtml", outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0]);
 
@@ -241,7 +235,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -285,7 +279,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -311,7 +305,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -337,7 +331,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -364,7 +358,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(7);
+    assertThat(outputFolder.list()).hasSize(6);
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -390,7 +384,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+    assertThat(outputFolder.list()).containsOnly( "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
       "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];

@@ -49,11 +49,6 @@ public class GenerateHtmlHeadersMojoTest {
     String html = FileUtils.readFileToString(htmlConfluenceInclude);
     assertThat(html).contains("<strong>Artifact Size");
 
-    File htmlSonarSource = new File(outputDir, "html/artifactsize-sonarsource.html");
-    assertThat(htmlSonarSource).exists().isFile();
-    html = FileUtils.readFileToString(htmlSonarSource);
-    assertThat(html).contains("<title>Artifact Size");
-
     File htmlSonarSourceInclude = new File(outputDir, "html/artifactsize-sonarsource-include.html");
     assertThat(htmlSonarSourceInclude).exists().isFile();
     html = FileUtils.readFileToString(htmlSonarSourceInclude);
