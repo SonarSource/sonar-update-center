@@ -19,7 +19,6 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
@@ -44,7 +43,7 @@ public class Plugin extends Artifact {
     super(key);
   }
 
-  public static Plugin factory(String key) throws IllegalArgumentException {
+  public static Plugin factory(String key) {
     // in accordance with https://github.com/SonarSource/sonar-packaging-maven-plugin/blob/master/src/main/java/org/sonarsource/pluginpackaging/PluginKeyUtils.java#L44
     if (StringUtils.isAlphanumeric(key)) {
       return new Plugin(key);
