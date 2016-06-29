@@ -64,6 +64,7 @@ public class PluginHeader {
       return release.isArchived();
     }
 
+    @CheckForNull
     public String getSonarVersionRange() {
       Version latest = null;
       Release lastRelease = sonar.getLastRelease();
