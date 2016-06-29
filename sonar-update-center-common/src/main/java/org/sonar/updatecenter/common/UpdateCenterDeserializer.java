@@ -235,22 +235,27 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
+  private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) throws IllegalArgumentException {
+
     Release release = new Release(plugin, pluginVersion);
-    release.setPublic(isPublicRelease);
-    release.setArchived(isArchivedRelease);
-    release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
-    release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
-    release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
-    release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
-    release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
-    release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
-    Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
-    if (!isArchivedRelease && requiredSonarVersions.length == 0) {
-      reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion + " should declare compatible SQ versions");
-    }
-    for (Version requiredSonarVersion : requiredSonarVersions) {
-      release.addRequiredSonarVersions(requiredSonarVersion);
+    try {
+      release.setPublic(isPublicRelease);
+      release.setArchived(isArchivedRelease);
+      release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
+      release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
+      release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
+      release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
+      release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
+      release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
+      Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
+      if (!isArchivedRelease && requiredSonarVersions.length == 0) {
+        reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion + " should declare compatible SQ versions");
+      }
+      for (Version requiredSonarVersion : requiredSonarVersions) {
+        release.addRequiredSonarVersions(requiredSonarVersion);
+      }
+    } catch (IllegalArgumentException ex ) {
+      throw new IllegalArgumentException ("issue while processing plugin " + pluginKey, ex);
     }
     return release;
   }

@@ -49,11 +49,11 @@ public class PluginHeader {
     }
 
     public String getDownloadUrl() {
-      return release.getDownloadUrl();
+      return release.getDownloadUrlString();
     }
 
     public String getChangelogUrl() {
-      return release.getChangelogUrl();
+      return release.getChangelogUrlString();
     }
 
     public String getDescription() {

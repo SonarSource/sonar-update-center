@@ -99,7 +99,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://valid.download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");
@@ -177,14 +177,14 @@ public class PluginHeadersTest {
       Version version1 = Version.create("1.0");
       Release release1 = new Release(plugin, version1);
       release1.setDate(getDate());
-      release1.setDownloadUrl("download_url1");
+      release1.setDownloadUrl("http://download.url/1");
       release1.addRequiredSonarVersions("3.0");
       plugin.addRelease(release1);
     }
     Version version2 = Version.create("2.0");
     Release release2 = new Release(plugin, version2);
     release2.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
-    release2.setDownloadUrl("download_url2");
+    release2.setDownloadUrl("http://download.url/2");
     if (latestCompatibleWithLts) {
       release2.addRequiredSonarVersions("3.0", "4.0");
     } else {
@@ -214,7 +214,7 @@ public class PluginHeadersTest {
     Version version10 = Version.create("1.0");
     Release release10 = new Release(plugin, version10);
     release10.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
-    release10.setDownloadUrl("download_url");
+    release10.setDownloadUrl("http://download.url");
     release10.addRequiredSonarVersions("3.0");
     release10.setDescription("Archived version");
     release10.setArchived(true);
@@ -224,7 +224,7 @@ public class PluginHeadersTest {
     Version version11 = Version.create("1.1");
     Release release11 = new Release(plugin, version11);
     release11.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("15-12-2015"));
-    release11.setDownloadUrl("download_url");
+    release11.setDownloadUrl("http://download.url");
     release11.addRequiredSonarVersions("3.0");
     release11.setDescription("Non-archived version");
     release11.setArchived(false);
@@ -273,7 +273,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");
@@ -299,7 +299,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");
@@ -325,7 +325,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");
@@ -351,7 +351,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");
@@ -378,7 +378,7 @@ public class PluginHeadersTest {
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
-    release.setDownloadUrl("download_url");
+    release.setDownloadUrl("http://download.url");
     release.addRequiredSonarVersions("3.0");
     plugin.addRelease(release);
     plugin.setName("name");

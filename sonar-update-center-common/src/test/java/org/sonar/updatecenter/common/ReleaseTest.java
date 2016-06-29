@@ -34,6 +34,12 @@ public class ReleaseTest {
     assertThat(release.getFilename()).isEqualTo("foo-1.2.jar");
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void should_throw_if_badUrl() {
+    Release release = new Release(new Plugin("fake"), Version.create("1.2"));
+    release.setChangelogUrl("badurl");
+  }
+
   @Test
   public void should_add_dependencies() {
     Release release = new Release(new Plugin("fake"), Version.create("1.2"));
