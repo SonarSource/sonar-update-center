@@ -163,8 +163,8 @@ public final class UpdateCenterDeserializer {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
           reportError("SQ version " + v + " is declared compatible with two public versions of " + pluginName(plugin) + " plugin: " + r.getVersion()
-            + " and "
-            + sonarVersion.get(v).getVersion());
+              + " and "
+              + sonarVersion.get(v).getVersion());
         }
         sonarVersion.put(v, r);
       }
@@ -177,12 +177,12 @@ public final class UpdateCenterDeserializer {
       SortedSet<Release> publicAndArchivedReleases = new TreeSet<>(plugin.getPublicReleases());
       publicAndArchivedReleases.addAll(plugin.getArchivedReleases());
 
-      for (Release r : publicAndArchivedReleases ) {
+      for (Release r : publicAndArchivedReleases) {
         Version[] versionsWLatest = r.getSonarVersionFromString(LATEST_KEYWORD);
         // only latest release may depend on LATEST SQ
         if (!r.equals(publicAndArchivedReleases.last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin)
-                      + " may depend on " + LATEST_KEYWORD + " SonarQube");
+              + " may depend on " + LATEST_KEYWORD + " SonarQube");
         }
       }
     }
@@ -235,7 +235,13 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin, boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) throws IllegalArgumentException {
+  private Release parsePluginRelease(Properties p
+                                    , Sonar sonar
+                                    , String pluginKey
+                                    , Plugin plugin
+                                    , boolean isPublicRelease
+                                    , boolean isArchivedRelease
+                                    ,  String pluginVersion) {
 
     Release release = new Release(plugin, pluginVersion);
     try {
@@ -254,8 +260,8 @@ public final class UpdateCenterDeserializer {
       for (Version requiredSonarVersion : requiredSonarVersions) {
         release.addRequiredSonarVersions(requiredSonarVersion);
       }
-    } catch (IllegalArgumentException ex ) {
-      throw new IllegalArgumentException ("issue while processing plugin " + pluginKey, ex);
+    } catch (IllegalArgumentException ex) {
+      throw new IllegalArgumentException("issue while processing plugin " + pluginKey, ex);
     }
     return release;
   }
@@ -326,11 +332,11 @@ public final class UpdateCenterDeserializer {
       if (pattern != null) {
         Matcher multipleEltMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
         Matcher simpleEltMatcher = Pattern.compile("\\[(.*)\\]").matcher(pattern);
-        if (multipleEltMatcher.matches() ) {
+        if (multipleEltMatcher.matches()) {
           final Version low = resolveKeywordAndStar(multipleEltMatcher.group(1), sonar);
           final Version high = resolveKeywordAndStar(multipleEltMatcher.group(2), sonar);
           resolveRangeOfRequiredSQVersion(sonar, result, low, high);
-        } else if(simpleEltMatcher.matches() ) {
+        } else if (simpleEltMatcher.matches()) {
           result.add(resolveKeywordAndStar(simpleEltMatcher.group(1), sonar));
         } else {
           result.add(resolveKeywordAndStar(pattern, sonar));
@@ -354,9 +360,9 @@ public final class UpdateCenterDeserializer {
     });
     for (Version version : versions) {
       String fromString;
-      if( version.equals(low) ) {
+      if (version.equals(low)) {
         fromString = low.getFromString();
-      } else if ( version.equals(high) ) {
+      } else if (version.equals(high)) {
         fromString = high.getFromString();
       } else {
         fromString = "";
