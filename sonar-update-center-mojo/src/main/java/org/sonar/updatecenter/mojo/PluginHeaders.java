@@ -86,10 +86,6 @@ class PluginHeaders {
       log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-confluence-include-template.html.ftl");
 
-      file = new File(outputDirectory, plugin.getKey() + "-sonarsource.html");
-      log.info("Generate sonarsource.com html header of plugin " + plugin.getKey() + " in: " + file);
-      print(dataModel, file, "plugin-sonarsource-template.html.ftl");
-
       file = new File(outputDirectory, plugin.getKey() + "-sonarsource-include.html");
       log.info("Generate sonarsource.com include of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-sonarsource-include-template.html.ftl");
