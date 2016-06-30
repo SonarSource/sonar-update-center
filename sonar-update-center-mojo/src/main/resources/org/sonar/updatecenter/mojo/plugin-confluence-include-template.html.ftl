@@ -61,7 +61,7 @@ Supported by SonarSource
     <div style="padding-top:10px;padding-bottom:5px">
     <span style="font-size:larger;"><strong>${pluginHeader.getName()} ${pluginVersion.getVersion()}</strong></span>
     <#if pluginVersion.date?? > &#8211; ${pluginVersion.date}</#if>
-    <#if pluginVersion.getSonarVersionRange()?? > &#8211; Compatible with SonarQube ${pluginVersion.getSonarVersionRange()}</#if>
+    <#if pluginVersion.getSonarVersionRange()?? && !pluginVersion.isArchived()> &#8211; SonarQube ${pluginVersion.getSonarVersionRange()}</#if>
     <br>
 
     <#if pluginVersion.description?? >${pluginVersion.description}<br></#if>
