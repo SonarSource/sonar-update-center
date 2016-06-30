@@ -411,7 +411,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource.html", "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
         "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
