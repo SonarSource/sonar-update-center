@@ -52,7 +52,7 @@ public class UpdateCenterDeserializerTest {
       UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo(new URL("http://dist.sonar.codehaus.org/sonar-2.2.zip"));
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
@@ -64,7 +64,7 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getSourcesUrl()).isNull();
       assertThat(clirr.getDevelopers()).isEmpty();
 
-      assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrlString()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+      assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
       assertThat(clirr.getRelease(Version.create("1.0")).getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
       assertThat(clirr.getRelease(Version.create("1.0")).getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
 
@@ -360,14 +360,14 @@ public class UpdateCenterDeserializerTest {
 
       Release sonar2_2 = updateCenter.getSonar().getRelease("2.2");
       Release sonar2_3 = updateCenter.getSonar().getRelease("2.3");
-      assertThat(sonar2_2.getChangelogUrlString()).isEqualTo("http://changelog");
-      assertThat(sonar2_3.getChangelogUrlString()).isEqualTo("http://changelog2.3");
+      assertThat(sonar2_2.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(sonar2_3.getChangelogUrl()).isEqualTo("http://changelog2.3");
 
       Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
       Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
       Release clirr1_1 = clirr.getRelease(Version.create("1.1"));
-      assertThat(clirr1_0.getChangelogUrlString()).isEqualTo("http://changelog");
-      assertThat(clirr1_1.getChangelogUrlString()).isEqualTo("http://changelog1.1");
+      assertThat(clirr1_0.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(clirr1_1.getChangelogUrl()).isEqualTo("http://changelog1.1");
 
     } finally {
       IOUtils.closeQuietly(input);

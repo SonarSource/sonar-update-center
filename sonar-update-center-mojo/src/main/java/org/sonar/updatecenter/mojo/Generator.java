@@ -67,14 +67,14 @@ class Generator {
 
       File masterJar = null;
       for (Release release : plugin.getAllReleases()) {
-        if (StringUtils.isNotBlank(release.getDownloadUrlString())) {
+        if (StringUtils.isNotBlank(release.getDownloadUrl())) {
           boolean forceDownload = release.equals(plugin.getDevRelease());
-          File jar = downloader.download(release.getDownloadUrlString(), forceDownload);
+          File jar = downloader.download(release.getDownloadUrl(), forceDownload);
           if (jar != null && jar.exists()) {
             updateReleaseRequirePluginsAndParentProperties(pluginReferential, jar, release);
             masterJar = jar;
           } else {
-            throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrlString());
+            throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
           }
         } else {
           log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());

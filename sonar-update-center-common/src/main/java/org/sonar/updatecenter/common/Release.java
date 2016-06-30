@@ -86,11 +86,7 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
-  public URL getDownloadUrl() {
-    return downloadUrl;
-  }
-
-  public String getDownloadUrlString() {
+  public String getDownloadUrl() {
     return this.downloadUrl == null ? null : downloadUrl.toString();
   }
 
@@ -186,12 +182,8 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
-  public String getChangelogUrlString() {
+  public String getChangelogUrl() {
     return this.changelogUrl == null ? null : changelogUrl.toString();
-  }
-
-  public URL getChangelogUrl() {
-    return this.changelogUrl;
   }
 
   public Release setChangelogUrl(String changelogUrlString) {

@@ -85,14 +85,14 @@ public final class UpdateCenterSerializer {
     }
 
     for (Release sonarRelease : center.getSonar().getAllReleases()) {
-      set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrlString());
-      set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrlString());
+      set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
+      set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
       set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
 
       // For backward compatibility
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrlString());
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrlString());
+      set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
+      set(p, SONAR_PREFIX + sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
     }
@@ -124,8 +124,8 @@ public final class UpdateCenterSerializer {
       // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
 
-      set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrlString());
-      set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrlString());
+      set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrl());
+      set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrl());
       set(p, plugin, release.getVersion() + DESCRIPTION_SUFFIX, release.getDescription());
       set(p, plugin, release.getVersion() + MAVEN_GROUPID_SUFFIX, release.groupId());
       set(p, plugin, release.getVersion() + MAVEN_ARTIFACTID_SUFFIX, release.artifactId());
@@ -166,6 +166,6 @@ public final class UpdateCenterSerializer {
     for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
-    return requiredStringList.toArray(new String[] {});
+    return requiredStringList.toArray(new String[]{});
   }
 }

@@ -236,12 +236,12 @@ public final class UpdateCenterDeserializer {
   }
 
   private Release parsePluginRelease(Properties p
-                                    , Sonar sonar
-                                    , String pluginKey
-                                    , Plugin plugin
-                                    , boolean isPublicRelease
-                                    , boolean isArchivedRelease
-                                    ,  String pluginVersion) {
+      , Sonar sonar
+      , String pluginKey
+      , Plugin plugin
+      , boolean isPublicRelease
+      , boolean isArchivedRelease
+      , String pluginVersion) {
 
     Release release = new Release(plugin, pluginVersion);
     try {
