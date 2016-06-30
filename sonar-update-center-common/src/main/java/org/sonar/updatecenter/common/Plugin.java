@@ -39,8 +39,17 @@ public class Plugin extends Artifact {
   private boolean supportedBySonarSource = false;
   private List<String> developers;
 
-  public Plugin(String key) {
+  private Plugin(String key) {
     super(key);
+  }
+
+  public static Plugin factory(String key) {
+    // in accordance with https://github.com/SonarSource/sonar-packaging-maven-plugin/blob/master/src/main/java/org/sonarsource/pluginpackaging/PluginKeyUtils.java#L44
+    if (StringUtils.isAlphanumeric(key)) {
+      return new Plugin(key);
+    } else {
+      throw new IllegalArgumentException("plugin key must be alphanumeric, strictly");
+    }
   }
 
   public String getName() {
@@ -185,7 +194,7 @@ public class Plugin extends Artifact {
   @Override
   public String toString() {
     return new StringBuilder()
-      .append(key)
-      .toString();
+        .append(key)
+        .toString();
   }
 }

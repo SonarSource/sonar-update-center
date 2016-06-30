@@ -95,7 +95,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldGenerateHtml() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -166,7 +166,7 @@ public class PluginHeadersTest {
 
   private Map<String, File> generateWithLts(boolean latestCompatibleWithLts, boolean atLeastOneCompatibleWithLts) throws ParseException, IOException {
     sonar.setLtsRelease("3.0");
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     if (atLeastOneCompatibleWithLts) {
       Version version1 = Version.create("1.0");
       Release release1 = new Release(plugin, version1);
@@ -203,7 +203,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldHaveNoDownloadLinkIfArchivedVersion() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
 
     Version version10 = Version.create("1.0");
     Release release10 = new Release(plugin, version10);
@@ -263,7 +263,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldGenerateHtmlWithTwoDevelopers() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -289,7 +289,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldWriteUnknownIfNoLicence() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -315,7 +315,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldWriteUnknownIfNoIssueUrl() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -341,7 +341,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldWriteAuthor() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -368,7 +368,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldWriteUnknownWhenNoSources() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());
@@ -395,7 +395,7 @@ public class PluginHeadersTest {
 
   @Test
   public void shouldProcessProperlyNoMoreCompatiblePlugin() throws Exception {
-    Plugin plugin = new Plugin(PLUGIN_KEY);
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);
     release.setDate(getDate());

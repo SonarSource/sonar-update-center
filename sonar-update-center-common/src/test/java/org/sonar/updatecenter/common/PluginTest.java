@@ -27,26 +27,26 @@ public class PluginTest {
 
   @Test
   public void should_merge_with_manifest() {
-    Plugin plugin = new Plugin("squid")
-            .setLicense("LGPL2")
-            .setDescription("description")
-            .setOrganization("organization")
-            .setOrganizationUrl("organizationUrl")
-            .setTermsConditionsUrl("termsconditions")
-            .setIssueTrackerUrl("issueTrackerUrl")
-            .setHomepageUrl("homepage")
-            .setSourcesUrl("sourceURL");
+    Plugin plugin = Plugin.factory("squid")
+        .setLicense("LGPL2")
+        .setDescription("description")
+        .setOrganization("organization")
+        .setOrganizationUrl("organizationUrl")
+        .setTermsConditionsUrl("termsconditions")
+        .setIssueTrackerUrl("issueTrackerUrl")
+        .setHomepageUrl("homepage")
+        .setSourcesUrl("sourceURL");
 
     PluginManifest manifest = new PluginManifest()
-            .setKey("squid")
-            .setLicense("LGPL3")
-            .setOrganization("organization_manifest")
-            .setOrganizationUrl("organizationUrl_manifest")
-            .setTermsConditionsUrl("termsconditions_manifest")
-            .setDescription("description_manifest")
-            .setHomepage("homepage_manifest")
-            .setSourcesUrl("sourceURL_manifest")
-            .setIssueTrackerUrl("issueTrackerUrl_manifest");
+        .setKey("squid")
+        .setLicense("LGPL3")
+        .setOrganization("organization_manifest")
+        .setOrganizationUrl("organizationUrl_manifest")
+        .setTermsConditionsUrl("termsconditions_manifest")
+        .setDescription("description_manifest")
+        .setHomepage("homepage_manifest")
+        .setSourcesUrl("sourceURL_manifest")
+        .setIssueTrackerUrl("issueTrackerUrl_manifest");
 
     plugin.merge(manifest);
 
@@ -65,7 +65,7 @@ public class PluginTest {
 
   @Test
   public void should_not_merge_with_manifest_plugin_key_is_different() {
-    Plugin plugin = new Plugin("squid").setOrganization("SonarSource");
+    Plugin plugin = Plugin.factory("squid").setOrganization("SonarSource");
     PluginManifest manifest = new PluginManifest().setKey("another_key").setOrganization("Other");
 
     plugin.merge(manifest);
@@ -77,8 +77,8 @@ public class PluginTest {
 
   @Test
   public void should_add_developers() {
-    Plugin plugin = new Plugin("squid");
-    PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[] {"Dev1"});
+    Plugin plugin = Plugin.factory("squid");
+    PluginManifest manifest = new PluginManifest().setKey("squid").setDevelopers(new String[]{"Dev1"});
 
     plugin.merge(manifest);
 
@@ -87,7 +87,7 @@ public class PluginTest {
 
   @Test
   public void should_add_sources_url() {
-    Plugin plugin = new Plugin("squid");
+    Plugin plugin = Plugin.factory("squid");
     PluginManifest manifest = new PluginManifest().setKey("squid").setSourcesUrl("sourcesUrl");
 
     plugin.merge(manifest);
@@ -97,8 +97,14 @@ public class PluginTest {
 
   @Test
   public void should_return_string() {
-    Plugin plugin = new Plugin("squid");
+    Plugin plugin = Plugin.factory("squid");
 
     assertThat(plugin.toString()).isEqualTo("squid");
   }
+
+  @Test( expected = IllegalArgumentException.class)
+  public void shouldPreventInvalidPluginKey() {
+    Plugin.factory("foo-bar");
+  }
+
 }

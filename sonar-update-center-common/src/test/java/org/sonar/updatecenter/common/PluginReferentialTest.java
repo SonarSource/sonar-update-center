@@ -35,11 +35,11 @@ public class PluginReferentialTest {
 
   @Test
   public void get_and_set_plugins() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
     foo.addRelease(foo10);
 
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
     bar.addRelease(bar10);
 
@@ -51,7 +51,7 @@ public class PluginReferentialTest {
 
   @Test(expected = NoSuchElementException.class)
   public void should_throw_exception_if_plugin_is_not_found() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
     pluginReferential.findPlugin("not_found");
   }
@@ -59,24 +59,24 @@ public class PluginReferentialTest {
   @Test
   public void should_return_releases_keys_to_remove() {
     // Standalone plugin
-    Plugin test = new Plugin("test");
+    Plugin test = Plugin.factory("test");
     Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1");
     test.addRelease(test10);
 
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
     foo.addRelease(foo10);
 
     // foobis depends upon foo
-    Plugin foobis = new Plugin("foobis");
+    Plugin foobis = Plugin.factory("foobis");
     Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1");
     foobis.addRelease(foobis10);
 
     // bar has one child and depends upon foobis
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
     bar.addRelease(bar10);
-    Plugin barbis = new Plugin("barbis");
+    Plugin barbis = Plugin.factory("barbis");
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1");
     barbis.addRelease(barbis10);
 
@@ -90,11 +90,11 @@ public class PluginReferentialTest {
 
   @Test
   public void should_add_dependency() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo10 = new Release(foo, "1.0");
     foo.addRelease(foo10);
 
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
@@ -105,13 +105,13 @@ public class PluginReferentialTest {
 
   @Test
   public void should_add_dependency_to_the_closest_compatible_version() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo12 = new Release(foo, "1.2");
     Release foo13 = new Release(foo, "1.3");
     foo.addRelease(foo12);
     foo.addRelease(foo13);
 
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
@@ -122,7 +122,7 @@ public class PluginReferentialTest {
 
   @Test(expected = PluginNotFoundException.class)
   public void should_throw_exception_if_dependency_does_not_exist() {
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
@@ -132,11 +132,11 @@ public class PluginReferentialTest {
 
   @Test(expected = IncompatiblePluginVersionException.class)
   public void should_throw_exception_if_required_release_does_not_exist_with_minimal_version() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo10 = new Release(foo, "1.0");
     foo.addRelease(foo10);
 
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
@@ -146,13 +146,13 @@ public class PluginReferentialTest {
 
   @Test
   public void should_check_dependency_cycle() {
-    Plugin foo = new Plugin("foo");
+    Plugin foo = Plugin.factory("foo");
     Release foo10 = new Release(foo, "1.0");
     Release foo11 = new Release(foo, "1.1");
     foo.addRelease(foo10);
     foo.addRelease(foo11);
 
-    Plugin bar = new Plugin("bar");
+    Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
     Release bar11 = new Release(bar, "1.1");
     bar.addRelease(bar10);

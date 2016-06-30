@@ -36,7 +36,7 @@ public class ArtifactTest {
   public void compare() {
     Artifact a = new FakeArtifact("a");
     Artifact b = new FakeArtifact("b");
-    Artifact c = new Plugin("c");
+    Artifact c = Plugin.factory("c");
 
     List<Artifact> list = Arrays.asList(b, a, c);
     Collections.sort(list);
