@@ -25,6 +25,10 @@ import com.google.common.collect.ImmutableSortedSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -39,8 +43,8 @@ public class Release implements Comparable<Release> {
   private Artifact artifact;
   private Version version;
   private String description;
-  private String downloadUrl;
-  private String changelogUrl;
+  private URL downloadUrl;
+  private URL changelogUrl;
   private boolean isPublic;
   private boolean isArchived;
   private String groupId;
@@ -83,16 +87,25 @@ public class Release implements Comparable<Release> {
   }
 
   public String getDownloadUrl() {
-    return downloadUrl;
+    return this.downloadUrl == null ? null : downloadUrl.toString();
   }
 
-  public Release setDownloadUrl(String s) {
-    this.downloadUrl = s;
+  public Release setDownloadUrl(String downloadUrlString) {
+    if (downloadUrlString == null) {
+      this.downloadUrl = null;
+    } else {
+      try {
+        // URI does more checks on syntax than URL
+        this.downloadUrl = new URI(downloadUrlString).toURL();
+      } catch (URISyntaxException|MalformedURLException ex) {
+        throw new IllegalArgumentException("downloadUrl invalid", ex);
+      }
+    }
     return this;
   }
 
   public String getFilename() {
-    return StringUtils.substringAfterLast(downloadUrl, "/");
+    return downloadUrl == null ? null : StringUtils.substringAfterLast(downloadUrl.getPath(), "/");
   }
 
   public SortedSet<Version> getRequiredSonarVersions() {
@@ -170,11 +183,19 @@ public class Release implements Comparable<Release> {
   }
 
   public String getChangelogUrl() {
-    return changelogUrl;
+    return this.changelogUrl == null ? null : changelogUrl.toString();
   }
 
-  public Release setChangelogUrl(String changelogUrl) {
-    this.changelogUrl = changelogUrl;
+  public Release setChangelogUrl(String changelogUrlString) {
+    if (changelogUrlString == null) {
+      this.changelogUrl = null;
+    } else {
+      try {
+        this.changelogUrl = new URI(changelogUrlString).toURL();
+      } catch (URISyntaxException|MalformedURLException ex) {
+        throw new IllegalArgumentException("changelogUrl invalid", ex);
+      }
+    }
     return this;
   }
 
@@ -267,11 +288,11 @@ public class Release implements Comparable<Release> {
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-      .append("version", version)
-      .append("downloadUrl", downloadUrl)
-      .append("changelogUrl", changelogUrl)
-      .append("description", description)
-      .toString();
+        .append("version", version)
+        .append("downloadUrl", downloadUrl)
+        .append("changelogUrl", changelogUrl)
+        .append("description", description)
+        .toString();
   }
 
   @Override

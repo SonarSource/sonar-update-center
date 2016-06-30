@@ -166,6 +166,6 @@ public final class UpdateCenterSerializer {
     for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
-    return requiredStringList.toArray(new String[] {});
+    return requiredStringList.toArray(new String[]{});
   }
 }
