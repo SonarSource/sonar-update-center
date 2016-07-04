@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.sonarsource.update-center</groupId>
     <artifactId>sonar-update-center</artifactId>
-    <version>1.16</version>
+    <version>1.17-SNAPSHOT</version>
   </parent>
   <artifactId>sonar-update-center-mojo</artifactId>
   <packaging>maven-plugin</packaging>
