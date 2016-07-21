@@ -120,6 +120,7 @@ class PluginHeaders {
   }
 
   private void print(Map<String, Object> dataModel, File toFile, String templateName) {
+    FileOutputStream fileOutputStream = null;
     Writer writer = null;
     try {
       freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
@@ -128,7 +129,8 @@ class PluginHeaders {
       cfg.setObjectWrapper(new DefaultObjectWrapper());
 
       Template template = cfg.getTemplate(templateName);
-      writer = new OutputStreamWriter(new FileOutputStream(toFile), Charsets.UTF_8);
+      fileOutputStream = new FileOutputStream(toFile);
+      writer = new OutputStreamWriter(fileOutputStream, Charsets.UTF_8);
       template.process(dataModel, writer);
       writer.flush();
     } catch (Exception e) {
@@ -136,6 +138,7 @@ class PluginHeaders {
 
     } finally {
       IOUtils.closeQuietly(writer);
+      IOUtils.closeQuietly(fileOutputStream);
     }
   }
 
