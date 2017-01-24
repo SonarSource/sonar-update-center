@@ -271,7 +271,7 @@ public final class PluginManifest {
     return dependencies != null ? dependencies.clone() : null;
   }
 
-  public PluginManifest setDependencies(String[] dependencies) {
+  public PluginManifest setDependencies(@Nullable String[] dependencies) {
     this.dependencies = dependencies != null ? dependencies.clone() : null;
     return this;
   }
@@ -280,7 +280,7 @@ public final class PluginManifest {
     return buildDate != null ? new Date(buildDate.getTime()) : null;
   }
 
-  public PluginManifest setBuildDate(Date buildDate) {
+  public PluginManifest setBuildDate(@Nullable Date buildDate) {
     this.buildDate = buildDate != null ? new Date(buildDate.getTime()) : null;
     return this;
   }

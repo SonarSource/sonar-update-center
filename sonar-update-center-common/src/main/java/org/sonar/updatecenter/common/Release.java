@@ -143,7 +143,6 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
-  @CheckForNull
   public Version getLastRequiredSonarVersion() {
     if (!compatibleSqVersions.isEmpty()) {
       return compatibleSqVersions.last();
@@ -151,7 +150,6 @@ public class Release implements Comparable<Release> {
     return null;
   }
 
-  @CheckForNull
   public Version getMinimumRequiredSonarVersion() {
     if (!compatibleSqVersions.isEmpty()) {
       return compatibleSqVersions.first();
