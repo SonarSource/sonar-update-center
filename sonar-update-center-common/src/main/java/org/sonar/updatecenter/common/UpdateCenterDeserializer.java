@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -347,12 +348,12 @@ public final class UpdateCenterDeserializer {
   private static void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high) {
     Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
       @Override
-      public Version apply(Release release) {
+      public Version apply(@Nullable Release release) {
         return release != null ? release.getVersion() : null;
       }
     }), new Predicate<Version>() {
       @Override
-      public boolean apply(Version version) {
+      public boolean apply(@Nullable Version version) {
         return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
       }
     });

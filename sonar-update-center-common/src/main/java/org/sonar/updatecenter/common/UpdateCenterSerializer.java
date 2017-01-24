@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public final class UpdateCenterSerializer {
     }
   }
 
-  private static void set(Properties props, String key, Collection values) {
+  private static void set(Properties props, String key, @Nullable Collection values) {
     if (values != null && !values.isEmpty()) {
       props.setProperty(key, StringUtils.join(values, ","));
     }
@@ -62,7 +63,7 @@ public final class UpdateCenterSerializer {
     }
   }
 
-  private static void set(Properties props, Plugin plugin, String key, Collection values) {
+  private static void set(Properties props, Plugin plugin, String key, @Nullable Collection values) {
     if (values != null && !values.isEmpty()) {
       props.setProperty(plugin.getKey() + "." + key, StringUtils.join(values, ","));
     }

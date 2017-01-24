@@ -21,6 +21,9 @@ package org.sonar.updatecenter.common;
 
 import org.apache.commons.lang.StringUtils;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
 /**
  * @since 0.4
  */
@@ -34,7 +37,8 @@ public final class PluginKeyUtils {
     // only static methods
   }
 
-  public static String sanitize(String mavenArtifactId) {
+  @CheckForNull
+  public static String sanitize(@Nullable String mavenArtifactId) {
     if (mavenArtifactId == null) {
       return null;
     }

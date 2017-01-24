@@ -19,11 +19,8 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableSortedSet;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,11 +29,18 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newTreeSet;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.google.common.collect.ImmutableSortedSet;
 
 public class Release implements Comparable<Release> {
 
@@ -90,7 +94,7 @@ public class Release implements Comparable<Release> {
     return this.downloadUrl == null ? null : downloadUrl.toString();
   }
 
-  public Release setDownloadUrl(String downloadUrlString) {
+  public Release setDownloadUrl(@Nullable String downloadUrlString) {
     if (downloadUrlString == null) {
       this.downloadUrl = null;
     } else {
@@ -104,6 +108,7 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
+  @CheckForNull
   public String getFilename() {
     return downloadUrl == null ? null : StringUtils.substringAfterLast(downloadUrl.getPath(), "/");
   }
@@ -122,14 +127,14 @@ public class Release implements Comparable<Release> {
     return false;
   }
 
-  public Release addRequiredSonarVersions(Version... versions) {
+  public Release addRequiredSonarVersions(@Nullable Version... versions) {
     if (versions != null) {
       compatibleSqVersions.addAll(Arrays.asList(versions));
     }
     return this;
   }
 
-  public Release addRequiredSonarVersions(String... versions) {
+  public Release addRequiredSonarVersions(@Nullable String... versions) {
     if (versions != null) {
       for (String v : versions) {
         compatibleSqVersions.add(Version.create(v));
@@ -138,6 +143,7 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
+  @CheckForNull
   public Version getLastRequiredSonarVersion() {
     if (!compatibleSqVersions.isEmpty()) {
       return compatibleSqVersions.last();
@@ -145,6 +151,7 @@ public class Release implements Comparable<Release> {
     return null;
   }
 
+  @CheckForNull
   public Version getMinimumRequiredSonarVersion() {
     if (!compatibleSqVersions.isEmpty()) {
       return compatibleSqVersions.first();
@@ -154,39 +161,40 @@ public class Release implements Comparable<Release> {
 
   public Version[] getSonarVersionFromString(final String fromString) {
 
-    Collection<Version> versionsWGivenFromString = Collections2.filter(compatibleSqVersions, new Predicate<Version>() {
-      @Override
-      public boolean apply(Version sqVersion) {
-        return fromString.equals(sqVersion.getFromString());
-      }
-    });
+    Collection<Version> versionsWGivenFromString = compatibleSqVersions.stream()
+            .filter(Objects::nonNull)
+            .filter(sqVersion -> fromString.equals(sqVersion.getFromString()))
+            .collect(Collectors.toSet());
 
     return versionsWGivenFromString.toArray(new Version[versionsWGivenFromString.size()]);
   }
 
+  @CheckForNull
   public Date getDate() {
     return date != null ? new Date(date.getTime()) : null;
   }
 
-  public Release setDate(Date date) {
+  public Release setDate(@Nullable Date date) {
     this.date = date != null ? new Date(date.getTime()) : null;
     return this;
   }
 
+  @CheckForNull
   public String getDescription() {
     return description;
   }
 
-  public Release setDescription(String description) {
+  public Release setDescription(@Nullable String description) {
     this.description = description;
     return this;
   }
 
+  @CheckForNull
   public String getChangelogUrl() {
     return this.changelogUrl == null ? null : changelogUrl.toString();
   }
 
-  public Release setChangelogUrl(String changelogUrlString) {
+  public Release setChangelogUrl(@Nullable String changelogUrlString) {
     if (changelogUrlString == null) {
       this.changelogUrl = null;
     } else {
@@ -241,19 +249,21 @@ public class Release implements Comparable<Release> {
     this.isArchived = isArchived;
   }
 
+  @CheckForNull
   public String groupId() {
     return groupId;
   }
 
-  public void setGroupId(String groupId) {
+  public void setGroupId(@Nullable String groupId) {
     this.groupId = groupId;
   }
 
+  @CheckForNull
   public String artifactId() {
     return artifactId;
   }
 
-  public void setArtifactId(String artifactId) {
+  public void setArtifactId(@Nullable String artifactId) {
     this.artifactId = artifactId;
   }
 
@@ -268,14 +278,7 @@ public class Release implements Comparable<Release> {
 
     Release release = (Release) o;
 
-    if (!artifact.equals(release.artifact)) {
-      return false;
-    }
-    if (!version.equals(release.version)) {
-      return false;
-    }
-
-    return true;
+    return artifact.equals(release.artifact) && version.equals(release.version);
   }
 
   @Override

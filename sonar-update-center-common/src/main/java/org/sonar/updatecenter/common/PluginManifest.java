@@ -28,6 +28,8 @@ import java.util.jar.Manifest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
+import javax.annotation.Nullable;
+
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 /**
@@ -197,7 +199,7 @@ public final class PluginManifest {
   /**
    * @since 3.5
    */
-  public PluginManifest setRequirePlugins(String[] requirePlugins) {
+  public PluginManifest setRequirePlugins(@Nullable String[] requirePlugins) {
     this.requirePlugins = requirePlugins != null ? requirePlugins.clone() : null;
     return this;
   }

@@ -19,14 +19,8 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Date;
 import java.util.List;
@@ -34,8 +28,15 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
 public class UpdateCenter {
 
@@ -78,7 +79,7 @@ public class UpdateCenter {
     return date != null ? new Date(date.getTime()) : null;
   }
 
-  public UpdateCenter setDate(Date date) {
+  public UpdateCenter setDate(@Nullable Date date) {
     this.date = date != null ? new Date(date.getTime()) : null;
     return this;
   }
@@ -192,12 +193,7 @@ public class UpdateCenter {
   }
 
   private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
-    return Iterables.any(installablePlugins, new Predicate<Release>() {
-      @Override
-      public boolean apply(Release input) {
-        return input.getKey().equals(pluginKey);
-      }
-    });
+    return installablePlugins.stream().anyMatch(input -> input.getKey().equals(pluginKey));
   }
 
   private void addReleaseIfNotAlreadyInstalled(Release release, Set<Release> installablePlugins) {
