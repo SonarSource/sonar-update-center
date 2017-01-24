@@ -21,18 +21,23 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class PluginReferentialManifestConverterTest {
 
   @Test
-  public void should_return_plugins(){
+  public void should_return_plugins() {
     PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0");
-    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("1.1");
+    PluginManifest bar = new PluginManifest().setKey("bar").setVersion("1.1").setDisplayVersion("1.1 (build 42)");
 
     PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, bar));
 
     assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
+    assertThat(pluginReferential.findPlugin("foo").getRelease("1.0").getDisplayVersion()).isNull();
+    assertThat(pluginReferential.findPlugin("bar").getRelease("1.1").getDisplayVersion()).isEqualTo("1.1 (build 42)");
   }
 }

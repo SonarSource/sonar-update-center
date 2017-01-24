@@ -52,7 +52,6 @@ public final class PluginManifest {
   public static final String BUILD_DATE = "Plugin-BuildDate";
   public static final String ISSUE_TRACKER_URL = "Plugin-IssueTrackerUrl";
   public static final String REQUIRE_PLUGINS = "Plugin-RequirePlugins";
-
   /**
    * @since 0.3
    */
@@ -83,6 +82,11 @@ public final class PluginManifest {
    */
   public static final String SONARLINT_SUPPORTED = "SonarLint-Supported";
 
+  /**
+   * @since 1.18
+   */
+  public static final String DISPLAY_VERSION = "Plugin-Display-Version";
+
   private String key;
   private String name;
   private String mainClass;
@@ -91,6 +95,7 @@ public final class PluginManifest {
   private String organizationUrl;
   private String license;
   private String version;
+  private String displayVersion;
   private String sonarVersion;
   private String[] dependencies;
   private String homepage;
@@ -150,6 +155,7 @@ public final class PluginManifest {
     this.organization = attributes.getValue(ORGANIZATION);
     this.organizationUrl = attributes.getValue(ORGANIZATION_URL);
     this.version = attributes.getValue(VERSION);
+    this.displayVersion = attributes.getValue(DISPLAY_VERSION);
     this.homepage = attributes.getValue(HOMEPAGE);
     this.termsConditionsUrl = attributes.getValue(TERMS_CONDITIONS_URL);
     this.sonarVersion = attributes.getValue(SONAR_VERSION);
@@ -246,6 +252,15 @@ public final class PluginManifest {
 
   public PluginManifest setVersion(String version) {
     this.version = version;
+    return this;
+  }
+
+  public String getDisplayVersion() {
+    return displayVersion;
+  }
+
+  public PluginManifest setDisplayVersion(String displayVersion) {
+    this.displayVersion = displayVersion;
     return this;
   }
 

@@ -32,13 +32,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.CHANGELOG_URL_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DATE_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DESCRIPTION_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_URL_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_GROUPID_SUFFIX;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.SONAR_PREFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.*;
 
 public final class UpdateCenterSerializer {
 
@@ -88,6 +82,7 @@ public final class UpdateCenterSerializer {
     for (Release sonarRelease : center.getSonar().getAllReleases()) {
       set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
       set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
+      set(p, sonarRelease.getVersion() + DISPLAY_VERSION_SUFFIX, sonarRelease.getDisplayVersion());
       set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
       set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
 
@@ -127,6 +122,7 @@ public final class UpdateCenterSerializer {
 
       set(p, plugin, release.getVersion() + DOWNLOAD_URL_SUFFIX, release.getDownloadUrl());
       set(p, plugin, release.getVersion() + CHANGELOG_URL_SUFFIX, release.getChangelogUrl());
+      set(p, plugin, release.getVersion() + DISPLAY_VERSION_SUFFIX, release.getDisplayVersion());
       set(p, plugin, release.getVersion() + DESCRIPTION_SUFFIX, release.getDescription());
       set(p, plugin, release.getVersion() + MAVEN_GROUPID_SUFFIX, release.groupId());
       set(p, plugin, release.getVersion() + MAVEN_ARTIFACTID_SUFFIX, release.artifactId());

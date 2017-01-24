@@ -46,6 +46,7 @@ public class Release implements Comparable<Release> {
 
   private Artifact artifact;
   private Version version;
+  private String displayVersion;
   private String description;
   private URL downloadUrl;
   private URL changelogUrl;
@@ -87,6 +88,15 @@ public class Release implements Comparable<Release> {
 
   public Release setVersion(Version version) {
     this.version = version;
+    return this;
+  }
+
+  public String getDisplayVersion() {
+    return displayVersion;
+  }
+
+  public Release setDisplayVersion(String displayVersion) {
+    this.displayVersion = displayVersion;
     return this;
   }
 

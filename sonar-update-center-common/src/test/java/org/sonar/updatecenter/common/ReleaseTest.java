@@ -109,4 +109,12 @@ public class ReleaseTest {
     assertThat(sqVersions[0]).isEqualTo(Version.create("3.0"));
   }
 
+  @Test
+  public void should_allow_display_version() {
+    Release release = new Release(Plugin.factory("squid"), "1.0");
+    String displayVersion = "1.0 (build 1234)";
+    assertThat(release.setDisplayVersion(displayVersion).getDisplayVersion()).isEqualTo(displayVersion);
+
+  }
+
 }
