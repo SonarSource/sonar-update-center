@@ -35,8 +35,8 @@ public class UpdateCenterSerializerTest {
   @Test
   public void test_to_properties() throws IOException, URISyntaxException {
     Sonar sonar = new Sonar();
-    sonar.addRelease("2.0");
-    sonar.addRelease("2.1");
+    sonar.addRelease("2.0").setDisplayVersion("2.0");
+    sonar.addRelease("2.1").setDisplayVersion("2.1 (build 42)");
     sonar.setLtsRelease("2.0");
 
     Plugin foo = Plugin.factory("foo")
@@ -46,6 +46,7 @@ public class UpdateCenterSerializerTest {
       new Release(foo, Version.create("1.2"))
         .addRequiredSonarVersions(Version.create("2.0"))
         .addRequiredSonarVersions(Version.create("2.1"))
+        .setDisplayVersion("1.2 (build 42)")
       );
 
     Plugin bar = Plugin.factory("bar")
@@ -55,6 +56,7 @@ public class UpdateCenterSerializerTest {
       new Release(bar, Version.create("1.2"))
         .addRequiredSonarVersions(Version.create("2.0"))
         .addRequiredSonarVersions(Version.create("2.1"))
+        .setDisplayVersion("1.2")
       );
     PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
 
@@ -64,17 +66,21 @@ public class UpdateCenterSerializerTest {
 
     assertProperty(properties, "sonar.versions", "2.0,2.1");
     assertProperty(properties, "publicVersions", "2.0,2.1");
+    assertProperty(properties, "2.0.displayVersion", "2.0");
+    assertProperty(properties, "2.1.displayVersion", "2.1 (build 42)");
     assertProperty(properties, "ltsVersion", "2.0");
     assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
+    assertProperty(properties, "foo.1.2.displayVersion", "1.2 (build 42)");
     assertProperty(properties, "bar.versions", "1.2");
     assertProperty(properties, "bar.publicVersions", "1.2");
     assertProperty(properties, "bar.scm", "scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2");
     assertProperty(properties, "bar.developers", "dev1,dev2");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "bar.1.2.sqVersions", "2.0,2.1");
+    assertProperty(properties, "bar.1.2.displayVersion", "1.2");
   }
 
   @Test

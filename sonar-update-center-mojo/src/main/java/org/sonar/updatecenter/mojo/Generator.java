@@ -71,7 +71,7 @@ class Generator {
           boolean forceDownload = release.equals(plugin.getDevRelease());
           File jar = downloader.download(release.getDownloadUrl(), forceDownload);
           if (jar != null && jar.exists()) {
-            updateReleaseRequirePluginsAndParentProperties(pluginReferential, jar, release);
+            updateReleaseRequirePluginsParentPropertiesAndDisplayVersion(pluginReferential, jar, release);
             masterJar = jar;
           } else {
             throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
@@ -88,7 +88,7 @@ class Generator {
     }
   }
 
-  private static void updateReleaseRequirePluginsAndParentProperties(PluginReferential pluginReferential, File jar, Release release) throws IOException {
+  private static void updateReleaseRequirePluginsParentPropertiesAndDisplayVersion(PluginReferential pluginReferential, File jar, Release release) throws IOException {
     PluginManifest releaseManifest = new PluginManifest(jar);
     if (releaseManifest.getRequirePlugins() != null) {
       for (String requirePlugin : releaseManifest.getRequirePlugins()) {
@@ -98,6 +98,9 @@ class Generator {
         pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
       }
     }
+    pluginReferential.findPlugin(release.getKey())
+      .getRelease(release.getVersion())
+      .setDisplayVersion(releaseManifest.getDisplayVersion());
   }
 
   private void generateMetadata(UpdateCenter center) {

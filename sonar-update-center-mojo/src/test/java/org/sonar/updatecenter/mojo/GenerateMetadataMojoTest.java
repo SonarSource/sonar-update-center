@@ -51,6 +51,7 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0");
+    assertThat(output).contains("csharp.1.0.displayVersion=1.0 (build 42)");
   }
 
   @Test

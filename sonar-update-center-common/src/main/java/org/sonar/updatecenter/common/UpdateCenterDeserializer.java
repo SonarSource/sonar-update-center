@@ -57,6 +57,7 @@ public final class UpdateCenterDeserializer {
   public static final String MAVEN_ARTIFACTID_SUFFIX = ".mavenArtifactId";
   public static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
   public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
+  public static final String DISPLAY_VERSION_SUFFIX = ".displayVersion";
   public static final String SONAR_PREFIX = "sonar.";
   public static final String DEFAULTS_PREFIX = "defaults";
   public static final String PLUGINS = "plugins";
@@ -246,6 +247,7 @@ public final class UpdateCenterDeserializer {
       release.setArchived(isArchivedRelease);
       release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
       release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
+      release.setDisplayVersion(getOrDefault(p, pluginKey, pluginVersion, DISPLAY_VERSION_SUFFIX, false));
       release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
       release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
       release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
@@ -316,6 +318,7 @@ public final class UpdateCenterDeserializer {
     Release release = new Release(sonar, sonarVersion);
     release.setPublic(isPublicRelease);
     release.setChangelogUrl(getOrDefault(p, sonarVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
+    release.setDisplayVersion(getOrDefault(p, sonarVersion, DISPLAY_VERSION_SUFFIX, false));
     release.setDescription(getOrDefault(p, sonarVersion, DESCRIPTION_SUFFIX, isPublicRelease));
     release.setDownloadUrl(getOrDefault(p, sonarVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
     release.setDate(FormatUtils.toDate(getOrDefault(p, sonarVersion, DATE_SUFFIX, isPublicRelease), false));

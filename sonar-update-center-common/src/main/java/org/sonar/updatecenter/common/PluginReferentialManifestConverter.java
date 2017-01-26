@@ -19,13 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Splitter;
-import org.apache.commons.lang.StringUtils;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.base.Splitter;
 
 public class PluginReferentialManifestConverter {
 
@@ -41,6 +42,7 @@ public class PluginReferentialManifestConverter {
 
       Release release = new Release(plugin, pluginManifest.getVersion());
       release.addRequiredSonarVersions(Version.create(pluginManifest.getSonarVersion()));
+      release.setDisplayVersion(pluginManifest.getDisplayVersion());
       plugin.addRelease(release);
       plugins.add(plugin);
     }
@@ -51,12 +53,12 @@ public class PluginReferentialManifestConverter {
       Plugin plugin = pluginReferential.findPlugin(pluginManifest.getKey());
       for (String requiresPluginKey : pluginManifest.getRequirePlugins()) {
         if (StringUtils.isNotBlank(requiresPluginKey)) {
-          for (Release release : plugin.getReleases()) {
+          plugin.getReleases().forEach(release -> {
             Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
             String requiredPluginReleaseKey = split.next();
             String requiredMinimumReleaseVersion = split.next();
             pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
-          }
+          });
         }
       }
     }

@@ -53,6 +53,8 @@ public class UpdateCenterDeserializerTest {
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDisplayVersion()).isEqualTo("2.2");
+      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDisplayVersion()).isEqualTo("2.3 (build 42)");
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
@@ -64,12 +66,17 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getSourcesUrl()).isNull();
       assertThat(clirr.getDevelopers()).isEmpty();
 
-      assertThat(clirr.getRelease(Version.create("1.0")).getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
-      assertThat(clirr.getRelease(Version.create("1.0")).getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
-      assertThat(clirr.getRelease(Version.create("1.0")).getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
+      assertThat(clirr1_0.getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
+      assertThat(clirr1_0.getDisplayVersion()).isEqualTo("1.0");
+      assertThat(clirr1_0.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      assertThat(clirr1_0.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+
+      assertThat(clirr.getRelease(Version.create("1.1")).getDisplayVersion()).isEqualTo("1.1 (build 42)");
 
       Plugin motionchart = center.getUpdateCenterPluginReferential().findPlugin("motionchart");
       assertThat(motionchart.isSupportedBySonarSource()).isFalse();
+      assertThat(motionchart.getRelease(Version.create("1.7")).getDisplayVersion()).isNull();
 
     } finally {
       IOUtils.closeQuietly(input);
