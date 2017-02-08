@@ -62,10 +62,17 @@ public class GenerateMetadataMojo extends AbstractMojo {
    */
   private boolean ignoreErrors = false;
 
+  /**
+   * Should we include archived versions in public versions
+   *
+   * @parameter expression="${includeArchives}"
+   */
+  private boolean includeArchives = false;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, getLog());
       new Generator(configuration, getLog()).generateMetadata();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);

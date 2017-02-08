@@ -35,7 +35,7 @@ class Configuration {
   private File inputFile;
   private UpdateCenter updateCenter;
 
-  Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, Log log) {
+  Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, boolean includeArchives, Log log) {
     Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
     Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
     try {
@@ -47,7 +47,7 @@ class Configuration {
     this.inputFile = inputFile;
     log(log);
     try {
-      this.updateCenter = new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors).fromManyFiles(inputFile);
+      this.updateCenter = new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors, includeArchives).fromManyFiles(inputFile);
     } catch (IOException e) {
       throw new IllegalStateException("Can not read properties from: " + inputFile, e);
     }
