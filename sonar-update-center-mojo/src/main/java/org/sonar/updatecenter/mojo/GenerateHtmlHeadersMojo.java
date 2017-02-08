@@ -58,7 +58,7 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, false, getLog());
       new Generator(configuration, getLog()).generateHtml();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);

@@ -66,7 +66,7 @@ public class GenerateMetadataMojoTest {
     FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.1-SNAPSHOT.jar"), outputDir);
 
     File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
-    Configuration configuration = new Configuration(outputDir, inputFile, true, false, new SystemStreamLog());
+    Configuration configuration = new Configuration(outputDir, inputFile, true, false, false, new SystemStreamLog());
     configuration.getUpdateCenter().getUpdateCenterPluginReferential().findPlugin("csharp").getRelease("1.1-SNAPSHOT")
       .setDownloadUrl(url("csharp-plugin-1.1-SNAPSHOT.jar").toString());
     configuration.getUpdateCenter().getUpdateCenterPluginReferential().findPlugin("fxcop").getRelease("1.1-SNAPSHOT")
@@ -81,6 +81,27 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile);
 
     assertThat(output).contains("csharp.1.1-SNAPSHOT.requirePlugins=dotnet\\:1.1");
+  }
+
+  @Test
+  public void generate_properties_including_archived_versions() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugin is already cached
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.4.jar"), outputDir);
+
+    File inputFile = resource("update-center-template/update-center.properties");
+    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, new SystemStreamLog());
+    new Generator(configuration, new SystemStreamLog()).generateMetadata();
+
+    // verify that properties file is generated
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).exists().isFile();
+    String output = FileUtils.readFileToString(outputFile);
+
+    assertThat(output).contains("artifactsize.versions=0.2,0.3");
   }
 
   private File resource(String filename) {
