@@ -70,6 +70,10 @@ public final class UpdateCenterDeserializer {
   private boolean ignoreError;
   private boolean includeArchives;
 
+  public UpdateCenterDeserializer(Mode mode, boolean ignoreError) {
+    this(mode, ignoreError, false);
+  }
+
   public UpdateCenterDeserializer(Mode mode, boolean ignoreError, boolean includeArchives) {
     this.mode = mode;
     this.ignoreError = ignoreError;
