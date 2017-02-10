@@ -462,4 +462,23 @@ public class UpdateCenterDeserializerTest {
       IOUtils.closeQuietly(input);
     }
   }
+
+  // UPC-83
+  @Test
+  public void test_plugin_with_archived_version_and_include_archives_flag() throws IOException {
+    InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/plugin-with-archived-versions.properties");
+    try {
+      Properties props = new Properties();
+      props.load(input);
+
+      UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.PROD, false, true).fromProperties(props);
+
+      Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
+      assertThat(clirr.getRelease(Version.create("1.0")).isArchived()).isFalse();
+      assertThat(clirr.getRelease(Version.create("1.1")).isArchived()).isFalse();
+
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+  }
 }

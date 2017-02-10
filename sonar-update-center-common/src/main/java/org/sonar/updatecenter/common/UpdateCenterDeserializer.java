@@ -68,10 +68,16 @@ public final class UpdateCenterDeserializer {
   private static final String LATEST_KEYWORD = "LATEST";
   private Mode mode;
   private boolean ignoreError;
+  private boolean includeArchives;
 
   public UpdateCenterDeserializer(Mode mode, boolean ignoreError) {
+    this(mode, ignoreError, false);
+  }
+
+  public UpdateCenterDeserializer(Mode mode, boolean ignoreError, boolean includeArchives) {
     this.mode = mode;
     this.ignoreError = ignoreError;
+    this.includeArchives = includeArchives;
   }
 
   public enum Mode {
@@ -216,7 +222,13 @@ public final class UpdateCenterDeserializer {
         parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false, false);
         parsePluginDevVersions(p, sonar, pluginKey, plugin);
       }
-      parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, true);
+
+      if (includeArchives) {
+        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false, false);
+        parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, false);
+      } else {
+        parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, true);
+      }
 
       // do not add plugin without any version
       if (!plugin.getAllReleases().isEmpty()) {
@@ -298,7 +310,7 @@ public final class UpdateCenterDeserializer {
 
   private void parseSonarVersions(Properties p, Sonar sonar) {
     parseSonarVersions(p, sonar, PUBLIC_VERSIONS, true);
-    if (mode == Mode.DEV) {
+    if (mode == Mode.DEV || includeArchives) {
       parseSonarVersions(p, sonar, PRIVATE_VERSIONS, false);
     }
   }
