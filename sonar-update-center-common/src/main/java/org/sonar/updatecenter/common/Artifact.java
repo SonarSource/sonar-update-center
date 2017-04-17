@@ -191,7 +191,7 @@ public abstract class Artifact implements Comparable<Artifact> {
 
   @CheckForNull
   public final Release getLastRelease() {
-    return getAllReleases().isEmpty() ? null : getAllReleases().last();
+    return getReleases().isEmpty() ? null : getReleases().last();
   }
 
   /**
