@@ -19,7 +19,9 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.base.Splitter;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
@@ -28,11 +30,6 @@ import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterSerializer;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Iterator;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
 
@@ -92,9 +89,9 @@ class Generator {
     PluginManifest releaseManifest = new PluginManifest(jar);
     if (releaseManifest.getRequirePlugins() != null) {
       for (String requirePlugin : releaseManifest.getRequirePlugins()) {
-        Iterator<String> split = Splitter.on(':').split(requirePlugin).iterator();
-        String requiredPluginReleaseKey = split.next();
-        String requiredMinimumReleaseVersion = split.next();
+        String[] split = requirePlugin.split(":");
+        String requiredPluginReleaseKey = split[0];
+        String requiredMinimumReleaseVersion = split[1];
         pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
       }
     }

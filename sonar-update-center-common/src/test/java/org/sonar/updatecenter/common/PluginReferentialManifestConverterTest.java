@@ -21,10 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class PluginReferentialManifestConverterTest {
@@ -34,7 +31,7 @@ public class PluginReferentialManifestConverterTest {
     PluginManifest foo = new PluginManifest().setKey("foo").setVersion("1.0");
     PluginManifest bar = new PluginManifest().setKey("bar").setVersion("1.1").setDisplayVersion("1.1 (build 42)");
 
-    PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferentialManifestConverter.fromPluginManifests(asList(foo, bar));
 
     assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
     assertThat(pluginReferential.findPlugin("foo").getRelease("1.0").getDisplayVersion()).isNull();

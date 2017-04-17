@@ -19,12 +19,10 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.File;
 
 /**
  * @goal generate-html
@@ -65,13 +63,11 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
     }
   }
 
-  @VisibleForTesting
   GenerateHtmlHeadersMojo setOutputDir(File d) {
     this.outputDir = d;
     return this;
   }
 
-  @VisibleForTesting
   GenerateHtmlHeadersMojo setInputFile(File f) {
     this.inputFile = f;
     return this;

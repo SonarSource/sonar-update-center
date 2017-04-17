@@ -19,15 +19,13 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
-
-import java.io.File;
-import java.io.IOException;
 
 class Configuration {
 
@@ -36,8 +34,9 @@ class Configuration {
   private UpdateCenter updateCenter;
 
   Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, boolean includeArchives, Log log) {
-    Preconditions.checkArgument(inputFile.exists(), "inputFile must exist");
-    Preconditions.checkArgument(inputFile.isFile(), "inputFile must be a file");
+    if (!inputFile.exists() || !inputFile.isFile()) {
+      throw new IllegalArgumentException("inputFile must exist");
+    }
     try {
       FileUtils.forceMkdir(outputDir);
     } catch (IOException e) {

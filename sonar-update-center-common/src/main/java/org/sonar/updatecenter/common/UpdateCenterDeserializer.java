@@ -19,34 +19,25 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-
-import javax.annotation.Nullable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
 
 public final class UpdateCenterDeserializer {
@@ -92,17 +83,13 @@ public final class UpdateCenterDeserializer {
    * Load configuration with one file for each plugin
    */
   public UpdateCenter fromManyFiles(File mainFile) throws IOException {
-    FileInputStream in = FileUtils.openInputStream(mainFile);
-    try {
+    try (InputStream in = Files.newInputStream(mainFile.toPath())) {
       Properties props = new Properties();
       props.load(in);
       loadPluginProperties(mainFile, props);
       UpdateCenter pluginReferential = fromProperties(props);
       pluginReferential.setDate(new Date(mainFile.lastModified()));
       return pluginReferential;
-
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -110,15 +97,12 @@ public final class UpdateCenterDeserializer {
     String[] pluginKeys = getArray(props, PLUGINS);
     for (String pluginKey : pluginKeys) {
       File pluginFile = new File(file.getParent(), pluginKey + ".properties");
-      FileInputStream pluginFis = FileUtils.openInputStream(pluginFile);
-      try {
+      try (InputStream pluginFis = Files.newInputStream(pluginFile.toPath())) {
         Properties pluginProps = new Properties();
         pluginProps.load(pluginFis);
         for (Map.Entry<Object, Object> prop : pluginProps.entrySet()) {
           props.put(pluginKey + "." + prop.getKey(), prop.getValue());
         }
-      } finally {
-        IOUtils.closeQuietly(pluginFis);
       }
     }
   }
@@ -126,7 +110,7 @@ public final class UpdateCenterDeserializer {
   public UpdateCenter fromProperties(Properties p) {
     Sonar sonar = new Sonar();
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
-    List<Plugin> plugins = newArrayList();
+    List<Plugin> plugins = new ArrayList<>();
 
     parseSonar(p, sonar);
 
@@ -141,9 +125,9 @@ public final class UpdateCenterDeserializer {
       for (Release release : plugin.getAllReleases()) {
         String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins", false), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
-          Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-          String requiredPluginReleaseKey = split.next();
-          String requiredMinimumReleaseVersion = split.next();
+          String[] split = requiresPluginKey.split(":");
+          String requiredPluginReleaseKey = split[0];
+          String requiredMinimumReleaseVersion = split[1];
           pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
         }
       }
@@ -171,8 +155,8 @@ public final class UpdateCenterDeserializer {
       for (Version v : r.getRequiredSonarVersions()) {
         if (sonarVersion.containsKey(v)) {
           reportError("SQ version " + v + " is declared compatible with two public versions of " + pluginName(plugin)
-              + " plugin: " + r.getVersion()
-              + " and " + sonarVersion.get(v).getVersion());
+            + " plugin: " + r.getVersion()
+            + " and " + sonarVersion.get(v).getVersion());
         }
         sonarVersion.put(v, r);
       }
@@ -190,7 +174,7 @@ public final class UpdateCenterDeserializer {
         // only latest release may depend on LATEST SQ
         if (!r.equals(publicAndArchivedReleases.last()) && versionsWLatest.length > 0) {
           reportError("Only the latest release of plugin " + pluginName(plugin)
-              + " may depend on " + LATEST_KEYWORD + " SonarQube");
+            + " may depend on " + LATEST_KEYWORD + " SonarQube");
         }
       }
     }
@@ -215,7 +199,7 @@ public final class UpdateCenterDeserializer {
       plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl", false));
       plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
       plugin.setSupportedBySonarSource(Boolean.valueOf(get(p, pluginKey, "supportedBySonarSource", false)));
-      plugin.setDevelopers(newArrayList(getArray(p, pluginKey, "developers")));
+      plugin.setDevelopers(asList(getArray(p, pluginKey, "developers")));
 
       parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true, false);
       if (mode == Mode.DEV) {
@@ -238,7 +222,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key,
-                                   boolean isPublicRelease, boolean isArchivedRelease) {
+    boolean isPublicRelease, boolean isArchivedRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
       Release release = parsePluginRelease(p, sonar, pluginKey, plugin, isPublicRelease, isArchivedRelease, pluginVersion);
@@ -251,7 +235,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin,
-                                     boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
+    boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
 
     Release release = new Release(plugin, pluginVersion);
     try {
@@ -267,7 +251,7 @@ public final class UpdateCenterDeserializer {
       Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
       if (!isArchivedRelease && requiredSonarVersions.length == 0) {
         reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion
-            + " should declare compatible SQ versions");
+          + " should declare compatible SQ versions");
       }
       for (Version requiredSonarVersion : requiredSonarVersions) {
         release.addRequiredSonarVersions(requiredSonarVersion);
@@ -338,7 +322,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private Version[] getRequiredSonarVersions(Properties p, String pluginKey, String pluginVersion,
-                                             Sonar sonar, boolean isArchived) {
+    Sonar sonar, boolean isArchived) {
     String sqVersions = get(p, pluginKey, pluginVersion + ".sqVersions", !isArchived);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
     List<Version> result = new LinkedList<>();
@@ -361,28 +345,22 @@ public final class UpdateCenterDeserializer {
   }
 
   private static void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high) {
-    Collection<Version> versions = Collections2.filter(transform(sonar.getAllReleases(), new Function<Release, Version>() {
-      @Override
-      public Version apply(@Nullable Release release) {
-        return release != null ? release.getVersion() : null;
-      }
-    }), new Predicate<Version>() {
-      @Override
-      public boolean apply(@Nullable Version version) {
-        return version != null && version.compareTo(low) >= 0 && version.compareTo(high) <= 0;
-      }
-    });
-    for (Version version : versions) {
-      String fromString;
-      if (version.equals(low)) {
-        fromString = low.getFromString();
-      } else if (version.equals(high)) {
-        fromString = high.getFromString();
-      } else {
-        fromString = "";
-      }
-      result.add(Version.create(version, fromString));
-    }
+    sonar.getAllReleases().stream()
+      .filter(Objects::nonNull)
+      .map(Release::getVersion)
+      .filter(Objects::nonNull)
+      .filter(version -> version.compareTo(low) >= 0 && version.compareTo(high) <= 0)
+      .forEach(version -> {
+        String fromString;
+        if (version.equals(low)) {
+          fromString = low.getFromString();
+        } else if (version.equals(high)) {
+          fromString = high.getFromString();
+        } else {
+          fromString = "";
+        }
+        result.add(Version.create(version, fromString));
+      });
   }
 
   private static List<String> split(String requiredSonarVersions) {

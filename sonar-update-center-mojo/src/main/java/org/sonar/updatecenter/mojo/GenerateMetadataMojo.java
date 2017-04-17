@@ -19,7 +19,6 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -79,19 +78,16 @@ public class GenerateMetadataMojo extends AbstractMojo {
     }
   }
 
-  @VisibleForTesting
   GenerateMetadataMojo setOutputDir(File d) {
     this.outputDir = d;
     return this;
   }
 
-  @VisibleForTesting
   GenerateMetadataMojo setInputFile(File f) {
     this.inputFile = f;
     return this;
   }
 
-  @VisibleForTesting
   GenerateMetadataMojo setDevMode(boolean devMode) {
     this.devMode = devMode;
     return this;

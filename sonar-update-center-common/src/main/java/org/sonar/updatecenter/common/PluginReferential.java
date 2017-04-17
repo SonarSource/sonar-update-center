@@ -19,28 +19,22 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.sonar.updatecenter.common.exception.DependencyCycleException;
-import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
-import org.sonar.updatecenter.common.exception.PluginNotFoundException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newTreeSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import org.sonar.updatecenter.common.exception.DependencyCycleException;
+import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
+import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 public class PluginReferential {
 
   private Set<Plugin> plugins;
 
   private PluginReferential() {
-    this.plugins = newTreeSet();
+    this.plugins = new TreeSet<>();
   }
 
   public static PluginReferential create(List<Plugin> pluginList) {
@@ -52,49 +46,35 @@ public class PluginReferential {
   }
 
   public static PluginReferential createEmpty() {
-    return PluginReferential.create(Lists.<Plugin>newArrayList());
+    return PluginReferential.create(new ArrayList<>());
   }
 
   /**
    * @return the list of plugins where last releases is master releases
    */
   public List<Plugin> getLastMasterReleasePlugins() {
-    return newArrayList(Iterables.filter(plugins, new Predicate<Plugin>() {
-      @Override
-      public boolean apply(Plugin input) {
-        Release lastRelease = input.getLastRelease();
-        return lastRelease != null;
-      }
-    }));
+    return plugins.stream()
+      .filter(plugin -> plugin.getLastRelease() != null)
+      .collect(Collectors.toList());
   }
 
   public List<Plugin> getPlugins() {
-    return newArrayList(plugins);
+    return new ArrayList<>(plugins);
   }
 
   /**
    * @throws NoSuchElementException if plugin could not be found
    */
-  public Plugin findPlugin(final String key) {
-    try {
-      return Iterables.find(plugins, new Predicate<Plugin>() {
-        @Override
-        public boolean apply(Plugin input) {
-          return input.getKey().equals(key);
-        }
-      });
-    } catch (NoSuchElementException e) {
-      throw new NoSuchElementException("Unable to find plugin with key " + key);
-    }
+  public Plugin findPlugin(String key) {
+    return plugins.stream()
+      .filter(plugin -> plugin.getKey().equals(key))
+      .findFirst()
+      .orElseThrow(() -> new NoSuchElementException("Unable to find plugin with key " + key));
   }
 
-  public boolean doesContainPlugin(final String key) {
-    return Iterables.any(plugins, new Predicate<Plugin>() {
-      @Override
-      public boolean apply(Plugin input) {
-        return input.getKey().equals(key);
-      }
-    });
+  public boolean doesContainPlugin(String key) {
+    return plugins.stream()
+      .anyMatch(plugin -> plugin.getKey().equals(key));
   }
 
   public boolean doesContainRelease(final String key, Version version) {
@@ -107,7 +87,7 @@ public class PluginReferential {
   }
 
   public List<String> findLastReleasesWithDependencies(String pluginKey) {
-    List<String> removablePlugins = newArrayList();
+    List<String> removablePlugins = new ArrayList<>();
     Plugin plugin = findPlugin(pluginKey);
     if (plugin != null) {
       Release pluginRelease = plugin.getLastRelease();
@@ -142,17 +122,14 @@ public class PluginReferential {
   }
 
   private void checkDependencyCycle(Release release) {
-    List<Release> releases = newArrayList();
+    List<Release> releases = new ArrayList<>();
     try {
       checkDependencyCycle(release, releases);
     } catch (DependencyCycleException e) {
-      List<String> releaseKeys = newArrayList(Iterables.transform(releases, new Function<Release, String>() {
-        @Override
-        public String apply(Release input) {
-          return input.getArtifact().getKey();
-        }
-      }));
-      throw new DependencyCycleException("There is a dependency cycle between plugins '" + Joiner.on("', '").join(releaseKeys) + "' that must be cut.", e);
+      String releaseKeys = releases.stream()
+        .map(rel -> rel.getArtifact().getKey())
+        .collect(Collectors.joining("', '"));
+      throw new DependencyCycleException("There is a dependency cycle between plugins '" + releaseKeys + "' that must be cut.", e);
     }
   }
 
@@ -167,7 +144,7 @@ public class PluginReferential {
   }
 
   List<Release> getLastMasterReleases() {
-    List<Release> releases = newArrayList();
+    List<Release> releases = new ArrayList<>();
     for (Plugin plugin : getLastMasterReleasePlugins()) {
       releases.add(plugin.getLastRelease());
     }

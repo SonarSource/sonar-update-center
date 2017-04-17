@@ -19,15 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.Test;
 import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 
@@ -43,7 +42,7 @@ public class PluginReferentialTest {
     Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(asList(foo, bar));
 
     assertThat(pluginReferential.findPlugin("foo")).isEqualTo(foo);
     assertThat(pluginReferential.getLastMasterReleasePlugins()).hasSize(2);
@@ -52,7 +51,7 @@ public class PluginReferentialTest {
   @Test(expected = NoSuchElementException.class)
   public void should_throw_exception_if_plugin_is_not_found() {
     Plugin foo = Plugin.factory("foo");
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo));
+    PluginReferential pluginReferential = PluginReferential.create(asList(foo));
     pluginReferential.findPlugin("not_found");
   }
 
@@ -80,7 +79,7 @@ public class PluginReferentialTest {
     Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1");
     barbis.addRelease(barbis10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, foobis, bar, test));
+    PluginReferential pluginReferential = PluginReferential.create(asList(foo, foobis, bar, test));
     pluginReferential.addOutgoingDependency(foobis10, "foo", "1.0");
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
 
@@ -98,7 +97,7 @@ public class PluginReferentialTest {
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
     assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().iterator().next().getVersion().getName()).isEqualTo("1.0");
   }
@@ -115,7 +114,7 @@ public class PluginReferentialTest {
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
     assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().iterator().next().getVersion().getName()).isEqualTo("1.2");
   }
@@ -126,7 +125,7 @@ public class PluginReferentialTest {
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar));
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
   }
 
@@ -140,7 +139,7 @@ public class PluginReferentialTest {
     Release bar10 = new Release(bar, "1.0");
     bar.addRelease(bar10);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
   }
 
@@ -158,7 +157,7 @@ public class PluginReferentialTest {
     bar.addRelease(bar10);
     bar.addRelease(bar11);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(bar, foo));
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.1");
     try {
       pluginReferential.addOutgoingDependency(foo11, "bar", "1.0");

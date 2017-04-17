@@ -19,24 +19,18 @@
  */
 package org.sonar.updatecenter.common;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
-
 import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 
 public class UpdateCenter {
 
@@ -85,7 +79,7 @@ public class UpdateCenter {
   }
 
   public List<PluginUpdate> findAvailablePlugins() {
-    List<PluginUpdate> availables = newArrayList();
+    List<PluginUpdate> availables = new ArrayList<>();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       if (isInstalled(plugin)) {
         continue;
@@ -114,7 +108,7 @@ public class UpdateCenter {
    * Return all plugins with at least one version compatible with SQ. For ecosystems only parent plugin is returned.
    */
   public List<Plugin> findAllCompatiblePlugins() {
-    List<Plugin> availables = newArrayList();
+    List<Plugin> availables = new ArrayList<>();
     for (Plugin plugin : updateCenterPluginReferential.getPlugins()) {
       Release release = plugin.getLastCompatible(installedSonarVersion);
       if (release != null) {
@@ -125,7 +119,7 @@ public class UpdateCenter {
   }
 
   public List<PluginUpdate> findPluginUpdates() {
-    List<PluginUpdate> updates = newArrayList();
+    List<PluginUpdate> updates = new ArrayList<>();
     for (Release installedRelease : getInstalledMasterReleases()) {
       try {
         Plugin plugin = findPlugin(installedRelease);
@@ -155,10 +149,10 @@ public class UpdateCenter {
    * Return all releases to download (including outgoing dependencies and installed incoming dependencies) to install / update a plugin
    */
   public List<Release> findInstallablePlugins(String pluginKey, Version minimumVersion) {
-    Set<Release> installablePlugins = newHashSet();
-    Set<Release> checkedPlugins = newHashSet();
+    Set<Release> installablePlugins = new HashSet<>();
+    Set<Release> checkedPlugins = new HashSet<>();
     addInstallablePlugins(pluginKey, minimumVersion, installablePlugins, checkedPlugins);
-    return newArrayList(installablePlugins);
+    return new ArrayList<>(installablePlugins);
   }
 
   private void addInstallablePlugins(String pluginKey, Version minimumVersion, Set<Release> installablePlugins, Set<Release> checkedPlugins) {
@@ -203,7 +197,7 @@ public class UpdateCenter {
   }
 
   public List<SonarUpdate> findSonarUpdates() {
-    List<SonarUpdate> updates = Lists.newArrayList();
+    List<SonarUpdate> updates = new ArrayList<>();
     SortedSet<Release> releases = sonar.getReleasesGreaterThan(installedSonarVersion);
     for (Release release : releases) {
       updates.add(createSonarUpdate(release));
@@ -246,7 +240,6 @@ public class UpdateCenter {
     }
   }
 
-  @VisibleForTesting
   PluginReferential getInstalledPluginReferential() {
     return installedPluginReferential;
   }

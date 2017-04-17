@@ -19,17 +19,16 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.collect.ImmutableList;
-
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.unmodifiableList;
 
 public final class PluginUpdate {
 
   private Status status = Status.INCOMPATIBLE;
   private Release release;
-  private List<Release> dependencies = newArrayList();
+  private List<Release> dependencies = new ArrayList<>();
 
   public static PluginUpdate createWithStatus(Release pluginRelease, Status status) {
     PluginUpdate update = new PluginUpdate();
@@ -93,7 +92,7 @@ public final class PluginUpdate {
   }
 
   public List<Release> getDependencies() {
-    return ImmutableList.copyOf(dependencies);
+    return unmodifiableList(new ArrayList<>(dependencies));
   }
 
   public void setDependencies(List<Release> dependencies) {
