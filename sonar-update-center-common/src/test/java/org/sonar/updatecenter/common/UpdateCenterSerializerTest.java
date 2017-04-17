@@ -19,15 +19,12 @@
  */
 package org.sonar.updatecenter.common;
 
-import com.google.common.base.Splitter;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Properties;
+import org.junit.Test;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class UpdateCenterSerializerTest {
@@ -58,7 +55,7 @@ public class UpdateCenterSerializerTest {
         .addRequiredSonarVersions(Version.create("2.1"))
         .setDisplayVersion("1.2")
       );
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar));
+    PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo, bar));
 
     UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
     Properties properties = UpdateCenterSerializer.toProperties(center);
@@ -101,7 +98,7 @@ public class UpdateCenterSerializerTest {
     Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
     bar.addRelease(bar12);
 
-    PluginReferential pluginReferential = PluginReferential.create(newArrayList(foo, bar, test));
+    PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo, bar, test));
     pluginReferential.addOutgoingDependency(bar12, "foo", "1.2");
     pluginReferential.addOutgoingDependency(bar12, "test", "1.0");
 
@@ -113,7 +110,7 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "foo.1.2.requiredSonarVersions", "2.0,2.1");
     assertProperty(properties, "test.1.0.requiredSonarVersions", "2.1");
     assertProperty(properties, "bar.1.2.requiredSonarVersions", "2.0,2.1");
-    Iterable requirePlugins = Splitter.on(",").split(properties.getProperty("bar.1.2.requirePlugins"));
+    String[] requirePlugins = properties.getProperty("bar.1.2.requirePlugins").split(",");
     assertThat(requirePlugins).containsOnly("foo:1.2", "test:1.0");
   }
 

@@ -19,6 +19,14 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
@@ -32,17 +40,7 @@ import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
-
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -78,7 +76,7 @@ public class PluginHeadersTest {
   }
 
   private void prepareMocks(Plugin... plugins) throws IOException {
-    pluginReferential = plugins.length > 0 ? PluginReferential.create(Arrays.asList(plugins)) : PluginReferential.createEmpty();
+    pluginReferential = plugins.length > 0 ? PluginReferential.create(asList(plugins)) : PluginReferential.createEmpty();
     center = UpdateCenter.create(pluginReferential, sonar);
     pluginHeaders = new PluginHeaders(center, outputFolder, mock(Log.class));
   }
@@ -106,7 +104,7 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
     plugin.setSupportedBySonarSource(true);
 
     prepareMocks(plugin);
@@ -189,7 +187,7 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
@@ -228,14 +226,15 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
     plugin.setOrganization("SonarSource");
     plugin.setOrganizationUrl("http://sonarsource.com");
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png",
+      "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
@@ -274,7 +273,7 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev1", "dev2"));
+    plugin.setDevelopers(asList("dev1", "dev2"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
@@ -300,7 +299,7 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense(null);
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
@@ -326,7 +325,7 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl(null);
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
@@ -379,12 +378,12 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl(null);
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly( "key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
       "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
@@ -406,19 +405,18 @@ public class PluginHeadersTest {
     plugin.setIssueTrackerUrl("issue_url");
     plugin.setLicense("licence");
     plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(newArrayList("dev"));
+    plugin.setDevelopers(asList("dev"));
 
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
-        "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
+      "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
 
     File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
     assertThat(flattenFile).doesNotContain("Compatible with SonarQube".replaceAll("\\s", ""));
   }
-
 
   private File getExpectedFile(String fileName) {
     return FileUtils.toFile(getClass().getResource("/org/sonar/updatecenter/mojo/PluginHeadersTest/" + fileName));

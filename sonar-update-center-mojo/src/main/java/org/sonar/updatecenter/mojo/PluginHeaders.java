@@ -19,11 +19,18 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
-import org.apache.commons.io.Charsets;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.logging.Log;
@@ -32,16 +39,7 @@ import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.CompatibilityMatrix.SQVersion;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 class PluginHeaders {
 
@@ -56,7 +54,9 @@ class PluginHeaders {
   }
 
   private void init() throws IOException {
-    Preconditions.checkArgument(outputDirectory.exists());
+    if (!outputDirectory.exists()) {
+      throw new IllegalArgumentException("Output directory does not exist: " + outputDirectory);
+    }
     FileUtils.copyURLToFile(getClass().getResource("/style-confluence.css"), new File(outputDirectory, "style-confluence.css"));
     FileUtils.copyURLToFile(getClass().getResource("/error.png"), new File(outputDirectory, "error.png"));
     FileUtils.copyURLToFile(getClass().getResource("/onde-sonar-16.png"), new File(outputDirectory, "onde-sonar-16.png"));
@@ -79,7 +79,7 @@ class PluginHeaders {
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
-      Map<String, Object> dataModel = Maps.newHashMap();
+      Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginHeader);
 
       File file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
@@ -90,9 +90,7 @@ class PluginHeaders {
       log.info("Generate sonarsource.com include of plugin " + plugin.getKey() + " in: " + file);
       print(dataModel, file, "plugin-sonarsource-include-template.html.ftl");
 
-      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName()
-        , plugin.getHomepageUrl()
-        , plugin.isSupportedBySonarSource());
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
       matrix.getPlugins().add(matrixPlugin);
 
       for (Release sq : center.getSonar().getAllReleases()) {
@@ -103,16 +101,11 @@ class PluginHeaders {
       }
     }
 
-    Collections.sort(matrix.getPlugins(), new Comparator<CompatibilityMatrix.Plugin>() {
-      @Override
-      public int compare(org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o1, org.sonar.updatecenter.mojo.CompatibilityMatrix.Plugin o2) {
-        return o1.getName().compareToIgnoreCase(o2.getName());
-      }
-    });
+    Collections.sort(matrix.getPlugins(), (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
     if (!matrix.getPlugins().isEmpty()) {
       File file = new File(outputDirectory, "compatibility-matrix.html");
-      Map<String, Object> dataModel = Maps.newHashMap();
+      Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("matrix", matrix);
       log.info("Generate compatibility matrix in: " + file);
       print(dataModel, file, "matrix-template.html.ftl");
@@ -130,7 +123,7 @@ class PluginHeaders {
 
       Template template = cfg.getTemplate(templateName);
       fileOutputStream = new FileOutputStream(toFile);
-      writer = new OutputStreamWriter(fileOutputStream, Charsets.UTF_8);
+      writer = new OutputStreamWriter(fileOutputStream, UTF_8);
       template.process(dataModel, writer);
       writer.flush();
     } catch (Exception e) {

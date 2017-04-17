@@ -19,9 +19,6 @@
  */
 package org.sonar.updatecenter.common;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newTreeSet;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,18 +26,18 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import com.google.common.collect.ImmutableSortedSet;
+import static java.util.Collections.unmodifiableSet;
 
 public class Release implements Comparable<Release> {
 
@@ -69,9 +66,9 @@ public class Release implements Comparable<Release> {
     this.isPublic = true;
     this.isArchived = false;
 
-    this.compatibleSqVersions = newTreeSet();
-    this.outgoingDependencies = newHashSet();
-    this.incomingDependencies = newHashSet();
+    this.compatibleSqVersions = new TreeSet<>();
+    this.outgoingDependencies = new HashSet<>();
+    this.incomingDependencies = new HashSet<>();
   }
 
   public Release(Artifact artifact, String version) {
@@ -111,7 +108,7 @@ public class Release implements Comparable<Release> {
       try {
         // URI does more checks on syntax than URL
         this.downloadUrl = new URI(downloadUrlString).toURL();
-      } catch (URISyntaxException|MalformedURLException ex) {
+      } catch (URISyntaxException | MalformedURLException ex) {
         throw new IllegalArgumentException("downloadUrl invalid", ex);
       }
     }
@@ -170,9 +167,9 @@ public class Release implements Comparable<Release> {
   public Version[] getSonarVersionFromString(final String fromString) {
 
     Collection<Version> versionsWGivenFromString = compatibleSqVersions.stream()
-            .filter(Objects::nonNull)
-            .filter(sqVersion -> fromString.equals(sqVersion.getFromString()))
-            .collect(Collectors.toSet());
+      .filter(Objects::nonNull)
+      .filter(sqVersion -> fromString.equals(sqVersion.getFromString()))
+      .collect(Collectors.toSet());
 
     return versionsWGivenFromString.toArray(new Version[versionsWGivenFromString.size()]);
   }
@@ -208,7 +205,7 @@ public class Release implements Comparable<Release> {
     } else {
       try {
         this.changelogUrl = new URI(changelogUrlString).toURL();
-      } catch (URISyntaxException|MalformedURLException ex) {
+      } catch (URISyntaxException | MalformedURLException ex) {
         throw new IllegalArgumentException("changelogUrl invalid", ex);
       }
     }
@@ -216,7 +213,7 @@ public class Release implements Comparable<Release> {
   }
 
   public Set<Release> getOutgoingDependencies() {
-    return ImmutableSortedSet.copyOf(outgoingDependencies);
+    return unmodifiableSet(new HashSet<>(outgoingDependencies));
   }
 
   public Release addOutgoingDependency(Release required) {
@@ -225,7 +222,7 @@ public class Release implements Comparable<Release> {
   }
 
   public Set<Release> getIncomingDependencies() {
-    return ImmutableSortedSet.copyOf(incomingDependencies);
+    return unmodifiableSet(new HashSet<>(incomingDependencies));
   }
 
   public Release addIncomingDependency(Release required) {
@@ -299,11 +296,11 @@ public class Release implements Comparable<Release> {
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-        .append("version", version)
-        .append("downloadUrl", downloadUrl)
-        .append("changelogUrl", changelogUrl)
-        .append("description", description)
-        .toString();
+      .append("version", version)
+      .append("downloadUrl", downloadUrl)
+      .append("changelogUrl", changelogUrl)
+      .append("description", description)
+      .toString();
   }
 
   @Override

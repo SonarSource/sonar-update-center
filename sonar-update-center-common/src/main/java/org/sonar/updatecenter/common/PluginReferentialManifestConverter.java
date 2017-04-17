@@ -19,14 +19,9 @@
  */
 package org.sonar.updatecenter.common;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
-
-import com.google.common.base.Splitter;
 
 public class PluginReferentialManifestConverter {
 
@@ -35,7 +30,7 @@ public class PluginReferentialManifestConverter {
   }
 
   public static PluginReferential fromPluginManifests(List<PluginManifest> pluginManifestList) {
-    List<Plugin> plugins = newArrayList();
+    List<Plugin> plugins = new ArrayList<>();
     for (PluginManifest pluginManifest : pluginManifestList) {
       Plugin plugin = Plugin.factory(pluginManifest.getKey());
       plugin.merge(pluginManifest);
@@ -54,9 +49,9 @@ public class PluginReferentialManifestConverter {
       for (String requiresPluginKey : pluginManifest.getRequirePlugins()) {
         if (StringUtils.isNotBlank(requiresPluginKey)) {
           plugin.getReleases().forEach(release -> {
-            Iterator<String> split = Splitter.on(':').split(requiresPluginKey).iterator();
-            String requiredPluginReleaseKey = split.next();
-            String requiredMinimumReleaseVersion = split.next();
+            String[] split = requiresPluginKey.split(":");
+            String requiredPluginReleaseKey = split[0];
+            String requiredMinimumReleaseVersion = split[1];
             pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
           });
         }

@@ -19,20 +19,25 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-
-import javax.annotation.Nullable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import javax.annotation.Nullable;
+import org.apache.commons.lang.StringUtils;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.sonar.updatecenter.common.UpdateCenterDeserializer.*;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.CHANGELOG_URL_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DATE_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DESCRIPTION_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DISPLAY_VERSION_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_URL_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_GROUPID_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.SONAR_PREFIX;
 
 public final class UpdateCenterSerializer {
 
@@ -93,7 +98,7 @@ public final class UpdateCenterSerializer {
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
     }
 
-    List<String> pluginKeys = newArrayList();
+    List<String> pluginKeys = new ArrayList<>();
     for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
       addPlugin(plugin, pluginKeys, p);
     }
@@ -145,24 +150,19 @@ public final class UpdateCenterSerializer {
   }
 
   public static void toProperties(UpdateCenter sonar, File toFile) {
-    FileOutputStream output = null;
-    try {
-      output = FileUtils.openOutputStream(toFile);
+    try (OutputStream output = Files.newOutputStream(toFile.toPath())) {
       toProperties(sonar).store(output, "Generated file");
 
     } catch (IOException e) {
       throw new IllegalStateException("Fail to store update center properties to: " + toFile.getAbsolutePath(), e);
-
-    } finally {
-      IOUtils.closeQuietly(output);
     }
   }
 
   private static String[] getRequiredList(Release release) {
-    List<String> requiredStringList = newArrayList();
+    List<String> requiredStringList = new ArrayList<>();
     for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
-    return requiredStringList.toArray(new String[]{});
+    return requiredStringList.toArray(new String[] {});
   }
 }
