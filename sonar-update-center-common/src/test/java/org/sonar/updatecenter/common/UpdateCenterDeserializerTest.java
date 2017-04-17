@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpdateCenterDeserializerTest {
 
@@ -141,7 +141,7 @@ public class UpdateCenterDeserializerTest {
       assertThat(requiredSonarVersion).hasSize(6);
       assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.2");
       assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
-      assertThat(requiredSonarVersion).excludes(Version.create("2.7"));
+      assertThat(requiredSonarVersion).doesNotContain(Version.create("2.7"));
     }
   }
 
@@ -216,7 +216,7 @@ public class UpdateCenterDeserializerTest {
     UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
 
     Plugin fooPlugin = center.getUpdateCenterPluginReferential().findPlugin("foo");
-    assertThat(fooPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    assertThat(fooPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("1.0", "1.1");
   }
 
   @Test
@@ -225,8 +225,8 @@ public class UpdateCenterDeserializerTest {
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
 
     Plugin fooPlugin = center.getUpdateCenterPluginReferential().findPlugin("foo");
-    assertThat(fooPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
-    assertThat(fooPlugin.getPrivateVersions()).onProperty("name").containsOnly("1.2");
+    assertThat(fooPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("1.0", "1.1");
+    assertThat(fooPlugin.getPrivateVersions()).extracting(Version::getName).containsOnly("1.2");
   }
 
   @Test
@@ -254,13 +254,13 @@ public class UpdateCenterDeserializerTest {
     Plugin phpPlugin = center.getUpdateCenterPluginReferential().findPlugin("php");
     assertThat(phpPlugin.isSupportedBySonarSource()).isTrue();
     assertThat(phpPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.3-SNAPSHOT"));
-    assertThat(phpPlugin.getPublicVersions()).onProperty("name").containsOnly("2.1", "2.2");
-    assertThat(phpPlugin.getPrivateVersions()).onProperty("name").containsOnly("2.2.1");
-    assertThat(phpPlugin.getArchivedVersions()).onProperty("name").containsOnly("2.0");
+    assertThat(phpPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("2.1", "2.2");
+    assertThat(phpPlugin.getPrivateVersions()).extracting(Version::getName).containsOnly("2.2.1");
+    assertThat(phpPlugin.getArchivedVersions()).extracting(Version::getName).containsOnly("2.0");
 
     Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
     assertThat(ssqvPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("1.1-SNAPSHOT"));
-    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    assertThat(ssqvPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("1.0", "1.1");
 
   }
 
@@ -275,7 +275,7 @@ public class UpdateCenterDeserializerTest {
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("ssqv").getDevRelease()).isNull();
 
     Plugin ssqvPlugin = center.getUpdateCenterPluginReferential().findPlugin("ssqv");
-    assertThat(ssqvPlugin.getPublicVersions()).onProperty("name").containsOnly("1.0", "1.1");
+    assertThat(ssqvPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("1.0", "1.1");
     SortedSet<Version> requiredSonarVersion10 = ssqvPlugin.getRelease(Version.create("1.0")).getRequiredSonarVersions();
     assertThat(requiredSonarVersion10).hasSize(1);
     assertThat(requiredSonarVersion10.first().toString()).isEqualTo("3.7");
