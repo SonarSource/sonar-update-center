@@ -19,11 +19,14 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.io.File;
+import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.File;
+import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.mojo.editions.EditionTemplatesLoaderImpl;
+import org.sonar.updatecenter.mojo.editions.EditionsGenerator;
 
 /**
  * @goal generate-metadata
@@ -37,7 +40,7 @@ public class GenerateMetadataMojo extends AbstractMojo {
    * @parameter expression="${outputDir}"
    * @required
    */
-  private File outputDir;
+  File outputDir;
 
   /**
    * The path to the metadata file
@@ -45,51 +48,71 @@ public class GenerateMetadataMojo extends AbstractMojo {
    * @parameter expression="${inputFile}"
    * @required
    */
-  private File inputFile;
+  File inputFile;
 
   /**
    * Should we consider private and dev versions
    *
    * @parameter expression="${devMode}"
    */
-  private boolean devMode = false;
+  boolean devMode = false;
 
   /**
    * Should we fail fast on errors
    *
    * @parameter expression="${ignoreErrors}"
    */
-  private boolean ignoreErrors = false;
+  boolean ignoreErrors = false;
 
   /**
    * Should we include archived versions in public versions
    *
    * @parameter expression="${includeArchives}"
    */
-  private boolean includeArchives = false;
+  boolean includeArchives = false;
+
+  /**
+   * Base URL for hosting of editions
+   *
+   * @parameter expression="${editionsDownloadBaseUrl}"
+   * @required
+   */
+  String editionsDownloadBaseUrl;
+
+  /**
+   * The directory that contains generated json and zip files of editions
+   *
+   * @parameter expression="${editionsOutputDir}"
+   * @required
+   */
+  File editionsOutputDir;
+
+  /**
+   * The directory that contains generated json and zip files of editions
+   */
+  @Parameter(property = "editionTemplateProperties", defaultValue = "edition-templates.properties")
+  File editionTemplateProperties;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, getLog());
+
+      // generate properties
       new Generator(configuration, getLog()).generateMetadata();
+
+      // generate editions (json + zip files)
+      generateEditions(configuration.getUpdateCenter());
+
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
     }
   }
 
-  GenerateMetadataMojo setOutputDir(File d) {
-    this.outputDir = d;
-    return this;
-  }
-
-  GenerateMetadataMojo setInputFile(File f) {
-    this.inputFile = f;
-    return this;
-  }
-
-  GenerateMetadataMojo setDevMode(boolean devMode) {
-    this.devMode = devMode;
-    return this;
+  private void generateEditions(UpdateCenter updateCenter) throws IOException {
+    File jarsDir = outputDir;
+    EditionTemplatesLoaderImpl templatesLoader = new EditionTemplatesLoaderImpl(editionTemplateProperties);
+    EditionsGenerator editionsGenerator = new EditionsGenerator(updateCenter, templatesLoader, jarsDir);
+    editionsGenerator.generateZipsAndJson(editionsOutputDir, editionsDownloadBaseUrl);
   }
 }

@@ -1,0 +1,30 @@
+{
+  "6.7": [
+    {
+      "key": "community",
+      "name": "community_name",
+      "textDescription": "community Edition",
+      "homeUrl": "community/home",
+      "licenseRequestUrl": "community/request",
+      "downloadUrl": "http://bintray/community-6.7.zip"
+    },
+    {
+      "key": "enterprise",
+      "name": "enterprise_name",
+      "textDescription": "enterprise Edition",
+      "homeUrl": "enterprise/home",
+      "licenseRequestUrl": "enterprise/request",
+      "downloadUrl": "http://bintray/enterprise-6.7.zip"
+    }
+  ],
+  "7.0": [
+    {
+      "key": "community",
+      "name": "community_name",
+      "textDescription": "community Edition",
+      "homeUrl": "community/home",
+      "licenseRequestUrl": "community/request",
+      "downloadUrl": "http://bintray/community-7.0.zip"
+    }
+  ]
+}

@@ -43,7 +43,13 @@ public class GenerateMetadataMojoTest {
     FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.0.jar"), outputDir);
 
     File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
-    new GenerateMetadataMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    GenerateMetadataMojo underTest = new GenerateMetadataMojo();
+    underTest.inputFile = inputFile;
+    underTest.outputDir = outputDir;
+    underTest.editionsDownloadBaseUrl = "http://bintray/";
+    underTest.editionsOutputDir = temp.newFolder();
+    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
+    underTest.execute();
 
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
