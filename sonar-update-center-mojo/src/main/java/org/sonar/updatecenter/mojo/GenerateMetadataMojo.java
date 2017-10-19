@@ -24,67 +24,55 @@ import java.io.IOException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.editions.EditionTemplatesLoaderImpl;
 import org.sonar.updatecenter.mojo.editions.EditionsGenerator;
 
-/**
- * @goal generate-metadata
- * @requiresProject false
- */
+@Mojo(name = "generate-metadata", requiresProject = false, threadSafe = true)
 public class GenerateMetadataMojo extends AbstractMojo {
 
   /**
    * The directory that contains generated files and cache of plugins.
-   *
-   * @parameter expression="${outputDir}"
-   * @required
    */
+  @Parameter(property="outputDir", required = true)
   File outputDir;
 
   /**
    * The path to the metadata file
-   *
-   * @parameter expression="${inputFile}"
-   * @required
    */
+  @Parameter(property="inputFile", required = true)
   File inputFile;
 
   /**
    * Should we consider private and dev versions
-   *
-   * @parameter expression="${devMode}"
    */
+  @Parameter(property="devMode")
   boolean devMode = false;
 
   /**
    * Should we fail fast on errors
-   *
-   * @parameter expression="${ignoreErrors}"
    */
+  @Parameter(property="ignoreErrors")
   boolean ignoreErrors = false;
 
   /**
    * Should we include archived versions in public versions
-   *
-   * @parameter expression="${includeArchives}"
    */
+  @Parameter(property="includeArchives")
   boolean includeArchives = false;
 
   /**
    * Base URL for hosting of editions
-   *
-   * @parameter expression="${editionsDownloadBaseUrl}"
-   * @required
    */
+  @Parameter(property = "editionsDownloadBaseUrl", required = true)
   String editionsDownloadBaseUrl;
 
   /**
    * The directory that contains generated json and zip files of editions
-   *
-   * @parameter expression="${editionsOutputDir}"
-   * @required
    */
+  @Parameter(property = "editionsOutputDir", required = true)
   File editionsOutputDir;
 
   /**

@@ -23,34 +23,28 @@ import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
-/**
- * @goal generate-html
- * @requiresProject false
- */
+@Mojo(name = "generate-html", requiresProject = false, threadSafe = true)
 public class GenerateHtmlHeadersMojo extends AbstractMojo {
 
   /**
    * The directory that contains generated files and cache of plugins.
-   *
-   * @parameter expression="${outputDir}"
-   * @required
    */
+  @Parameter(property = "outputDir", required = true)
   private File outputDir;
 
   /**
    * The path to the metadata file
-   *
-   * @parameter expression="${inputFile}"
-   * @required
    */
+  @Parameter(property = "inputFile", required = true)
   private File inputFile;
 
   /**
    * Should we fail fast on errors
-   *
-   * @parameter expression="${ignoreErrors}"
    */
+  @Parameter(property = "ignoreErrors")
   private boolean ignoreErrors = false;
 
   @Override
