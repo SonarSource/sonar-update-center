@@ -6,7 +6,6 @@
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
     <version>40</version>
-    <relativePath />
   </parent>
   
   <groupId>org.sonarsource.update-center</groupId>
@@ -112,8 +111,8 @@
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.9.5</version>
+        <artifactId>mockito-core</artifactId>
+        <version>2.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
