@@ -51,7 +51,7 @@ public class EditionsGenerator {
     this.templatesLoader = templatesLoader;
     this.jarsDir = jarsDir;
     if (!jarsDir.exists()) {
-      throw new IllegalArgumentException("Directory " + jarsDir + " does not exist");
+      throw new IllegalArgumentException("Directory does not exist: " + jarsDir.getAbsolutePath());
     }
   }
 

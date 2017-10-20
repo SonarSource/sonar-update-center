@@ -159,6 +159,18 @@ public class EditionsGeneratorTest {
     assertThatZipIsEmpty(edition.getZip());
   }
 
+  @Test
+  public void fail_if_jars_dir_does_not_exist() throws Exception {
+    FileUtils.deleteDirectory(jarsDir);
+    Sonar sonarqube = new Sonar().setReleases(new String[] {"99.2"});
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Directory does not exist: " + jarsDir);
+
+    new EditionsGenerator(updateCenter, templateLoader, jarsDir);
+  }
+
   private EditionTemplate.Builder newEnterpriseTemplate() {
     return new EditionTemplate.Builder()
       .setKey("enterprise")

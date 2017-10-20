@@ -84,10 +84,35 @@ public class EditionTest {
     underTest.addJar(jar);
   }
 
+  @Test
+  public void test_equals_and_hashCode() throws Exception {
+    Edition foo = newEdition("foo");
+    Edition foo1 = newEdition("foo");
+    Edition bar = newEdition("bar");
+
+    assertThat(foo.equals(foo)).isTrue();
+    assertThat(foo.equals(foo1)).isTrue();
+    assertThat(foo.equals(bar)).isFalse();
+
+    assertThat(foo.hashCode()).isEqualTo(foo.hashCode());
+    assertThat(foo.hashCode()).isEqualTo(foo1.hashCode());
+  }
+
   private File newJar(String filename) throws IOException {
     File file = temp.newFile(filename);
     FileUtils.write(file, RandomStringUtils.randomAlphabetic(50));
     return file;
   }
 
+  private Edition newEdition(String key) throws IOException {
+    return new Edition.Builder()
+      .setKey(key)
+      .setName(key + "_name")
+      .setTextDescription(key + " Edition")
+      .setSonarQubeVersion("6.7")
+      .setHomeUrl(key + "/home")
+      .setRequestUrl(key + "/request")
+      .setTargetZip(temp.newFile())
+      .build();
+  }
 }
