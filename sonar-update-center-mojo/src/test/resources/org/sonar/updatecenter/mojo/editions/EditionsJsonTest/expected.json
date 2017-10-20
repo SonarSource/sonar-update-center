@@ -6,7 +6,7 @@
       "textDescription": "community Edition",
       "homeUrl": "community/home",
       "licenseRequestUrl": "community/request",
-      "downloadUrl": "http://bintray/community-6.7.zip"
+      "downloadUrl": "http://bintray/community-edition-6.7.zip"
     },
     {
       "key": "enterprise",
@@ -14,7 +14,7 @@
       "textDescription": "enterprise Edition",
       "homeUrl": "enterprise/home",
       "licenseRequestUrl": "enterprise/request",
-      "downloadUrl": "http://bintray/enterprise-6.7.zip"
+      "downloadUrl": "http://bintray/enterprise-edition-6.7.zip"
     }
   ],
   "7.0": [
@@ -24,7 +24,7 @@
       "textDescription": "community Edition",
       "homeUrl": "community/home",
       "licenseRequestUrl": "community/request",
-      "downloadUrl": "http://bintray/community-7.0.zip"
+      "downloadUrl": "http://bintray/community-edition-7.0.zip"
     }
   ]
 }

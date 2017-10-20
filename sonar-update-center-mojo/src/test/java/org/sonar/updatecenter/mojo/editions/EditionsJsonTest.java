@@ -65,7 +65,7 @@ public class EditionsJsonTest {
       .setSonarQubeVersion(sqVersion)
       .setHomeUrl(key + "/home")
       .setRequestUrl(key + "/request")
-      .setTargetZip(temp.newFile(key + "-" + sqVersion + ".zip"))
+      .setTargetZip(temp.newFile(key + "-edition-" + sqVersion + ".zip"))
       .build();
   }
 

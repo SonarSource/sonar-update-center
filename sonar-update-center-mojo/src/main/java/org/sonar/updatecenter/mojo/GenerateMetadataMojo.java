@@ -81,6 +81,10 @@ public class GenerateMetadataMojo extends AbstractMojo {
   @Parameter(property = "editionTemplateProperties", defaultValue = "edition-templates.properties")
   File editionTemplateProperties;
 
+  @Parameter(property = "editionBuildNumber")
+  String editionBuildNumber;
+
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
@@ -100,7 +104,7 @@ public class GenerateMetadataMojo extends AbstractMojo {
   private void generateEditions(UpdateCenter updateCenter) throws IOException {
     File jarsDir = outputDir;
     EditionTemplatesLoaderImpl templatesLoader = new EditionTemplatesLoaderImpl(editionTemplateProperties);
-    EditionsGenerator editionsGenerator = new EditionsGenerator(updateCenter, templatesLoader, jarsDir);
-    editionsGenerator.generateZipsAndJson(editionsOutputDir, editionsDownloadBaseUrl);
+    EditionsGenerator editionsGenerator = new EditionsGenerator(updateCenter, templatesLoader, jarsDir, editionsDownloadBaseUrl, editionBuildNumber);
+    editionsGenerator.generateZipsAndJson(editionsOutputDir);
   }
 }
