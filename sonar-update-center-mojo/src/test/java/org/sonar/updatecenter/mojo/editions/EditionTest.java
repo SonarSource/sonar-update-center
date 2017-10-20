@@ -85,6 +85,17 @@ public class EditionTest {
   }
 
   @Test
+  public void fail_if_adding_jar_that_is_a_directory() throws Exception {
+    File dir = temp.newFolder();
+    Edition.Builder underTest = new Edition.Builder();
+
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("File does not exist: " + dir.getAbsolutePath());
+
+    underTest.addJar(dir);
+  }
+
+  @Test
   public void test_equals_and_hashCode() throws Exception {
     Edition foo = newEdition("foo");
     Edition foo1 = newEdition("foo");
@@ -93,6 +104,8 @@ public class EditionTest {
     assertThat(foo.equals(foo)).isTrue();
     assertThat(foo.equals(foo1)).isTrue();
     assertThat(foo.equals(bar)).isFalse();
+    assertThat(foo.equals("foo")).isFalse();
+    assertThat(foo.equals(null)).isFalse();
 
     assertThat(foo.hashCode()).isEqualTo(foo.hashCode());
     assertThat(foo.hashCode()).isEqualTo(foo1.hashCode());
