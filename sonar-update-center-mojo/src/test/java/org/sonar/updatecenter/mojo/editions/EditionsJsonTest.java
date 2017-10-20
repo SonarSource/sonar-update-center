@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class EditionsJsonTest {
 
   @Rule
@@ -53,7 +55,7 @@ public class EditionsJsonTest {
 
     String json = toJson(editions, downloadBaseUrl);
 
-    String expectedJson = IOUtils.toString(getClass().getResource("EditionsJsonTest/expected.json"));
+    String expectedJson = IOUtils.toString(getClass().getResource("EditionsJsonTest/expected.json"), UTF_8);
     JSONAssert.assertEquals(expectedJson, json, false);
   }
 
@@ -65,7 +67,7 @@ public class EditionsJsonTest {
       .setSonarQubeVersion(sqVersion)
       .setHomeUrl(key + "/home")
       .setRequestUrl(key + "/request")
-      .setTargetZip(temp.newFile(key + "-" + sqVersion + ".zip"))
+      .setTargetZip(temp.newFile(key + "-edition-" + sqVersion + ".zip"))
       .build();
   }
 

@@ -79,12 +79,12 @@ public class EditionsGeneratorTest {
 
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir);
-    underTest.generateZipsAndJson(outputDir, "http://bintray");
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
+    underTest.generateZipsAndJson(outputDir);
 
     assertThat(new File(outputDir, "editions.json")).isFile().exists();
-    assertThat(new File(outputDir, "enterprise-6.7.zip")).isFile().exists();
-    assertThat(new File(outputDir, "enterprise-7.0.zip")).isFile().exists();
+    assertThat(new File(outputDir, "enterprise-edition-6.7.0.1234.zip")).isFile().exists();
+    assertThat(new File(outputDir, "enterprise-edition-7.0.0.1234.zip")).isFile().exists();
   }
 
   @Test
@@ -98,7 +98,7 @@ public class EditionsGeneratorTest {
 
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
 
     // one enterprise edition per SQ version >= 6.5
     // The latest compatible release of each plugin is packaged in the zip.
@@ -111,7 +111,7 @@ public class EditionsGeneratorTest {
     assertThat(edition67.getZip())
       .exists()
       .isFile()
-      .hasName("enterprise-6.7.zip")
+      .hasName("enterprise-edition-6.7.0.1234.zip")
       .hasParent(outputDir);
     assertThatZipContainsExactly(edition67.getZip(), "cobol-1.1.jar", "governance-1.0.jar");
 
@@ -121,7 +121,7 @@ public class EditionsGeneratorTest {
     assertThat(edition70.getZip())
       .exists()
       .isFile()
-      .hasName("enterprise-7.0.zip")
+      .hasName("enterprise-edition-7.0.0.1234.zip")
       .hasParent(outputDir);
 
     assertThatZipContainsExactly(edition70.getZip(), "cobol-1.1.jar", "governance-2.0.jar");
@@ -140,7 +140,7 @@ public class EditionsGeneratorTest {
     expectedException.expect(NoSuchElementException.class);
     expectedException.expectMessage("Unable to find plugin with key wat");
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
     underTest.generateZips(outputDir);
   }
 
@@ -154,7 +154,7 @@ public class EditionsGeneratorTest {
       .build();
     when(templateLoader.load()).thenReturn(asList(template));
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
     Edition edition = underTest.generateZips(outputDir).get(0);
     assertThatZipIsEmpty(edition.getZip());
   }
@@ -168,7 +168,7 @@ public class EditionsGeneratorTest {
     expectedException.expect(IllegalArgumentException.class);
     expectedException.expectMessage("Directory does not exist: " + jarsDir);
 
-    new EditionsGenerator(updateCenter, templateLoader, jarsDir);
+    new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
   }
 
   private EditionTemplate.Builder newEnterpriseTemplate() {

@@ -45,17 +45,22 @@ public class EditionsGenerator {
   private final UpdateCenter updateCenter;
   private final EditionTemplatesLoader templatesLoader;
   private final File jarsDir;
+  private final String downloadBaseUrl;
+  private final String editionBuildNumber;
 
-  public EditionsGenerator(UpdateCenter updateCenter, EditionTemplatesLoader templatesLoader, File jarsDir) {
+  public EditionsGenerator(UpdateCenter updateCenter, EditionTemplatesLoader templatesLoader, File jarsDir,
+    String downloadBaseUrl, String editionBuildNumber) {
     this.updateCenter = updateCenter;
     this.templatesLoader = templatesLoader;
     this.jarsDir = jarsDir;
+    this.downloadBaseUrl = downloadBaseUrl;
+    this.editionBuildNumber = editionBuildNumber;
     if (!jarsDir.exists()) {
       throw new IllegalArgumentException("Directory does not exist: " + jarsDir.getAbsolutePath());
     }
   }
 
-  public void generateZipsAndJson(File outputDir, String downloadBaseUrl) throws IOException {
+  public void generateZipsAndJson(File outputDir) throws IOException {
     FileUtils.forceMkdir(outputDir);
     FileUtils.cleanDirectory(outputDir);
 
@@ -97,7 +102,8 @@ public class EditionsGenerator {
     for (EditionTemplate template : templates) {
       LOGGER.info("Generate edition [{}] for SonarQube {}", template.getKey(), sqVersion);
       Edition.Builder builder = new Edition.Builder();
-      File zipFile = new File(outputDir, template.getKey() + "-" + sqVersion.toString() + ".zip");
+
+      File zipFile = new File(outputDir, template.getKey() + "-edition-" + EditionVersion.create(sqVersion, editionBuildNumber).toString() + ".zip");
       builder
         .setKey(template.getKey())
         .setName(template.getName())
