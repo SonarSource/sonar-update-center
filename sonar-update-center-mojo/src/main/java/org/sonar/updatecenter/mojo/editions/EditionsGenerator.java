@@ -39,7 +39,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class EditionsGenerator {
 
-  private static final Version MIN_SUPPORTED_SQ_VERSION = Version.create("6.5");
+  private static final Version MIN_SUPPORTED_SQ_VERSION = Version.create("6.6");
   private static final Logger LOGGER = LoggerFactory.getLogger(EditionsGenerator.class);
 
   private final UpdateCenter updateCenter;
@@ -113,17 +113,21 @@ public class EditionsGenerator {
         .setSonarQubeVersion(sqVersion.toString())
         .setTargetZip(zipFile);
 
+      boolean missingPlugin = false;
       for (String pluginKey : template.getPluginKeys()) {
         Plugin plugin = updateCenter.getUpdateCenterPluginReferential().findPlugin(pluginKey);
         Release pluginRelease = plugin.getLastCompatibleRelease(sqVersion);
         if (pluginRelease == null) {
           LOGGER.warn("Plugin {} has no release compatible with SonarQube {}.", pluginKey, sqVersion);
-          continue;
+          missingPlugin = true;
+        } else {
+          builder.addJar(new File(jarsDir, pluginRelease.getFilename()));
         }
-        builder.addJar(new File(jarsDir, pluginRelease.getFilename()));
       }
 
-      editions.add(builder.build());
+      if (!missingPlugin) {
+        editions.add(builder.build());
+      }
     }
 
     return editions;

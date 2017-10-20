@@ -145,7 +145,7 @@ public class EditionsGeneratorTest {
   }
 
   @Test
-  public void plugin_is_not_packaged_if_no_compatible_versions() throws Exception {
+  public void edition_is_not_generated_if_a_plugin_has_no_compatible_release() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"99.2"});
     UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
 
@@ -155,8 +155,9 @@ public class EditionsGeneratorTest {
     when(templateLoader.load()).thenReturn(asList(template));
 
     EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
-    Edition edition = underTest.generateZips(outputDir).get(0);
-    assertThatZipIsEmpty(edition.getZip());
+    List<Edition> editions = underTest.generateZips(outputDir);
+
+    assertThat(editions).isEmpty();
   }
 
   @Test
