@@ -27,8 +27,9 @@ public class Sonar extends Artifact {
     super("sonar");
   }
 
-  public void setLtsRelease(String ltsVersion) {
+  public Sonar setLtsRelease(String ltsVersion) {
     this.ltsVersion = new Release(this, Version.create(ltsVersion));
+    return this;
   }
 
   public Release getLtsRelease() {

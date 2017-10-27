@@ -25,7 +25,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -34,6 +37,8 @@ import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
+import org.sonar.updatecenter.mojo.FreeMarkerUtils;
+import org.sonar.updatecenter.mojo.SQVersionInMatrix;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -65,12 +70,37 @@ public class EditionsGenerator {
     FileUtils.cleanDirectory(outputDir);
 
     File jsonOutput = new File(outputDir, "editions.json");
+    List<Edition> editions = generateZips(outputDir);
     try (Writer jsonWriter = new OutputStreamWriter(new FileOutputStream(jsonOutput), UTF_8)) {
-      List<Edition> editions = generateZips(outputDir);
-
       LOGGER.info("Generate {}", jsonOutput.getAbsolutePath());
       new EditionsJson().write(editions, downloadBaseUrl, jsonWriter);
     }
+    generateEditionsHtml(outputDir, editions);
+  }
+
+  private void generateEditionsHtml(File outputDir, List<Edition> editions) {
+    File editionsHtmlOutput = new File(outputDir, "editions.html");
+    LOGGER.info("Generate {}", editionsHtmlOutput);
+    EditionsMatrix matrix = new EditionsMatrix();
+    Map<String, Release> majorVersions = new LinkedHashMap<>();
+    for (Release sq : updateCenter.getSonar().getMajorReleases()) {
+      majorVersions.put(sq.getVersion().getName(), sq);
+    }
+    for (Edition edition : editions) {
+      // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
+      if (majorVersions.keySet().contains(edition.getSonarQubeVersion())) {
+        matrix.getSqVersionsByVersion().computeIfAbsent(edition.getSonarQubeVersion(), v -> {
+          Release sq = majorVersions.get(v);
+          return new SQVersionInMatrix(sq, updateCenter.getSonar().getLtsRelease().equals(sq));
+        });
+      }
+      matrix.getEditionsByKey().computeIfAbsent(edition.getKey(), k -> new EditionsMatrix.EditionInMatrix(edition.getName()))
+        .getCompatibleEditionBySqVersion().put(edition.getSonarQubeVersion(), edition);
+    }
+    Map<String, Object> dataModel = new HashMap<>();
+    dataModel.put("matrix", matrix);
+    dataModel.put("downloadBaseUrl", downloadBaseUrl);
+    FreeMarkerUtils.print(dataModel, editionsHtmlOutput, "editions/editions-template.html.ftl");
   }
 
   /**
@@ -110,7 +140,7 @@ public class EditionsGenerator {
         .setTextDescription(template.getTextDescription())
         .setHomeUrl(template.getHomeUrl())
         .setRequestUrl(template.getRequestUrl())
-        .setSonarQubeVersion(sqVersion.toString())
+        .setSonarQubeVersion(sqVersion.getName())
         .setTargetZip(zipFile);
 
       boolean missingPlugin = false;

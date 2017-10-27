@@ -19,11 +19,12 @@
  */
 package org.sonar.updatecenter.common;
 
-import javax.annotation.CheckForNull;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.annotation.CheckForNull;
 
 public abstract class Artifact implements Comparable<Artifact> {
 
@@ -266,6 +267,18 @@ public abstract class Artifact implements Comparable<Artifact> {
       all.add(getDevRelease());
     }
     return all;
+  }
+
+  /**
+   * Keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
+   */
+  public SortedSet<Release> getMajorReleases() {
+    Map<String, Release> majorVersions = new LinkedHashMap<>();
+    for (Release sq : getAllReleases()) {
+      String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
+      majorVersions.put(displayVersion, sq);
+    }
+    return new TreeSet<>(majorVersions.values());
   }
 
   @Override

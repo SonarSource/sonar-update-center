@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import static java.util.Objects.requireNonNull;
 
@@ -170,5 +171,9 @@ public class Edition {
     public Edition build() throws IOException {
       return new Edition(this);
     }
+  }
+
+  public String getDownloadUrl(String downloadBaseUrl) {
+    return String.format("%s/%s", StringUtils.removeEnd(downloadBaseUrl, "/"), getZip().getName());
   }
 }

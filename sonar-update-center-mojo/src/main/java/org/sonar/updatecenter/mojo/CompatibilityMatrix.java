@@ -19,59 +19,22 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class CompatibilityMatrix {
 
-  private List<SQVersion> sqVersions = new ArrayList<>();
+  private List<SQVersionInMatrix> sqVersions = new ArrayList<>();
   private List<Plugin> plugins = new ArrayList<>();
 
-  public List<SQVersion> getSqVersions() {
+  public List<SQVersionInMatrix> getSqVersions() {
     return sqVersions;
   }
 
   public List<Plugin> getPlugins() {
     return plugins;
-  }
-
-  public static class SQVersion {
-    private final String displayVersion;
-    private final String realVersion;
-    private final boolean isLts;
-    private final Date releaseDate;
-
-    public SQVersion(String displayVersion, String realVersion, boolean isLts, Date releaseDate) {
-      this.displayVersion = displayVersion;
-      this.realVersion = realVersion;
-      this.isLts = isLts;
-      this.releaseDate = releaseDate;
-    }
-
-    public String getDisplayVersion() {
-      return displayVersion;
-    }
-
-    public String getRealVersion() {
-      return realVersion;
-    }
-
-    public boolean isLts() {
-      return isLts;
-    }
-
-    public String getReleaseDate() {
-      return releaseDate != null ? formatDate(releaseDate) : null;
-    }
-
-    private static String formatDate(Date date) {
-      return (new SimpleDateFormat("MMM yyyy", Locale.ENGLISH)).format(date);
-    }
   }
 
   public static class Plugin {
