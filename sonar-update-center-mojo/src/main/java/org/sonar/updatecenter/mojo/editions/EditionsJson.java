@@ -20,7 +20,6 @@
 package org.sonar.updatecenter.mojo.editions;
 
 import com.google.gson.stream.JsonWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Comparator;
@@ -30,7 +29,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import org.apache.commons.lang.StringUtils;
 
 public class EditionsJson {
 
@@ -55,7 +53,7 @@ public class EditionsJson {
         json.name("textDescription").value(e.getTextDescription());
         json.name("homeUrl").value(e.getHomeUrl());
         json.name("licenseRequestUrl").value(e.getRequestUrl());
-        json.name("downloadUrl").value(getDownloadUrl(e, downloadBaseUrl));
+        json.name("downloadUrl").value(e.getDownloadUrl(downloadBaseUrl));
         json.endObject();
       }
       json.endArray();
@@ -64,8 +62,4 @@ public class EditionsJson {
     json.close();
   }
 
-  private static String getDownloadUrl(Edition edition, String downloadBaseUrl) {
-    File zip = edition.getZip();
-    return String.format("%s/%s", StringUtils.removeEnd(downloadBaseUrl, "/"), zip.getName());
-  }
 }

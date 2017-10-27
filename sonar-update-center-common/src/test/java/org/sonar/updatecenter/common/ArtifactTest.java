@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class ArtifactTest {
@@ -106,6 +107,21 @@ public class ArtifactTest {
       .extracting(Release::getVersion)
       .extracting(Version::getName)
       .containsExactly("1.1", "1.5", "2.0", "2.1-SNAPSHOT");
+  }
+
+  @Test
+  public void getMajorReleases() {
+    FakeArtifact artifact = new FakeArtifact("fake");
+    artifact.addRelease(Version.create("1.1"));
+    artifact.addRelease(Version.create("1.1.2"));
+    artifact.addRelease(Version.create("2.0"));
+    artifact.addRelease(Version.create("2.0.1"));
+    artifact.addRelease(Version.create("2.0.2"));
+
+    assertThat(artifact.getMajorReleases())
+      .extracting(Release::getVersion)
+      .extracting(Version::getName)
+      .containsExactly("1.1.2", "2.0.2");
   }
 
   private static class FakeArtifact extends Artifact {

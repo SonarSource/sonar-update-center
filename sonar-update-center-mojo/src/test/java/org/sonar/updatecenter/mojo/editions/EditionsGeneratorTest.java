@@ -22,6 +22,7 @@ package org.sonar.updatecenter.mojo.editions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.zip.ZipInputStream;
@@ -69,8 +70,8 @@ public class EditionsGeneratorTest {
   }
 
   @Test
-  public void generateZipsAndJson_generates_files_in_output_dir() throws IOException {
-    Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"});
+  public void generateZipsHtmlAndJson_generates_files_in_output_dir() throws IOException {
+    Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"}).setLtsRelease("6.7");
 
     EditionTemplate template = newEnterpriseTemplate()
       .setPluginKeys(asList("cobol", "governance"))
@@ -85,6 +86,8 @@ public class EditionsGeneratorTest {
     assertThat(new File(outputDir, "editions.json")).isFile().exists();
     assertThat(new File(outputDir, "enterprise-edition-6.7.0.1234.zip")).isFile().exists();
     assertThat(new File(outputDir, "enterprise-edition-7.0.0.1234.zip")).isFile().exists();
+    assertThat(new File(outputDir, "editions.html")).isFile().exists();
+    assertThat(new String(Files.readAllBytes(outputDir.toPath().resolve("editions.html")))).contains("http://bintray/enterprise-edition-6.7.0.1234.zip");
   }
 
   @Test
