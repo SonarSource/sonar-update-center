@@ -91,6 +91,27 @@ public class EditionsGeneratorTest {
   }
 
   @Test
+  public void preserve_edition_order() throws IOException {
+    Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"}).setLtsRelease("6.7");
+
+    EditionTemplate template1 = newCommunityTemplate()
+      .build();
+    EditionTemplate template2 = newEnterpriseTemplate()
+      .setPluginKeys(asList("cobol", "governance"))
+      .build();
+    when(templateLoader.load()).thenReturn(asList(template1, template2));
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
+    underTest.generateZipsAndJson(outputDir);
+
+    assertThat(new File(outputDir, "editions.json")).isFile().exists();
+    assertThat(new File(outputDir, "editions.html")).isFile().exists();
+    assertThat(new String(Files.readAllBytes(outputDir.toPath().resolve("editions.html")))).containsSequence("Community Edition", "Enterprise Edition");
+  }
+
+  @Test
   public void generate_zip_files_of_editions() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"});
 
@@ -178,8 +199,17 @@ public class EditionsGeneratorTest {
   private EditionTemplate.Builder newEnterpriseTemplate() {
     return new EditionTemplate.Builder()
       .setKey("enterprise")
-      .setName("Enterprise")
-      .setTextDescription("Enterprise Edition")
+      .setName("Enterprise Edition")
+      .setTextDescription("Get support from SonarSource on your SonarSource Enterprise Edition.")
+      .setHomeUrl("/home")
+      .setRequestLicenseUrl("/request");
+  }
+
+  private EditionTemplate.Builder newCommunityTemplate() {
+    return new EditionTemplate.Builder()
+      .setKey("community")
+      .setName("Community Edition")
+      .setTextDescription("Get support from SonarSource on your SonarSource Community Edition.")
       .setHomeUrl("/home")
       .setRequestLicenseUrl("/request");
   }

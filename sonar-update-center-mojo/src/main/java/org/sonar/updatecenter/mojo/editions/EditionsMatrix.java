@@ -21,13 +21,14 @@ package org.sonar.updatecenter.mojo.editions;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.sonar.updatecenter.mojo.SQVersionInMatrix;
 
 public class EditionsMatrix {
 
-  private Map<String, SQVersionInMatrix> sqVersionsByVersion = new HashMap<>();
-  private Map<String, EditionInMatrix> editionsByKey = new HashMap<>();
+  private Map<String, SQVersionInMatrix> sqVersionsByVersion = new LinkedHashMap<>();
+  private Map<String, EditionInMatrix> editionsByKey = new LinkedHashMap<>();
 
   public Map<String, SQVersionInMatrix> getSqVersionsByVersion() {
     return sqVersionsByVersion;
