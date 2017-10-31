@@ -73,7 +73,7 @@ public class EditionTemplate {
     private String description;
     private String homeUrl;
     private String requestUrl;
-    private Set<String> pluginKeys;
+    private Set<String> pluginKeys = Collections.emptySet();
 
     public Builder setKey(String s) {
       this.key = s;
