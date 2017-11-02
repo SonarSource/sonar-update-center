@@ -19,17 +19,8 @@
  */
 package org.sonar.updatecenter.mojo.editions;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.IOUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import static java.util.Objects.requireNonNull;
@@ -42,17 +33,18 @@ public class Edition {
   private final String textDescription;
   private final String homeUrl;
   private final String requestUrl;
-  private final File zip;
+  private final String zipFileName;
+  private final Set<String> jars;
 
-  private Edition(Builder builder) throws IOException {
+  private Edition(Builder builder) {
     this.sonarQubeVersion = requireNonNull(builder.sonarQubeVersion);
     this.key = requireNonNull(builder.key);
     this.name = requireNonNull(builder.name);
     this.textDescription = requireNonNull(builder.textDescription);
     this.homeUrl = requireNonNull(builder.homeUrl);
     this.requestUrl = requireNonNull(builder.requestUrl);
-
-    this.zip = zip(builder.targetZip, builder.jarsInZip);
+    this.zipFileName = requireNonNull(builder.zipFileName);
+    this.jars = requireNonNull(builder.jars);
   }
 
   public String getSonarQubeVersion() {
@@ -79,22 +71,12 @@ public class Edition {
     return requestUrl;
   }
 
-  public File getZip() {
-    return zip;
+  public String getZipFileName() {
+    return zipFileName;
   }
 
-  private static File zip(File zipFile, List<File> files) throws IOException {
-    try (ZipOutputStream zipOutput = new ZipOutputStream(new FileOutputStream(zipFile, false))) {
-      for (File file : files) {
-        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-          ZipEntry entry = new ZipEntry(file.getName());
-          zipOutput.putNextEntry(entry);
-          IOUtils.copy(in, zipOutput);
-          zipOutput.closeEntry();
-        }
-      }
-    }
-    return zipFile;
+  public Set<String> jars() {
+    return jars;
   }
 
   @Override
@@ -122,8 +104,8 @@ public class Edition {
     private String textDescription;
     private String homeUrl;
     private String requestUrl;
-    private File targetZip;
-    private final List<File> jarsInZip = new ArrayList<>();
+    private String zipFileName;
+    private final Set<String> jars = new LinkedHashSet<>();
 
     public Builder setSonarQubeVersion(String sonarQubeVersion) {
       this.sonarQubeVersion = sonarQubeVersion;
@@ -155,25 +137,22 @@ public class Edition {
       return this;
     }
 
-    public Builder addJar(File jar) {
-      if (!jar.exists() || !jar.isFile()) {
-        throw new IllegalArgumentException("File does not exist: " + jar);
-      }
-      this.jarsInZip.add(jar);
+    public Builder addJar(String jar) {
+      this.jars.add(jar);
       return this;
     }
 
-    public Builder setTargetZip(File zip) {
-      this.targetZip = zip;
+    public Builder setZipFileName(String zipFileName) {
+      this.zipFileName = zipFileName;
       return this;
     }
 
-    public Edition build() throws IOException {
+    public Edition build() {
       return new Edition(this);
     }
   }
 
   public String getDownloadUrl(String downloadBaseUrl) {
-    return String.format("%s/%s", StringUtils.removeEnd(downloadBaseUrl, "/"), getZip().getName());
+    return String.format("%s/%s", StringUtils.removeEnd(downloadBaseUrl, "/"), getZipFileName());
   }
 }

@@ -19,12 +19,7 @@
  */
 package org.sonar.updatecenter.mojo.editions;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -41,7 +36,6 @@ public class EditionTest {
 
   @Test
   public void build_edition() throws Exception {
-    File zip = temp.newFile();
     Edition.Builder builder = new Edition.Builder();
     builder.setKey("enterprise");
     builder.setName("Enterprise");
@@ -49,9 +43,9 @@ public class EditionTest {
     builder.setSonarQubeVersion("6.7.1");
     builder.setHomeUrl("/home");
     builder.setRequestUrl("/request");
-    builder.setTargetZip(zip);
-    builder.addJar(newJar("foo.jar"));
-    builder.addJar(newJar("bar.jar"));
+    builder.setZipFileName("enterprise.zip");
+    builder.addJar("foo.jar");
+    builder.addJar("bar.jar");
 
     Edition edition = builder.build();
 
@@ -61,38 +55,7 @@ public class EditionTest {
     assertThat(edition.getHomeUrl()).isEqualTo("/home");
     assertThat(edition.getRequestUrl()).isEqualTo("/request");
     assertThat(edition.getSonarQubeVersion()).isEqualTo("6.7.1");
-    assertThat(edition.getZip()).exists().isFile();
-    assertThat(FileUtils.sizeOf(edition.getZip())).isGreaterThan(0);
-    assertThat(edition.getZip().getAbsolutePath()).isEqualTo(zip.getAbsolutePath());
-
-    try (ZipInputStream zipInput = new ZipInputStream(new FileInputStream(edition.getZip()))) {
-      assertThat(zipInput.getNextEntry().getName()).isEqualTo("foo.jar");
-      assertThat(zipInput.getNextEntry().getName()).isEqualTo("bar.jar");
-      assertThat(zipInput.getNextEntry()).isNull();
-    }
-  }
-
-  @Test
-  public void fail_if_adding_jar_that_does_not_exist() throws Exception {
-    File jar = temp.newFile();
-    jar.delete();
-    Edition.Builder underTest = new Edition.Builder();
-
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("File does not exist: " + jar.getAbsolutePath());
-
-    underTest.addJar(jar);
-  }
-
-  @Test
-  public void fail_if_adding_jar_that_is_a_directory() throws Exception {
-    File dir = temp.newFolder();
-    Edition.Builder underTest = new Edition.Builder();
-
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("File does not exist: " + dir.getAbsolutePath());
-
-    underTest.addJar(dir);
+    assertThat(edition.getZipFileName()).isEqualTo("enterprise.zip");
   }
 
   @Test
@@ -111,12 +74,6 @@ public class EditionTest {
     assertThat(foo.hashCode()).isEqualTo(foo1.hashCode());
   }
 
-  private File newJar(String filename) throws IOException {
-    File file = temp.newFile(filename);
-    FileUtils.write(file, RandomStringUtils.randomAlphabetic(50));
-    return file;
-  }
-
   private Edition newEdition(String key) throws IOException {
     return new Edition.Builder()
       .setKey(key)
@@ -125,7 +82,7 @@ public class EditionTest {
       .setSonarQubeVersion("6.7")
       .setHomeUrl(key + "/home")
       .setRequestUrl(key + "/request")
-      .setTargetZip(temp.newFile())
+      .setZipFileName(key + ".zip")
       .build();
   }
 }
