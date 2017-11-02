@@ -22,6 +22,7 @@ package org.sonar.updatecenter.mojo;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -432,7 +433,7 @@ public class PluginHeadersTest {
    * @return
    */
   private String flatHtmlFile(File file) throws IOException {
-    return FileUtils.readFileToString(file).replaceAll("\\s", "");
+    return FileUtils.readFileToString(file, StandardCharsets.UTF_8).replaceAll("\\s", "");
   }
 
 }

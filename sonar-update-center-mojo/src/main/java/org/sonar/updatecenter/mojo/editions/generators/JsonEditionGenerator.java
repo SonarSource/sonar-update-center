@@ -17,10 +17,13 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonar.updatecenter.mojo.editions;
+package org.sonar.updatecenter.mojo.editions.generators;
 
 import com.google.gson.stream.JsonWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Comparator;
 import java.util.List;
@@ -29,10 +32,31 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.updatecenter.mojo.editions.Edition;
 
-public class EditionsJson {
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-  public void write(List<Edition> editions, String downloadBaseUrl, Writer writer) throws IOException {
+public class JsonEditionGenerator implements EditionGenerator {
+  private static final Logger LOGGER = LoggerFactory.getLogger(JsonEditionGenerator.class);
+  static final String FILE_NAME = "editions.json";
+  private final String downloadBaseUrl;
+
+  public JsonEditionGenerator(String downloadBaseUrl) {
+    this.downloadBaseUrl = downloadBaseUrl;
+  }
+
+  @Override
+  public void generate(File outputDir, List<Edition> editions) throws IOException {
+    File jsonOutput = new File(outputDir, FILE_NAME);
+    try (Writer jsonWriter = new OutputStreamWriter(new FileOutputStream(jsonOutput), UTF_8)) {
+      LOGGER.info("Generate {}", jsonOutput.getAbsolutePath());
+      write(editions, downloadBaseUrl, jsonWriter);
+    }
+  }
+
+  private void write(List<Edition> editions, String downloadBaseUrl, Writer writer) throws IOException {
     SortedMap<String, SortedSet<Edition>> editionsPerVersion = new TreeMap<>();
     for (Edition edition : editions) {
       editionsPerVersion
@@ -61,5 +85,4 @@ public class EditionsJson {
     json.endObject();
     json.close();
   }
-
 }

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,12 +47,12 @@ public class GenerateHtmlHeadersMojoTest {
     // html confluence include
     File htmlConfluenceInclude = new File(outputDir, "html/artifactsize-confluence-include.html");
     assertThat(htmlConfluenceInclude).exists().isFile();
-    String html = FileUtils.readFileToString(htmlConfluenceInclude);
+    String html = FileUtils.readFileToString(htmlConfluenceInclude, StandardCharsets.UTF_8);
     assertThat(html).contains("<strong>Artifact Size");
 
     File htmlSonarSourceInclude = new File(outputDir, "html/artifactsize-sonarsource-include.html");
     assertThat(htmlSonarSourceInclude).exists().isFile();
-    html = FileUtils.readFileToString(htmlSonarSourceInclude);
+    html = FileUtils.readFileToString(htmlSonarSourceInclude, StandardCharsets.UTF_8);
     assertThat(html).contains("sonar-artifact-size");
 
     assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();

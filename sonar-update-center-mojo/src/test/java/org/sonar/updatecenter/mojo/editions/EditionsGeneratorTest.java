@@ -20,28 +20,30 @@
 package org.sonar.updatecenter.mojo.editions;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
-import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.mojo.editions.generators.EditionGenerator;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class EditionsGeneratorTest {
@@ -50,17 +52,19 @@ public class EditionsGeneratorTest {
   public ExpectedException expectedException = ExpectedException.none();
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
+  @Captor
+  private ArgumentCaptor<ArrayList<Edition>> editionListCapture;
 
-  private File jarsDir;
   private File outputDir;
   private EditionTemplatesLoader templateLoader = mock(EditionTemplatesLoader.class);
   private Plugin cobolPlugin = newPlugin("cobol");
   private Plugin governancePlugin = newPlugin("governance");
   private PluginReferential pluginReferential;
+  private EditionGenerator generator = mock(EditionGenerator.class);
 
   @Before
   public void setUp() throws Exception {
-    jarsDir = temp.newFolder();
+    MockitoAnnotations.initMocks(this);
     outputDir = temp.newFolder();
     makePluginVersionCompatibleWith(cobolPlugin, "1.0", "5.6", "6.7");
     makePluginVersionCompatibleWith(cobolPlugin, "1.1", "6.7", "7.0");
@@ -70,64 +74,31 @@ public class EditionsGeneratorTest {
   }
 
   @Test
-  public void generateZipsHtmlAndJson_generates_files_in_output_dir() throws IOException {
+  public void generateZipsJsonHtml_calls_generators() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"}).setLtsRelease("6.7");
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
 
     EditionTemplate template = newEnterpriseTemplate()
       .setPluginKeys(asList("cobol", "governance"))
       .build();
     when(templateLoader.load()).thenReturn(asList(template));
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, "1234");
+    underTest.generateZipsJsonHtml(outputDir, generator);
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
-    underTest.generateZipsAndJson(outputDir);
+    verify(generator).generate(eq(outputDir), editionListCapture.capture());
+    assertThat(editionListCapture.getValue()).hasSize(2);
 
-    assertThat(new File(outputDir, "editions.json")).isFile().exists();
-    assertThat(new File(outputDir, "enterprise-edition-6.7.0.1234.zip")).isFile().exists();
-    assertThat(new File(outputDir, "enterprise-edition-7.0.0.1234.zip")).isFile().exists();
-    assertThat(new File(outputDir, "editions.html")).isFile().exists();
-    assertThat(new String(Files.readAllBytes(outputDir.toPath().resolve("editions.html")))).contains("http://bintray/enterprise-edition-6.7.0.1234.zip");
-  }
+    Edition edition67 = editionListCapture.getValue().get(0);
+    Edition edition70 = editionListCapture.getValue().get(1);
 
-  @Test
-  public void generate_zip_files_of_editions() throws Exception {
-    Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"});
-
-    EditionTemplate template = newEnterpriseTemplate()
-      .setPluginKeys(asList("cobol", "governance"))
-      .build();
-    when(templateLoader.load()).thenReturn(asList(template));
-
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
-
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
-
-    // one enterprise edition per SQ version >= 6.5
-    // The latest compatible release of each plugin is packaged in the zip.
-    List<Edition> editions = underTest.generateZips(outputDir);
-    assertThat(editions).hasSize(2);
-
-    Edition edition67 = editions.get(0);
     assertThat(edition67.getSonarQubeVersion()).isEqualTo("6.7");
+    assertThat(edition67.jars()).containsOnly("cobol-1.1.jar", "governance-1.0.jar");
     assertThatEditionMatchesTemplate(edition67, template);
-    assertThat(edition67.getZip())
-      .exists()
-      .isFile()
-      .hasName("enterprise-edition-6.7.0.1234.zip")
-      .hasParent(outputDir);
-    assertThatZipContainsExactly(edition67.getZip(), "cobol-1.1.jar", "governance-1.0.jar");
 
-    Edition edition70 = editions.get(1);
-    assertThatEditionMatchesTemplate(edition70, template);
     assertThat(edition70.getSonarQubeVersion()).isEqualTo("7.0");
-    assertThat(edition70.getZip())
-      .exists()
-      .isFile()
-      .hasName("enterprise-edition-7.0.0.1234.zip")
-      .hasParent(outputDir);
-
-    assertThatZipContainsExactly(edition70.getZip(), "cobol-1.1.jar", "governance-2.0.jar");
+    assertThat(edition70.jars()).containsOnly("cobol-1.1.jar", "governance-2.0.jar");
+    assertThatEditionMatchesTemplate(edition70, template);
   }
 
   @Test
@@ -143,8 +114,8 @@ public class EditionsGeneratorTest {
     expectedException.expect(NoSuchElementException.class);
     expectedException.expectMessage("Unable to find plugin with key wat");
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
-    underTest.generateZips(outputDir);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, "1234");
+    underTest.generateZipsJsonHtml(outputDir, generator);
   }
 
   @Test
@@ -157,22 +128,10 @@ public class EditionsGeneratorTest {
       .build();
     when(templateLoader.load()).thenReturn(asList(template));
 
-    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
-    List<Edition> editions = underTest.generateZips(outputDir);
+    EditionsGenerator underTest = new EditionsGenerator(updateCenter, templateLoader, "1234");
+    underTest.generateZipsJsonHtml(outputDir, generator);
 
-    assertThat(editions).isEmpty();
-  }
-
-  @Test
-  public void fail_if_jars_dir_does_not_exist() throws Exception {
-    FileUtils.deleteDirectory(jarsDir);
-    Sonar sonarqube = new Sonar().setReleases(new String[] {"99.2"});
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
-
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Directory does not exist: " + jarsDir);
-
-    new EditionsGenerator(updateCenter, templateLoader, jarsDir, "http://bintray", "1234");
+    verifyZeroInteractions(generator);
   }
 
   private EditionTemplate.Builder newEnterpriseTemplate() {
@@ -192,26 +151,12 @@ public class EditionsGeneratorTest {
     assertThat(edition.getRequestUrl()).isEqualTo(template.getRequestUrl());
   }
 
-  private void assertThatZipIsEmpty(File zip) throws Exception {
-    assertThatZipContainsExactly(zip);
-  }
-
-  private void assertThatZipContainsExactly(File zip, String... filenames) throws Exception {
-    try (ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zip))) {
-      for (String filename : filenames) {
-        assertThat(zipInput.getNextEntry().getName()).isEqualTo(filename);
-      }
-      assertThat(zipInput.getNextEntry()).isNull();
-    }
-  }
-
-  private void makePluginVersionCompatibleWith(Plugin plugin, String pluginVersion, String... sqVersions) throws IOException {
+  private void makePluginVersionCompatibleWith(Plugin plugin, String pluginVersion, String... sqVersions) {
     Release release = new Release(plugin, pluginVersion);
     release.addRequiredSonarVersions(sqVersions);
     String filename = plugin.getKey() + "-" + pluginVersion + ".jar";
     release.setDownloadUrl("http://server/" + filename);
     plugin.addRelease(release);
-    FileUtils.write(new File(jarsDir, filename), "content of " + filename);
   }
 
   private static Plugin newPlugin(String key) {

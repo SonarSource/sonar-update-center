@@ -39,7 +39,7 @@
         <#list matrix.sqVersions as sqVersion>
         <td>
           <#if edition.supports(sqVersion.realVersion) >
-          <a href="${downloadBaseUrl}/${edition.supportedEdition(sqVersion.realVersion).getZip().getName()}">Download</a>
+          <a href="${downloadBaseUrl}/${edition.supportedEdition(sqVersion.realVersion).getZipFileName()}">Download</a>
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png"></img>
           </#if>

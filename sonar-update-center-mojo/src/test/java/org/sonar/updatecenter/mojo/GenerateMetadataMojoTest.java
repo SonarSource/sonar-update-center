@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Rule;
@@ -54,7 +55,7 @@ public class GenerateMetadataMojoTest {
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
     assertThat(outputFile).exists().isFile();
-    String output = FileUtils.readFileToString(outputFile);
+    String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
     assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0");
     assertThat(output).contains("csharp.1.0.displayVersion=1.0 (build 42)");
@@ -84,7 +85,7 @@ public class GenerateMetadataMojoTest {
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
     assertThat(outputFile).exists().isFile();
-    String output = FileUtils.readFileToString(outputFile);
+    String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
     assertThat(output).contains("csharp.1.1-SNAPSHOT.requirePlugins=dotnet\\:1.1");
   }
@@ -105,7 +106,7 @@ public class GenerateMetadataMojoTest {
     // verify that properties file is generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
     assertThat(outputFile).exists().isFile();
-    String output = FileUtils.readFileToString(outputFile);
+    String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
     assertThat(output).contains("artifactsize.versions=0.2,0.3");
   }

@@ -20,15 +20,9 @@
 package org.sonar.updatecenter.mojo.editions;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -37,10 +31,7 @@ import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.Version;
-import org.sonar.updatecenter.mojo.FreeMarkerUtils;
-import org.sonar.updatecenter.mojo.SQVersionInMatrix;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.sonar.updatecenter.mojo.editions.generators.EditionGenerator;
 
 public class EditionsGenerator {
 
@@ -49,68 +40,27 @@ public class EditionsGenerator {
 
   private final UpdateCenter updateCenter;
   private final EditionTemplatesLoader templatesLoader;
-  private final File jarsDir;
-  private final String downloadBaseUrl;
   private final String editionBuildNumber;
 
-  public EditionsGenerator(UpdateCenter updateCenter, EditionTemplatesLoader templatesLoader, File jarsDir,
-    String downloadBaseUrl, String editionBuildNumber) {
+  public EditionsGenerator(UpdateCenter updateCenter, EditionTemplatesLoader templatesLoader, String editionBuildNumber) {
     this.updateCenter = updateCenter;
     this.templatesLoader = templatesLoader;
-    this.jarsDir = jarsDir;
-    this.downloadBaseUrl = downloadBaseUrl;
     this.editionBuildNumber = editionBuildNumber;
-    if (!jarsDir.exists()) {
-      throw new IllegalArgumentException("Directory does not exist: " + jarsDir.getAbsolutePath());
-    }
   }
 
-  public void generateZipsAndJson(File outputDir) throws IOException {
+  public void generateZipsJsonHtml(File outputDir, EditionGenerator... generators) throws Exception {
     FileUtils.forceMkdir(outputDir);
     FileUtils.cleanDirectory(outputDir);
 
-    File jsonOutput = new File(outputDir, "editions.json");
-    List<Edition> editions = generateZips(outputDir);
-    try (Writer jsonWriter = new OutputStreamWriter(new FileOutputStream(jsonOutput), UTF_8)) {
-      LOGGER.info("Generate {}", jsonOutput.getAbsolutePath());
-      new EditionsJson().write(editions, downloadBaseUrl, jsonWriter);
-    }
-    generateEditionsHtml(outputDir, editions);
-  }
-
-  private void generateEditionsHtml(File outputDir, List<Edition> editions) {
-    File editionsHtmlOutput = new File(outputDir, "editions.html");
-    LOGGER.info("Generate {}", editionsHtmlOutput);
-    EditionsMatrix matrix = new EditionsMatrix();
-    Map<String, Release> majorVersions = new LinkedHashMap<>();
-    for (Release sq : updateCenter.getSonar().getMajorReleases()) {
-      majorVersions.put(sq.getVersion().getName(), sq);
-    }
-    for (Edition edition : editions) {
-      // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
-      if (majorVersions.keySet().contains(edition.getSonarQubeVersion())) {
-        matrix.getSqVersionsByVersion().computeIfAbsent(edition.getSonarQubeVersion(), v -> {
-          Release sq = majorVersions.get(v);
-          return new SQVersionInMatrix(sq, updateCenter.getSonar().getLtsRelease().equals(sq));
-        });
+    List<Edition> editions = createEditions();
+    if (!editions.isEmpty()) {
+      for (EditionGenerator generator : generators) {
+        generator.generate(outputDir, editions);
       }
-      matrix.getEditionsByKey().computeIfAbsent(edition.getKey(), k -> new EditionsMatrix.EditionInMatrix(edition.getName()))
-        .getCompatibleEditionBySqVersion().put(edition.getSonarQubeVersion(), edition);
     }
-    Map<String, Object> dataModel = new HashMap<>();
-    dataModel.put("matrix", matrix);
-    dataModel.put("downloadBaseUrl", downloadBaseUrl);
-    FreeMarkerUtils.print(dataModel, editionsHtmlOutput, "editions/editions-template.html.ftl");
   }
 
-  /**
-   * Example of files generated in outputDir:
-   * - edition1-6.7.zip
-   * - edition1-7.0.zip
-   * - edition2-6.7.zip
-   * - edition2-7.0.zip
-   */
-  List<Edition> generateZips(File outputDir) throws IOException {
+  List<Edition> createEditions() throws IOException {
     List<EditionTemplate> templates = templatesLoader.load();
 
     List<Version> sqVersions = updateCenter.getSonar()
@@ -122,18 +72,19 @@ public class EditionsGenerator {
 
     List<Edition> editions = new ArrayList<>();
     for (Version sqVersion : sqVersions) {
-      editions.addAll(generateForSqVersion(sqVersion, templates, outputDir));
+      editions.addAll(generateForSqVersion(sqVersion, templates));
     }
     return editions;
   }
 
-  private List<Edition> generateForSqVersion(Version sqVersion, List<EditionTemplate> templates, File outputDir) throws IOException {
+  private List<Edition> generateForSqVersion(Version sqVersion, List<EditionTemplate> templates) {
     List<Edition> editions = new ArrayList<>();
+
     for (EditionTemplate template : templates) {
       LOGGER.info("Generate edition [{}] for SonarQube {}", template.getKey(), sqVersion);
       Edition.Builder builder = new Edition.Builder();
 
-      File zipFile = new File(outputDir, template.getKey() + "-edition-" + EditionVersion.create(sqVersion, editionBuildNumber).toString() + ".zip");
+      String zipFileName = template.getKey() + "-edition-" + EditionVersion.create(sqVersion, editionBuildNumber).toString() + ".zip";
       builder
         .setKey(template.getKey())
         .setName(template.getName())
@@ -141,7 +92,7 @@ public class EditionsGenerator {
         .setHomeUrl(template.getHomeUrl())
         .setRequestUrl(template.getRequestUrl())
         .setSonarQubeVersion(sqVersion.getName())
-        .setTargetZip(zipFile);
+        .setZipFileName(zipFileName);
 
       boolean missingPlugin = false;
       for (String pluginKey : template.getPluginKeys()) {
@@ -151,7 +102,7 @@ public class EditionsGenerator {
           LOGGER.warn("Plugin {} has no release compatible with SonarQube {}.", pluginKey, sqVersion);
           missingPlugin = true;
         } else {
-          builder.addJar(new File(jarsDir, pluginRelease.getFilename()));
+          builder.addJar(pluginRelease.getFilename());
         }
       }
 
