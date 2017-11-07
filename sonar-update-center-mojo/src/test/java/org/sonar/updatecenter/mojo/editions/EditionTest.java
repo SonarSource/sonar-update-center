@@ -23,7 +23,6 @@ import java.io.IOException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,8 +30,6 @@ public class EditionTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
   public void build_edition() throws Exception {

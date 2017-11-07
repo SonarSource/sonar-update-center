@@ -13,7 +13,7 @@
   <thead>
     <tr>
         <th><strong>SonarQube Version</strong></th>
-        <#list matrix.sqVersions as sqVersion>
+        <#list sqVersions as sqVersion>
         <th>
           ${sqVersion.displayVersion}
           <#if sqVersion.isLts() >
@@ -24,29 +24,27 @@
     </tr>
     <tr>
         <td style="white-space:nowrap"><strong>Edition / Release Date</strong></td>
-        <#list matrix.sqVersions as sqVersion>
+        <#list sqVersions as sqVersion>
         <td>${(sqVersion.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>
   <tbody>
-    <#list matrix.editions as edition>
     <tr>
         <td><strong>
         ${edition.name}
         </strong>
         </td>
-        <#list matrix.sqVersions as sqVersion>
+        <#list sqVersions as sqVersion>
         <td>
           <#if edition.supports(sqVersion.realVersion) >
-          <a href="${downloadBaseUrl}/${edition.supportedEdition(sqVersion.realVersion).getZipFileName()}">Download</a>
+          <a href="${edition.getDownloadUrlForSQVersion(sqVersion.realVersion)}">Download</a>
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png"></img>
           </#if>
         </td>
         </#list>
     </tr>
-    </#list>
   </tbody>
 </table>
 </body>

@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,10 @@ class PluginHeaders {
 
     // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
     for (Release sq : center.getSonar().getMajorReleases()) {
-      matrix.getSqVersions().add(new SQVersionInMatrix(sq, center.getSonar().getLtsRelease().equals(sq)));
+      String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
+      Date releaseDate = sq.getDate();
+      boolean isLts = center.getSonar().getLtsRelease().equals(sq);
+      matrix.getSqVersions().add(new HtmlSQVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
     }
     for (Plugin plugin : plugins) {
       PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());

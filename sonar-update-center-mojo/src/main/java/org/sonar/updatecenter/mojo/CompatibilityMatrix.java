@@ -26,10 +26,10 @@ import java.util.Map;
 
 public class CompatibilityMatrix {
 
-  private List<SQVersionInMatrix> sqVersions = new ArrayList<>();
+  private List<HtmlSQVersionModel> sqVersions = new ArrayList<>();
   private List<Plugin> plugins = new ArrayList<>();
 
-  public List<SQVersionInMatrix> getSqVersions() {
+  public List<HtmlSQVersionModel> getSqVersions() {
     return sqVersions;
   }
 
