@@ -22,25 +22,32 @@ package org.sonar.updatecenter.mojo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import org.sonar.updatecenter.common.Release;
+import javax.annotation.Nullable;
 
-public class SQVersionInMatrix {
-  private final String displayVersion;
+public class HtmlSQVersionModel {
   private final String realVersion;
+  private final String displayVersion;
   private final boolean isLts;
+  @Nullable
   private final Date releaseDate;
 
-  public SQVersionInMatrix(Release release, boolean isLts) {
-    this.displayVersion = release.getVersion().getMajor() + "." + release.getVersion().getMinor();
-    this.realVersion = release.getVersion().toString();
+  public HtmlSQVersionModel(String realVersion, String displayVersion, @Nullable Date releaseDate, boolean isLts) {
+    this.realVersion = realVersion;
     this.isLts = isLts;
-    this.releaseDate = release.getDate();
+    this.displayVersion = displayVersion;
+    this.releaseDate = releaseDate;
   }
 
+  /**
+   * @return Version with major and minor numbers. Example: 6.7
+   */
   public String getDisplayVersion() {
     return displayVersion;
   }
 
+  /**
+   * @return The precise version of the release. Example: 6.7.4
+   */
   public String getRealVersion() {
     return realVersion;
   }

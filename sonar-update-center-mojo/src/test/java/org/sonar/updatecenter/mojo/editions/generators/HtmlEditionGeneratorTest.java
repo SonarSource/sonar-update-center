@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.editions.Edition;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,19 +57,24 @@ public class HtmlEditionGeneratorTest {
 
   @Test
   public void test() throws IOException {
-    sonar.setLtsRelease("6.7");
-    sonar.setReleases(new String[] {"6.7", "7.0"});
+    sonar.setLtsRelease("6.7.1");
+    sonar.setReleases(new String[] {"6.7.1", "6.7", "7.0"});
 
-    generator.generate(outputDir, Collections.singletonList(newEdition("dev", "6.7")));
-    File htmlFile = new File(outputDir, "editions.html");
+    generator.generate(outputDir, Collections.singletonList(newEdition("dev", "6.7.1")));
+    File htmlFile = new File(outputDir, "edition-dev.html");
     assertThat(htmlFile).exists();
-    System.out.println(FileUtils.readFileToString(htmlFile, StandardCharsets.UTF_8));
+    String htmlFileContent = FileUtils.readFileToString(htmlFile, StandardCharsets.UTF_8);
+    assertThat(htmlFileContent).contains(loadExpectedTable());
   }
 
   private UpdateCenter mockUpdateCenter() {
     UpdateCenter uc = mock(UpdateCenter.class);
     when(uc.getSonar()).thenReturn(sonar);
     return uc;
+  }
+
+  private String loadExpectedTable() throws IOException {
+    return IOUtils.toString(getClass().getResource("HtmlEditionGeneratorTest/table.html"), UTF_8);
   }
 
   private Edition newEdition(String key, String sqVersion) {

@@ -20,19 +20,27 @@
 package org.sonar.updatecenter.mojo.editions.generators;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.FreeMarkerUtils;
-import org.sonar.updatecenter.mojo.SQVersionInMatrix;
+import org.sonar.updatecenter.mojo.HtmlSQVersionModel;
 import org.sonar.updatecenter.mojo.editions.Edition;
-import org.sonar.updatecenter.mojo.editions.EditionsMatrix;
+import static org.sonar.updatecenter.mojo.editions.EditionsGenerator.MIN_SUPPORTED_SQ_VERSION;
 
+/**
+ * Generates a HTML section to display download links for an edition, for each SQ version.
+ * It considers the latest patches for all versions of sonarqube since {@link MIN_SUPPORTED_SQ_VERSION}.
+ * 
+ * It adds a column for each SonarQube version, even if they are not supported by the edition.
+ */
 public class HtmlEditionGenerator implements EditionGenerator {
   private static final Logger LOGGER = LoggerFactory.getLogger(HtmlEditionGenerator.class);
   private final UpdateCenter updateCenter;
@@ -41,40 +49,60 @@ public class HtmlEditionGenerator implements EditionGenerator {
   public HtmlEditionGenerator(UpdateCenter updateCenter, String downloadBaseUrl) {
     this.updateCenter = updateCenter;
     this.downloadBaseUrl = downloadBaseUrl;
-
   }
 
   @Override
   public void generate(File outputDir, List<Edition> editions) {
     LOGGER.info("Generate HTML files");
 
-    EditionsMatrix matrix = new EditionsMatrix();
-    Map<String, Release> majorVersions = new LinkedHashMap<>();
-    for (Release sq : updateCenter.getSonar().getMajorReleases()) {
-      majorVersions.put(sq.getVersion().getName(), sq);
+    Map<String, Release> majorReleases = new LinkedHashMap<>();
+    // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
+    for (Release majorRelease : updateCenter.getSonar().getMajorReleases()) {
+      majorReleases.put(majorRelease.getVersion().getName(), majorRelease);
     }
 
-    for (Edition edition : editions) {
-      // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
-      if (majorVersions.keySet().contains(edition.getSonarQubeVersion())) {
-        matrix.getSqVersionsByVersion().computeIfAbsent(edition.getSonarQubeVersion(), v -> {
-          Release sq = majorVersions.get(v);
-          return new SQVersionInMatrix(sq, updateCenter.getSonar().getLtsRelease().equals(sq));
-        });
-      }
-      matrix.getEditionsByKey().computeIfAbsent(edition.getKey(), k -> new EditionsMatrix.EditionInMatrix(edition.getName()))
-        .getCompatibleEditionBySqVersion().put(edition.getSonarQubeVersion(), edition);
-    }
+    // group editions by key. There is one edition per supported SQ version.
+    Map<String, List<Edition>> editionsByKey = editions.stream()
+      .collect(Collectors.groupingBy(Edition::getKey));
 
-    printEditionsHtml(outputDir, matrix);
+    for (List<Edition> editionList : editionsByKey.values()) {
+      generateEditionHtml(outputDir, majorReleases, editionList);
+    }
   }
 
-  private void printEditionsHtml(File outputDir, EditionsMatrix matrix) {
-    File editionsHtmlOutput = new File(outputDir, "editions.html");
+  private void generateEditionHtml(File outputDir, Map<String, Release> majorReleases, List<Edition> editionList) {
+    Edition edition = editionList.iterator().next();
+    File editionHtmlOutputFile = new File(outputDir, "edition-" + edition.getKey() + ".html");
+    HtmlEditionModel htmlEdition = new HtmlEditionModel(edition.getName());
 
+    for (Edition e : editionList) {
+      if (majorReleases.containsKey(e.getSonarQubeVersion())) {
+        Release release = majorReleases.get(e.getSonarQubeVersion());
+        htmlEdition.add(release.getVersion().toString(), e.getDownloadUrl(downloadBaseUrl));
+      }
+    }
+
+    List<HtmlSQVersionModel> htmlSqVersions = majorReleases.values().stream()
+      .filter(r -> r.getVersion().compareTo(MIN_SUPPORTED_SQ_VERSION) >= 0)
+      .map(this::createHtmlSqVersion)
+      .collect(Collectors.toList());
+
+    printEditionHtml(editionHtmlOutputFile, htmlEdition, htmlSqVersions);
+  }
+
+  private HtmlSQVersionModel createHtmlSqVersion(Release release) {
+    String displayVersion = release.getVersion().getMajor() + "." + release.getVersion().getMinor();
+    Date releaseDate = release.getDate();
+    boolean isLts = updateCenter.getSonar().getLtsRelease().equals(release);
+    return new HtmlSQVersionModel(release.getVersion().toString(), displayVersion, releaseDate, isLts);
+  }
+
+  private void printEditionHtml(File htmlFile, HtmlEditionModel htmlEditionModel, List<HtmlSQVersionModel> htmlSqVersions) {
+    LOGGER.info("Generate HTML file: {}", htmlFile);
     Map<String, Object> dataModel = new HashMap<>();
-    dataModel.put("matrix", matrix);
+    dataModel.put("edition", htmlEditionModel);
+    dataModel.put("sqVersions", htmlSqVersions);
     dataModel.put("downloadBaseUrl", downloadBaseUrl);
-    FreeMarkerUtils.print(dataModel, editionsHtmlOutput, "editions/editions-template.html.ftl");
+    FreeMarkerUtils.print(dataModel, htmlFile, "editions/editions-template.html.ftl");
   }
 }
