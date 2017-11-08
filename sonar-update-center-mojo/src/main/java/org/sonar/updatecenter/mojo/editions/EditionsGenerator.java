@@ -35,7 +35,7 @@ import org.sonar.updatecenter.mojo.editions.generators.EditionGenerator;
 
 public class EditionsGenerator {
 
-  public static final Version MIN_SUPPORTED_SQ_VERSION = Version.create("6.6");
+  public static final Version MIN_SUPPORTED_SQ_VERSION = Version.create("6.7");
   private static final Logger LOGGER = LoggerFactory.getLogger(EditionsGenerator.class);
 
   private final UpdateCenter updateCenter;
