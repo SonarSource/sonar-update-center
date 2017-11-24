@@ -1,0 +1,25 @@
+<script type="text/javascript">
+    function checkTC(downloadLink, pluginId, url) {
+        var tc = document.getElementById('tc-' + pluginId);
+        if (!tc.checked) {
+            alert('Please accept the Terms and Conditions');
+            downloadLink.href = '#';
+        } else {
+            downloadLink.href = url;
+        }
+        return tc.checked;
+    }
+</script>
+licence &#8211; <a target="_top" href="issue_url">Issue Tracker</a> &#8211; <a target="_top" href="sources_url">Sources</a> &#8211; Supported by SonarSource
+<br>
+<div id="lastVersion">
+    <div style="padding-top:10px;padding-bottom:5px">
+    <span style="font-size:larger;"><strong>name 1.0</strong></span> &#8211; Dec 12, 2012 &#8211; SonarQube 3.0
+    <br>
+    <input type="checkbox" id="tc-key-0" name="tc-key-0"/>I accept the <a
+              target="_blank"
+              href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms and Conditions</a>
+    &#8211;
+    <a target="_top" href="#" onClick="return checkTC(this, 'key-0', 'http://valid.download.url')">Download</a>
+    </div>
+</div>
