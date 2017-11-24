@@ -159,7 +159,7 @@ public class PluginHeader {
     return plugin.isSupportedBySonarSource();
   }
 
-  public boolean displayTermsAndConditions() {
+  public boolean isSonarSourceCommercialPlugin() {
     return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
   }
 

@@ -135,7 +135,7 @@ public class PluginHeadersTest {
 
   // UPC-95
   @Test
-  public void shouldGenerateHtmlWithTC() throws Exception {
+  public void shouldGenerateHtmlForCommercialPlugins() throws Exception {
     Plugin plugin = Plugin.factory(PLUGIN_KEY);
     Version version = Version.create("1.0");
     Release release = new Release(plugin, version);

@@ -1,4 +1,4 @@
-<#if pluginHeader.displayTermsAndConditions() >
+<#if pluginHeader.isSonarSourceCommercialPlugin() >
 <script type="text/javascript">
     function checkTC(downloadLink, pluginId, url) {
         var tc = document.getElementById('tc-' + pluginId);
@@ -34,7 +34,7 @@ ${pluginHeader.license}
     &#8211;
     </#if>
 </#if>
-<#if pluginHeader.sources?? >
+<#if pluginHeader.sources?? && !pluginHeader.isSonarSourceCommercialPlugin() >
 <a target="_top" href="${pluginHeader.sources}">Sources</a>
     <#if pluginHeader.isSupportedBySonarSource() >
     &#8211;
@@ -81,7 +81,7 @@ Supported by SonarSource
     <#if pluginVersion.description?? >${pluginVersion.description}<br></#if>
 
     <#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() >
-        <#if pluginHeader.displayTermsAndConditions() >
+        <#if pluginHeader.isSonarSourceCommercialPlugin() >
           <input type="checkbox" id="tc-${pluginHeader.getKey()}-${pluginVersion_index}" name="tc-${pluginHeader.getKey()}-${pluginVersion_index}"/>I accept the <a
               target="_blank"
               href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms and Conditions</a>
