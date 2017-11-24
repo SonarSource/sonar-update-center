@@ -84,17 +84,16 @@ public class EditionsGenerator {
       LOGGER.info("Generate edition [{}] for SonarQube {}", template.getKey(), sqVersion);
       Edition.Builder builder = new Edition.Builder();
 
-      String zipFileName = template.getKey() + "-edition-" + EditionVersion.create(sqVersion, editionBuildNumber).toString() + ".zip";
       builder
         .setKey(template.getKey())
         .setName(template.getName())
         .setTextDescription(template.getTextDescription())
         .setHomeUrl(template.getHomeUrl())
         .setRequestUrl(template.getRequestUrl())
-        .setSonarQubeVersion(sqVersion.getName())
-        .setZipFileName(zipFileName);
+        .setSonarQubeVersion(sqVersion.getName());
 
       boolean missingPlugin = false;
+      boolean generateZip = false;
       for (String pluginKey : template.getPluginKeys()) {
         Plugin plugin = updateCenter.getUpdateCenterPluginReferential().findPlugin(pluginKey);
         Release pluginRelease = plugin.getLastCompatibleRelease(sqVersion);
@@ -103,7 +102,13 @@ public class EditionsGenerator {
           missingPlugin = true;
         } else {
           builder.addJar(pluginRelease.getFilename());
+          generateZip = true;
         }
+      }
+
+      if (generateZip) {
+        String zipFileName = template.getKey() + "-edition-" + EditionVersion.create(sqVersion, editionBuildNumber).toString() + ".zip";
+        builder.setZipFileName(zipFileName);
       }
 
       if (!missingPlugin) {

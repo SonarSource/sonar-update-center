@@ -68,6 +68,15 @@ public class ZipsEditionGeneratorTest {
   }
 
   @Test
+  public void dont_generate_zip_files_of_empty_editions() throws Exception {
+    List<Edition> editions = Collections.singletonList(createEdition("dev"));
+
+    generator.generate(outputDir, editions);
+    File expectedZip = new File(outputDir, "dev.zip");
+    assertThat(expectedZip).doesNotExist();
+  }
+
+  @Test
   public void fail_if_adding_jar_that_does_not_exist() throws Exception {
     List<Edition> editions = Collections.singletonList(createEdition("dev", "file1.jar", "file2.jar"));
     File file = new File(jarDir, "file1.jar");
@@ -105,7 +114,7 @@ public class ZipsEditionGeneratorTest {
     Edition edition = mock(Edition.class);
     when(edition.getKey()).thenReturn(name);
     when(edition.jars()).thenReturn(Sets.newLinkedHashSet(jars));
-    when(edition.getZipFileName()).thenReturn(name + ".zip");
+    when(edition.getZipFileName()).thenReturn(jars.length > 0 ? (name + ".zip") : null);
 
     for (String jar : jars) {
       createJarFile(jar);

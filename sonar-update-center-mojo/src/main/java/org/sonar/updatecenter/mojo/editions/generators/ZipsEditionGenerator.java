@@ -53,7 +53,9 @@ public class ZipsEditionGenerator implements EditionGenerator {
   @Override
   public void generate(File outputDir, List<Edition> editions) throws Exception {
     for (Edition e : editions) {
-      zip(new File(outputDir, e.getZipFileName()), jarFiles(e.jars()));
+      if (e.getZipFileName() != null) {
+        zip(new File(outputDir, e.getZipFileName()), jarFiles(e.jars()));
+      }
     }
   }
 
