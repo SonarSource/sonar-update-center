@@ -21,6 +21,7 @@ package org.sonar.updatecenter.mojo.editions;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang.StringUtils;
 
 import static java.util.Objects.requireNonNull;
@@ -43,7 +44,7 @@ public class Edition {
     this.textDescription = requireNonNull(builder.textDescription);
     this.homeUrl = requireNonNull(builder.homeUrl);
     this.requestUrl = requireNonNull(builder.requestUrl);
-    this.zipFileName = requireNonNull(builder.zipFileName);
+    this.zipFileName = builder.zipFileName;
     this.jars = requireNonNull(builder.jars);
   }
 
@@ -71,6 +72,7 @@ public class Edition {
     return requestUrl;
   }
 
+  @CheckForNull
   public String getZipFileName() {
     return zipFileName;
   }
@@ -152,7 +154,11 @@ public class Edition {
     }
   }
 
+  @CheckForNull
   public String getDownloadUrl(String downloadBaseUrl) {
+    if (getZipFileName() == null) {
+      return null;
+    }
     return String.format("%s/%s", StringUtils.removeEnd(downloadBaseUrl, "/"), getZipFileName());
   }
 }

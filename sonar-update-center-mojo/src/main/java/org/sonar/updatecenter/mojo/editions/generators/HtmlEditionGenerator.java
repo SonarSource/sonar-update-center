@@ -33,6 +33,7 @@ import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.FreeMarkerUtils;
 import org.sonar.updatecenter.mojo.HtmlSQVersionModel;
 import org.sonar.updatecenter.mojo.editions.Edition;
+
 import static org.sonar.updatecenter.mojo.editions.EditionsGenerator.MIN_SUPPORTED_SQ_VERSION;
 
 /**
@@ -78,7 +79,10 @@ public class HtmlEditionGenerator implements EditionGenerator {
     for (Edition e : editionList) {
       if (majorReleases.containsKey(e.getSonarQubeVersion())) {
         Release release = majorReleases.get(e.getSonarQubeVersion());
-        htmlEdition.add(release.getVersion().toString(), e.getDownloadUrl(downloadBaseUrl));
+        String downloadUrl = e.getDownloadUrl(downloadBaseUrl);
+        if (downloadUrl != null) {
+          htmlEdition.add(release.getVersion().toString(), downloadUrl);
+        }
       }
     }
 

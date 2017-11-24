@@ -77,7 +77,10 @@ public class JsonEditionGenerator implements EditionGenerator {
         json.name("textDescription").value(e.getTextDescription());
         json.name("homeUrl").value(e.getHomeUrl());
         json.name("licenseRequestUrl").value(e.getRequestUrl());
-        json.name("downloadUrl").value(e.getDownloadUrl(downloadBaseUrl));
+        String downloadUrl = e.getDownloadUrl(downloadBaseUrl);
+        if (downloadUrl != null) {
+          json.name("downloadUrl").value(downloadUrl);
+        }
         json.endObject();
       }
       json.endArray();
