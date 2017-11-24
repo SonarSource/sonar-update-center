@@ -133,6 +133,35 @@ public class PluginHeadersTest {
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 
+  // UPC-95
+  @Test
+  public void shouldGenerateHtmlWithTC() throws Exception {
+    Plugin plugin = Plugin.factory(PLUGIN_KEY);
+    Version version = Version.create("1.0");
+    Release release = new Release(plugin, version);
+    release.setDate(getDate());
+    release.setDownloadUrl("http://valid.download.url");
+    release.addRequiredSonarVersions("3.0");
+    plugin.addRelease(release);
+    plugin.setName("name");
+    plugin.setIssueTrackerUrl("issue_url");
+    plugin.setLicense("licence");
+    plugin.setSourcesUrl("sources_url");
+    plugin.setDevelopers(asList("dev"));
+    plugin.setSupportedBySonarSource(true);
+    plugin.setTermsConditionsUrl("http://foo");
+
+    prepareMocks(plugin);
+    pluginHeaders.generateHtml();
+
+    // since Freemarker transformation, confluence include data file are not easy to read
+    // flatten the file to keep a easy to read reference file.
+    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    String flattenFile = flatHtmlFile(file);
+    String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-commercial-include.html"));
+    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+  }
+
   // UPC-20
   @Test
   public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {

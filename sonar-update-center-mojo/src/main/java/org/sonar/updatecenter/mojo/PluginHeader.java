@@ -19,17 +19,17 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.Sonar;
-import org.sonar.updatecenter.common.Version;
-
-import javax.annotation.CheckForNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.CheckForNull;
+import org.apache.commons.lang3.StringUtils;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Sonar;
+import org.sonar.updatecenter.common.Version;
 
 public class PluginHeader {
 
@@ -157,6 +157,10 @@ public class PluginHeader {
 
   public boolean isSupportedBySonarSource() {
     return plugin.isSupportedBySonarSource();
+  }
+
+  public boolean displayTermsAndConditions() {
+    return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
   }
 
   @CheckForNull

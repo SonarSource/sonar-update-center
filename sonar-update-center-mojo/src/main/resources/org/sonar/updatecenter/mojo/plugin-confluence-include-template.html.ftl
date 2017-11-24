@@ -1,3 +1,17 @@
+<#if pluginHeader.displayTermsAndConditions() >
+<script type="text/javascript">
+    function checkTC(downloadLink, pluginId, url) {
+        var tc = document.getElementById('tc-' + pluginId);
+        if (!tc.checked) {
+            alert('Please accept the Terms and Conditions');
+            downloadLink.href = '#';
+        } else {
+            downloadLink.href = url;
+        }
+        return tc.checked;
+    }
+</script>
+</#if>
 <#if pluginHeader.organization?? >By
     <#if pluginHeader.organizationUrl?? >
     <a target="_top" href="${pluginHeader.organizationUrl}">${pluginHeader.organization}</a>
@@ -66,7 +80,16 @@ Supported by SonarSource
 
     <#if pluginVersion.description?? >${pluginVersion.description}<br></#if>
 
-    <#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() ><a target="_top" href="${pluginVersion.downloadUrl}">Download</a>
+    <#if pluginVersion.downloadUrl?? && !pluginVersion.isArchived() >
+        <#if pluginHeader.displayTermsAndConditions() >
+          <input type="checkbox" id="tc-${pluginHeader.getKey()}-${pluginVersion_index}" name="tc-${pluginHeader.getKey()}-${pluginVersion_index}"/>I accept the <a
+              target="_blank"
+              href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms and Conditions</a>
+          &#8211;
+          <a target="_top" href="#" onClick="return checkTC(this, '${pluginHeader.getKey()}-${pluginVersion_index}', '${pluginVersion.downloadUrl}')">Download</a>
+        <#else>
+          <a target="_top" href="${pluginVersion.downloadUrl}">Download</a>
+        </#if>
         <#if pluginVersion.changelogUrl?? > &#8211; </#if>
     </#if>
     <#if pluginVersion.changelogUrl?? ><a target="_top" href="${pluginVersion.changelogUrl}">Release notes</a></#if>

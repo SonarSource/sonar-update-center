@@ -7,8 +7,23 @@
     <style type="text/css">
         @import url("style-confluence.css");
     </style>
+    <script type="text/javascript">
+        function checkTC(downloadLink, url) {
+            var tc = document.getElementById('tc');
+            if (!tc.checked) {
+                alert('Please accept the Terms and Conditions');
+                downloadLink.href = '#';
+            } else {
+                downloadLink.href = url;
+            }
+            return tc.checked;
+        }
+    </script>
 </head>
 <body>
+<input type="checkbox" id="tc" name="tc"/>I accept the <a
+    target="_blank"
+    href="http://dist.sonarsource.com/SonarSource_Terms_And_Conditions.pdf">Terms and Conditions</a>
 <table cellpadding="0" cellspacing="0">
   <thead>
     <tr>
@@ -38,7 +53,7 @@
         <#list sqVersions as sqVersion>
         <td>
           <#if edition.supports(sqVersion.realVersion) >
-          <a href="${edition.getDownloadUrlForSQVersion(sqVersion.realVersion)}">Download</a>
+          <a href="#" onClick="return checkTC(this, '${edition.getDownloadUrlForSQVersion(sqVersion.realVersion)}')">Download</a>
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png"></img>
           </#if>
