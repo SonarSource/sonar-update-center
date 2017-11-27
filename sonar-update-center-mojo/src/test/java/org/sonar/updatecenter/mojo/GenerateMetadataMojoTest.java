@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class GenerateMetadataMojoTest {
   @Rule
@@ -109,6 +110,27 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
     assertThat(output).contains("artifactsize.versions=0.2,0.3");
+  }
+
+  // UPC-97
+  @Test
+  public void fail_if_key_mismatch() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugin is already cached
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.2.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.4.jar"), outputDir);
+
+    File inputFile = resource("key-mismatch/update-center.properties");
+    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, new SystemStreamLog());
+    try {
+      new Generator(configuration, new SystemStreamLog()).generateMetadata();
+      fail("Expected exception");
+    } catch (Exception e) {
+      assertThat(e).isInstanceOf(IllegalStateException.class)
+        .hasMessage("Plugin sonar-artifact-size-plugin-0.3.jar is declared with key 'artifactsize' in its MANIFEST, but with key 'artifactsize2' in the update center");
+    }
   }
 
   private File resource(String filename) {
