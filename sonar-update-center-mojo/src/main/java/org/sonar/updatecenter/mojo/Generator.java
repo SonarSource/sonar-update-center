@@ -22,6 +22,7 @@ package org.sonar.updatecenter.mojo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
@@ -77,11 +78,19 @@ class Generator {
           log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
         }
       }
+      mergeFromManifest(plugin, masterJar);
+    }
+  }
 
-      // the last release is the master version for loading metadata included in manifest
-      if (masterJar != null) {
-        plugin.merge(new PluginManifest(masterJar));
+  private static void mergeFromManifest(Plugin plugin, @Nullable File masterJar) throws IOException {
+    // the last release is the master version for loading metadata included in manifest
+    if (masterJar != null) {
+      PluginManifest manifest = new PluginManifest(masterJar);
+      if (!StringUtils.equals(plugin.getKey(), manifest.getKey())) {
+        throw new IllegalStateException(
+          "Plugin " + masterJar.getName() + " is declared with key '" + manifest.getKey() + "' in its MANIFEST, but with key '" + plugin.getKey() + "' in the update center");
       }
+      plugin.merge(manifest);
     }
   }
 
