@@ -20,6 +20,8 @@
 package org.sonar.updatecenter.mojo;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +48,10 @@ public class PluginHeader {
 
     public String getDate() {
       return formatDate(release.getDate());
+    }
+
+    public String getDateAsIsoString() {
+      return formatDateToISOString(release.getDate());
     }
 
     public String getDownloadUrl() {
@@ -138,8 +144,16 @@ public class PluginHeader {
     return plugin.getOrganizationUrl();
   }
 
+  public String getCategory() {
+    return plugin.getCategory();
+  }
+
   private static String formatDate(Date date) {
     return (new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)).format(date);
+  }
+
+  private static String formatDateToISOString(Date date) {
+    return (new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)).format(date);
   }
 
   public List<PluginHeaderVersion> getAllVersions() {
