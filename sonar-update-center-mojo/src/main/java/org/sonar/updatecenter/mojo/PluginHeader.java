@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
@@ -46,6 +48,11 @@ public class PluginHeader {
 
     public String getDate() {
       return formatDate(release.getDate());
+    }
+
+    @CheckForNull
+    public String getDateAsIsoString() {
+      return formatDateToISOString(release.getDate());
     }
 
     public String getDownloadUrl() {
@@ -93,6 +100,11 @@ public class PluginHeader {
       }
     }
 
+    @CheckForNull
+    private String formatDateToISOString( @Nullable Date date) {
+      return date != null ? (new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)).format(date) : null;
+    }
+
     public boolean compatibleWithLts() {
       String lts = getSonarLtsVersion();
       if (lts == null) {
@@ -136,6 +148,10 @@ public class PluginHeader {
 
   public String getOrganizationUrl() {
     return plugin.getOrganizationUrl();
+  }
+
+  public String getCategory() {
+    return plugin.getCategory();
   }
 
   private static String formatDate(Date date) {
