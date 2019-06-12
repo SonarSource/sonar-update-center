@@ -129,7 +129,7 @@ class Generator {
 
   private void prepareDirectoryAndOutputJson(UpdateCenter center) throws IOException {
     File jsonOutputDir = ensureDirectory(configuration.getOutputDir(), JSON_DIR);
-    new PluginsDataJson(center, jsonOutputDir, log).generateJsonFiles();
+    new PluginsDataJsonGenerator(center, jsonOutputDir, log).generateJsonFiles();
   }
 
   private File ensureDirectory(File baseDirectory, String directory) {
