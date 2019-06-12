@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,24 +41,20 @@ import javax.annotation.Nullable;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class PluginsDataJson {
+class PluginsDataJsonGenerator {
 
   private final File outputDirectory;
   private final UpdateCenter center;
   private final Log log;
   private final Gson gson;
 
-  PluginsDataJson(UpdateCenter center, File outputDirectory, Log log) {
+  PluginsDataJsonGenerator(UpdateCenter center, File outputDirectory, Log log) {
     this.outputDirectory = outputDirectory;
     this.center = center;
     this.log = log;
     this.gson = new GsonBuilder()
       .disableHtmlEscaping()
       .setPrettyPrinting()
-
-      // convert to IOS8601 2011-12-03
-      .registerTypeAdapter(Date.class,
-        (JsonSerializer<Date>) (instant, type, context) -> new JsonPrimitive(instant.toString()))
       .create();
 
   }
