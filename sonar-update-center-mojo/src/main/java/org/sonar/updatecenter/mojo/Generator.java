@@ -72,10 +72,10 @@ class Generator {
             updateReleaseRequirePluginsParentPropertiesAndDisplayVersion(pluginReferential, jar, release);
             masterJar = jar;
           } else {
-            throw new IllegalStateException("Plugin " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
+            throw new IllegalStateException("PLoum ploum " + plugin.getKey() + " can't be downloaded at: " + release.getDownloadUrl());
           }
         } else {
-          log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", version " + release.getVersion());
+          log.warn("Ignored because of missing downloadUrl: plugin " + plugin.getKey() + ", PLoum ploum " + release.getVersion());
         }
       }
       mergeFromManifest(plugin, masterJar);
