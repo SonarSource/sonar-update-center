@@ -185,7 +185,7 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parsePlugins(Properties p, Sonar sonar, List<Plugin> plugins) {
-    String[] pluginKeys = getArray(p, "plugins");
+    String[] pluginKeys = getArray(p, PLUGINS);
     for (String pluginKey : pluginKeys) {
       Plugin plugin = Plugin.factory(pluginKey);
       plugin.setName(get(p, pluginKey, "name", false));

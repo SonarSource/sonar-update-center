@@ -44,7 +44,7 @@ public final class UpdateCenterSerializer {
   private UpdateCenterSerializer() {
   }
 
-  private static void set(Properties props, String key, String value) {
+  private static void set(Properties props, String key, @Nullable String value) {
     if (StringUtils.isNotBlank(value)) {
       props.setProperty(key, value);
     }
