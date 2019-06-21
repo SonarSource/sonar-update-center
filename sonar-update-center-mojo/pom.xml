@@ -11,6 +11,10 @@
   <packaging>maven-plugin</packaging>
   <name>SonarSource :: Update Center :: Maven Plugin</name>
 
+  <properties>
+    <sonar.cpd.exclusions>**/mojo/*Mojo.java</sonar.cpd.exclusions>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
