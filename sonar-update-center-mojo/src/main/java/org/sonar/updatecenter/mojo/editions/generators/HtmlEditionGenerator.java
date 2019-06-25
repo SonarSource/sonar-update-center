@@ -38,7 +38,7 @@ import static org.sonar.updatecenter.mojo.editions.EditionsGenerator.MIN_SUPPORT
 
 /**
  * Generates a HTML section to display download links for an edition, for each SQ version.
- * It considers the latest patches for all versions of sonarqube since {@link MIN_SUPPORTED_SQ_VERSION}.
+ * It considers the latest patches for all versions of sonarqube since {@link org.sonar.updatecenter.mojo.editions.EditionsGenerator#MIN_SUPPORTED_SQ_VERSION}.
  * 
  * It adds a column for each SonarQube version, even if they are not supported by the edition.
  */

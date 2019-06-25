@@ -39,7 +39,9 @@ public class HtmlEditionModel {
   }
 
   /**
-   * @throws IllegalArgumentException is the provided version is not supported by the edition 
+   * @param sqVersion SonarQube version as a string
+   * @throws IllegalArgumentException is the provided version is not supported by the edition
+   * @return download url as String
    */
   public String getDownloadUrlForSQVersion(String sqVersion) {
     String version = urlByRealVersion.get(sqVersion);
