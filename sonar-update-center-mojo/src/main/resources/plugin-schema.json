@@ -61,7 +61,7 @@
             "type": "string",
             "format": "date"
           },
-          "compatibilityRange": {
+          "compatibility": {
             "type": "string"
           },
           "description": {
