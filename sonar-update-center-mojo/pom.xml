@@ -11,6 +11,10 @@
   <packaging>maven-plugin</packaging>
   <name>SonarSource :: Update Center :: Maven Plugin</name>
 
+  <properties>
+    <sonar.cpd.exclusions>**/mojo/*Mojo.java</sonar.cpd.exclusions>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -51,6 +55,11 @@
       <artifactId>http-request</artifactId>
       <version>5.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.everit.json</groupId>
+      <artifactId>org.everit.json.schema</artifactId>
+      <version>1.5.1</version>
+    </dependency>
 
     <!-- unit tests -->
     <dependency>
@@ -80,7 +89,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.5</version>
+        <version>3.6.0</version>
         <configuration>
           <!-- see https://issues.apache.org/jira/browse/MNG-5346 -->
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>

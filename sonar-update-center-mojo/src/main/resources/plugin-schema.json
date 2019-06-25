@@ -1,0 +1,86 @@
+{
+  "id": "http://www.sonarsource.org/plugin-schema-v1.0",
+  "title": "Plugin Data",
+  "type": "object",
+  "required": [
+    "isSonarSourceCommercial",
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human readable designation of the plugin"
+    },
+    "key": {
+      "type": "string"
+    },
+    "isSonarSourceCommercial": {
+      "type": "boolean"
+    },
+    "organization": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "category": {
+      "type": "string"
+    },
+    "license": {
+      "type": "string"
+    },
+    "issueTrackerURL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sourcesURL": {
+      "type": "string",
+      "format": "uri"
+    },
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "compatibility": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "downloadURL": {
+            "type": "string",
+            "format": "uri"
+          },
+          "changeLogUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}
+

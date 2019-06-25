@@ -25,16 +25,15 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GenerateHtmlHeadersMojoTest {
+public class GenerateJsonMojoTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
-  public void generate_prod_html_without_private() throws Exception {
+  public void generate_json() throws Exception {
     File outputDir = temp.newFolder();
 
     // plugin is already cached
@@ -42,23 +41,13 @@ public class GenerateHtmlHeadersMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
 
     File inputFile = resource("update-center-template/update-center.properties");
-    new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    new GenerateJsonMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    // html confluence include
-    File htmlConfluenceInclude = new File(outputDir, "html/artifactsize-confluence-include.html");
-    assertThat(htmlConfluenceInclude).exists().isFile();
-    String html = FileUtils.readFileToString(htmlConfluenceInclude, StandardCharsets.UTF_8);
-    assertThat(html).contains("<strong>Artifact Size");
+    File artifactJson = new File(outputDir, "json/artifactsize.json");
+    File schema = new File(outputDir, "json/plugin-schema.json");
 
-    File htmlSonarSourceInclude = new File(outputDir, "html/artifactsize-sonarsource-include.html");
-    assertThat(htmlSonarSourceInclude).exists().isFile();
-    html = FileUtils.readFileToString(htmlSonarSourceInclude, StandardCharsets.UTF_8);
-    assertThat(html).contains("sonar-artifact-size");
-
-    assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
-    assertThat(new File(outputDir, "html/error.png")).exists().isFile();
-    assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();
-
+    assertThat(artifactJson).exists().isFile();
+    assertThat(schema).exists().isFile();
   }
 
   private File resource(String filename) {

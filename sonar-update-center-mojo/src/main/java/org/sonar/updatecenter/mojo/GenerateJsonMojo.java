@@ -19,15 +19,16 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-@Mojo(name = "generate-html", requiresProject = false, threadSafe = true)
-public class GenerateHtmlHeadersMojo extends AbstractMojo {
+import java.io.File;
+
+@Mojo(name = "generate-json", requiresProject = false, threadSafe = true)
+public class GenerateJsonMojo extends AbstractMojo {
 
   /**
    * The directory that contains generated files and cache of plugins.
@@ -50,19 +51,25 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, false, getLog());
-      new Generator(configuration, getLog()).generateHtml();
+      Configuration configuration = new Configuration(
+        outputDir,
+        inputFile,
+        false,
+        ignoreErrors,
+        false,
+        getLog());
+      new Generator(configuration, getLog()).generateJson();
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
     }
   }
 
-  GenerateHtmlHeadersMojo setOutputDir(File d) {
+  GenerateJsonMojo setOutputDir(File d) {
     this.outputDir = d;
     return this;
   }
 
-  GenerateHtmlHeadersMojo setInputFile(File f) {
+  GenerateJsonMojo setInputFile(File f) {
     this.inputFile = f;
     return this;
   }

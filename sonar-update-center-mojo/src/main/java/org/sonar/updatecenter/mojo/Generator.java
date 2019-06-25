@@ -1,6 +1,6 @@
 /*
  * SonarSource :: Update Center :: Maven Plugin
- * Copyright (C) 2010-2018 SonarSource SA
+ * Copyright (C) 2010-2019 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -37,6 +37,7 @@ import static org.apache.commons.io.FileUtils.forceMkdir;
 class Generator {
 
   private static final String HTML_HEADER_DIR = "html";
+  private static final String JSON_DIR = "json";
   private final Configuration configuration;
   private final Log log;
 
@@ -55,6 +56,12 @@ class Generator {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
+  }
+
+  void generateJson() throws IOException, URISyntaxException {
+    UpdateCenter center = configuration.getUpdateCenter();
+    downloadReleases(center);
+    prepareDirectoryAndOutputJson(center);
   }
 
   private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
@@ -115,14 +122,23 @@ class Generator {
   }
 
   private void generateHtmlHeader(UpdateCenter center) throws IOException {
-    File htmlOutputDir = new File(configuration.getOutputDir(), HTML_HEADER_DIR);
-    try {
-      forceMkdir(htmlOutputDir);
-    } catch (IOException e) {
-      throw new IllegalStateException("Fail to create the working directory: " + htmlOutputDir.getAbsolutePath(), e);
-    }
+    File htmlOutputDir = ensureDirectory(configuration.getOutputDir(), HTML_HEADER_DIR);
     PluginHeaders pluginHeaders = new PluginHeaders(center, htmlOutputDir, log);
     pluginHeaders.generateHtml();
   }
 
+  private void prepareDirectoryAndOutputJson(UpdateCenter center) throws IOException {
+    File jsonOutputDir = ensureDirectory(configuration.getOutputDir(), JSON_DIR);
+    PluginsJsonGenerator.create(center, jsonOutputDir, log).generateJsonFiles();
+  }
+
+  private static File ensureDirectory(File baseDirectory, String directory) {
+    File outputDir = new File(baseDirectory, directory);
+    try {
+      forceMkdir(outputDir);
+    } catch (IOException e) {
+      throw new IllegalStateException("Fail to create the working directory: " + outputDir.getAbsolutePath(), e);
+    }
+    return outputDir;
+  }
 }
