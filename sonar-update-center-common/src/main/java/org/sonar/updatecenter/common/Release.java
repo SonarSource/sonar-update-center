@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -45,13 +46,13 @@ public class Release implements Comparable<Release> {
   private Version version;
   private String displayVersion;
   private String description;
-  private URL downloadUrl;
   private URL changelogUrl;
   private boolean isPublic;
   private boolean isArchived;
   private String groupId;
   private String artifactId;
 
+  private EnumMap<Edition, URL> downloadUrl;
   private Set<Release> outgoingDependencies;
   private Set<Release> incomingDependencies;
   /**
@@ -60,12 +61,20 @@ public class Release implements Comparable<Release> {
   private SortedSet<Version> compatibleSqVersions;
   private Date date;
 
+  public enum Edition {
+    COMMUNITY,
+    DEVELOPER,
+    ENTERPRISE,
+    DATACENTER
+  }
+
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
     this.version = version;
     this.isPublic = true;
     this.isArchived = false;
 
+    this.downloadUrl = new EnumMap<>(Edition.class);
     this.compatibleSqVersions = new TreeSet<>();
     this.outgoingDependencies = new HashSet<>();
     this.incomingDependencies = new HashSet<>();
@@ -97,27 +106,44 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
+  @CheckForNull
   public String getDownloadUrl() {
-    return this.downloadUrl == null ? null : downloadUrl.toString();
+    return getDownloadUrl(Edition.COMMUNITY);
+  }
+
+  @CheckForNull
+  public String getDownloadUrl(Edition edition) {
+    URL value = this.downloadUrl.get(edition);
+    return value == null ? null : value.toString();
   }
 
   public Release setDownloadUrl(@Nullable String downloadUrlString) {
-    if (downloadUrlString == null) {
-      this.downloadUrl = null;
-    } else {
+    return setDownloadUrl(downloadUrlString, Edition.COMMUNITY);
+  }
+
+  public Release setDownloadUrl(@Nullable String downloadUrlString, Edition edition) {
+    URL transformedDownloadUrl = null;
+    if (downloadUrlString != null) {
       try {
         // URI does more checks on syntax than URL
-        this.downloadUrl = new URI(downloadUrlString).toURL();
+        transformedDownloadUrl = new URI(downloadUrlString).toURL();
       } catch (URISyntaxException | MalformedURLException ex) {
         throw new IllegalArgumentException("downloadUrl invalid", ex);
       }
     }
+    this.downloadUrl.put(edition, transformedDownloadUrl);
     return this;
   }
 
   @CheckForNull
   public String getFilename() {
-    return downloadUrl == null ? null : StringUtils.substringAfterLast(downloadUrl.getPath(), "/");
+    return getFilename(Edition.COMMUNITY);
+  }
+
+  @CheckForNull
+  public String getFilename(Edition edition) {
+    URL value = this.downloadUrl.get(edition);
+    return value == null ? null : StringUtils.substringAfterLast(value.getPath(), "/");
   }
 
   public SortedSet<Version> getRequiredSonarVersions() {

@@ -38,6 +38,7 @@ import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_UR
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_GROUPID_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.SONAR_PREFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.getDownloadUrlSuffix;
 
 public final class UpdateCenterSerializer {
 
@@ -85,11 +86,17 @@ public final class UpdateCenterSerializer {
     }
 
     for (Release sonarRelease : center.getSonar().getAllReleases()) {
-      set(p, sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
       set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, sonarRelease.getVersion() + DISPLAY_VERSION_SUFFIX, sonarRelease.getDisplayVersion());
       set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
       set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
+
+      for (Release.Edition edition: Release.Edition.values()) {
+        String downloadUrl = sonarRelease.getDownloadUrl(edition);
+        if (downloadUrl != null) {
+          set(p, sonarRelease.getVersion() + getDownloadUrlSuffix(edition), downloadUrl);
+        }
+      }
 
       // For backward compatibility
       set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());

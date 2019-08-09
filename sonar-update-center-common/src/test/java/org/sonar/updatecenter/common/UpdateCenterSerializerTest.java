@@ -33,7 +33,13 @@ public class UpdateCenterSerializerTest {
   public void test_to_properties() throws IOException, URISyntaxException {
     Sonar sonar = new Sonar();
     sonar.addRelease("2.0").setDisplayVersion("2.0");
-    sonar.addRelease("2.1").setDisplayVersion("2.1 (build 42)");
+    sonar
+      .addRelease("2.1")
+      .setDisplayVersion("2.1 (build 42)")
+      .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-2.1.zip")
+      .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-developer-2.1.zip", Release.Edition.DEVELOPER)
+      .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-enterprise-2.1.zip", Release.Edition.ENTERPRISE)
+      .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-datacenter-2.1.zip", Release.Edition.DATACENTER);
     sonar.setLtsRelease("2.0");
 
     Plugin foo = Plugin.factory("foo")
@@ -65,6 +71,10 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "publicVersions", "2.0,2.1");
     assertProperty(properties, "2.0.displayVersion", "2.0");
     assertProperty(properties, "2.1.displayVersion", "2.1 (build 42)");
+    assertProperty(properties, "2.1.downloadUrl", "http://dist.sonar.codehaus.org/sonar-2.1.zip");
+    assertProperty(properties, "2.1.downloadDeveloperUrl", "http://dist.sonar.codehaus.org/sonar-developer-2.1.zip");
+    assertProperty(properties, "2.1.downloadEnterpriseUrl", "http://dist.sonar.codehaus.org/sonar-enterprise-2.1.zip");
+    assertProperty(properties, "2.1.downloadDatacenterUrl", "http://dist.sonar.codehaus.org/sonar-datacenter-2.1.zip");
     assertProperty(properties, "ltsVersion", "2.0");
     assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
