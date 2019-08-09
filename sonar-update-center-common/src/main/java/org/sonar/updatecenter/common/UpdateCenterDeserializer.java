@@ -48,6 +48,9 @@ public final class UpdateCenterDeserializer {
   public static final String MAVEN_ARTIFACTID_SUFFIX = ".mavenArtifactId";
   public static final String CHANGELOG_URL_SUFFIX = ".changelogUrl";
   public static final String DOWNLOAD_URL_SUFFIX = ".downloadUrl";
+  public static final String DOWNLOAD_DEVELOPER_URL_SUFFIX = ".downloadDeveloperUrl";
+  public static final String DOWNLOAD_ENTERPRISE_URL_SUFFIX = ".downloadEnterpriseUrl";
+  public static final String DOWNLOAD_DATACENTER_URL_SUFFIX = ".downloadDatacenterUrl";
   public static final String DISPLAY_VERSION_SUFFIX = ".displayVersion";
   public static final String SONAR_PREFIX = "sonar.";
   public static final String DEFAULTS_PREFIX = "defaults";
@@ -69,6 +72,19 @@ public final class UpdateCenterDeserializer {
     this.mode = mode;
     this.ignoreError = ignoreError;
     this.includeArchives = includeArchives;
+  }
+
+  public static String getDownloadUrlSuffix(Release.Edition edition) {
+    switch (edition) {
+      case DEVELOPER:
+        return DOWNLOAD_DEVELOPER_URL_SUFFIX;
+      case ENTERPRISE:
+        return DOWNLOAD_ENTERPRISE_URL_SUFFIX;
+      case DATACENTER:
+        return DOWNLOAD_DATACENTER_URL_SUFFIX;
+      default:
+        return DOWNLOAD_URL_SUFFIX;
+    }
   }
 
   public enum Mode {
@@ -316,7 +332,12 @@ public final class UpdateCenterDeserializer {
     release.setChangelogUrl(getOrDefault(p, sonarVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
     release.setDisplayVersion(getOrDefault(p, sonarVersion, DISPLAY_VERSION_SUFFIX, false));
     release.setDescription(getOrDefault(p, sonarVersion, DESCRIPTION_SUFFIX, isPublicRelease));
-    release.setDownloadUrl(getOrDefault(p, sonarVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
+    for (Release.Edition edition: Release.Edition.values()) {
+      String downloadUrl = getOrDefault(p, sonarVersion, getDownloadUrlSuffix(edition), edition == Release.Edition.COMMUNITY && isPublicRelease);
+      if (downloadUrl != null) {
+        release.setDownloadUrl(downloadUrl, edition);
+      }
+    }
     release.setDate(FormatUtils.toDate(getOrDefault(p, sonarVersion, DATE_SUFFIX, isPublicRelease), false));
     return release;
   }

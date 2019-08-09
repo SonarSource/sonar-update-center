@@ -50,8 +50,12 @@ public class UpdateCenterDeserializerTest {
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DEVELOPER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.ENTERPRISE)).isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DATACENTER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-2.2.zip");
       assertThat(center.getSonar().getRelease(Version.create("2.2")).getDisplayVersion()).isEqualTo("2.2");
       assertThat(center.getSonar().getRelease(Version.create("2.3")).getDisplayVersion()).isEqualTo("2.3 (build 42)");
+      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDownloadUrl(Release.Edition.DATACENTER)).isNullOrEmpty();
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");

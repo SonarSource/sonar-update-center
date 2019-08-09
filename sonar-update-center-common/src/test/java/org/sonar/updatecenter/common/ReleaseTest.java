@@ -32,6 +32,10 @@ public class ReleaseTest {
 
     release.setDownloadUrl("http://dist.sonarsource.org/foo-1.2.jar");
     assertThat(release.getFilename()).isEqualTo("foo-1.2.jar");
+
+    release.setDownloadUrl("http://dist.sonarsource.org/foo-1.3.jar", Release.Edition.ENTERPRISE);
+    assertThat(release.getFilename(Release.Edition.COMMUNITY)).isEqualTo("foo-1.2.jar");
+    assertThat(release.getFilename(Release.Edition.ENTERPRISE)).isEqualTo("foo-1.3.jar");
   }
 
   @Test(expected = IllegalArgumentException.class)
