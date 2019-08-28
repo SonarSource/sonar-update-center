@@ -12,29 +12,46 @@
 
 ## Use as a mojo
 
+### Setup
+
+First, build and install locally.
+
+```bash
+mvn clean install -DskipTests
+```
+
+You will need the update center properties, which you can find [here](https://github.com/SonarSource/sonar-update-center-properties/) (adapt the `-DinputFile` parameter below accordingly).
+
 ### To generate metadata files
 
-```
+```bash
 mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metadata \
-    -DinputFile=update-center-source.properties \
+    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
     -DoutputDir=output
+
+# Currently, this requires 2 "deprecated" parameters to run. See https://jira.sonarsource.com/browse/UPC-106
+mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metadata \
+    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
+    -DoutputDir=output \
+    -DeditionsDownloadBaseUrl=https://binaries.sonarsource.com/CommercialDistribution/editions/ \
+    -DeditionsOutputDir=output-editions
 ```
 
 ### To generate html
 
 This will generate html snippets for every plugins plus the compatability matrix
 
-```
+```bash
 mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-html \
-    -DinputFile=update-center-source.properties \
+    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
     -DoutputDir=output
 ```
 
 ### To generate json files
 
-```
+```bash
 mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-json \
-    -DinputFile=update-center-source.properties \
+    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
     -DoutputDir=output
 ```
 
