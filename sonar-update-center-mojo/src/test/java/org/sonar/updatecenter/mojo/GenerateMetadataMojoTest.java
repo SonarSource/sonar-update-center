@@ -51,6 +51,7 @@ public class GenerateMetadataMojoTest {
     underTest.editionsDownloadBaseUrl = "http://bintray/";
     underTest.editionsOutputDir = temp.newFolder();
     underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
+    underTest.checkDownloadUrls = false;
     underTest.execute();
 
     // verify that properties file is generated
@@ -74,7 +75,7 @@ public class GenerateMetadataMojoTest {
     FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.1-SNAPSHOT.jar"), outputDir);
 
     File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
-    Configuration configuration = new Configuration(outputDir, inputFile, true, false, false, new SystemStreamLog());
+    Configuration configuration = new Configuration(outputDir, inputFile, true, false, false, false, new SystemStreamLog());
     configuration.getUpdateCenter().getUpdateCenterPluginReferential().findPlugin("csharp").getRelease("1.1-SNAPSHOT")
       .setDownloadUrl(url("csharp-plugin-1.1-SNAPSHOT.jar").toString());
     configuration.getUpdateCenter().getUpdateCenterPluginReferential().findPlugin("fxcop").getRelease("1.1-SNAPSHOT")
@@ -101,7 +102,7 @@ public class GenerateMetadataMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.4.jar"), outputDir);
 
     File inputFile = resource("update-center-template/update-center.properties");
-    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, new SystemStreamLog());
+    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, false, new SystemStreamLog());
     new Generator(configuration, new SystemStreamLog()).generateMetadata();
 
     // verify that properties file is generated
@@ -123,7 +124,7 @@ public class GenerateMetadataMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.4.jar"), outputDir);
 
     File inputFile = resource("key-mismatch/update-center.properties");
-    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, new SystemStreamLog());
+    Configuration configuration = new Configuration(outputDir, inputFile, false, false, true, false, new SystemStreamLog());
     try {
       new Generator(configuration, new SystemStreamLog()).generateMetadata();
       fail("Expected exception");

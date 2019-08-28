@@ -32,8 +32,9 @@ class Configuration {
   private File outputDir;
   private File inputFile;
   private UpdateCenter updateCenter;
+  private boolean checkDownloadUrls;
 
-  Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, boolean includeArchives, Log log) {
+  Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, boolean includeArchives, boolean checkDownloadUrls, Log log) {
     if (!inputFile.exists() || !inputFile.isFile()) {
       throw new IllegalArgumentException("inputFile must exist");
     }
@@ -44,6 +45,7 @@ class Configuration {
     }
     this.outputDir = outputDir;
     this.inputFile = inputFile;
+    this.checkDownloadUrls = checkDownloadUrls;
     log(log);
     try {
       this.updateCenter = new UpdateCenterDeserializer(devMode ? Mode.DEV : Mode.PROD, ignoreErrors, includeArchives).fromManyFiles(inputFile);
@@ -66,6 +68,10 @@ class Configuration {
 
   File getOutputFile() {
     return new File(getOutputDir(), "sonar-updates.properties");
+  }
+
+  boolean mustCheckDownloadUrls() {
+    return checkDownloadUrls;
   }
 
   UpdateCenter getUpdateCenter() {

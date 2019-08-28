@@ -57,6 +57,7 @@ public class GenerateJsonMojo extends AbstractMojo {
         false,
         ignoreErrors,
         false,
+        false,
         getLog());
       new Generator(configuration, getLog()).generateJson();
     } catch (Exception e) {

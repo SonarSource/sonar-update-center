@@ -67,6 +67,12 @@ public class GenerateMetadataMojo extends AbstractMojo {
   boolean includeArchives = false;
 
   /**
+   * Should we check if the download URLs are still valid for cached releases
+   */
+  @Parameter(property = "checkDownloadUrls")
+  boolean checkDownloadUrls = true;
+
+  /**
    * Base URL for hosting of editions
    */
   @Parameter(property = "editionsDownloadBaseUrl", required = true)
@@ -90,7 +96,7 @@ public class GenerateMetadataMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
-      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, getLog());
+      Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, checkDownloadUrls, getLog());
 
       // generate properties
       new Generator(configuration, getLog()).generateMetadata();

@@ -32,10 +32,12 @@ import java.net.URL;
 class HttpDownloader {
 
   private final File outputDir;
+  private final boolean verifyUrlIfCached;
   private final Log log;
 
-  public HttpDownloader(File outputDir, Log log) {
+  public HttpDownloader(File outputDir, boolean verifyUrlIfCached, Log log) {
     this.outputDir = outputDir;
+    this.verifyUrlIfCached = verifyUrlIfCached;
     this.log = log;
   }
 
@@ -48,6 +50,9 @@ class HttpDownloader {
       downloadFile(new URL(url), output);
     } else {
       log.info("File found in local cache: " + url);
+      if (verifyUrlIfCached && !verifyDownloadUrl(new URL(url))) {
+        throw new IllegalStateException("Failed to download " + url + ", URL is no longer valid!");
+      }
     }
     return output;
   }
@@ -61,7 +66,7 @@ class HttpDownloader {
       } else {
         HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
         if (fileURL.getUserInfo() != null) {
-          request.header("Authorization", "Basic " + com.github.kevinsawicki.http.HttpRequest.Base64.encode(fileURL.getUserInfo()));
+          request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
         }
 
         if (!request.receive(toFile).ok()) {
@@ -73,6 +78,26 @@ class HttpDownloader {
       throw new IllegalStateException("Fail to download " + fileURL + " to " + toFile, e);
     }
     return toFile;
+  }
+
+
+  boolean verifyDownloadUrl(URL fileURL) {
+    log.debug("Verify download URL (" + fileURL + ") is still valid");
+    try {
+      if ("file".equals(fileURL.getProtocol())) {
+        File src = new File(fileURL.toURI());
+        return src.exists();
+      } else {
+        HttpRequest request = HttpRequest.head(fileURL).followRedirects(true);
+        if (fileURL.getUserInfo() != null) {
+          request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
+        }
+
+        return request.ok();
+      }
+    } catch (Exception e) {
+      return false;
+    }
   }
 
 }
