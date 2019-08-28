@@ -49,8 +49,6 @@
 
   <properties>
     <gitRepositoryName>sonar-update-center</gitRepositoryName>
-        <!-- analyze this project on SonarCloud -->
-    <sonar.organization>sonarsource</sonar.organization>
      <artifactsToDownload>${project.groupId}:sonar-update-center-common:jar,${project.groupId}:sonar-update-center-mojo:jar</artifactsToDownload>
   </properties>
 

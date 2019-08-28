@@ -1,4 +1,4 @@
-# Sonar Update Center [![Build Status](https://travis-ci.org/SonarSource/sonar-update-center.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-update-center) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=org.sonarsource.update-center%3Asonar-update-center&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.sonarsource.update-center%3Asonar-update-center)
+# Sonar Update Center [![Build Status](https://travis-ci.org/SonarSource/sonar-update-center.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-update-center) [![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.update-center%3Asonar-update-center&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.update-center%3Asonar-update-center)
 
 ## Use as a library
 
