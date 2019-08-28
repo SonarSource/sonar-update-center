@@ -27,13 +27,13 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HtmlSQVersionModelTest {
+public class SonarVersionModelTest {
   @Test
   public void testGetters() {
     LocalDate localDate = LocalDate.of(2017, 11, 15);
     Instant instant = localDate.atStartOfDay().toInstant(ZoneOffset.UTC);
     Date date = Date.from(instant);
-    HtmlSQVersionModel model = new HtmlSQVersionModel("6.7.1", "6.7", date, true);
+    SonarVersionModel model = new SonarVersionModel("6.7.1", "6.7", date, true);
 
     assertThat(model.getDisplayVersion()).isEqualTo("6.7");
     assertThat(model.getRealVersion()).isEqualTo("6.7.1");

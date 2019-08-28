@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
-import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 
@@ -37,7 +36,7 @@ public class CompatibilityMatrix {
   private final UpdateCenter center;
   private final Log log;
 
-  private List<HtmlSQVersionModel> sqVersions = new ArrayList<>();
+  private List<SonarVersionModel> sqVersions = new ArrayList<>();
   private List<Plugin> plugins = new ArrayList<>();
 
   CompatibilityMatrix(UpdateCenter center, File outputDirectory, Log log) {
@@ -64,12 +63,12 @@ public class CompatibilityMatrix {
       String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
       Date releaseDate = sq.getDate();
       boolean isLts = center.getSonar().getLtsRelease().equals(sq);
-      getSqVersions().add(new HtmlSQVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
+      getSqVersions().add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
     }
     for (org.sonar.updatecenter.common.Plugin plugin : pluginList) {
-      PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
+      PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
       Map<String, Object> dataModel = new HashMap<>();
-      dataModel.put("pluginHeader", pluginHeader);
+      dataModel.put("pluginHeader", pluginModel);
 
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
       getPlugins().add(matrixPlugin);
@@ -94,7 +93,7 @@ public class CompatibilityMatrix {
   }
 
 
-  public List<HtmlSQVersionModel> getSqVersions() {
+  public List<SonarVersionModel> getSqVersions() {
     return sqVersions;
   }
 

@@ -33,12 +33,12 @@ import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.Version;
 
-public class PluginHeader {
+public class PluginModel {
 
-  public class PluginHeaderVersion {
+  public class PluginModelVersion {
     private final Release release;
 
-    public PluginHeaderVersion(Release release) {
+    public PluginModelVersion(Release release) {
       this.release = release;
     }
 
@@ -105,12 +105,16 @@ public class PluginHeader {
       return date != null ? (new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)).format(date) : null;
     }
 
+    private String formatDate(Date date) {
+      return (new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)).format(date);
+    }
+
   }
 
   private Plugin plugin;
   private Sonar sonar;
 
-  public PluginHeader(Plugin plugin, Sonar sonar) {
+  public PluginModel(Plugin plugin, Sonar sonar) {
     this.plugin = plugin;
     this.sonar = sonar;
   }
@@ -147,15 +151,11 @@ public class PluginHeader {
     return plugin.getCategory();
   }
 
-  private static String formatDate(Date date) {
-    return (new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH)).format(date);
-  }
-
-  public List<PluginHeaderVersion> getAllVersions() {
-    List<PluginHeaderVersion> result = new LinkedList<>();
+  public List<PluginModelVersion> getAllVersions() {
+    List<PluginModelVersion> result = new LinkedList<>();
     for (Release r : plugin.getAllReleases()) {
       // Add in reverse order to have greater version on top
-      result.add(0, new PluginHeaderVersion(r));
+      result.add(0, new PluginModelVersion(r));
     }
     return result;
   }

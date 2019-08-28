@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.mojo.FreeMarkerUtils;
-import org.sonar.updatecenter.mojo.HtmlSQVersionModel;
+import org.sonar.updatecenter.mojo.SonarVersionModel;
 import org.sonar.updatecenter.mojo.editions.Edition;
 
 import static org.sonar.updatecenter.mojo.editions.EditionsGenerator.MIN_SUPPORTED_SQ_VERSION;
@@ -86,7 +86,7 @@ public class HtmlEditionGenerator implements EditionGenerator {
       }
     }
 
-    List<HtmlSQVersionModel> htmlSqVersions = majorReleases.values().stream()
+    List<SonarVersionModel> htmlSqVersions = majorReleases.values().stream()
       .filter(r -> r.getVersion().compareTo(MIN_SUPPORTED_SQ_VERSION) >= 0)
       .map(this::createHtmlSqVersion)
       .collect(Collectors.toList());
@@ -94,14 +94,14 @@ public class HtmlEditionGenerator implements EditionGenerator {
     printEditionHtml(editionHtmlOutputFile, htmlEdition, htmlSqVersions);
   }
 
-  private HtmlSQVersionModel createHtmlSqVersion(Release release) {
+  private SonarVersionModel createHtmlSqVersion(Release release) {
     String displayVersion = release.getVersion().getMajor() + "." + release.getVersion().getMinor();
     Date releaseDate = release.getDate();
     boolean isLts = updateCenter.getSonar().getLtsRelease().equals(release);
-    return new HtmlSQVersionModel(release.getVersion().toString(), displayVersion, releaseDate, isLts);
+    return new SonarVersionModel(release.getVersion().toString(), displayVersion, releaseDate, isLts);
   }
 
-  private void printEditionHtml(File htmlFile, HtmlEditionModel htmlEditionModel, List<HtmlSQVersionModel> htmlSqVersions) {
+  private void printEditionHtml(File htmlFile, HtmlEditionModel htmlEditionModel, List<SonarVersionModel> htmlSqVersions) {
     LOGGER.info("Generate HTML file: {}", htmlFile);
     Map<String, Object> dataModel = new HashMap<>();
     dataModel.put("edition", htmlEditionModel);

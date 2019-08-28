@@ -24,14 +24,14 @@ import java.util.Date;
 import java.util.Locale;
 import javax.annotation.Nullable;
 
-public class HtmlSQVersionModel {
+public class SonarVersionModel {
   private final String realVersion;
   private final String displayVersion;
   private final boolean isLts;
   @Nullable
   private final Date releaseDate;
 
-  public HtmlSQVersionModel(String realVersion, String displayVersion, @Nullable Date releaseDate, boolean isLts) {
+  public SonarVersionModel(String realVersion, String displayVersion, @Nullable Date releaseDate, boolean isLts) {
     this.realVersion = realVersion;
     this.isLts = isLts;
     this.displayVersion = displayVersion;
