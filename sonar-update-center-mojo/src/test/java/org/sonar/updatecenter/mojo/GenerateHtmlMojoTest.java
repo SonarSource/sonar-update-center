@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GenerateHtmlHeadersMojoTest {
+public class GenerateHtmlMojoTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
@@ -42,7 +42,7 @@ public class GenerateHtmlHeadersMojoTest {
     FileUtils.copyFileToDirectory(resource("sonar-artifact-size-plugin-0.3.jar"), outputDir);
 
     File inputFile = resource("update-center-template/update-center.properties");
-    new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
+    new GenerateHtmlMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
     File compatibilityMatrix = new File(outputDir, "html/compatibility-matrix.html");
     assertThat(compatibilityMatrix).exists().isFile();

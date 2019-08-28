@@ -27,7 +27,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 @Mojo(name = "generate-html", requiresProject = false, threadSafe = true)
-public class GenerateHtmlHeadersMojo extends AbstractMojo {
+public class GenerateHtmlMojo extends AbstractMojo {
 
   /**
    * The directory that contains generated files and cache of plugins.
@@ -57,12 +57,12 @@ public class GenerateHtmlHeadersMojo extends AbstractMojo {
     }
   }
 
-  GenerateHtmlHeadersMojo setOutputDir(File d) {
+  GenerateHtmlMojo setOutputDir(File d) {
     this.outputDir = d;
     return this;
   }
 
-  GenerateHtmlHeadersMojo setInputFile(File f) {
+  GenerateHtmlMojo setInputFile(File f) {
     this.inputFile = f;
     return this;
   }
