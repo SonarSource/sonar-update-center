@@ -39,7 +39,7 @@ public class FreeMarkerUtils {
       Writer writer = new OutputStreamWriter(fileOutputStream, UTF_8)) {
       freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
       freemarker.template.Configuration cfg = new freemarker.template.Configuration();
-      cfg.setClassForTemplateLoading(PluginHeader.class, "");
+      cfg.setClassForTemplateLoading(PluginModel.class, "");
       cfg.setObjectWrapper(new DefaultObjectWrapper());
 
       Template template = cfg.getTemplate(templateName);

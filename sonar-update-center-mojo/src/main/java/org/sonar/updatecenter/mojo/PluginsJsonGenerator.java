@@ -93,9 +93,9 @@ class PluginsJsonGenerator {
     List<Plugin> plugins = center.getUpdateCenterPluginReferential().getPlugins();
 
     for (Plugin plugin : plugins) {
-      PluginHeader pluginHeader = new PluginHeader(plugin, center.getSonar());
+      PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
 
-      String jsonOutputString = gson.toJson(JsonOutput.createFrom(pluginHeader));
+      String jsonOutputString = gson.toJson(JsonOutput.createFrom(pluginModel));
 
       try {
         checkComplianceWithSchema(jsonOutputString);
@@ -170,22 +170,22 @@ class PluginsJsonGenerator {
 
     }
 
-    private static JsonOutput createFrom(PluginHeader pluginHeader) {
+    private static JsonOutput createFrom(PluginModel pluginModel) {
       JsonOutput returned = new JsonOutput();
-      returned.name = pluginHeader.getName();
-      returned.key = pluginHeader.getKey();
-      returned.isSonarSourceCommercial = pluginHeader.isSonarSourceCommercialPlugin();
-      if (pluginHeader.getOrganization() != null) {
+      returned.name = pluginModel.getName();
+      returned.key = pluginModel.getKey();
+      returned.isSonarSourceCommercial = pluginModel.isSonarSourceCommercialPlugin();
+      if (pluginModel.getOrganization() != null) {
         returned.organization = new OrganizationData(
-          pluginHeader.getOrganization(),
-          safeCreateURLFromString(pluginHeader.getOrganizationUrl()));
+          pluginModel.getOrganization(),
+          safeCreateURLFromString(pluginModel.getOrganizationUrl()));
       }
-      returned.category = pluginHeader.getCategory();
-      returned.license = pluginHeader.getLicense();
-      returned.issueTrackerURL = safeCreateURLFromString(pluginHeader.getIssueTracker());
-      returned.sourcesURL = safeCreateURLFromString(pluginHeader.getSources());
+      returned.category = pluginModel.getCategory();
+      returned.license = pluginModel.getLicense();
+      returned.issueTrackerURL = safeCreateURLFromString(pluginModel.getIssueTracker());
+      returned.sourcesURL = safeCreateURLFromString(pluginModel.getSources());
 
-      returned.versions = pluginHeader.getAllVersions()
+      returned.versions = pluginModel.getAllVersions()
         .stream()
         .map(pluginHeaderVersion -> {
           JsonOutputVersion becomeAJsonOutputVersion = new JsonOutput.JsonOutputVersion();
