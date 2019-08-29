@@ -120,9 +120,6 @@ public class CompatibilityMatrix {
       return name;
     }
 
-    public String getHomepageUrl() {
-      return homepageUrl;
-    }
 
     public Map<String, String> getCompatibleVersionBySqVersion() {
       return compatibleVersionBySqVersion;
