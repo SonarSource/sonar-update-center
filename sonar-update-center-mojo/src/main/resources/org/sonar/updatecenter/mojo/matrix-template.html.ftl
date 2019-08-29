@@ -17,7 +17,7 @@
         <th>
           ${sqVersion.displayVersion}
           <#if sqVersion.isLts() >
-          </br> <strong>(LTS)</strong>
+          <br/> <strong>(LTS)</strong>
           </#if>
         </th>
         </#list>
@@ -40,7 +40,7 @@
         </#if>
         </strong>
         <#if plugin.isSupportedBySonarSource()>
-        <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png">
+        <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png" />
         </#if>
         </td>
         <#list matrix.sqVersions as sqVersion>
@@ -48,7 +48,7 @@
           <#if plugin.supports(sqVersion.realVersion) >
           ${plugin.supportedVersion(sqVersion.realVersion)}
           <#else>
-          <img class="emoticon" alt="(not compatible)" src="error.png"></img>
+          <img class="emoticon" alt="(not compatible)" src="error.png" />
           </#if>
         </td>
         </#list>

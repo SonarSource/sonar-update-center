@@ -49,7 +49,7 @@ class Generator {
   void generateHtml() throws IOException, URISyntaxException {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
-    generateHtmlHeader(center);
+    generateHtmlMatrix(center);
   }
 
   void generateMetadata() throws IOException, URISyntaxException {
@@ -121,10 +121,10 @@ class Generator {
     UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
-  private void generateHtmlHeader(UpdateCenter center) throws IOException {
+  private void generateHtmlMatrix(UpdateCenter center) throws IOException {
     File htmlOutputDir = ensureDirectory(configuration.getOutputDir(), HTML_HEADER_DIR);
-    PluginHeaders pluginHeaders = new PluginHeaders(center, htmlOutputDir, log);
-    pluginHeaders.generateHtml();
+    CompatibilityMatrix matrix = new CompatibilityMatrix(center, htmlOutputDir, log);
+    matrix.generateHtml();
   }
 
   private void prepareDirectoryAndOutputJson(UpdateCenter center) throws IOException {
