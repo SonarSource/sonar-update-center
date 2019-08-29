@@ -47,7 +47,7 @@ class PluginHeaders {
     if (!outputDirectory.exists()) {
       throw new IllegalArgumentException("Output directory does not exist: " + outputDirectory);
     }
-    FileUtils.copyURLToFile(getClass().getResource("/style-confluence.css"), new File(outputDirectory, "style-confluence.css"));
+    FileUtils.copyURLToFile(getClass().getResource("/styles.css"), new File(outputDirectory, "styles.css"));
     FileUtils.copyURLToFile(getClass().getResource("/error.png"), new File(outputDirectory, "error.png"));
     FileUtils.copyURLToFile(getClass().getResource("/onde-sonar-16.png"), new File(outputDirectory, "onde-sonar-16.png"));
   }
@@ -69,11 +69,7 @@ class PluginHeaders {
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginHeader);
 
-      File file = new File(outputDirectory, plugin.getKey() + "-confluence-include.html");
-      log.info("Generate confluence html include of plugin " + plugin.getKey() + " in: " + file);
-      FreeMarkerUtils.print(dataModel, file, "plugin-confluence-include-template.html.ftl");
-
-      file = new File(outputDirectory, plugin.getKey() + "-sonarsource-include.html");
+      File file = new File(outputDirectory, plugin.getKey() + "-sonarsource-include.html");
       log.info("Generate sonarsource.com include of plugin " + plugin.getKey() + " in: " + file);
       FreeMarkerUtils.print(dataModel, file, "plugin-sonarsource-include-template.html.ftl");
 

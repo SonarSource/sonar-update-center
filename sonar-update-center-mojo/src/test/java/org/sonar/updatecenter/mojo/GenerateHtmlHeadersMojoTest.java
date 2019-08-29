@@ -44,21 +44,14 @@ public class GenerateHtmlHeadersMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    // html confluence include
-    File htmlConfluenceInclude = new File(outputDir, "html/artifactsize-confluence-include.html");
-    assertThat(htmlConfluenceInclude).exists().isFile();
-    String html = FileUtils.readFileToString(htmlConfluenceInclude, StandardCharsets.UTF_8);
-    assertThat(html).contains("<strong>Artifact Size");
-
     File htmlSonarSourceInclude = new File(outputDir, "html/artifactsize-sonarsource-include.html");
     assertThat(htmlSonarSourceInclude).exists().isFile();
-    html = FileUtils.readFileToString(htmlSonarSourceInclude, StandardCharsets.UTF_8);
+    String html = FileUtils.readFileToString(htmlSonarSourceInclude, StandardCharsets.UTF_8);
     assertThat(html).contains("sonar-artifact-size");
 
-    assertThat(new File(outputDir, "html/style-confluence.css")).exists().isFile();
+    assertThat(new File(outputDir, "html/styles.css")).exists().isFile();
     assertThat(new File(outputDir, "html/error.png")).exists().isFile();
     assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();
-
   }
 
   private File resource(String filename) {

@@ -89,7 +89,7 @@ public class PluginHeadersTest {
     pluginHeaders.generateHtml();
 
     assertThat(outputFolder.list()).hasSize(3);
-    assertThat(outputFolder.list()).containsOnly("style-confluence.css", "error.png", "onde-sonar-16.png");
+    assertThat(outputFolder.list()).containsOnly("styles.css", "error.png", "onde-sonar-16.png");
   }
 
   @Test
@@ -112,121 +112,19 @@ public class PluginHeadersTest {
     pluginHeaders.generateHtml();
 
     // 6 files:
-    // - style-confluence.css
+    // - styles.css
     // - error.png
     // - onde-sonar-16.png
     // - compatibility-matrix.html
-    // - PLUGIN_KEY-confluence-include.html
     // - PLUGIN_KEY-sonarsource-include.html
-    assertThat(outputFolder.list()).hasSize(6);
+    assertThat(outputFolder.list()).hasSize(5);
 
     // since Freemarker transformation, confluence include data file are not easy to read
     // flatten the file to keep a easy to read reference file.
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
+    File file = outputFolder.listFiles(new FilenameFilterForSonarSourceIncludeGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-include.html"));
+    String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-sonarsource-include.html"));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-
-    file = outputFolder.listFiles(new FilenameFilterForSonarSourceIncludeGeneratedHtml())[0];
-    flattenFile = flatHtmlFile(file);
-    flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-sonarsource-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  // UPC-95
-  @Test
-  public void shouldGenerateHtmlForCommercialPlugins() throws Exception {
-    Plugin plugin = Plugin.factory(PLUGIN_KEY);
-    Version version = Version.create("1.0");
-    Release release = new Release(plugin, version);
-    release.setDate(getDate());
-    release.setDownloadUrl("http://valid.download.url");
-    release.addRequiredSonarVersions("3.0");
-    plugin.addRelease(release);
-    plugin.setName("name");
-    plugin.setIssueTrackerUrl("issue_url");
-    plugin.setLicense("licence");
-    plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(asList("dev"));
-    plugin.setSupportedBySonarSource(true);
-    plugin.setTermsConditionsUrl("http://foo");
-
-    prepareMocks(plugin);
-    pluginHeaders.generateHtml();
-
-    // since Freemarker transformation, confluence include data file are not easy to read
-    // flatten the file to keep a easy to read reference file.
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-commercial-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  // UPC-20
-  @Test
-  public void shouldGenerateHtml_latest_plugin_version_compatible_with_lts() throws Exception {
-    Map<String, File> files = generateWithLts(true, true);
-
-    String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("latest_plugin_version_compatible_with_lts-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  @Test
-  public void shouldGenerateHtml_old_plugin_version_compatible_with_lts() throws Exception {
-    Map<String, File> files = generateWithLts(false, true);
-
-    String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("old_plugin_version_compatible_with_lts-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  // UPC-20
-  @Test
-  public void shouldGenerateHtml_no_plugin_version_compatible_with_lts() throws Exception {
-
-    Map<String, File> files = generateWithLts(false, false);
-
-    String flattenFile = flatHtmlFile(files.get("confluenceIncludeHtml"));
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("no_plugin_version_compatible_with_lts-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  private Map<String, File> generateWithLts(boolean latestCompatibleWithLts, boolean atLeastOneCompatibleWithLts) throws ParseException, IOException {
-    sonar.setLtsRelease("3.0");
-    Plugin plugin = Plugin.factory(PLUGIN_KEY);
-    if (atLeastOneCompatibleWithLts) {
-      Version version1 = Version.create("1.0");
-      Release release1 = new Release(plugin, version1);
-      release1.setDate(getDate());
-      release1.setDownloadUrl("http://download.url/1");
-      release1.addRequiredSonarVersions("3.0");
-      plugin.addRelease(release1);
-    }
-    Version version2 = Version.create("2.0");
-    Release release2 = new Release(plugin, version2);
-    release2.setDate(new SimpleDateFormat("dd-MM-yyyy").parse("12-12-2013"));
-    release2.setDownloadUrl("http://download.url/2");
-    if (latestCompatibleWithLts) {
-      release2.addRequiredSonarVersions("3.0", "4.0");
-    } else {
-      release2.addRequiredSonarVersions("4.0");
-    }
-    plugin.addRelease(release2);
-    plugin.setName("name");
-    plugin.setIssueTrackerUrl("issue_url");
-    plugin.setLicense("licence");
-    plugin.setSourcesUrl("sources_url");
-    plugin.setDevelopers(asList("dev"));
-
-    prepareMocks(plugin);
-    pluginHeaders.generateHtml();
-
-    assertThat(outputFolder.list()).hasSize(6);
-    Map<String, File> returned = new HashMap<>(2);
-    returned.put("confluenceIncludeHtml", outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0]);
-
-    return returned;
   }
 
   @Test
@@ -263,19 +161,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css", "compatibility-matrix.html", "error.png",
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "styles.css", "compatibility-matrix.html", "error.png",
       "onde-sonar-16.png");
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("archived-version-have-no-SQ-compability-and-no-download-link-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
-  }
-
-  class FilenameFilterForConfluenceIncludeGeneratedHtml implements FilenameFilter {
-    public boolean accept(File file, String s) {
-      return (PLUGIN_KEY + "-confluence-include.html").equals(s);
-    }
   }
 
   class FilenameFilterForSonarSourceGeneratedHtml implements FilenameFilter {
@@ -308,12 +195,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("normal-with-2-dev-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+    assertThat(outputFolder.list()).hasSize(5);
   }
 
   @Test
@@ -334,12 +216,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-licence-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+    assertThat(outputFolder.list()).hasSize(5);
   }
 
   @Test
@@ -360,12 +237,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-issues-url-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+    assertThat(outputFolder.list()).hasSize(5);
   }
 
   @Test
@@ -387,12 +259,7 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).hasSize(6);
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("with-author-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
+    assertThat(outputFolder.list()).hasSize(5);
   }
 
   @Test
@@ -413,13 +280,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "styles.css",
       "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("without-sources-url-include.html"));
-    assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 
   @Test
@@ -440,12 +302,8 @@ public class PluginHeadersTest {
     prepareMocks(plugin);
     pluginHeaders.generateHtml();
 
-    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "key-confluence-include.html", "style-confluence.css",
+    assertThat(outputFolder.list()).containsOnly("key-sonarsource-include.html", "styles.css",
       "compatibility-matrix.html", "error.png", "onde-sonar-16.png");
-
-    File file = outputFolder.listFiles(new FilenameFilterForConfluenceIncludeGeneratedHtml())[0];
-    String flattenFile = flatHtmlFile(file);
-    assertThat(flattenFile).doesNotContain("Compatible with SonarQube".replaceAll("\\s", ""));
   }
 
   private File getExpectedFile(String fileName) {
