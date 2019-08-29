@@ -68,10 +68,6 @@ class Configuration {
     return new File(getOutputDir(), "sonar-updates.properties");
   }
 
-  File getInputFile() {
-    return inputFile;
-  }
-
   UpdateCenter getUpdateCenter() {
     return this.updateCenter;
   }

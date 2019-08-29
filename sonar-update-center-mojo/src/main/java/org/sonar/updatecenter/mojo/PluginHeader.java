@@ -105,13 +105,6 @@ public class PluginHeader {
       return date != null ? (new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)).format(date) : null;
     }
 
-    public boolean compatibleWithLts() {
-      String lts = getSonarLtsVersion();
-      if (lts == null) {
-        throw new IllegalStateException("Unable to determine if plugin is compatible wth LTS as LTS version is not defined");
-      }
-      return release.supportSonarVersion(Version.create(lts));
-    }
   }
 
   private Plugin plugin;
@@ -167,29 +160,11 @@ public class PluginHeader {
     return result;
   }
 
-  public int getNbVersions() {
-    return plugin.getAllReleases().size();
-  }
-
   public boolean isSupportedBySonarSource() {
     return plugin.isSupportedBySonarSource();
   }
 
   public boolean isSonarSourceCommercialPlugin() {
     return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
-  }
-
-  @CheckForNull
-  public String getLastVersionString() {
-    Release lastRelease = plugin.getLastRelease();
-    if (lastRelease != null) {
-      return lastRelease.getVersion().getName();
-    } else {
-      return null;
-    }
-  }
-
-  public String getSonarLtsVersion() {
-    return sonar.getLtsRelease() != null ? sonar.getLtsRelease().getVersion().toString() : null;
   }
 }
