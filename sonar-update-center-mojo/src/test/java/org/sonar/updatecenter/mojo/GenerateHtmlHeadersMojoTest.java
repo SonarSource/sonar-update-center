@@ -44,6 +44,11 @@ public class GenerateHtmlHeadersMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
+    File compatibilityMatrix = new File(outputDir, "html/compatibility-matrix.html");
+    assertThat(compatibilityMatrix).exists().isFile();
+    String html = FileUtils.readFileToString(compatibilityMatrix, StandardCharsets.UTF_8);
+    assertThat(html).contains("Artifact Size");
+
     assertThat(new File(outputDir, "html/styles.css")).exists().isFile();
     assertThat(new File(outputDir, "html/error.png")).exists().isFile();
     assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();
