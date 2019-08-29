@@ -44,11 +44,6 @@ public class GenerateHtmlHeadersMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlHeadersMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    File htmlSonarSourceInclude = new File(outputDir, "html/artifactsize-sonarsource-include.html");
-    assertThat(htmlSonarSourceInclude).exists().isFile();
-    String html = FileUtils.readFileToString(htmlSonarSourceInclude, StandardCharsets.UTF_8);
-    assertThat(html).contains("sonar-artifact-size");
-
     assertThat(new File(outputDir, "html/styles.css")).exists().isFile();
     assertThat(new File(outputDir, "html/error.png")).exists().isFile();
     assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();

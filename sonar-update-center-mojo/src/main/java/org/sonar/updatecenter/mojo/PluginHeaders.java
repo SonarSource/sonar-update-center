@@ -69,10 +69,6 @@ class PluginHeaders {
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginHeader);
 
-      File file = new File(outputDirectory, plugin.getKey() + "-sonarsource-include.html");
-      log.info("Generate sonarsource.com include of plugin " + plugin.getKey() + " in: " + file);
-      FreeMarkerUtils.print(dataModel, file, "plugin-sonarsource-include-template.html.ftl");
-
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
       matrix.getPlugins().add(matrixPlugin);
 
