@@ -98,7 +98,7 @@ public class VersionTest {
     assertThat(version13.compareTo(version12)).isGreaterThan(0);
     assertThat(version13.isCompatibleWith(version121)).isFalse();
 
-    // Should be compatible with wildcard versions of the same major release.
+    // Should be compatible with wildcard versions of the same minor release.
     assertThat(version12star.compareTo(version12)).isEqualTo(0);
     assertThat(version12star.isCompatibleWith(version12)).isTrue();
     assertThat(version12star.compareTo(version121)).isEqualTo(0);

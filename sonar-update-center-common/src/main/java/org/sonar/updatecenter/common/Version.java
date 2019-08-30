@@ -143,13 +143,13 @@ public class Version implements Comparable<Version> {
   }
 
   public int compareToIgnoreQualifier(Version other) {
-    int c = compareTo(normalizedMajor, other.normalizedMajor);
+    int c = compareToNormalizedParts(normalizedMajor, other.normalizedMajor);
     if (c == 0) {
-      c = compareTo(normalizedMinor, other.normalizedMinor);
+      c = compareToNormalizedParts(normalizedMinor, other.normalizedMinor);
       if (c == 0) {
-        c = compareTo(normalizedPatch, other.normalizedPatch);
+        c = compareToNormalizedParts(normalizedPatch, other.normalizedPatch);
         if (c == 0) {
-          c = compareTo(normalizedPatch2, other.normalizedPatch2);
+          c = compareToNormalizedParts(normalizedPatch2, other.normalizedPatch2);
         }
       }
     }
@@ -189,7 +189,7 @@ public class Version implements Comparable<Version> {
     return this.removeQualifier().compareTo(version.removeQualifier()) == 0;
   }
 
-  private static int compareTo(String normalized, String otherNormalized) {
+  private static int compareToNormalizedParts(String normalized, String otherNormalized) {
     if (WILDCARD.equals(normalized) || WILDCARD.equals(otherNormalized)) {
       return 0;
     } else {
