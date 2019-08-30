@@ -72,14 +72,49 @@ public class VersionTest {
   @Test
   public void compare_releases() {
     Version version12 = Version.create("1.2");
+    Version version13 = Version.create("1.3");
     Version version121 = Version.create("1.2.1");
+    Version version12star = Version.create("1.2.*");
+    Version version2star = Version.create("2.*");
 
     assertThat(version12.toString()).isEqualTo("1.2");
-    assertThat(version12.compareTo(version12)).isEqualTo(0);
-    assertThat(version121.compareTo(version121)).isEqualTo(0);
 
-    assertThat(version121.compareTo(version12) > 0).isTrue();
-    assertThat(version12.compareTo(version121) < 0).isTrue();
+    // Should be compatible with itself.
+    assertThat(version12.compareTo(version12)).isEqualTo(0);
+    assertThat(version12.isCompatibleWith(version12)).isTrue();
+    assertThat(version121.compareTo(version121)).isEqualTo(0);
+    assertThat(version12star.compareTo(version12star)).isEqualTo(0);
+    assertThat(version2star.compareTo(version2star)).isEqualTo(0);
+
+    // Should not be compatible with more recent versions.
+    assertThat(version12.compareTo(version13)).isLessThan(0);
+    assertThat(version12.isCompatibleWith(version13)).isFalse();
+    assertThat(version12.compareTo(version121)).isLessThan(0);
+    assertThat(version12.isCompatibleWith(version121)).isFalse();
+
+    // Should not be compatible with less recent versions.
+    assertThat(version121.compareTo(version12)).isGreaterThan(0);
+    assertThat(version121.isCompatibleWith(version12)).isFalse();
+    assertThat(version13.compareTo(version12)).isGreaterThan(0);
+    assertThat(version13.isCompatibleWith(version121)).isFalse();
+
+    // Should be compatible with wildcard versions of the same major release.
+    assertThat(version12star.compareTo(version12)).isEqualTo(0);
+    assertThat(version12star.isCompatibleWith(version12)).isTrue();
+    assertThat(version12star.compareTo(version121)).isEqualTo(0);
+    assertThat(version12star.isCompatibleWith(version121)).isTrue();
+    assertThat(version12.compareTo(version12star)).isEqualTo(0);
+    assertThat(version12.isCompatibleWith(version12star)).isTrue();
+
+    // Should not be compatible if wildcard version is for a more recent major release.
+    assertThat(version2star.compareTo(version12)).isGreaterThan(0);
+    assertThat(version2star.isCompatibleWith(version12)).isFalse();
+    assertThat(version2star.compareTo(version12star)).isGreaterThan(0);
+    assertThat(version2star.isCompatibleWith(version12star)).isFalse();
+    assertThat(version12.compareTo(version2star)).isLessThan(0);
+    assertThat(version12.isCompatibleWith(version2star)).isFalse();
+    assertThat(version12star.compareTo(version2star)).isLessThan(0);
+    assertThat(version12star.isCompatibleWith(version2star)).isFalse();
   }
 
   @Test

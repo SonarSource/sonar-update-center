@@ -35,6 +35,8 @@ public class Version implements Comparable<Version> {
   private String name;
   private String fromString;
 
+  private static final String WILDCARD = "000*";
+
   private Version(String version, String fromString) {
     this.name = StringUtils.trimToEmpty(version);
     this.qualifier = StringUtils.substringAfter(this.name, "-");
@@ -47,10 +49,18 @@ public class Version implements Comparable<Version> {
     if (split.length >= 2) {
       minor = split[1];
       normalizedMinor = normalizePart(minor);
+      if (WILDCARD.equals(normalizedMinor)) {
+        patch = patch2 = "*";
+        normalizedPatch = normalizedPatch2 = WILDCARD;
+      }
     }
     if (split.length >= 3) {
       patch = split[2];
       normalizedPatch = normalizePart(patch);
+      if (WILDCARD.equals(normalizedPatch)) {
+        patch2 = "*";
+        normalizedPatch2 = WILDCARD;
+      }
     }
     if (split.length >= 4) {
       patch2 = split[3];
@@ -133,13 +143,13 @@ public class Version implements Comparable<Version> {
   }
 
   public int compareToIgnoreQualifier(Version other) {
-    int c = normalizedMajor.compareTo(other.normalizedMajor);
+    int c = compareTo(normalizedMajor, other.normalizedMajor);
     if (c == 0) {
-      c = normalizedMinor.compareTo(other.normalizedMinor);
+      c = compareTo(normalizedMinor, other.normalizedMinor);
       if (c == 0) {
-        c = normalizedPatch.compareTo(other.normalizedPatch);
+        c = compareTo(normalizedPatch, other.normalizedPatch);
         if (c == 0) {
-          c = normalizedPatch2.compareTo(other.normalizedPatch2);
+          c = compareTo(normalizedPatch2, other.normalizedPatch2);
         }
       }
     }
@@ -176,6 +186,14 @@ public class Version implements Comparable<Version> {
    * Two versions are compatible when they are identical except for qualifier.
    */
   public boolean isCompatibleWith(Version version) {
-    return this.removeQualifier().equals(version.removeQualifier());
+    return this.removeQualifier().compareTo(version.removeQualifier()) == 0;
+  }
+
+  private static int compareTo(String normalized, String otherNormalized) {
+    if (WILDCARD.equals(normalized) || WILDCARD.equals(otherNormalized)) {
+      return 0;
+    } else {
+      return normalized.compareTo(otherNormalized);
+    }
   }
 }

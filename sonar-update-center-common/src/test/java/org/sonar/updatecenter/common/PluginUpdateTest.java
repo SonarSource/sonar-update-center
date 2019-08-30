@@ -41,6 +41,18 @@ public class PluginUpdateTest {
   }
 
   @Test
+  public void createForCompatibleWildcardRelease() {
+    Version sonarVersion = Version.create("2.3");
+    Release pluginRelease = new Release(Plugin.factory("fake"), "1.0");
+    pluginRelease.addRequiredSonarVersions(Version.create("2.3.*"));
+
+    PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion);
+
+    assertThat(update.isCompatible(), is(true));
+    assertThat(update.isIncompatible(), is(false));
+  }
+
+  @Test
   public void createForSonarUpgrade() {
     Version sonarVersion = Version.create("2.0");
     Release pluginRelease = new Release(Plugin.factory("fake"), "1.0");
