@@ -418,11 +418,9 @@ public final class UpdateCenterDeserializer {
   }
 
   private static Version resolveWithWildcard(String versionStr, Sonar sonar) {
-    String prefix = versionStr.substring(0, versionStr.length() - 1);
-    String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
     Release found = null;
     for (Release r : sonar.getAllReleases()) {
-      if (r.getVersion().toString().equals(prefixWithoutDot) || r.getVersion().toString().startsWith(prefix)) {
+      if (r.getVersion().isCompatibleWith(Version.create(versionStr))) {
         found = r;
       }
     }

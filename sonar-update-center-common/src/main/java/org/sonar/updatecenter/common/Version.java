@@ -19,7 +19,9 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import org.sonar.updatecenter.common.exception.VersionParseException;
 
 public class Version implements Comparable<Version> {
 
@@ -41,6 +43,12 @@ public class Version implements Comparable<Version> {
     this.name = StringUtils.trimToEmpty(version);
     this.qualifier = StringUtils.substringAfter(this.name, "-");
     String numbers = StringUtils.substringBefore(this.name, "-");
+
+    Pattern p = Pattern.compile("(^\\*\\.|\\*\\.\\d|\\d\\*)");
+    if (p.matcher(numbers).find()) {
+      throw new VersionParseException(numbers);
+    }
+
     String[] split = StringUtils.split(numbers, '.');
     if (split.length >= 1) {
       major = split[0];

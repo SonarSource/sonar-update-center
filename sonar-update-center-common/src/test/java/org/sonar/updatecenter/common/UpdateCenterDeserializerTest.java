@@ -171,6 +171,25 @@ public class UpdateCenterDeserializerTest {
     }
   }
 
+  @Test
+  public void should_resolve_wildcard_releases() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-latest.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter pluginReferential = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+      Plugin foobar = pluginReferential.getUpdateCenterPluginReferential().findPlugin("foobar");
+      SortedSet<Version> requiredSonarVersion = foobar.getRelease(Version.create("1.0")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(8);
+
+      requiredSonarVersion = foobar.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      assertThat(requiredSonarVersion).hasSize(3);
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.7");
+      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.7.1");
+      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+    }
+  }
+
   // UPC-15
   @Test
   public void should_resolve_latest_using_sonar_devVersion() throws IOException {
