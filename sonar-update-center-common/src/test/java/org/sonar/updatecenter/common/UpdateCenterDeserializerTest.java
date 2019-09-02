@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
+import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -146,6 +147,31 @@ public class UpdateCenterDeserializerTest {
       assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.2");
       assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
       assertThat(requiredSonarVersion).doesNotContain(Version.create("2.7"));
+    }
+  }
+
+  // UPC-101
+  @Test
+  public void should_not_allow_wildcard_at_start_of_range() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-incorrect-range-wildcard.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(SonarVersionRangeException.class);
+      thrown.expectMessage(
+        "Cannot use a wildcard version at the start of a range in '[2.4.*,2.6]' (in plugin 'motionchart'). " +
+          "If you want to mark this range as compatible with any MAJOR.MINOR.* version, use the MAJOR.MINOR version instead (e.g.: 'sqVersions=[6.7,6.7.*]', 'sqVersions=[6.7,LATEST]').");
+      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+    }
+  }
+
+  @Test
+  public void should_not_allow_LATEST_at_start_of_range() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-incorrect-range-latest.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      thrown.expect(SonarVersionRangeException.class);
+      thrown.expectMessage("Cannot use LATEST keyword at the start of a range in '[LATEST,LATEST]' (in plugin 'motionchart'). Use 'sqVersions=LATEST' instead.");
+      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
     }
   }
 
@@ -297,7 +323,7 @@ public class UpdateCenterDeserializerTest {
   public void should_fail_if_overlap_in_sqVersion_of_public_releases() throws IOException {
 
     thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("SQ version 2.7.1 is declared compatible with two public versions of Clirr plugin: 1.1 and 1.0");
+    thrown.expectMessage("SQ version 2.7 is declared compatible with two public versions of Clirr plugin: 1.1 and 1.0");
 
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-overlap-sqVersion.properties")) {
       Properties props = new Properties();

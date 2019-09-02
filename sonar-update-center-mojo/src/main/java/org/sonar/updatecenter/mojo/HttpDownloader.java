@@ -51,23 +51,21 @@ class HttpDownloader {
     } else {
       log.info("File found in local cache: " + url);
       if (verifyUrlIfCached && !verifyDownloadUrl(new URL(url))) {
-        throw new IllegalStateException("Failed to download " + url + ", URL is no longer valid!");
+        throw new IllegalStateException(String.format("Failed to download %s, URL is no longer valid!", url));
       }
     }
     return output;
   }
 
   File downloadFile(URL fileURL, File toFile) {
-    log.info("Download " + fileURL + " in " + toFile);
+    log.info(String.format("Download %s in %s", fileURL, toFile));
     try {
       if ("file".equals(fileURL.getProtocol())) {
         File src = new File(fileURL.toURI());
         FileUtils.copyFile(src, toFile);
       } else {
         HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
-        if (fileURL.getUserInfo() != null) {
-          request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
-        }
+        addAuthorizationHeader(request, fileURL);
 
         if (!request.receive(toFile).ok()) {
           throw new IllegalStateException(request.message());
@@ -75,28 +73,48 @@ class HttpDownloader {
       }
     } catch (Exception e) {
       FileUtils.deleteQuietly(toFile);
-      throw new IllegalStateException("Fail to download " + fileURL + " to " + toFile, e);
+      throw new IllegalStateException(String.format("Fail to download %s to %s", fileURL, toFile), e);
     }
     return toFile;
   }
 
 
   boolean verifyDownloadUrl(URL fileURL) {
-    log.debug("Verify download URL (" + fileURL + ") is still valid");
+    log.debug(String.format("Verify download URL (%s) is still valid", fileURL));
     try {
       if ("file".equals(fileURL.getProtocol())) {
         File src = new File(fileURL.toURI());
         return src.exists();
       } else {
         HttpRequest request = HttpRequest.head(fileURL).followRedirects(true);
-        if (fileURL.getUserInfo() != null) {
-          request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
-        }
+        addAuthorizationHeader(request, fileURL);
 
-        return request.ok();
+        if (request.ok()) {
+          return true;
+        } else {
+          // Some services refuse HEAD requests. Try a GET instead.
+          log.debug(String.format("Download URL (%s) failed with a HEAD request. Double check using GET...", fileURL));
+
+          request = HttpRequest.get(fileURL).followRedirects(true);
+          addAuthorizationHeader(request, fileURL);
+
+          if (request.ok()) {
+            log.debug(String.format("Download URL (%s) is still valid", fileURL));
+            return true;
+          } else {
+            log.error(String.format("Download URL (%s) is no longer valid (HTTP status: %d)", fileURL, request.code()));
+            return false;
+          }
+        }
       }
     } catch (Exception e) {
       return false;
+    }
+  }
+
+  private static void addAuthorizationHeader(HttpRequest request, URL fileURL) {
+    if (fileURL.getUserInfo() != null) {
+      request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
     }
   }
 

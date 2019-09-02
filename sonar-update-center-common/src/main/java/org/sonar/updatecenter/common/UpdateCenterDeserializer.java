@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static java.util.Arrays.asList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
@@ -352,13 +353,13 @@ public final class UpdateCenterDeserializer {
         Matcher multipleEltMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
         Matcher simpleEltMatcher = Pattern.compile("\\[(.*)\\]").matcher(pattern);
         if (multipleEltMatcher.matches()) {
-          final Version low = resolveKeywordAndStar(multipleEltMatcher.group(1), sonar);
-          final Version high = resolveKeywordAndStar(multipleEltMatcher.group(2), sonar);
+          final Version low = resolveLowVersion(multipleEltMatcher.group(1), pattern, pluginKey);
+          final Version high = resolveKeywordAndStar(multipleEltMatcher.group(2), sonar, pluginKey);
           resolveRangeOfRequiredSQVersion(sonar, result, low, high);
         } else if (simpleEltMatcher.matches()) {
-          result.add(resolveKeywordAndStar(simpleEltMatcher.group(1), sonar));
+          result.add(resolveKeywordAndStar(simpleEltMatcher.group(1), sonar, pluginKey));
         } else {
-          result.add(resolveKeywordAndStar(pattern, sonar));
+          result.add(resolveKeywordAndStar(pattern, sonar, pluginKey));
         }
       }
     }
@@ -408,16 +409,38 @@ public final class UpdateCenterDeserializer {
     return splitted;
   }
 
-  private static Version resolveKeywordAndStar(String versionStr, Sonar sonar) {
+  private static Version resolveLowVersion(String versionStr, String range, String pluginKey) {
+    if (LATEST_KEYWORD.equals(versionStr)) {
+      throw new SonarVersionRangeException(String.format(
+        "Cannot use LATEST keyword at the start of a range in '%s' (in plugin '%s'). Use 'sqVersions=LATEST' instead.",
+        range,
+        pluginKey
+      ));
+    }
+
+    if (versionStr.endsWith("*")) {
+      throw new SonarVersionRangeException(String.format(
+        "Cannot use a wildcard version at the start of a range in '%s' (in plugin '%s'). " +
+          "If you want to mark this range as compatible with any MAJOR.MINOR.* version, use the MAJOR.MINOR version instead " +
+          "(e.g.: 'sqVersions=[6.7,6.7.*]', 'sqVersions=[6.7,LATEST]').",
+        range,
+        pluginKey
+      ));
+    }
+
+    return Version.create(versionStr);
+  }
+
+  private static Version resolveKeywordAndStar(String versionStr, Sonar sonar, String pluginKey) {
     if (LATEST_KEYWORD.equals(versionStr)) {
       return Version.create(sonar.getAllReleases().last().getVersion(), LATEST_KEYWORD);
     } else if (versionStr.endsWith("*")) {
-      return resolveWithWildcard(versionStr, sonar);
+      return resolveWithWildcard(versionStr, sonar, pluginKey);
     }
     return Version.create(versionStr);
   }
 
-  private static Version resolveWithWildcard(String versionStr, Sonar sonar) {
+  private static Version resolveWithWildcard(String versionStr, Sonar sonar, String pluginKey) {
     String prefix = versionStr.substring(0, versionStr.length() - 1);
     String prefixWithoutDot = prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
     Release found = null;
@@ -429,7 +452,7 @@ public final class UpdateCenterDeserializer {
     if (found != null) {
       return Version.create(found.getVersion(), "*");
     } else {
-      throw new IllegalStateException("Unable to resolve " + versionStr);
+      throw new IllegalStateException(String.format("Unable to resolve version '%s' (in plugin '%s')", versionStr, pluginKey));
     }
   }
 

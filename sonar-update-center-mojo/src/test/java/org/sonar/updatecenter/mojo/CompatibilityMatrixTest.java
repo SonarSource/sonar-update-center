@@ -80,6 +80,13 @@ public class CompatibilityMatrixTest {
     matrix = new CompatibilityMatrix(center, outputFolder, mock(Log.class));
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionIfNoOutputDir() throws IOException {
+    File folder = new File("/doesnt/exist/");
+    CompatibilityMatrix m = new CompatibilityMatrix(center, folder, mock(Log.class));
+    m.generateHtml();
+  }
+
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
     prepareMocks();
