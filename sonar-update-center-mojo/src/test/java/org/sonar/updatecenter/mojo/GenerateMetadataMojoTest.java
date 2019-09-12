@@ -26,12 +26,17 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.sonar.updatecenter.common.PluginReferential;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public class GenerateMetadataMojoTest {
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
@@ -90,6 +95,78 @@ public class GenerateMetadataMojoTest {
     String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
     assertThat(output).contains("csharp.1.1-SNAPSHOT.requirePlugins=dotnet\\:1.1");
+  }
+
+  @Test
+  public void throw_exception_if_not_downloadable() throws Exception {
+    File outputDir = temp.newFolder();
+
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
+    Configuration configuration = new Configuration(outputDir, inputFile, true, false, false, true, new SystemStreamLog());
+
+    // Set all download URLs.
+    PluginReferential ref = configuration.getUpdateCenter().getUpdateCenterPluginReferential();
+    String incorrectUrl = "";
+    for (String pluginKey : new String[] {"fxcop", "dotnet", "csharp"}) {
+      for (String version : new String[] {"1.1-SNAPSHOT", "1.0"}) {
+        String formattedUrl = url(String.format("%s-plugin-%s.jar", pluginKey, version)).toString();
+        if (pluginKey.equals("csharp") && version.equals("1.0")) {
+          // Corrupt the file URL so it's no longer downloadable.
+          formattedUrl = formattedUrl.replace("GenerateMojoTest", "GenerateMojoTestWithTypo");
+          incorrectUrl = formattedUrl;
+        }
+
+        ref
+          .findPlugin(pluginKey)
+          .getRelease(version)
+          .setDownloadUrl(formattedUrl);
+      }
+    }
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage(String.format(
+      "Fail to download %s to %s/csharp-plugin-1.0.jar",
+      incorrectUrl,
+      outputDir.toPath()
+    ));
+    new Generator(configuration, new SystemStreamLog()).generateMetadata();
+  }
+
+  @Test
+  public void verify_download_urls_if_cached() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // Cache plugin.
+    FileUtils.copyFileToDirectory(resource("csharp-plugin-1.0.jar"), outputDir);
+
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
+    Configuration configuration = new Configuration(outputDir, inputFile, true, false, false, true, new SystemStreamLog());
+
+    // Set all download URLs.
+    PluginReferential ref = configuration.getUpdateCenter().getUpdateCenterPluginReferential();
+    String incorrectUrl = "";
+    for (String pluginKey : new String[] {"fxcop", "dotnet", "csharp"}) {
+      for (String version : new String[] {"1.1-SNAPSHOT", "1.0"}) {
+        String formattedUrl = url(String.format("%s-plugin-%s.jar", pluginKey, version)).toString();
+        if (pluginKey.equals("csharp") && version.equals("1.0")) {
+          // Corrupt the file URL so it's no longer downloadable.
+          formattedUrl = formattedUrl.replace("GenerateMojoTest", "GenerateMojoTestWithTypo");
+          incorrectUrl = formattedUrl;
+        }
+
+        ref
+          .findPlugin(pluginKey)
+          .getRelease(version)
+          .setDownloadUrl(formattedUrl);
+      }
+    }
+
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage(String.format(
+      "Failed to download %s, URL is no longer valid!",
+      incorrectUrl
+    ));
+    new Generator(configuration, new SystemStreamLog()).generateMetadata();
   }
 
   @Test
