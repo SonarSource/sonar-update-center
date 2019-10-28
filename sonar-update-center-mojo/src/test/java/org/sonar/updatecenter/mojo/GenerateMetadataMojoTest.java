@@ -69,6 +69,27 @@ public class GenerateMetadataMojoTest {
   }
 
   @Test
+  public void validation_should_not_trigger_download_or_generation() throws Exception {
+    File outputDir = temp.newFolder();
+
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
+    GenerateMetadataMojo underTest = new GenerateMetadataMojo();
+    underTest.inputFile = inputFile;
+    underTest.outputDir = outputDir;
+    underTest.editionsDownloadBaseUrl = "http://bintray/";
+    underTest.editionsOutputDir = temp.newFolder();
+    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
+    underTest.checkDownloadUrls = false;
+    underTest.validateOnly = true;
+    underTest.execute();
+
+    // verify that properties file is not generated
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).doesNotExist();
+    assertThat(outputDir.listFiles().length).isZero();
+  }
+
+  @Test
   public void generate_properties_with_requires_plugins_dev_mode() throws Exception {
     File outputDir = temp.newFolder();
 

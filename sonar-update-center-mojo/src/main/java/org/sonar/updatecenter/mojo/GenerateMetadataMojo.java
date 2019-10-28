@@ -93,10 +93,21 @@ public class GenerateMetadataMojo extends AbstractMojo {
   @Parameter(property = "editionBuildNumber")
   String editionBuildNumber;
 
+  /**
+   * Should we only validate the marketplace properties files
+   */
+  @Parameter(property = "validateOnly")
+  boolean validateOnly = false;
+
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, checkDownloadUrls, getLog());
+
+      // Are we in validation mode? If so, stop here.
+      if (validateOnly) {
+        return;
+      }
 
       // generate properties
       new Generator(configuration, getLog()).generateMetadata();
