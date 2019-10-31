@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="generator" content="Sonar Update Center"/>
     <style type="text/css">
-        @import url("style-confluence.css");
+        @import url("styles.css");
     </style>
 </head>
 <body>
