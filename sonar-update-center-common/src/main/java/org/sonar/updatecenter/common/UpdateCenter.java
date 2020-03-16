@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
@@ -40,15 +41,17 @@ public class UpdateCenter {
   private Version installedSonarVersion;
   private Date date;
   private Sonar sonar;
+  private List<Scanner> scanners;
 
-  private UpdateCenter(PluginReferential updateCenterPluginReferential, Sonar sonar) {
+  private UpdateCenter(PluginReferential updateCenterPluginReferential, List<Scanner> scanners, Sonar sonar) {
     this.updateCenterPluginReferential = updateCenterPluginReferential;
     this.sonar = sonar;
     this.installedPluginReferential = PluginReferential.createEmpty();
+    this.scanners = scanners;
   }
 
-  public static UpdateCenter create(PluginReferential updateCenterPluginReferential, Sonar sonar) {
-    return new UpdateCenter(updateCenterPluginReferential, sonar);
+  public static UpdateCenter create(PluginReferential updateCenterPluginReferential, List<Scanner> scanners, Sonar sonar) {
+    return new UpdateCenter(updateCenterPluginReferential, scanners, sonar);
   }
 
   public PluginReferential getUpdateCenterPluginReferential() {
@@ -76,6 +79,10 @@ public class UpdateCenter {
   public UpdateCenter setDate(@Nullable Date date) {
     this.date = date != null ? new Date(date.getTime()) : null;
     return this;
+  }
+
+  public List<Scanner> getScanners() {
+    return scanners;
   }
 
   public List<PluginUpdate> findAvailablePlugins() {

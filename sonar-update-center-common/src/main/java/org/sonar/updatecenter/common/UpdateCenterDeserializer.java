@@ -19,10 +19,14 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.apache.commons.lang.StringUtils;
+import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,8 +39,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
-import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static java.util.Arrays.asList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
@@ -56,11 +58,13 @@ public final class UpdateCenterDeserializer {
   public static final String SONAR_PREFIX = "sonar.";
   public static final String DEFAULTS_PREFIX = "defaults";
   public static final String PLUGINS = "plugins";
+  public static final String SCANNERS = "scanners";
   private static final String PUBLIC_VERSIONS = "publicVersions";
   private static final String PRIVATE_VERSIONS = "privateVersions";
   private static final String ARCHIVED_VERSIONS = "archivedVersions";
   private static final String DEV_VERSION = "devVersion";
   private static final String LATEST_KEYWORD = "LATEST";
+  private static final String FLAVORS_PREFIX = "flavors";
   private Mode mode;
   private boolean ignoreError;
   private boolean includeArchives;
@@ -103,23 +107,27 @@ public final class UpdateCenterDeserializer {
     try (InputStream in = Files.newInputStream(mainFile.toPath())) {
       Properties props = new Properties();
       props.load(in);
-      loadPluginProperties(mainFile, props);
+      loadProperties(mainFile, props, PLUGINS);
+      loadProperties(mainFile, props, SCANNERS);
       UpdateCenter pluginReferential = fromProperties(props);
       pluginReferential.setDate(new Date(mainFile.lastModified()));
       return pluginReferential;
     }
   }
 
-  private static void loadPluginProperties(File file, Properties props) throws IOException {
-    String[] pluginKeys = getArray(props, PLUGINS);
-    for (String pluginKey : pluginKeys) {
-      File pluginFile = new File(file.getParent(), pluginKey + ".properties");
-      try (InputStream pluginFis = Files.newInputStream(pluginFile.toPath())) {
-        Properties pluginProps = new Properties();
-        pluginProps.load(pluginFis);
-        for (Map.Entry<Object, Object> prop : pluginProps.entrySet()) {
-          props.put(pluginKey + "." + prop.getKey(), prop.getValue());
+
+
+  private static void loadProperties(File file, Properties props, String listKey) throws IOException {
+    String[] keys = getArray(props, listKey);
+    for (String key : keys) {
+      File propFile = new File(file.getParent(), key + ".properties");
+      try (InputStream fileInputStream = Files.newInputStream(propFile.toPath())) {
+        Properties p = new Properties();
+        p.load(fileInputStream);
+        for (Map.Entry<Object, Object> prop : p.entrySet()) {
+          props.put(key + "." + prop.getKey(), prop.getValue());
         }
+
       }
     }
   }
@@ -128,10 +136,12 @@ public final class UpdateCenterDeserializer {
     Sonar sonar = new Sonar();
     Date date = FormatUtils.toDate(p.getProperty("date"), true);
     List<Plugin> plugins = new ArrayList<>();
+    List<Scanner> scanners = new ArrayList<>();
 
     parseSonar(p, sonar);
 
     parsePlugins(p, sonar, plugins);
+    parseScanners(p, sonar, scanners);
 
     validatePublicPluginSQVersionOverlap(plugins);
 
@@ -149,7 +159,7 @@ public final class UpdateCenterDeserializer {
         }
       }
     }
-    return UpdateCenter.create(pluginReferential, sonar).setDate(date);
+    return UpdateCenter.create(pluginReferential, scanners, sonar).setDate(date);
   }
 
   private void reportError(String message) {
@@ -197,39 +207,62 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private static String pluginName(Plugin plugin) {
-    return StringUtils.isNotBlank(plugin.getName()) ? plugin.getName() : plugin.getKey();
+  private static String pluginName(Component component) {
+    return StringUtils.isNotBlank(component.getName()) ? component.getName() : component.getKey();
+  }
+
+  private void parseScanners(Properties p, Sonar sonar, List<Scanner> scanners) {
+    String[] scannerKeys = getArray(p, SCANNERS);
+    for (String pluginKey : scannerKeys) {
+      Scanner scanner = Scanner.factory(pluginKey);
+
+      parseComponent(p, sonar, pluginKey, scanner);
+
+      // do not add plugin without any version
+      if (!scanner.getAllReleases().isEmpty()) {
+        scanners.add(scanner);
+      }
+    }
+  }
+
+  private void parseComponent(Properties p, Sonar sonar, String key, Component c) {
+    c.setName(get(p, key, "name", false));
+    c.setDescription(get(p, key, "description", false));
+    c.setCategory(get(p, key, "category", true));
+    c.setHomepageUrl(get(p, key, "homepageUrl", false));
+    c.setLicense(get(p, key, "license", false));
+    c.setOrganization(get(p, key, "organization", false));
+    c.setOrganizationUrl(get(p, key, "organizationUrl", false));
+    c.setTermsConditionsUrl(get(p, key, "termsConditionsUrl", false));
+    c.setIssueTrackerUrl(get(p, key, "issueTrackerUrl", false));
+    c.setSourcesUrl(get(p, key, "scm", false));
+    c.setDevelopers(asList(getArray(p, key, "developers")));
+
+    HashMap<String, Map.Entry<String, Integer>> flavorsLabel = new HashMap<>();
+    parseFlavors(p, key, flavorsLabel);
+
+
+    parseReleases(p, sonar, key, c, PUBLIC_VERSIONS, flavorsLabel, true, false);
+    if (mode == Mode.DEV) {
+      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, false, false);
+      parseDevVersions(p, sonar, key, c, flavorsLabel);
+    }
+
+    if (includeArchives) {
+      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, false, false);
+      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, false, false);
+    } else {
+      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, false, true);
+    }
   }
 
   private void parsePlugins(Properties p, Sonar sonar, List<Plugin> plugins) {
-    String[] pluginKeys = getArray(p, "plugins");
+    String[] pluginKeys = getArray(p, PLUGINS);
     for (String pluginKey : pluginKeys) {
       Plugin plugin = Plugin.factory(pluginKey);
-      plugin.setName(get(p, pluginKey, "name", false));
-      plugin.setDescription(get(p, pluginKey, "description", false));
-      plugin.setCategory(get(p, pluginKey, "category", true));
-      plugin.setHomepageUrl(get(p, pluginKey, "homepageUrl", false));
-      plugin.setLicense(get(p, pluginKey, "license", false));
-      plugin.setOrganization(get(p, pluginKey, "organization", false));
-      plugin.setOrganizationUrl(get(p, pluginKey, "organizationUrl", false));
-      plugin.setTermsConditionsUrl(get(p, pluginKey, "termsConditionsUrl", false));
-      plugin.setIssueTrackerUrl(get(p, pluginKey, "issueTrackerUrl", false));
-      plugin.setSourcesUrl(get(p, pluginKey, "scm", false));
+
+      parseComponent(p, sonar, pluginKey, plugin);
       plugin.setSupportedBySonarSource(Boolean.valueOf(get(p, pluginKey, "supportedBySonarSource", false)));
-      plugin.setDevelopers(asList(getArray(p, pluginKey, "developers")));
-
-      parsePluginReleases(p, sonar, pluginKey, plugin, PUBLIC_VERSIONS, true, false);
-      if (mode == Mode.DEV) {
-        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false, false);
-        parsePluginDevVersions(p, sonar, pluginKey, plugin);
-      }
-
-      if (includeArchives) {
-        parsePluginReleases(p, sonar, pluginKey, plugin, PRIVATE_VERSIONS, false, false);
-        parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, false);
-      } else {
-        parsePluginReleases(p, sonar, pluginKey, plugin, ARCHIVED_VERSIONS, false, true);
-      }
 
       // do not add plugin without any version
       if (!plugin.getAllReleases().isEmpty()) {
@@ -238,40 +271,51 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private void parsePluginReleases(Properties p, Sonar sonar, String pluginKey, Plugin plugin, String key,
-    boolean isPublicRelease, boolean isArchivedRelease) {
+  private void parseReleases(Properties p, Sonar sonar, String pluginKey, Component component, String key,
+    HashMap<String, Map.Entry<String, Integer>> flavosLabel, boolean isPublicRelease, boolean isArchivedRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
-      Release release = parsePluginRelease(p, sonar, pluginKey, plugin, isPublicRelease, isArchivedRelease, pluginVersion);
-      if (!plugin.getAllReleases().contains(release)) {
-        plugin.addRelease(release);
+      Release release = parseRelease(p, sonar, pluginKey, component, isPublicRelease, isArchivedRelease, pluginVersion, flavosLabel);
+      if (!component.getAllReleases().contains(release)) {
+        component.addRelease(release);
       } else {
         reportError("Duplicate version for plugin " + pluginKey + ": " + pluginVersion);
       }
     }
   }
 
-  private Release parsePluginRelease(Properties p, Sonar sonar, String pluginKey, Plugin plugin,
-    boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion) {
+  private void parseFlavors(Properties p, String pluginKey, HashMap<String, Map.Entry<String, Integer>> flavosLabel) {
+    String[] flavors = getArray(p, pluginKey, FLAVORS_PREFIX);
+    for (int i = 0; i < flavors.length; i++) {
+      flavosLabel.put(flavors[i], new AbstractMap.SimpleEntry<String, Integer>(get(p, pluginKey, FLAVORS_PREFIX + "." + flavors[i]  + ".label", true), i));
+    }
+  }
 
-    Release release = new Release(plugin, pluginVersion);
+  private Release parseRelease(Properties p, Sonar sonar, String pluginKey, Component component,
+    boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion, HashMap<String, Map.Entry<String, Integer>> flavosLabel) {
+
+    Release release = new Release(component, pluginVersion);
     try {
       release.setPublic(isPublicRelease);
       release.setArchived(isArchivedRelease);
-      release.setDownloadUrl(getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, isPublicRelease));
+      parseDownloadUrl(p, pluginKey, pluginVersion, isPublicRelease, flavosLabel, release);
       release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
       release.setDisplayVersion(getOrDefault(p, pluginKey, pluginVersion, DISPLAY_VERSION_SUFFIX, false));
       release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
       release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
-      release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
-      release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
-      Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
-      if (!isArchivedRelease && requiredSonarVersions.length == 0) {
-        reportError("Plugin " + pluginName(plugin) + " version " + pluginVersion
-          + " should declare compatible SQ versions");
+      if(component.needArtifact()) {
+        release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
+        release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
       }
-      for (Version requiredSonarVersion : requiredSonarVersions) {
-        release.addRequiredSonarVersions(requiredSonarVersion);
+      if(component.needSqVersion()) {
+        Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
+        if (!isArchivedRelease && requiredSonarVersions.length == 0) {
+          reportError("Plugin " + pluginName(component) + " version " + pluginVersion
+            + " should declare compatible SQ versions");
+        }
+        for (Version requiredSonarVersion : requiredSonarVersions) {
+          release.addRequiredSonarVersions(requiredSonarVersion);
+        }
       }
     } catch (IllegalArgumentException ex) {
       throw new IllegalArgumentException("issue while processing plugin " + pluginKey, ex);
@@ -279,11 +323,29 @@ public final class UpdateCenterDeserializer {
     return release;
   }
 
-  private void parsePluginDevVersions(Properties p, Sonar sonar, String pluginKey, Plugin plugin) {
+  private void parseDownloadUrl(Properties p, String pluginKey, String pluginVersion, boolean isPublicRelease,
+    HashMap<String, Map.Entry<String, Integer>> flavorLabel, Release release) {
+    for(Map.Entry<String, Map.Entry<String, Integer>>  flavor : flavorLabel.entrySet()) {
+      String url = get(p, pluginKey, pluginVersion + DOWNLOAD_URL_SUFFIX + "." + flavor.getKey(), false);
+      if (url != null) {
+        release.addScannerDownloadUrlAndLabel(flavor.getKey(), flavor.getValue().getKey(), url, flavor.getValue().getValue());
+      }
+    }
+
+    String url = getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, false);
+    if(url != null) {
+      release.setDownloadUrl(url);
+    }
+    if (!release.hasDownloadUrl() && isPublicRelease) {
+      reportError("Download url is missing");
+    }
+  }
+
+  private void parseDevVersions(Properties p, Sonar sonar, String pluginKey, Component component, HashMap<String, Map.Entry<String, Integer>> flavosLabel) {
     String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
-      Release release = parsePluginRelease(p, sonar, pluginKey, plugin, false, false, devVersion);
-      plugin.setDevRelease(release);
+      Release release = parseRelease(p, sonar, pluginKey, component, false, false, devVersion, flavosLabel);
+      component.setDevRelease(release);
     }
   }
 

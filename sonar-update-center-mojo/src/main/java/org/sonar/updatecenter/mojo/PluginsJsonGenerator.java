@@ -19,73 +19,42 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
+import org.apache.maven.plugin.logging.Log;
+import org.everit.json.schema.Schema;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.UpdateCenter;
+
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.logging.Log;
-import org.everit.json.schema.ValidationException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.UpdateCenter;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-class PluginsJsonGenerator {
-
-  private final File outputDirectory;
-  private final UpdateCenter center;
-  private final Log log;
-  private final Gson gson;
-  private final Schema jsonSchema;
+class PluginsJsonGenerator extends JsonGenerator {
 
   private PluginsJsonGenerator(
+    String resourceFile,
     UpdateCenter center,
     File outputDirectory,
     Log log,
     Gson gson,
     Schema jsonSchema) {
-    this.outputDirectory = outputDirectory;
-    this.center = center;
-    this.log = log;
-    this.gson = gson;
-    this.jsonSchema = jsonSchema;
+    super(resourceFile, center, outputDirectory, log, gson, jsonSchema);
   }
 
   public static PluginsJsonGenerator create(UpdateCenter center, File outputDirectory, Log log) {
-    Gson jsonGenerator = new GsonBuilder()
-      .disableHtmlEscaping()
-      .setPrettyPrinting()
-      .create();
-
-    Schema jsonSchema;
-    try (InputStream inputStream = PluginsJsonGenerator.class.getResourceAsStream("/plugin-schema.json")) {
-      JSONObject rawSchema = new JSONObject(new JSONTokener(inputStream));
-      jsonSchema = SchemaLoader.load(rawSchema);
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
-    }
-
-    return new PluginsJsonGenerator(
-      center,
-      outputDirectory,
-      log,
-      jsonGenerator,
-      jsonSchema);
+    return JsonGenerator.create("plugin-schema.json",
+      (resourceFile, jsonGenerator, jsonSchema) -> new PluginsJsonGenerator(
+        resourceFile,
+        center,
+        outputDirectory,
+        log,
+        jsonGenerator,
+        jsonSchema)
+    );
   }
 
   void generateJsonFiles() throws IOException {
@@ -95,29 +64,9 @@ class PluginsJsonGenerator {
     for (Plugin plugin : plugins) {
       PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
 
-      String jsonOutputString = gson.toJson(JsonOutput.createFrom(pluginModel));
-
-      try {
-        checkComplianceWithSchema(jsonOutputString);
-      } catch (ValidationException exception) {
-        log.error(plugin.getKey() + " json not compliant with schema");
-        throw exception;
-      }
-
-      File file = new File(outputDirectory, plugin.getKey() + ".json");
-      log.info("Generate json data for plugin " + plugin.getKey() + " in: " + file);
-
-      FileUtils.writeStringToFile(file, jsonOutputString, UTF_8);
+      final JsonOutput from = JsonOutput.createFrom(pluginModel);
+      serializeToFile(plugin, from);
     }
-
-    // copy the schema
-    FileUtils.copyURLToFile(
-      PluginsJsonGenerator.class.getResource("/plugin-schema.json"),
-      new File(outputDirectory, "plugin-schema.json"));
-  }
-
-  private void checkComplianceWithSchema(String inputJson) {
-    this.jsonSchema.validate(new JSONObject(inputJson));
   }
 
   private static class JsonOutput {
@@ -202,16 +151,6 @@ class PluginsJsonGenerator {
       return returned;
     }
 
-    @CheckForNull
-    private static URL safeCreateURLFromString(@Nullable String mayBeAnURL) {
-      if (mayBeAnURL == null) {
-        return null;
-      }
-      try {
-        return new URL(mayBeAnURL);
-      } catch (MalformedURLException e) {
-        throw new IllegalArgumentException(e);
-      }
-    }
+
   }
 }

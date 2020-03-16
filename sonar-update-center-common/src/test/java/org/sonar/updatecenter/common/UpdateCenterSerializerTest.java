@@ -21,6 +21,7 @@ package org.sonar.updatecenter.common;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import org.junit.Test;
@@ -42,8 +43,9 @@ public class UpdateCenterSerializerTest {
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-datacenter-2.1.zip", Release.Edition.DATACENTER);
     sonar.setLtsRelease("2.0");
 
-    Plugin foo = Plugin.factory("foo")
-      .setName("Foo")
+    Plugin foo = Plugin.factory("foo");
+
+    foo.setName("Foo")
       .setOrganizationUrl("http://www.sonarsource.org");
     foo.addRelease(
       new Release(foo, Version.create("1.2"))
@@ -52,8 +54,8 @@ public class UpdateCenterSerializerTest {
         .setDisplayVersion("1.2 (build 42)")
       );
 
-    Plugin bar = Plugin.factory("bar")
-      .setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
+    Plugin bar = Plugin.factory("bar");
+    bar.setSourcesUrl("scm:svn:https://svn.codehaus.org/sonar-plugins/bar-plugin-1.2")
       .setDevelopers(Arrays.asList("dev1", "dev2"));
     bar.addRelease(
       new Release(bar, Version.create("1.2"))
@@ -63,7 +65,7 @@ public class UpdateCenterSerializerTest {
       );
     PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo, bar));
 
-    UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
@@ -112,7 +114,7 @@ public class UpdateCenterSerializerTest {
     pluginReferential.addOutgoingDependency(bar12, "foo", "1.2");
     pluginReferential.addOutgoingDependency(bar12, "test", "1.0");
 
-    UpdateCenter center = UpdateCenter.create(pluginReferential, sonar);
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 

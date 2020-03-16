@@ -22,26 +22,17 @@ package org.sonar.updatecenter.common;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class Plugin extends Artifact {
+public class Plugin extends Component {
 
-  private String name;
-  private String description;
-  private String homepageUrl;
-  private String license;
-  private String organization;
-  private String organizationUrl;
-  private String termsConditionsUrl;
-  private String category;
-  private String issueTrackerUrl;
-  private String sourcesUrl;
+
   private boolean supportedBySonarSource = false;
-  private List<String> developers;
+
 
   private Plugin(String key) {
     super(key);
   }
+
 
   public static Plugin factory(String key) {
     // in accordance with https://github.com/SonarSource/sonar-packaging-maven-plugin/blob/master/src/main/java/org/sonarsource/pluginpackaging/PluginKeyUtils.java#L44
@@ -52,108 +43,20 @@ public class Plugin extends Artifact {
     }
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public Plugin setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public Plugin setDescription(String description) {
-    this.description = description;
-    return this;
-  }
-
-  public String getHomepageUrl() {
-    return homepageUrl;
-  }
-
-  public Plugin setHomepageUrl(String s) {
-    this.homepageUrl = s;
-    return this;
-  }
-
-  public String getLicense() {
-    return license;
-  }
-
-  public Plugin setLicense(String license) {
-    this.license = license;
-    return this;
-  }
-
-  public String getOrganization() {
-    return organization;
-  }
-
-  public Plugin setOrganization(String organization) {
-    this.organization = organization;
-    return this;
-  }
-
-  public String getOrganizationUrl() {
-    return organizationUrl;
-  }
-
-  public Plugin setOrganizationUrl(String url) {
-    this.organizationUrl = url;
-    return this;
-  }
-
-  public String getCategory() {
-    return category;
-  }
-
-  public Plugin setCategory(String category) {
-    this.category = category;
-    return this;
-  }
-
-  public String getTermsConditionsUrl() {
-    return termsConditionsUrl;
-  }
-
-  public Plugin setTermsConditionsUrl(String url) {
-    this.termsConditionsUrl = url;
-    return this;
-  }
-
-  public String getIssueTrackerUrl() {
-    return issueTrackerUrl;
-  }
-
-  public Plugin setIssueTrackerUrl(String url) {
-    this.issueTrackerUrl = url;
-    return this;
-  }
-
-  public String getSourcesUrl() {
-    return sourcesUrl;
-  }
-
-  public Plugin setSourcesUrl(String sourcesUrl) {
-    this.sourcesUrl = sourcesUrl;
-    return this;
-  }
-
-  public List<String> getDevelopers() {
-    return developers;
-  }
-
-  public Plugin setDevelopers(List<String> developers) {
-    this.developers = developers;
-    return this;
-  }
-
   public boolean isSupportedBySonarSource() {
     return supportedBySonarSource;
   }
+
+  @Override
+  boolean needArtifact() {
+    return true;
+  }
+
+  @Override
+  boolean needSqVersion() {
+    return true;
+  }
+
 
   public Plugin setSupportedBySonarSource(boolean supportedBySonarSource) {
     this.supportedBySonarSource = supportedBySonarSource;
@@ -191,10 +94,4 @@ public class Plugin extends Artifact {
     throw new UnsupportedOperationException(alias + " is not a supported alias for plugin");
   }
 
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append(key)
-        .toString();
-  }
 }

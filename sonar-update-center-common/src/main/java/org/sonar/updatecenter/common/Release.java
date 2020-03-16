@@ -19,24 +19,30 @@
  */
 package org.sonar.updatecenter.common;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 import static java.util.Collections.unmodifiableSet;
 
@@ -53,6 +59,9 @@ public class Release implements Comparable<Release> {
   private String artifactId;
 
   private EnumMap<Edition, URL> downloadUrl;
+  private HashMap<String, Integer> scannerDownloadUrlOrder;
+  private HashMap<String, URL> scannerDownloadUrl;
+  private HashMap<String, String> scannerDownloadFlavor;
   private Set<Release> outgoingDependencies;
   private Set<Release> incomingDependencies;
   /**
@@ -60,13 +69,6 @@ public class Release implements Comparable<Release> {
    */
   private SortedSet<Version> compatibleSqVersions;
   private Date date;
-
-  public enum Edition {
-    COMMUNITY,
-    DEVELOPER,
-    ENTERPRISE,
-    DATACENTER
-  }
 
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
@@ -78,10 +80,26 @@ public class Release implements Comparable<Release> {
     this.compatibleSqVersions = new TreeSet<>();
     this.outgoingDependencies = new HashSet<>();
     this.incomingDependencies = new HashSet<>();
+    this.scannerDownloadFlavor = new HashMap<>();
+    this.scannerDownloadUrl = new HashMap<>();
+    this.scannerDownloadUrlOrder = new HashMap<>();
   }
 
   public Release(Artifact artifact, String version) {
     this(artifact, Version.create(version));
+  }
+
+  private static URL toUrl(@Nullable String downloadUrlString) {
+    URL transformedDownloadUrl = null;
+    if (downloadUrlString != null) {
+      try {
+        // URI does more checks on syntax than URL
+        transformedDownloadUrl = new URI(downloadUrlString).toURL();
+      } catch (URISyntaxException | MalformedURLException ex) {
+        throw new IllegalArgumentException("downloadUrl invalid", ex);
+      }
+    }
+    return transformedDownloadUrl;
   }
 
   public Artifact getArtifact() {
@@ -106,9 +124,17 @@ public class Release implements Comparable<Release> {
     return this;
   }
 
+  public boolean hasDownloadUrl() {
+    return this.downloadUrl.size() > 0 || this.scannerDownloadUrl.size() > 0;
+  }
+
   @CheckForNull
   public String getDownloadUrl() {
     return getDownloadUrl(Edition.COMMUNITY);
+  }
+
+  public Release setDownloadUrl(@Nullable String downloadUrlString) {
+    return setDownloadUrl(downloadUrlString, Edition.COMMUNITY);
   }
 
   @CheckForNull
@@ -117,22 +143,30 @@ public class Release implements Comparable<Release> {
     return value == null ? null : value.toString();
   }
 
-  public Release setDownloadUrl(@Nullable String downloadUrlString) {
-    return setDownloadUrl(downloadUrlString, Edition.COMMUNITY);
-  }
-
   public Release setDownloadUrl(@Nullable String downloadUrlString, Edition edition) {
-    URL transformedDownloadUrl = null;
-    if (downloadUrlString != null) {
-      try {
-        // URI does more checks on syntax than URL
-        transformedDownloadUrl = new URI(downloadUrlString).toURL();
-      } catch (URISyntaxException | MalformedURLException ex) {
-        throw new IllegalArgumentException("downloadUrl invalid", ex);
-      }
-    }
+    URL transformedDownloadUrl = toUrl(downloadUrlString);
     this.downloadUrl.put(edition, transformedDownloadUrl);
     return this;
+  }
+
+  public List<Map.Entry<String, URL>> getScannerDownloadUrl() {
+    List<Map.Entry<String, URL>> list = new ArrayList<>();
+    list.addAll(this.scannerDownloadUrl.entrySet());
+    list.sort(Comparator.comparingInt(entry -> this.scannerDownloadUrlOrder.get(entry.getKey())));
+    return list;
+  }
+
+  public Release addScannerDownloadUrlAndLabel(String flavor, String label, @Nullable String downloadUrl, int order) {
+    URL transformedDownloadUrl = toUrl(downloadUrl);
+    this.scannerDownloadUrl.put(flavor, transformedDownloadUrl);
+    this.scannerDownloadFlavor.put(flavor, label);
+    this.scannerDownloadUrlOrder.put(flavor, order);
+    return this;
+  }
+
+  @CheckForNull
+  public String getFlavorLabel(String flavor) {
+    return this.scannerDownloadFlavor.get(flavor);
   }
 
   @CheckForNull
@@ -332,5 +366,12 @@ public class Release implements Comparable<Release> {
   @Override
   public int compareTo(Release o) {
     return getVersion().compareTo(o.getVersion());
+  }
+
+  public enum Edition {
+    COMMUNITY,
+    DEVELOPER,
+    ENTERPRISE,
+    DATACENTER
   }
 }
