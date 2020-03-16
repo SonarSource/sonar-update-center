@@ -19,76 +19,60 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Scanner;
+import org.sonar.updatecenter.common.Sonar;
+
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.Release;
-import org.sonar.updatecenter.common.Sonar;
-import org.sonar.updatecenter.common.Version;
-
-public class PluginModel {
-
-  private Plugin plugin;
+public class ScannerModel {
+  private Scanner scanner;
   private Sonar sonar;
 
-  public PluginModel(Plugin plugin, Sonar sonar) {
-    this.plugin = plugin;
+  public ScannerModel(Scanner scanner, Sonar sonar) {
+    this.scanner = scanner;
     this.sonar = sonar;
   }
 
   public String getKey() {
-    return plugin.getKey();
+    return scanner.getKey();
   }
 
   public String getName() {
-    return plugin.getName();
+    return scanner.getName();
   }
 
   public String getIssueTracker() {
-    return plugin.getIssueTrackerUrl();
+    return scanner.getIssueTrackerUrl();
   }
 
   public String getSources() {
-    return plugin.getSourcesUrl();
+    return scanner.getSourcesUrl();
   }
 
   public String getLicense() {
-    return plugin.getLicense();
+    return scanner.getLicense();
   }
 
   public String getOrganization() {
-    return plugin.getOrganization();
+    return scanner.getOrganization();
   }
 
   public String getOrganizationUrl() {
-    return plugin.getOrganizationUrl();
+    return scanner.getOrganizationUrl();
   }
 
   public String getCategory() {
-    return plugin.getCategory();
+    return scanner.getCategory();
   }
 
   public List<ReleaseModel> getAllVersions() {
     List<ReleaseModel> result = new LinkedList<>();
-    for (Release r : plugin.getAllReleases()) {
+    for (Release r : scanner.getAllReleases()) {
       // Add in reverse order to have greater version on top
       result.add(0, new ReleaseModel(r, this.sonar));
     }
     return result;
-  }
-
-  public boolean isSupportedBySonarSource() {
-    return plugin.isSupportedBySonarSource();
-  }
-
-  public boolean isSonarSourceCommercialPlugin() {
-    return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
   }
 }

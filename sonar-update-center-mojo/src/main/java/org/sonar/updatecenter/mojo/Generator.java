@@ -19,10 +19,6 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
@@ -31,6 +27,11 @@ import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 import org.sonar.updatecenter.common.UpdateCenterSerializer;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
 
@@ -44,6 +45,43 @@ class Generator {
   Generator(Configuration configuration, Log log) {
     this.configuration = configuration;
     this.log = log;
+  }
+
+  private static void mergeFromManifest(Plugin plugin, @Nullable File masterJar) throws IOException {
+    // the last release is the master version for loading metadata included in manifest
+    if (masterJar != null) {
+      PluginManifest manifest = new PluginManifest(masterJar);
+      if (!StringUtils.equals(plugin.getKey(), manifest.getKey())) {
+        throw new IllegalStateException(
+          "Plugin " + masterJar.getName() + " is declared with key '" + manifest.getKey() + "' in its MANIFEST, but with key '" + plugin.getKey() + "' in the update center");
+      }
+      plugin.merge(manifest);
+    }
+  }
+
+  private static void updateReleaseRequirePluginsParentPropertiesAndDisplayVersion(PluginReferential pluginReferential, File jar, Release release) throws IOException {
+    PluginManifest releaseManifest = new PluginManifest(jar);
+    if (releaseManifest.getRequirePlugins() != null) {
+      for (String requirePlugin : releaseManifest.getRequirePlugins()) {
+        String[] split = requirePlugin.split(":");
+        String requiredPluginReleaseKey = split[0];
+        String requiredMinimumReleaseVersion = split[1];
+        pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
+      }
+    }
+    pluginReferential.findPlugin(release.getKey())
+      .getRelease(release.getVersion())
+      .setDisplayVersion(releaseManifest.getDisplayVersion());
+  }
+
+  private static File ensureDirectory(File baseDirectory, String directory) {
+    File outputDir = new File(baseDirectory, directory);
+    try {
+      forceMkdir(outputDir);
+    } catch (IOException e) {
+      throw new IllegalStateException("Fail to create the working directory: " + outputDir.getAbsolutePath(), e);
+    }
+    return outputDir;
   }
 
   void generateHtml() throws IOException, URISyntaxException {
@@ -89,33 +127,6 @@ class Generator {
     }
   }
 
-  private static void mergeFromManifest(Plugin plugin, @Nullable File masterJar) throws IOException {
-    // the last release is the master version for loading metadata included in manifest
-    if (masterJar != null) {
-      PluginManifest manifest = new PluginManifest(masterJar);
-      if (!StringUtils.equals(plugin.getKey(), manifest.getKey())) {
-        throw new IllegalStateException(
-          "Plugin " + masterJar.getName() + " is declared with key '" + manifest.getKey() + "' in its MANIFEST, but with key '" + plugin.getKey() + "' in the update center");
-      }
-      plugin.merge(manifest);
-    }
-  }
-
-  private static void updateReleaseRequirePluginsParentPropertiesAndDisplayVersion(PluginReferential pluginReferential, File jar, Release release) throws IOException {
-    PluginManifest releaseManifest = new PluginManifest(jar);
-    if (releaseManifest.getRequirePlugins() != null) {
-      for (String requirePlugin : releaseManifest.getRequirePlugins()) {
-        String[] split = requirePlugin.split(":");
-        String requiredPluginReleaseKey = split[0];
-        String requiredMinimumReleaseVersion = split[1];
-        pluginReferential.addOutgoingDependency(release, requiredPluginReleaseKey, requiredMinimumReleaseVersion);
-      }
-    }
-    pluginReferential.findPlugin(release.getKey())
-      .getRelease(release.getVersion())
-      .setDisplayVersion(releaseManifest.getDisplayVersion());
-  }
-
   private void generateMetadata(UpdateCenter center) {
     log.info("Generate output: " + configuration.getOutputFile());
     UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
@@ -130,15 +141,6 @@ class Generator {
   private void prepareDirectoryAndOutputJson(UpdateCenter center) throws IOException {
     File jsonOutputDir = ensureDirectory(configuration.getOutputDir(), JSON_DIR);
     PluginsJsonGenerator.create(center, jsonOutputDir, log).generateJsonFiles();
-  }
-
-  private static File ensureDirectory(File baseDirectory, String directory) {
-    File outputDir = new File(baseDirectory, directory);
-    try {
-      forceMkdir(outputDir);
-    } catch (IOException e) {
-      throw new IllegalStateException("Fail to create the working directory: " + outputDir.getAbsolutePath(), e);
-    }
-    return outputDir;
+    ScannerJsonGenerator.create(center, jsonOutputDir, log).generateJsonFiles();
   }
 }

@@ -44,10 +44,15 @@ public class GenerateJsonMojoTest {
     new GenerateJsonMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
     File artifactJson = new File(outputDir, "json/artifactsize.json");
-    File schema = new File(outputDir, "json/plugin-schema.json");
-
+    File scannerJson = new File(outputDir, "json/cli.json");
+    File schemaPlugin = new File(outputDir, "json/plugin-schema.json");
+    File schemaScanner = new File(outputDir, "json/scanner-schema.json");
+    
     assertThat(artifactJson).exists().isFile();
-    assertThat(schema).exists().isFile();
+    assertThat(scannerJson).exists().isFile();
+    assertThat(schemaPlugin).exists().isFile();
+    assertThat(schemaScanner).exists().isFile();
+
   }
 
   private File resource(String filename) {

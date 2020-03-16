@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
@@ -76,7 +77,7 @@ public class CompatibilityMatrixTest {
 
   private void prepareMocks(Plugin... plugins) throws IOException {
     pluginReferential = plugins.length > 0 ? PluginReferential.create(asList(plugins)) : PluginReferential.createEmpty();
-    center = UpdateCenter.create(pluginReferential, sonar);
+    center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
     matrix = new CompatibilityMatrix(center, outputFolder, mock(Log.class));
   }
 

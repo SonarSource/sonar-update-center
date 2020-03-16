@@ -27,8 +27,8 @@ public class PluginTest {
 
   @Test
   public void should_merge_with_manifest() {
-    Plugin plugin = Plugin.factory("squid")
-        .setLicense("LGPL2")
+    Plugin plugin = Plugin.factory("squid");
+    plugin.setLicense("LGPL2")
         .setDescription("description")
         .setOrganization("organization")
         .setOrganizationUrl("organizationUrl")
@@ -65,7 +65,8 @@ public class PluginTest {
 
   @Test
   public void should_not_merge_with_manifest_plugin_key_is_different() {
-    Plugin plugin = Plugin.factory("squid").setOrganization("SonarSource");
+    Plugin plugin = Plugin.factory("squid");
+    plugin.setOrganization("SonarSource");
     PluginManifest manifest = new PluginManifest().setKey("another_key").setOrganization("Other");
 
     plugin.merge(manifest);
@@ -95,16 +96,16 @@ public class PluginTest {
     assertThat(plugin.getSourcesUrl()).isEqualTo("sourcesUrl");
   }
 
-  @Test
-  public void should_return_string() {
-    Plugin plugin = Plugin.factory("squid");
-
-    assertThat(plugin.toString()).isEqualTo("squid");
-  }
 
   @Test( expected = IllegalArgumentException.class)
   public void shouldPreventInvalidPluginKey() {
     Plugin.factory("foo-bar");
   }
 
+  @Test
+  public void should_return_correct_flags() {
+    Plugin plugin = Plugin.factory("test");
+    assertThat(plugin.needArtifact()).isTrue();
+    assertThat(plugin.needSqVersion()).isTrue();
+  }
 }

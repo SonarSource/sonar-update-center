@@ -41,6 +41,33 @@ public class GenerateMetadataMojoTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Test
+  public void generate_properties_without_scanner_properties() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugin is already cached
+    FileUtils.copyFileToDirectory(resource("csharp-plugin-1.0.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("dotnet-plugin-1.0.jar"), outputDir);
+    FileUtils.copyFileToDirectory(resource("fxcop-plugin-1.0.jar"), outputDir);
+
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
+    GenerateMetadataMojo underTest = new GenerateMetadataMojo();
+    underTest.inputFile = inputFile;
+    underTest.outputDir = outputDir;
+    underTest.editionsDownloadBaseUrl = "http://bintray/";
+    underTest.editionsOutputDir = temp.newFolder();
+    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
+    underTest.checkDownloadUrls = false;
+    underTest.execute();
+
+    // verify that properties file is generated
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).exists().isFile();
+    String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
+
+    assertThat(output).doesNotContain("scanners=");
+  }
+
+  @Test
   public void generate_properties_with_requires_plugins() throws Exception {
     File outputDir = temp.newFolder();
 

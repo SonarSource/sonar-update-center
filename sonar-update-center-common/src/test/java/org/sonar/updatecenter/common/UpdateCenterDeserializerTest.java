@@ -96,6 +96,16 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
+  public void should_parse_scanner() throws IOException, URISyntaxException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
+    List<Scanner> scanners = center.getScanners();
+    assertThat(scanners.size()).isEqualTo(1);
+    Scanner scanner = scanners.get(0);
+    assertThat(scanner.getLicense()).isEqualTo("GNU LGPL 3");
+  }
+
+  @Test
   public void should_add_sources_url() throws IOException {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-scm.properties")) {
       Properties props = new Properties();

@@ -76,7 +76,7 @@ public class EditionsGeneratorTest {
   @Test
   public void generateZipsJsonHtml_calls_generators() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"}).setLtsRelease("6.7");
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonarqube);
 
     EditionTemplate template = newEnterpriseTemplate()
       .setPluginKeys(asList("cobol", "governance"))
@@ -104,7 +104,7 @@ public class EditionsGeneratorTest {
   @Test
   public void fail_if_template_declares_a_plugin_that_does_not_exist() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"5.6", "6.7", "7.0"});
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonarqube);
 
     EditionTemplate template = newEnterpriseTemplate()
       .setPluginKeys(asList("cobol", "wat"))
@@ -121,7 +121,7 @@ public class EditionsGeneratorTest {
   @Test
   public void edition_is_not_generated_if_a_plugin_has_no_compatible_release() throws Exception {
     Sonar sonarqube = new Sonar().setReleases(new String[] {"99.2"});
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonarqube);
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonarqube);
 
     EditionTemplate template = newEnterpriseTemplate()
       .setPluginKeys(asList("cobol"))

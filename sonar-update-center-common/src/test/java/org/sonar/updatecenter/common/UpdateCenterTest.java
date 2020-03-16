@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import org.junit.Before;
@@ -62,8 +63,15 @@ public class UpdateCenterTest {
   }
 
   @Test
+  public void find_scanner_correctly() {
+    ArrayList<Scanner> scanners = new ArrayList<>();
+    UpdateCenter center = UpdateCenter.create(pluginReferential, scanners, sonar);
+    assertThat(center.getScanners()).isEqualTo(scanners);
+  }
+
+  @Test
   public void find_plugin_installed() {
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     PluginReferential installed = updateCenter.getInstalledPluginReferential();
@@ -73,7 +81,7 @@ public class UpdateCenterTest {
 
   @Test
   public void find_plugin_updates() {
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> updates = updateCenter.findPluginUpdates();
@@ -96,7 +104,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     PluginReferential pluginReferential = PluginReferential.create(asList(foo));
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> updates = updateCenter.findPluginUpdates();
@@ -123,7 +131,7 @@ public class UpdateCenterTest {
     PluginReferential pluginReferential = PluginReferential.create(asList(foo, test));
     pluginReferential.addOutgoingDependency(foo11, "test", "1.1");
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> updates = updateCenter.findPluginUpdates();
@@ -150,7 +158,7 @@ public class UpdateCenterTest {
     PluginReferential pluginReferential = PluginReferential.create(asList(foo, test));
     pluginReferential.addOutgoingDependency(foo11, "test", "1.1");
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> updates = updateCenter.findPluginUpdates();
@@ -162,14 +170,14 @@ public class UpdateCenterTest {
 
   @Test
   public void no_plugin_updates_if_last_release_is_installed() {
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.3")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.3")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.2").getArtifact())));
     assertThat(updateCenter.findPluginUpdates()).isEmpty();
   }
 
   @Test
   public void available_plugins_are_only_the_best_releases() {
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.2")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(),  sonar).setInstalledSonarVersion(Version.create("2.2")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> availables = updateCenter.findAvailablePlugins();
@@ -184,7 +192,7 @@ public class UpdateCenterTest {
 
   @Test
   public void available_plugins_require_sonar_upgrade() {
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> availables = updateCenter.findAvailablePlugins();
@@ -213,7 +221,7 @@ public class UpdateCenterTest {
     PluginReferential pluginReferential = PluginReferential.create(asList(foo, test));
     pluginReferential.addOutgoingDependency(foo10, "test", "1.1");
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
       PluginReferential.create(asList((Plugin) Plugin.factory("test").addRelease("1.0").getArtifact())));
 
     List<PluginUpdate> availables = updateCenter.findAvailablePlugins();
@@ -233,7 +241,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      PluginReferential.create(asList(bar)), sonar)
+      PluginReferential.create(asList(bar)), new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.0"));
@@ -250,7 +258,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      PluginReferential.create(asList(bar)), sonar)
+      PluginReferential.create(asList(bar)), new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.0"));
@@ -265,7 +273,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      PluginReferential.create(asList(bar)), sonar)
+      PluginReferential.create(asList(bar)), new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -281,7 +289,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      PluginReferential.create(asList(bar)), sonar)
+      PluginReferential.create(asList(bar)), new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     updateCenter.findInstallablePlugins("not_found", Version.create("1.1"));
@@ -302,7 +310,7 @@ public class UpdateCenterTest {
     pluginReferential.addOutgoingDependency(foobis11, "foo", "1.1");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1"));
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("foobis", Version.create("1.1"));
     assertThat(installablePlugins).hasSize(2);
@@ -325,7 +333,7 @@ public class UpdateCenterTest {
     pluginReferential.addOutgoingDependency(foobis11, "foo", "1.2");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1"));
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1"));
 
     updateCenter.findInstallablePlugins("foobis", Version.create("1.1"));
   }
@@ -346,7 +354,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
+      pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).registerInstalledPlugins(
         PluginReferential.create(asList(
           (Plugin) Plugin.factory("foo").addRelease("1.1").getArtifact())));
 
@@ -384,7 +392,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar)
+      pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -412,7 +420,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar)
+      pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -452,7 +460,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar)
+      pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"))
       .registerInstalledPlugins(PluginReferential.create(asList(
         (Plugin) Plugin.factory("foobis").addRelease("1.0").getArtifact(),
@@ -486,7 +494,7 @@ public class UpdateCenterTest {
     pluginReferential.addOutgoingDependency(bar11, "foobis", "1.1");
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"));
 
     List<Release> installablePlugins = updateCenter.findInstallablePlugins("bar", Version.create("1.1"));
@@ -526,7 +534,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar)
+      pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"))
       .registerInstalledPlugins(PluginReferential.create(asList(
         (Plugin) Plugin.factory("foo").addRelease("1.1").getArtifact(),
@@ -567,7 +575,7 @@ public class UpdateCenterTest {
 
     Sonar sonar = (Sonar) new Sonar().addRelease("2.1").getArtifact();
     UpdateCenter updateCenter = UpdateCenter.create(
-      pluginReferential, sonar)
+      pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.1"))
       .registerInstalledPlugins(PluginReferential.create(asList(
         (Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact(),
@@ -585,7 +593,7 @@ public class UpdateCenterTest {
     sonar.addRelease(Version.create("2.3"));
     sonar.addRelease(Version.create("2.4"));
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.2"));
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.2"));
 
     List<SonarUpdate> updates = updateCenter.findSonarUpdates();
 
@@ -599,7 +607,7 @@ public class UpdateCenterTest {
   public void find_no_plugin_to_upgrade_on_already_compatible_plugins_with_sonar_updates() {
     sonar.addRelease(Version.create("2.3"));
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.2"))
       .registerInstalledPlugins(
         PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.2").getArtifact(), (Plugin) Plugin.factory("bar").addRelease("1.1").getArtifact())));
@@ -618,7 +626,7 @@ public class UpdateCenterTest {
     sonar.addRelease(Version.create("2.3"));
     sonar.addRelease(Version.create("2.4"));
 
-    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, sonar)
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar)
       .setInstalledSonarVersion(Version.create("2.2"))
       .registerInstalledPlugins(
         PluginReferential.create(asList((Plugin) Plugin.factory("foo").addRelease("1.0").getArtifact(), (Plugin) Plugin.factory("bar").addRelease("1.0").getArtifact())));
@@ -640,11 +648,11 @@ public class UpdateCenterTest {
 
   @Test
   public void find_compatible_plugins() {
-    List<Plugin> allCompatiblePlugins = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.1")).findAllCompatiblePlugins();
+    List<Plugin> allCompatiblePlugins = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.1")).findAllCompatiblePlugins();
 
     assertThat(allCompatiblePlugins).containsOnly(foo, bar);
 
-    allCompatiblePlugins = UpdateCenter.create(pluginReferential, sonar).setInstalledSonarVersion(Version.create("2.2.2")).findAllCompatiblePlugins();
+    allCompatiblePlugins = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar).setInstalledSonarVersion(Version.create("2.2.2")).findAllCompatiblePlugins();
 
     assertThat(allCompatiblePlugins).containsOnly(bar);
   }
