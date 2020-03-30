@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -10,7 +11,7 @@
   
   <groupId>org.sonarsource.update-center</groupId>
   <artifactId>sonar-update-center</artifactId>
-  <version>1.26-SNAPSHOT</version>
+  <version>1.25-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Sonar :: Update Center</name>
   <url>http://www.sonarsource.org</url>
@@ -50,6 +51,7 @@
   <properties>
     <gitRepositoryName>sonar-update-center</gitRepositoryName>
      <artifactsToDownload>${project.groupId}:sonar-update-center-common:jar,${project.groupId}:sonar-update-center-mojo:jar</artifactsToDownload>
+     <doclint>none</doclint>
   </properties>
 
   <modules>
@@ -68,6 +70,7 @@
     <system>jira</system>
     <url>https://jira.sonarsource.com/browse/UPC/</url>
   </issueManagement>
+
 
   <dependencyManagement>
     <dependencies>
@@ -143,4 +146,17 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
