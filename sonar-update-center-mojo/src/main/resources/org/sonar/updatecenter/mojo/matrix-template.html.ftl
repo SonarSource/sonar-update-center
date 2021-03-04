@@ -47,6 +47,8 @@
         <td>
           <#if plugin.supports(sqVersion.realVersion) >
           ${plugin.supportedVersion(sqVersion.realVersion)}
+          <#elseif plugin.isBundled()>
+        Bundled
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png" />
           </#if>

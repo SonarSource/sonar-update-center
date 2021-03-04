@@ -263,6 +263,7 @@ public final class UpdateCenterDeserializer {
 
       parseComponent(p, sonar, pluginKey, plugin);
       plugin.setSupportedBySonarSource(Boolean.valueOf(get(p, pluginKey, "supportedBySonarSource", false)));
+      plugin.setBundled(Boolean.valueOf(get(p, pluginKey, "bundled", false)));
 
       // do not add plugin without any version
       if (!plugin.getAllReleases().isEmpty()) {
