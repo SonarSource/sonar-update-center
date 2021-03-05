@@ -27,6 +27,7 @@ public class Plugin extends Component {
 
 
   private boolean supportedBySonarSource = false;
+  private boolean bundled = false;
 
 
   private Plugin(String key) {
@@ -47,6 +48,10 @@ public class Plugin extends Component {
     return supportedBySonarSource;
   }
 
+  public boolean isBundled() {
+    return bundled;
+  }
+
   @Override
   boolean needArtifact() {
     return true;
@@ -60,6 +65,11 @@ public class Plugin extends Component {
 
   public Plugin setSupportedBySonarSource(boolean supportedBySonarSource) {
     this.supportedBySonarSource = supportedBySonarSource;
+    return this;
+  }
+
+  public Plugin setBundled(boolean bundled) {
+    this.bundled = bundled;
     return this;
   }
 

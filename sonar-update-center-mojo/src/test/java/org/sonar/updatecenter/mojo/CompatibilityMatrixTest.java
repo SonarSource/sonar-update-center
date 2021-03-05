@@ -45,9 +45,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class CompatibilityMatrixTest {
-
-  private final static String PLUGIN_KEY = "key";
-
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -75,7 +72,7 @@ public class CompatibilityMatrixTest {
     sonar.setLtsRelease("3.7.4");
   }
 
-  private void prepareMocks(Plugin... plugins) throws IOException {
+  private void prepareMocks(Plugin... plugins) {
     pluginReferential = plugins.length > 0 ? PluginReferential.create(asList(plugins)) : PluginReferential.createEmpty();
     center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
     matrix = new CompatibilityMatrix(center, outputFolder, mock(Log.class));
@@ -98,18 +95,37 @@ public class CompatibilityMatrixTest {
 
   @Test
   public void shouldGenerateHtml() throws Exception {
-    Plugin plugin = Plugin.factory(PLUGIN_KEY);
-    Version version = Version.create("1.0");
-    Release release = new Release(plugin, version);
-    release.setDate(getDate());
-    release.setDownloadUrl("http://valid.download.url");
-    release.addRequiredSonarVersions("3.0");
-    plugin.addRelease(release);
-    plugin.setName("name");
-    plugin.setLicense("licence");
-    plugin.setSupportedBySonarSource(true);
+    Plugin pluginFoo = Plugin.factory("foo");
+    Version versionFoo = Version.create("1.0");
+    Release releaseFoo = new Release(pluginFoo, versionFoo);
+    releaseFoo.setDate(getDate());
+    releaseFoo.setDownloadUrl("http://valid.download.url");
+    releaseFoo.addRequiredSonarVersions("3.0");
+    pluginFoo.addRelease(releaseFoo);
+    pluginFoo.setName("foo");
+    pluginFoo.setSupportedBySonarSource(true);
 
-    prepareMocks(plugin);
+    Plugin pluginBar = Plugin.factory("bar");
+    Version versionBar = Version.create("2.0");
+    Release releaseBar = new Release(pluginBar, versionBar);
+    releaseBar.setDate(getDate());
+    releaseBar.setDownloadUrl("http://other.download.url");
+    releaseBar.addRequiredSonarVersions("4.0");
+    pluginBar.addRelease(releaseBar);
+    pluginBar.setName("bar");
+
+    Plugin pluginAbap = Plugin.factory("abap");
+    Version versionAbap = Version.create("5.2");
+    Release releaseAbap = new Release(pluginAbap, versionAbap);
+    releaseAbap.setDate(getDate());
+    releaseAbap.setDownloadUrl("http://abap.download.url");
+    releaseAbap.addRequiredSonarVersions("3.0");
+    pluginAbap.addRelease(releaseAbap);
+    pluginAbap.setName("abap");
+    pluginAbap.setSupportedBySonarSource(true);
+    pluginAbap.setBundled(true);
+
+    prepareMocks(pluginFoo, pluginBar, pluginAbap);
     matrix.generateHtml();
 
     // 4 files:

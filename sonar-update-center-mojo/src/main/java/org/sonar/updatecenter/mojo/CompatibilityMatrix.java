@@ -70,7 +70,7 @@ public class CompatibilityMatrix {
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginModel);
 
-      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource(), plugin.isBundled());
       getPlugins().add(matrixPlugin);
 
       for (Release sq : center.getSonar().getMajorReleases()) {
@@ -108,11 +108,13 @@ public class CompatibilityMatrix {
     private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
     private final boolean isSupportedBySonarSource;
+    private final boolean isBundled;
 
-    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource) {
+    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource, boolean isBundled) {
       this.name = name;
       this.homepageUrl = homepageUrl;
       this.isSupportedBySonarSource = isSupportedBySonarSource;
+      this.isBundled = isBundled;
     }
 
     public String getName() {
@@ -134,6 +136,10 @@ public class CompatibilityMatrix {
 
     public boolean isSupportedBySonarSource() {
       return isSupportedBySonarSource;
+    }
+
+    public boolean isBundled() {
+      return isBundled;
     }
   }
 

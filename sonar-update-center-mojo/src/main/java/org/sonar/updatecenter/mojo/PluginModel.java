@@ -88,6 +88,10 @@ public class PluginModel {
     return plugin.isSupportedBySonarSource();
   }
 
+  public boolean isBundled() {
+    return plugin.isBundled();
+  }
+
   public boolean isSonarSourceCommercialPlugin() {
     return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
   }
