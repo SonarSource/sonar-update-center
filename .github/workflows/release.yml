@@ -1,5 +1,4 @@
-name: Release
-# This workflow is triggered when publishing a GitHub release
+name: release
 on:
   release:
     types:
@@ -10,11 +9,36 @@ jobs:
     runs-on: ubuntu-latest
     name: Start release process
     steps:
-      # Not sure why this is needed... Fixes issue with running the action.
-      - name: Checkout release action
-        uses: actions/checkout@v2
+      - name: Release
+        id: release
+        env:
+          ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
+          BURGRX_USER: ${{ secrets.BURGRX_USER }}
+          BURGRX_PASSWORD: ${{ secrets.BURGRX_PASSWORD }}
+          CIRRUS_TOKEN: ${{ secrets.CIRRUS_TOKEN }}
+          PATH_PREFIX: ${{ secrets.BINARIES_PATH_PREFIX }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          RELEASE_SSH_USER: ${{ secrets.RELEASE_SSH_USER }}
+          RELEASE_SSH_KEY: ${{ secrets.RELEASE_SSH_KEY }}
+          SLACK_API_TOKEN: ${{secrets.SLACK_API_TOKEN }}
+        uses: SonarSource/gh-action_release/main@v3
         with:
-          repository: SonarSource/gh-action_release/main@v3
+          publish_to_binaries: true
+          attach_artifacts_to_github_release: false
+          run_rules_cov: false
+          slack_channel: sonarqube-build
+      - name: Release action results
+        if: always()
+        run: |
+          echo "${{ steps.lt_release.outputs.releasability }}"
+          echo "${{ steps.lt_release.outputs.release }}"
+
+  maven-central-sync:
+    runs-on: ubuntu-latest
+    name: Maven Central Sync
+    needs:
+      - release
+    steps:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v1
       - name: JFrog config
@@ -43,16 +67,13 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-      - name: Log outputs
-        if: always()
-        run: |
-          echo "${{ steps.run_release.outputs.releasability }}"
-          echo "${{ steps.run_release.outputs.release }}"
       - name: Notify on failure
         if: ${{ failure() || steps.maven-central-sync.outcome == 'failure' }}
         uses: 8398a7/action-slack@v3
         with:
+          text: 'Maven sync failed'
           status: failure
           fields: repo,author,eventName
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_BUILD_WEBHOOK }}
+
