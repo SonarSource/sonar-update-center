@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
@@ -50,6 +51,61 @@ public class Plugin extends Component {
 
   public boolean isBundled() {
     return bundled;
+  }
+
+  @Override
+  public Plugin setName(String name) {
+    return (Plugin) super.setName(name);
+  }
+
+  @Override
+  public Plugin setDescription(String description) {
+    return (Plugin) super.setDescription(description);
+  }
+
+  @Override
+  public Plugin setHomepageUrl(String url) {
+    return (Plugin) super.setHomepageUrl(url);
+  }
+
+  @Override
+  public Plugin setLicense(String license) {
+    return (Plugin) super.setLicense(license);
+  }
+
+  @Override
+  public Plugin setOrganization(String organization) {
+    return (Plugin) super.setOrganization(organization);
+  }
+
+  @Override
+  public Plugin setOrganizationUrl(String url) {
+    return (Plugin) super.setOrganizationUrl(url);
+  }
+
+  @Override
+  public Plugin setCategory(String category) {
+    return (Plugin) super.setCategory(category);
+  }
+
+  @Override
+  public Plugin setTermsConditionsUrl(String url) {
+    return (Plugin) super.setTermsConditionsUrl(url);
+  }
+
+  @Override
+  public Plugin setIssueTrackerUrl(String url) {
+    return (Plugin) super.setIssueTrackerUrl(url);
+  }
+
+  @Override
+  public Plugin setSourcesUrl(String sourcesUrl) {
+    return (Plugin) super.setSourcesUrl(sourcesUrl);
+  }
+
+  @Override
+  public Plugin setDevelopers(List developers) {
+    return (Plugin) super.setDevelopers(developers);
   }
 
   @Override
