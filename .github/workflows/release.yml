@@ -10,31 +10,40 @@ jobs:
     runs-on: ubuntu-latest
     name: Start release process
     steps:
-      # Not sure why this is needed... Fixes issue with running the action.
-      - name: Checkout release action
-        uses: actions/checkout@v2
-        with:
-          repository: SonarSource/gh-action_LT_release
-      - name: Run release action
-        id: run_release
-        uses: SonarSource/gh-action_LT_release@master
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1
+      - name: JFrog config
+        run: jfrog rt config repox --url https://repox.jfrog.io/artifactory/ --apikey $ARTIFACTORY_API_KEY --basic-auth-only
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_ORG_TOKEN }}
-      - name: Log outputs
-        if: always()
+          ARTIFACTORY_API_KEY: ${{ secrets.ARTIFACTORY_API_KEY }}
+      - name: Get the version
+        id: get_version
         run: |
-          echo "${{ steps.run_release.outputs.releasability }}"
-          echo "${{ steps.run_release.outputs.release }}"
-      - name: Notify success on Slack
-        uses: Ilshidur/action-slack@2.0.0
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          IFS=. read major minor patch build <<< "${{ github.event.release.tag_name }}"
+          echo ::set-output name=build::"${build}"
+      - name: Create local repository directory
+        id: local_repo
+        run: echo ::set-output name=dir::"$(mktemp -d repo.XXXXXXXX)"
+      - name: Download Artifacts
+        uses: SonarSource/gh-action_release/download-build@v4
         with:
-          args: "Release successful for {{ GITHUB_REPOSITORY }} by {{ GITHUB_ACTOR }}"
-      - name: Notify failures on Slack
-        uses: Ilshidur/action-slack@2.0.0
-        if: failure()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          build-number: ${{ steps.get_version.outputs.build }}
+          local-repo-dir: ${{ steps.local_repo.outputs.dir }}
+      - name: Maven Central Sync
+        id: maven-central-sync
+        continue-on-error: true
+        uses: SonarSource/gh-action_release/maven-central-sync@v4
         with:
-          args: "Release failed, see the logs at https://github.com/{{ GITHUB_REPOSITORY }}/actions by {{ GITHUB_ACTOR }}"
+          local-repo-dir: ${{ steps.local_repo.outputs.dir }}
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      - name: Notify on failure
+        if: ${{ failure() || steps.maven-central-sync.outcome == 'failure' }}
+        uses: 8398a7/action-slack@v3
+        with:
+          text: 'Maven sync failed'
+          status: failure
+          fields: repo,author,eventName
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_BUILD_WEBHOOK }}
