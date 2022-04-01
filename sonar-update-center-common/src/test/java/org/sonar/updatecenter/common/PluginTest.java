@@ -27,8 +27,8 @@ public class PluginTest {
 
   @Test
   public void should_merge_with_manifest() {
-    Plugin plugin = Plugin.factory("squid");
-    plugin.setLicense("LGPL2")
+    Plugin plugin = Plugin.factory("squid")
+        .setLicense("LGPL2")
         .setDescription("description")
         .setOrganization("organization")
         .setOrganizationUrl("organizationUrl")
@@ -65,8 +65,7 @@ public class PluginTest {
 
   @Test
   public void should_not_merge_with_manifest_plugin_key_is_different() {
-    Plugin plugin = Plugin.factory("squid");
-    plugin.setOrganization("SonarSource");
+    Plugin plugin = Plugin.factory("squid").setOrganization("SonarSource");
     PluginManifest manifest = new PluginManifest().setKey("another_key").setOrganization("Other");
 
     plugin.merge(manifest);
