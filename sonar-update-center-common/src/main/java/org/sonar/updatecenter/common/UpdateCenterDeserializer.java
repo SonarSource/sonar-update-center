@@ -332,9 +332,11 @@ public final class UpdateCenterDeserializer {
 
   private void reportDuplicateReleaseDeclaration(Release alreadyExistingRelease, Release releaseToAdd) {
     if (alreadyExistingRelease.isArchived() != releaseToAdd.isArchived()) {
-      reportError("Plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion() + " cannot be both public and archived.");
+      String message = "Plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion() + " cannot be both public and archived.";
+      reportError(message);
     } else {
-      reportError("Duplicate version for plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion());
+      String message = "Duplicate version for plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion();
+      reportError(message);
     }
   }
 
