@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.SortedSet;
+import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -399,6 +400,20 @@ public class UpdateCenterDeserializerTest {
 
       thrown.expect(IllegalStateException.class);
       thrown.expectMessage("Duplicate version for plugin clirr: 1.1");
+
+      new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+    }
+  }
+
+  //UPC-89
+  @Test
+  public void should_fail_if_plugin_version_archived_and_non_archived() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-plugin-archived-and-non-archived.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+
+      thrown.expect(IllegalStateException.class);
+      thrown.expectMessage("Plugin clirr: 1.0 cannot be both public and archived.");
 
       new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
     }
