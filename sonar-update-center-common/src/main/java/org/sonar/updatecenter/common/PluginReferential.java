@@ -102,6 +102,14 @@ public class PluginReferential {
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
+
+    // skip dependencies on license, as it's deprecated and is provided by SQ anyway. There is no need
+    // to have the explicit dependency on the update center side.
+    // Once we removed plugins < 8.9, and bundled plugins are removed from the matrix, we can drop this if
+    if("license".equals(requiredPluginReleaseKey)){
+      return;
+    }
+
     try {
       Plugin requiredPlugin = findPlugin(requiredPluginReleaseKey);
       Release minimalRequiredRelease = requiredPlugin.getMinimalRelease(Version.create(requiredMinimumReleaseVersion));
