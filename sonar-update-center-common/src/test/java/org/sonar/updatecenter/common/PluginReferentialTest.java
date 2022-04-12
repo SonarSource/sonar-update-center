@@ -28,7 +28,9 @@ import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.sonar.updatecenter.common.PluginReferential.PLUGIN_LICENSE_KEY;
 
 public class PluginReferentialTest {
 
@@ -100,6 +102,23 @@ public class PluginReferentialTest {
     PluginReferential pluginReferential = PluginReferential.create(asList(bar, foo));
     pluginReferential.addOutgoingDependency(bar10, "foo", "1.0");
     assertThat(pluginReferential.findPlugin("bar").getRelease(Version.create("1.0")).getOutgoingDependencies().iterator().next().getVersion().getName()).isEqualTo("1.0");
+  }
+
+
+  @Test
+  public void ignore_add_license_dependency() {
+    Plugin licensePlugin = Plugin.factory(PLUGIN_LICENSE_KEY);
+    Release licenseRelease = new Release(licensePlugin, "1.0");
+    licensePlugin.addRelease(licenseRelease);
+
+    Plugin bar = Plugin.factory("bar");
+    Release bar10 = new Release(bar, "1.0");
+    bar.addRelease(bar10);
+
+    Version version = Version.create("1.0");
+    PluginReferential pluginReferential = PluginReferential.create(asList(bar, licensePlugin));
+    pluginReferential.addOutgoingDependency(bar10, PLUGIN_LICENSE_KEY, version.getName());
+    assertThat(pluginReferential.findPlugin("bar").getRelease(version).getOutgoingDependencies()).isEmpty();
   }
 
   @Test

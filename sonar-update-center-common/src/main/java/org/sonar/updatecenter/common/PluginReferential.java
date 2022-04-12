@@ -31,6 +31,7 @@ import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 public class PluginReferential {
 
+  public static final String PLUGIN_LICENSE_KEY = "license";
   private Set<Plugin> plugins;
 
   private PluginReferential() {
@@ -102,6 +103,15 @@ public class PluginReferential {
   }
 
   public void addOutgoingDependency(Release release, String requiredPluginReleaseKey, String requiredMinimumReleaseVersion) {
+
+    // skip dependencies on license, as it's deprecated and is provided by SQ anyway. There is no need
+    // to have the explicit dependency on the update center side.
+    // Once every analyzers remove the dependency on 'license' on their metadata, we will be able to remove
+    // this guard condition
+    if(PLUGIN_LICENSE_KEY.equals(requiredPluginReleaseKey)){
+      return;
+    }
+
     try {
       Plugin requiredPlugin = findPlugin(requiredPluginReleaseKey);
       Release minimalRequiredRelease = requiredPlugin.getMinimalRelease(Version.create(requiredMinimumReleaseVersion));
