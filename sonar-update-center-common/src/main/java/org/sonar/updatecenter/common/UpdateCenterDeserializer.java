@@ -115,8 +115,6 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-
-
   private static void loadProperties(File file, Properties props, String listKey) throws IOException {
     String[] keys = getArray(props, listKey);
     for (String key : keys) {
@@ -241,7 +239,6 @@ public final class UpdateCenterDeserializer {
     HashMap<String, Map.Entry<String, Integer>> flavorsLabel = new HashMap<>();
     parseFlavors(p, key, flavorsLabel);
 
-
     parseReleases(p, sonar, key, c, PUBLIC_VERSIONS, flavorsLabel, true, false);
     if (mode == Mode.DEV) {
       parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, false, false);
@@ -265,11 +262,18 @@ public final class UpdateCenterDeserializer {
       plugin.setSupportedBySonarSource(Boolean.valueOf(get(p, pluginKey, "supportedBySonarSource", false)));
       plugin.setBundled(Boolean.valueOf(get(p, pluginKey, "bundled", false)));
 
-      // do not add plugin without any version
-      if (!plugin.getAllReleases().isEmpty()) {
+      if (isPluginCompatibleWithAnySqRelease(plugin, sonar)) {
         plugins.add(plugin);
+      } else {
+        System.out.println("The plugin " + pluginKey + " is not compatible with any public SQ versions.");
       }
     }
+  }
+
+  private static boolean isPluginCompatibleWithAnySqRelease(Plugin plugin, Sonar sonar) {
+    return sonar.getMajorReleases().stream()
+      .map(sonarMajorRelease -> plugin.getLastCompatible(sonarMajorRelease.getVersion()))
+      .anyMatch(Objects::nonNull);
   }
 
   private void parseReleases(Properties p, Sonar sonar, String pluginKey, Component component, String key,
@@ -277,10 +281,14 @@ public final class UpdateCenterDeserializer {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
       Release release = parseRelease(p, sonar, pluginKey, component, isPublicRelease, isArchivedRelease, pluginVersion, flavosLabel);
-      if (!component.getAllReleases().contains(release)) {
-        component.addRelease(release);
-      } else {
+      if (component.needSqVersion() && release.getRequiredSonarVersions().isEmpty()) {
+        continue;
+      }
+
+      if (component.getAllReleases().contains(release)) {
         reportError("Duplicate version for plugin " + pluginKey + ": " + pluginVersion);
+      } else {
+        component.addRelease(release);
       }
     }
   }
@@ -288,7 +296,7 @@ public final class UpdateCenterDeserializer {
   private void parseFlavors(Properties p, String pluginKey, HashMap<String, Map.Entry<String, Integer>> flavosLabel) {
     String[] flavors = getArray(p, pluginKey, FLAVORS_PREFIX);
     for (int i = 0; i < flavors.length; i++) {
-      flavosLabel.put(flavors[i], new AbstractMap.SimpleEntry<String, Integer>(get(p, pluginKey, FLAVORS_PREFIX + "." + flavors[i]  + ".label", true), i));
+      flavosLabel.put(flavors[i], new AbstractMap.SimpleEntry<>(get(p, pluginKey, FLAVORS_PREFIX + "." + flavors[i] + ".label", true), i));
     }
   }
 
@@ -326,7 +334,7 @@ public final class UpdateCenterDeserializer {
 
   private void parseDownloadUrl(Properties p, String pluginKey, String pluginVersion, boolean isPublicRelease,
     HashMap<String, Map.Entry<String, Integer>> flavorLabel, Release release) {
-    for(Map.Entry<String, Map.Entry<String, Integer>>  flavor : flavorLabel.entrySet()) {
+    for (Map.Entry<String, Map.Entry<String, Integer>> flavor : flavorLabel.entrySet()) {
       String url = get(p, pluginKey, pluginVersion + DOWNLOAD_URL_SUFFIX + "." + flavor.getKey(), false);
       if (url != null) {
         release.addScannerDownloadUrlAndLabel(flavor.getKey(), flavor.getValue().getKey(), url, flavor.getValue().getValue());
@@ -334,7 +342,7 @@ public final class UpdateCenterDeserializer {
     }
 
     String url = getOrDefault(p, pluginKey, pluginVersion, DOWNLOAD_URL_SUFFIX, false);
-    if(url != null) {
+    if (url != null) {
       release.setDownloadUrl(url);
     }
     if (!release.hasDownloadUrl() && isPublicRelease) {
@@ -396,7 +404,7 @@ public final class UpdateCenterDeserializer {
     release.setChangelogUrl(getOrDefault(p, sonarVersion, CHANGELOG_URL_SUFFIX, isPublicRelease));
     release.setDisplayVersion(getOrDefault(p, sonarVersion, DISPLAY_VERSION_SUFFIX, false));
     release.setDescription(getOrDefault(p, sonarVersion, DESCRIPTION_SUFFIX, isPublicRelease));
-    for (Release.Edition edition: Release.Edition.values()) {
+    for (Release.Edition edition : Release.Edition.values()) {
       String downloadUrl = getOrDefault(p, sonarVersion, getDownloadUrlSuffix(edition), edition == Release.Edition.COMMUNITY && isPublicRelease);
       if (downloadUrl != null) {
         release.setDownloadUrl(downloadUrl, edition);

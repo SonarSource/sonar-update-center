@@ -36,6 +36,7 @@ import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class UpdateCenterDeserializerTest {
 
@@ -331,6 +332,14 @@ public class UpdateCenterDeserializerTest {
 
   }
 
+  @Test
+  public void should_discard_plugin_not_compatible_with_any_public_sq_versions() throws URISyntaxException, IOException {
+    URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
+    UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
+    assertThatExceptionOfType(NoSuchElementException.class)
+      .isThrownBy(() -> center.getUpdateCenterPluginReferential().findPlugin("legacyplugin").getAllReleases());
+  }
+
   // UPC-29
   @Test
   public void should_fail_if_overlap_in_sqVersion_of_public_releases() throws IOException {
@@ -456,4 +465,6 @@ public class UpdateCenterDeserializerTest {
       assertThat(clirr.getRelease(Version.create("1.1")).isArchived()).isFalse();
     }
   }
+
+
 }
