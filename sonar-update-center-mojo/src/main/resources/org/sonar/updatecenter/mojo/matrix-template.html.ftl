@@ -46,13 +46,7 @@
         <#list matrix.sqVersions?reverse as sqVersion>
         <td>
           <#if plugin.supports(sqVersion.realVersion) >
-            <#if plugin.isArchived(sqVersion.realVersion) >
-            <img class="emoticon" alt="(not compatible)" src="error.png" />
-            <#else>
-            ${plugin.supportedVersion(sqVersion.realVersion)}
-            </#if>
-          <#elseif plugin.isBundled()>
-          Bundled
+          ${plugin.supportedVersion(sqVersion.realVersion)}
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png" />
           </#if>

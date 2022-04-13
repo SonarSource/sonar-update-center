@@ -31,6 +31,8 @@ import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 
+import javax.annotation.Nullable;
+
 public class CompatibilityMatrix {
   private final File outputDirectory;
   private final UpdateCenter center;
@@ -70,13 +72,13 @@ public class CompatibilityMatrix {
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginModel);
 
-      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource(), plugin.isBundled());
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
       getPlugins().add(matrixPlugin);
 
       for (Release sq : center.getSonar().getMajorReleases()) {
         Release lastCompatible = plugin.getLastCompatible(sq.getVersion());
-        if (lastCompatible != null) {
-          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.isArchived() ? "" : lastCompatible.getVersion().toString());
+        if (isNotArchived(lastCompatible)) {
+          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.getVersion().toString());
         }
       }
     }
@@ -90,6 +92,10 @@ public class CompatibilityMatrix {
       log.info("Generate compatibility matrix in: " + file);
       FreeMarkerUtils.print(dataModel, file, "matrix-template.html.ftl");
     }
+  }
+
+  private static boolean isNotArchived(@Nullable Release lastCompatible) {
+    return lastCompatible != null && !lastCompatible.isArchived();
   }
 
 
@@ -108,19 +114,20 @@ public class CompatibilityMatrix {
     private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
     private final boolean isSupportedBySonarSource;
-    private final boolean isBundled;
 
-    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource, boolean isBundled) {
+    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource) {
       this.name = name;
       this.homepageUrl = homepageUrl;
       this.isSupportedBySonarSource = isSupportedBySonarSource;
-      this.isBundled = isBundled;
     }
 
     public String getName() {
       return name;
     }
 
+    public String getHomepageUrl() {
+      return homepageUrl;
+    }
 
     public Map<String, String> getCompatibleVersionBySqVersion() {
       return compatibleVersionBySqVersion;
@@ -128,10 +135,6 @@ public class CompatibilityMatrix {
 
     public boolean supports(String sqVersion) {
       return compatibleVersionBySqVersion.containsKey(sqVersion);
-    }
-
-    public boolean isArchived(String sqVersion){
-      return compatibleVersionBySqVersion.get(sqVersion).isEmpty();
     }
 
     public String supportedVersion(String sqVersion) {
@@ -142,9 +145,6 @@ public class CompatibilityMatrix {
       return isSupportedBySonarSource;
     }
 
-    public boolean isBundled() {
-      return isBundled;
-    }
   }
 
 }

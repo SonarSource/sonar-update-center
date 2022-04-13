@@ -124,7 +124,6 @@ public class CompatibilityMatrixTest {
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
     pluginAbap.setSupportedBySonarSource(true);
-    pluginAbap.setBundled(true);
 
     prepareMocks(pluginFoo, pluginBar, pluginAbap);
     matrix.generateHtml();
