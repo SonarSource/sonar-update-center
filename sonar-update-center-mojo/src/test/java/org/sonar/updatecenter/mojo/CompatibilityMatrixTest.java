@@ -120,6 +120,7 @@ public class CompatibilityMatrixTest {
     releaseAbap.setDate(getDate());
     releaseAbap.setDownloadUrl("http://abap.download.url");
     releaseAbap.addRequiredSonarVersions("3.0");
+    releaseAbap.setArchived(true);
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
     pluginAbap.setSupportedBySonarSource(true);
