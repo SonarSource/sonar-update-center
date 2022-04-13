@@ -19,20 +19,28 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.io.CharArrayReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.junit.Test;
 import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.sonar.updatecenter.common.PluginReferential.PLUGIN_LICENSE_KEY;
+import static org.sonar.updatecenter.common.PluginReferential.PLUGINS_BUNDLED_IN_LTS;
 
 public class PluginReferentialTest {
+
+  private static final String PLUGIN_LICENSE_KEY = "license";
 
   @Test
   public void get_and_set_plugins() {
@@ -91,9 +99,7 @@ public class PluginReferentialTest {
 
   @Test
   public void should_add_dependency() {
-    Plugin foo = Plugin.factory("foo");
-    Release foo10 = new Release(foo, "1.0");
-    foo.addRelease(foo10);
+    Plugin foo = createPluginWithSingleRelease("foo");
 
     Plugin bar = Plugin.factory("bar");
     Release bar10 = new Release(bar, "1.0");
@@ -107,18 +113,32 @@ public class PluginReferentialTest {
 
   @Test
   public void ignore_add_license_dependency() {
-    Plugin licensePlugin = Plugin.factory(PLUGIN_LICENSE_KEY);
+    Set<Plugin> bundledPlugins = generateBundledPlugins();
+    Plugin dependentPlugin = createPluginWithSingleRelease("dependentPlugin");
+    Release dependentRelease = Objects.requireNonNull(dependentPlugin.getLastRelease());
+
+    List<Plugin> allPlugins = new ArrayList<>(bundledPlugins);
+    allPlugins.add(dependentPlugin);
+
+    PluginReferential pluginReferential = PluginReferential.create(allPlugins);
+    Version version = Version.create("1.0");
+    PLUGINS_BUNDLED_IN_LTS.forEach(bundledPlugin -> pluginReferential.addOutgoingDependency(dependentRelease, bundledPlugin, version.getName()));
+
+    assertThat(pluginReferential.findPlugin(dependentPlugin.getKey()).getRelease(version).getOutgoingDependencies()).isEmpty();
+  }
+
+  private static Set<Plugin> generateBundledPlugins() {
+    Set<Plugin> bundledPlugins = PLUGINS_BUNDLED_IN_LTS.stream()
+      .map(PluginReferentialTest::createPluginWithSingleRelease)
+      .collect(toSet());
+    return bundledPlugins;
+  }
+
+  private static Plugin createPluginWithSingleRelease(String pluginLicenseKey) {
+    Plugin licensePlugin = Plugin.factory(pluginLicenseKey);
     Release licenseRelease = new Release(licensePlugin, "1.0");
     licensePlugin.addRelease(licenseRelease);
-
-    Plugin bar = Plugin.factory("bar");
-    Release bar10 = new Release(bar, "1.0");
-    bar.addRelease(bar10);
-
-    Version version = Version.create("1.0");
-    PluginReferential pluginReferential = PluginReferential.create(asList(bar, licensePlugin));
-    pluginReferential.addOutgoingDependency(bar10, PLUGIN_LICENSE_KEY, version.getName());
-    assertThat(pluginReferential.findPlugin("bar").getRelease(version).getOutgoingDependencies()).isEmpty();
+    return licensePlugin;
   }
 
   @Test

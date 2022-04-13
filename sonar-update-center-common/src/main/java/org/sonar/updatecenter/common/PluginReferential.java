@@ -20,6 +20,7 @@
 package org.sonar.updatecenter.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -29,10 +30,13 @@ import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
 import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 
+import static java.util.Arrays.asList;
+
 public class PluginReferential {
 
-  public static final String PLUGIN_LICENSE_KEY = "license";
-  private Set<Plugin> plugins;
+  static final Set<String> PLUGINS_BUNDLED_IN_LTS = new HashSet<>(asList("license", "java", "xml"));
+
+  private final Set<Plugin> plugins;
 
   private PluginReferential() {
     this.plugins = new TreeSet<>();
@@ -106,9 +110,9 @@ public class PluginReferential {
 
     // skip dependencies on license, as it's deprecated and is provided by SQ anyway. There is no need
     // to have the explicit dependency on the update center side.
-    // Once every analyzers remove the dependency on 'license' on their metadata, we will be able to remove
+    // Once every analyzers remove the dependency on the bundled plugins and their metadata, we will be able to remove
     // this guard condition
-    if(PLUGIN_LICENSE_KEY.equals(requiredPluginReleaseKey)){
+    if(PLUGINS_BUNDLED_IN_LTS.contains(requiredPluginReleaseKey)){
       return;
     }
 
