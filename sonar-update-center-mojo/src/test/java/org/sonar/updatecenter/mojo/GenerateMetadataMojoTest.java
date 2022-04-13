@@ -53,9 +53,6 @@ public class GenerateMetadataMojoTest {
     GenerateMetadataMojo underTest = new GenerateMetadataMojo();
     underTest.inputFile = inputFile;
     underTest.outputDir = outputDir;
-    underTest.editionsDownloadBaseUrl = "http://bintray/";
-    underTest.editionsOutputDir = temp.newFolder();
-    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
     underTest.checkDownloadUrls = false;
     underTest.execute();
 
@@ -80,9 +77,6 @@ public class GenerateMetadataMojoTest {
     GenerateMetadataMojo underTest = new GenerateMetadataMojo();
     underTest.inputFile = inputFile;
     underTest.outputDir = outputDir;
-    underTest.editionsDownloadBaseUrl = "http://bintray/";
-    underTest.editionsOutputDir = temp.newFolder();
-    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
     underTest.checkDownloadUrls = false;
     underTest.execute();
 
@@ -91,8 +85,8 @@ public class GenerateMetadataMojoTest {
     assertThat(outputFile).exists().isFile();
     String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
 
-    assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0");
-    assertThat(output).contains("csharp.1.0.displayVersion=1.0 (build 42)");
+    assertThat(output).contains("csharp.1.0.requirePlugins=dotnet\\:1.0")
+      .contains("csharp.1.0.displayVersion=1.0 (build 42)");
   }
 
   @Test
@@ -103,9 +97,6 @@ public class GenerateMetadataMojoTest {
     GenerateMetadataMojo underTest = new GenerateMetadataMojo();
     underTest.inputFile = inputFile;
     underTest.outputDir = outputDir;
-    underTest.editionsDownloadBaseUrl = "http://bintray/";
-    underTest.editionsOutputDir = temp.newFolder();
-    underTest.editionTemplateProperties = new File("src/test/resources/org/sonar/updatecenter/mojo/GenerateMojoTest/edition-templates.properties");
     underTest.checkDownloadUrls = false;
     underTest.validateOnly = true;
     underTest.execute();
@@ -113,7 +104,7 @@ public class GenerateMetadataMojoTest {
     // verify that properties file is not generated
     File outputFile = new File(outputDir, "sonar-updates.properties");
     assertThat(outputFile).doesNotExist();
-    assertThat(outputDir.listFiles().length).isZero();
+    assertThat(outputDir).isEmptyDirectory();
   }
 
   @Test
@@ -155,8 +146,8 @@ public class GenerateMetadataMojoTest {
     // Set all download URLs.
     PluginReferential ref = configuration.getUpdateCenter().getUpdateCenterPluginReferential();
     String incorrectUrl = "";
-    for (String pluginKey : new String[] {"fxcop", "dotnet", "csharp"}) {
-      for (String version : new String[] {"1.1-SNAPSHOT", "1.0"}) {
+    for (String pluginKey : new String[]{"fxcop", "dotnet", "csharp"}) {
+      for (String version : new String[]{"1.1-SNAPSHOT", "1.0"}) {
         String formattedUrl = url(String.format("%s-plugin-%s.jar", pluginKey, version)).toString();
         if (pluginKey.equals("csharp") && version.equals("1.0")) {
           // Corrupt the file URL so it's no longer downloadable.
@@ -193,8 +184,8 @@ public class GenerateMetadataMojoTest {
     // Set all download URLs.
     PluginReferential ref = configuration.getUpdateCenter().getUpdateCenterPluginReferential();
     String incorrectUrl = "";
-    for (String pluginKey : new String[] {"fxcop", "dotnet", "csharp"}) {
-      for (String version : new String[] {"1.1-SNAPSHOT", "1.0"}) {
+    for (String pluginKey : new String[]{"fxcop", "dotnet", "csharp"}) {
+      for (String version : new String[]{"1.1-SNAPSHOT", "1.0"}) {
         String formattedUrl = url(String.format("%s-plugin-%s.jar", pluginKey, version)).toString();
         if (pluginKey.equals("csharp") && version.equals("1.0")) {
           // Corrupt the file URL so it's no longer downloadable.

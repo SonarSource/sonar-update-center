@@ -25,13 +25,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.sonar.updatecenter.common.UpdateCenter;
-import org.sonar.updatecenter.mojo.editions.EditionTemplatesLoaderImpl;
-import org.sonar.updatecenter.mojo.editions.EditionsGenerator;
-import org.sonar.updatecenter.mojo.editions.generators.EditionGenerator;
-import org.sonar.updatecenter.mojo.editions.generators.HtmlEditionGenerator;
-import org.sonar.updatecenter.mojo.editions.generators.JsonEditionGenerator;
-import org.sonar.updatecenter.mojo.editions.generators.ZipsEditionGenerator;
 
 @Mojo(name = "generate-metadata", requiresProject = false, threadSafe = true)
 public class GenerateMetadataMojo extends AbstractMojo {
@@ -73,34 +66,13 @@ public class GenerateMetadataMojo extends AbstractMojo {
   boolean checkDownloadUrls = true;
 
   /**
-   * Base URL for hosting of editions
-   */
-  @Parameter(property = "editionsDownloadBaseUrl", required = true)
-  String editionsDownloadBaseUrl;
-
-  /**
-   * The directory that contains generated json and zip files of editions
-   */
-  @Parameter(property = "editionsOutputDir", required = true)
-  File editionsOutputDir;
-
-  /**
-   * The directory that contains generated json and zip files of editions
-   */
-  @Parameter(property = "editionTemplateProperties", defaultValue = "edition-templates.properties")
-  File editionTemplateProperties;
-
-  @Parameter(property = "editionBuildNumber")
-  String editionBuildNumber;
-
-  /**
    * Should we only validate the marketplace properties files
    */
   @Parameter(property = "validateOnly")
   boolean validateOnly = false;
 
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public void execute() throws MojoExecutionException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, devMode, ignoreErrors, includeArchives, checkDownloadUrls, getLog());
 
@@ -112,23 +84,8 @@ public class GenerateMetadataMojo extends AbstractMojo {
       // generate properties
       new Generator(configuration, getLog()).generateMetadata();
 
-      // generate editions (json, zip files and html)
-      generateEditions(configuration.getUpdateCenter());
-
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
     }
-  }
-
-  private void generateEditions(UpdateCenter updateCenter) throws Exception {
-    File jarsDir = outputDir;
-    EditionTemplatesLoaderImpl templatesLoader = new EditionTemplatesLoaderImpl(editionTemplateProperties);
-    EditionGenerator[] generators = {
-      new HtmlEditionGenerator(updateCenter, editionsDownloadBaseUrl),
-      new JsonEditionGenerator(editionsDownloadBaseUrl),
-      new ZipsEditionGenerator(jarsDir)
-    };
-    EditionsGenerator editionsGenerator = new EditionsGenerator(updateCenter, templatesLoader, editionBuildNumber);
-    editionsGenerator.generateZipsJsonHtml(editionsOutputDir, generators);
   }
 }

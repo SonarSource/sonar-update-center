@@ -29,14 +29,6 @@ mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metad
     -DinputFile=../sonar-update-center-properties/update-center-source.properties \
     -DoutputDir=output
 
-# Currently, this requires 2 "deprecated" parameters to run. See https://jira.sonarsource.com/browse/UPC-106
-mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metadata \
-    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
-    -DoutputDir=output \
-    -DeditionsDownloadBaseUrl=https://binaries.sonarsource.com/CommercialDistribution/editions/ \
-    -DeditionsOutputDir=output-editions
-```
-
 ### To generate html
 
 This will generate html snippets for every plugins plus the compatability matrix
