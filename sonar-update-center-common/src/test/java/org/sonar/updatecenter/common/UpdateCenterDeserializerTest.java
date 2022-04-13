@@ -29,18 +29,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.SortedSet;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class UpdateCenterDeserializerTest {
-
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
 
   @Test
   public void read_infos_from_properties() throws IOException {
@@ -168,11 +164,12 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-incorrect-range-wildcard.properties")) {
       Properties props = new Properties();
       props.load(input);
-      thrown.expect(SonarVersionRangeException.class);
-      thrown.expectMessage(
-        "Cannot use a wildcard version at the start of a range in '[2.4.*,2.6]' (in plugin 'motionchart'). " +
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+
+      assertThatExceptionOfType(SonarVersionRangeException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("Cannot use a wildcard version at the start of a range in '[2.4.*,2.6]' (in plugin 'motionchart'). " +
           "If you want to mark this range as compatible with any MAJOR.MINOR.* version, use the MAJOR.MINOR version instead (e.g.: 'sqVersions=[6.7,6.7.*]', 'sqVersions=[6.7,LATEST]').");
-      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
     }
   }
 
@@ -181,9 +178,11 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-incorrect-range-latest.properties")) {
       Properties props = new Properties();
       props.load(input);
-      thrown.expect(SonarVersionRangeException.class);
-      thrown.expectMessage("Cannot use LATEST keyword at the start of a range in '[LATEST,LATEST]' (in plugin 'motionchart'). Use 'sqVersions=LATEST' instead.");
-      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+      assertThatExceptionOfType(SonarVersionRangeException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("Cannot use LATEST keyword at the start of a range in '[LATEST,LATEST]' (in plugin 'motionchart'). Use 'sqVersions=LATEST' instead.");
     }
   }
 
@@ -246,9 +245,10 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties")) {
       Properties props = new Properties();
       props.load(input);
-      thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("ltsVersion seems wrong as it is not listed in SonarQube versions");
-      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("ltsVersion seems wrong as it is not listed in SonarQube versions");
     }
   }
 
@@ -276,10 +276,12 @@ public class UpdateCenterDeserializerTest {
     URL url = getClass().getResource(
       "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
 
-    thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");
+    UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+    File mainFile = new File(url.toURI());
 
-    new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
+    assertThatExceptionOfType(IllegalStateException.class)
+      .isThrownBy(() -> updateCenterDeserializer.fromManyFiles(mainFile))
+      .withMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");
   }
 
   // UPC-29
@@ -334,14 +336,14 @@ public class UpdateCenterDeserializerTest {
   // UPC-29
   @Test
   public void should_fail_if_overlap_in_sqVersion_of_public_releases() throws IOException {
-
-    thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("SQ version 2.7 is declared compatible with two public versions of Clirr plugin: 1.1 and 1.0");
-
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-overlap-sqVersion.properties")) {
       Properties props = new Properties();
       props.load(input);
-      new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("SQ version 2.7 is declared compatible with two public versions of Clirr plugin: 1.1 and 1.0");
     }
   }
 
@@ -382,11 +384,12 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-duplicate.properties")) {
       Properties props = new Properties();
       props.load(input);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.DEV, false);
 
-      thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("Duplicate version for SonarQube: 2.8");
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("Duplicate version for SonarQube: 2.8");
 
-      new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
     }
   }
 
@@ -396,11 +399,25 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-duplicate-plugin.properties")) {
       Properties props = new Properties();
       props.load(input);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.DEV, false);
 
-      thrown.expect(IllegalStateException.class);
-      thrown.expectMessage("Duplicate version for plugin clirr: 1.1");
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("Duplicate version for plugin clirr: 1.1");
+    }
+  }
 
-      new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+  //UPC-89
+  @Test
+  public void should_fail_if_plugin_version_archived_and_non_archived() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-plugin-archived-and-non-archived.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.DEV, false);
+
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("Plugin clirr: 1.0 cannot be both public and archived.");
     }
   }
 
@@ -411,19 +428,19 @@ public class UpdateCenterDeserializerTest {
       Properties props = new Properties();
       props.load(input);
 
-      UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
+      UpdateCenter updateCenterDev = new UpdateCenterDeserializer(Mode.DEV, false).fromProperties(props);
 
-      Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
+      Plugin clirr = updateCenterDev.getUpdateCenterPluginReferential().findPlugin("clirr");
       clirr.getRelease(Version.create("1.0"));
       clirr.getRelease(Version.create("1.1"));
       clirr.getRelease(Version.create("1.2-SNAPSHOT"));
 
-      updateCenter = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+      UpdateCenter updateCenterProd = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+      PluginReferential updateCenterPluginReferential = updateCenterProd.getUpdateCenterPluginReferential();
 
-      thrown.expect(NoSuchElementException.class);
-      thrown.expectMessage("Unable to find plugin with key clirr");
-
-      updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
+      assertThatExceptionOfType(NoSuchElementException.class)
+        .isThrownBy(() -> updateCenterPluginReferential.findPlugin("clirr"))
+        .withMessage("Unable to find plugin with key clirr");
     }
   }
 

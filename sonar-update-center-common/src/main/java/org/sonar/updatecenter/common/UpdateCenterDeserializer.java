@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
 import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
@@ -276,11 +277,16 @@ public final class UpdateCenterDeserializer {
     HashMap<String, Map.Entry<String, Integer>> flavosLabel, boolean isPublicRelease, boolean isArchivedRelease) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
-      Release release = parseRelease(p, sonar, pluginKey, component, isPublicRelease, isArchivedRelease, pluginVersion, flavosLabel);
-      if (!component.getAllReleases().contains(release)) {
-        component.addRelease(release);
+      Release releaseToAdd = parseRelease(p, sonar, pluginKey, component, isPublicRelease, isArchivedRelease, pluginVersion, flavosLabel);
+      Optional<Release> alreadyExistingRelease = component.getAllReleases().stream()
+        .filter(r -> r.getArtifact().equals(releaseToAdd.getArtifact()))
+        .filter(r -> r.getVersion().equals(releaseToAdd.getVersion()))
+        .findFirst();
+
+      if (alreadyExistingRelease.isPresent()) {
+        reportDuplicateReleaseDeclaration(alreadyExistingRelease.get(), releaseToAdd);
       } else {
-        reportError("Duplicate version for plugin " + pluginKey + ": " + pluginVersion);
+        component.addRelease(releaseToAdd);
       }
     }
   }
@@ -322,6 +328,16 @@ public final class UpdateCenterDeserializer {
       throw new IllegalArgumentException("issue while processing plugin " + pluginKey, ex);
     }
     return release;
+  }
+
+  private void reportDuplicateReleaseDeclaration(Release alreadyExistingRelease, Release releaseToAdd) {
+    if (alreadyExistingRelease.isArchived() != releaseToAdd.isArchived()) {
+      String message = "Plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion() + " cannot be both public and archived.";
+      reportError(message);
+    } else {
+      String message = "Duplicate version for plugin " + releaseToAdd.getKey() + ": " + releaseToAdd.getVersion();
+      reportError(message);
+    }
   }
 
   private void parseDownloadUrl(Properties p, String pluginKey, String pluginVersion, boolean isPublicRelease,
