@@ -76,7 +76,7 @@ public class CompatibilityMatrix {
       for (Release sq : center.getSonar().getMajorReleases()) {
         Release lastCompatible = plugin.getLastCompatible(sq.getVersion());
         if (lastCompatible != null) {
-          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.getVersion().toString());
+          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.isArchived() ? "" : lastCompatible.getVersion().toString());
         }
       }
     }
@@ -128,6 +128,10 @@ public class CompatibilityMatrix {
 
     public boolean supports(String sqVersion) {
       return compatibleVersionBySqVersion.containsKey(sqVersion);
+    }
+
+    public boolean isArchived(String sqVersion){
+      return compatibleVersionBySqVersion.get(sqVersion).isEmpty();
     }
 
     public String supportedVersion(String sqVersion) {
