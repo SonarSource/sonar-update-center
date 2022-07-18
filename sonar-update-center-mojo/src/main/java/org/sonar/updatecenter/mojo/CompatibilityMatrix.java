@@ -22,24 +22,27 @@ package org.sonar.updatecenter.mojo;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 
-import javax.annotation.Nullable;
-
 public class CompatibilityMatrix {
+  private static final Comparator<SonarVersionModel> SONAR_VERSION_MODEL_COMPARATOR =
+    Comparator.comparing(SonarVersionModel::isLts).thenComparing(SonarVersionModel::getRealVersion).reversed();
+
   private final File outputDirectory;
   private final UpdateCenter center;
   private final Log log;
 
-  private List<SonarVersionModel> sqVersions = new ArrayList<>();
-  private List<Plugin> plugins = new ArrayList<>();
+  private final List<SonarVersionModel> sqVersions = new ArrayList<>();
+  private final List<Plugin> plugins = new ArrayList<>();
 
   CompatibilityMatrix(UpdateCenter center, File outputDirectory, Log log) {
     this.outputDirectory = outputDirectory;
@@ -67,6 +70,9 @@ public class CompatibilityMatrix {
       boolean isLts = center.getSonar().getLtsRelease().equals(sq);
       getSqVersions().add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
     }
+
+    getSqVersions().sort(SONAR_VERSION_MODEL_COMPARATOR);
+
     for (org.sonar.updatecenter.common.Plugin plugin : pluginList) {
       PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
       Map<String, Object> dataModel = new HashMap<>();

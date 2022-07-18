@@ -39,6 +39,8 @@ table td, table th {
 }
 table th {
   background-color: #F0F0F0;
+  position: sticky;
+  top: 0;
 }
 .button {
   background: #3C78B5;
@@ -49,4 +51,8 @@ table th {
   cursor: pointer;
   margin: 5px;
   color: white;
+}
+
+table td.lts {
+  background-color: rgba(202, 227, 242, 0.5);
 }
