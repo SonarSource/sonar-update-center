@@ -13,7 +13,7 @@
   <thead>
     <tr>
         <th><strong>SonarQube Version</strong></th>
-        <#list matrix.sqVersions?reverse as sqVersion>
+        <#list matrix.sqVersions as sqVersion>
         <th>
           ${sqVersion.displayVersion}
           <#if sqVersion.isLts() >
@@ -24,8 +24,8 @@
     </tr>
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
-        <#list matrix.sqVersions?reverse as sqVersion>
-        <td>${(sqVersion.releaseDate)!}</td>
+        <#list matrix.sqVersions as sqVersion>
+        <td${sqVersion.isLts()?string(' class="lts"', '')}>${(sqVersion.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>
@@ -43,8 +43,8 @@
         <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png" />
         </#if>
         </td>
-        <#list matrix.sqVersions?reverse as sqVersion>
-        <td>
+        <#list matrix.sqVersions as sqVersion>
+        <td${sqVersion.isLts()?string(' class="lts"', '')}>
           <#if plugin.supports(sqVersion.realVersion) >
           ${plugin.supportedVersion(sqVersion.realVersion)}
           <#else>
