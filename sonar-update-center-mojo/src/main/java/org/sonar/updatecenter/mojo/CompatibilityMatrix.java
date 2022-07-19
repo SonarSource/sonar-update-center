@@ -22,24 +22,27 @@ package org.sonar.updatecenter.mojo;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
 
-import javax.annotation.Nullable;
-
 public class CompatibilityMatrix {
+  private static final Comparator<SonarVersionModel> SONAR_VERSION_MODEL_COMPARATOR =
+    Comparator.comparing(SonarVersionModel::isLts).thenComparing(SonarVersionModel::getRealVersion).reversed();
+
   private final File outputDirectory;
   private final UpdateCenter center;
   private final Log log;
 
-  private List<SonarVersionModel> sqVersions = new ArrayList<>();
-  private List<Plugin> plugins = new ArrayList<>();
+  private final List<SonarVersionModel> sqVersions = new ArrayList<>();
+  private final List<Plugin> plugins = new ArrayList<>();
 
   CompatibilityMatrix(UpdateCenter center, File outputDirectory, Log log) {
     this.outputDirectory = outputDirectory;
@@ -65,15 +68,18 @@ public class CompatibilityMatrix {
       String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
       Date releaseDate = sq.getDate();
       boolean isLts = center.getSonar().getLtsRelease().equals(sq);
-      getSqVersions().add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
+      sqVersions.add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
     }
+
+    sqVersions.sort(SONAR_VERSION_MODEL_COMPARATOR);
+
     for (org.sonar.updatecenter.common.Plugin plugin : pluginList) {
       PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginModel);
 
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
-      getPlugins().add(matrixPlugin);
+      plugins.add(matrixPlugin);
 
       for (Release sq : center.getSonar().getMajorReleases()) {
         Release lastCompatible = plugin.getLastCompatible(sq.getVersion());
@@ -83,9 +89,9 @@ public class CompatibilityMatrix {
       }
     }
 
-    getPlugins().sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+    plugins.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
-    if (!getPlugins().isEmpty()) {
+    if (!plugins.isEmpty()) {
       File file = new File(outputDirectory, "compatibility-matrix.html");
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("matrix", this);
@@ -97,7 +103,6 @@ public class CompatibilityMatrix {
   private static boolean isNotArchived(@Nullable Release lastCompatible) {
     return lastCompatible != null && !lastCompatible.isArchived();
   }
-
 
   public List<SonarVersionModel> getSqVersions() {
     return sqVersions;
