@@ -103,7 +103,6 @@ public class CompatibilityMatrixTest {
     releaseFoo.addRequiredSonarVersions("3.0");
     pluginFoo.addRelease(releaseFoo);
     pluginFoo.setName("foo");
-    pluginFoo.setSupportedBySonarSource(true);
 
     Plugin pluginBar = Plugin.factory("bar");
     Version versionBar = Version.create("2.0");
@@ -123,7 +122,6 @@ public class CompatibilityMatrixTest {
     releaseAbap.setArchived(true);
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
-    pluginAbap.setSupportedBySonarSource(true);
 
     prepareMocks(pluginFoo, pluginBar, pluginAbap);
     matrix.generateHtml();

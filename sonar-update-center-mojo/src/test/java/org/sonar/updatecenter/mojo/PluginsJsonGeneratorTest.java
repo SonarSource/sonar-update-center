@@ -112,7 +112,6 @@ public class PluginsJsonGeneratorTest {
       "  \"license\": \"Magic v6\",\n" +
       "  \"sourcesURL\": \"http://foo.bar\",\n" +
       "  \"issueTrackerURL\": \"https://jira.blackmagicians.com/browse/magic\",\n" +
-      "  \"isSonarSourceCommercial\": false,\n" +
       "  \"versions\": [\n" +
       "    {\n" +
       "      \"version\": \"2.0\",\n" +
@@ -136,7 +135,6 @@ public class PluginsJsonGeneratorTest {
     JSONAssert.assertEquals("{\n" +
       "  \"key\": \"bar\",\n" +
       "  \"name\": \"Bar\",\n" +
-      "  \"isSonarSourceCommercial\": false, \n" +
       "  \"versions\": [] \n" +
       "}", barFileContent, true);
 

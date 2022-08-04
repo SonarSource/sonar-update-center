@@ -75,8 +75,6 @@ class PluginsJsonGenerator extends JsonGenerator {
     @Expose
     private String key;
     @Expose
-    private Boolean isSonarSourceCommercial;
-    @Expose
     private OrganizationData organization;
     @Expose
     private String category;
@@ -123,7 +121,6 @@ class PluginsJsonGenerator extends JsonGenerator {
       JsonOutput returned = new JsonOutput();
       returned.name = pluginModel.getName();
       returned.key = pluginModel.getKey();
-      returned.isSonarSourceCommercial = pluginModel.isSonarSourceCommercialPlugin();
       if (pluginModel.getOrganization() != null) {
         returned.organization = new OrganizationData(
           pluginModel.getOrganization(),
