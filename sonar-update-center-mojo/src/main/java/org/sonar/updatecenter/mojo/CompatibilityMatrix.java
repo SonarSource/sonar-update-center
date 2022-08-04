@@ -30,8 +30,11 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
+import org.sonar.updatecenter.common.PluginReferential;
 import org.sonar.updatecenter.common.Release;
+import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.Version;
 
 public class CompatibilityMatrix {
   private static final Comparator<SonarVersionModel> SONAR_VERSION_MODEL_COMPARATOR =
@@ -61,30 +64,32 @@ public class CompatibilityMatrix {
 
   public void generateHtml() throws IOException {
     init();
-    List<org.sonar.updatecenter.common.Plugin> pluginList = center.getUpdateCenterPluginReferential().getPlugins();
+    PluginReferential pluginReferential = center.getUpdateCenterPluginReferential();
+    Sonar sonar = center.getSonar();
+
+    List<org.sonar.updatecenter.common.Plugin> pluginList = pluginReferential.getPlugins();
 
     // We want to keep only latest patch version. For example for 3.7, 3.7.1, 3.7.2 we keep only 3.7.2
-    for (Release sq : center.getSonar().getMajorReleases()) {
-      String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
+    for (Release sq : sonar.getMajorReleases()) {
+      Version version = sq.getVersion();
+      String displayVersion = String.format("%s.%s", version.getMajor(), version.getMinor());
       Date releaseDate = sq.getDate();
-      boolean isLts = center.getSonar().getLtsRelease().equals(sq);
-      sqVersions.add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
+      boolean isLts = sq.equals(sonar.getLtsRelease());
+      SonarVersionModel sonarVersionModel = new SonarVersionModel(version.toString(), displayVersion, releaseDate, isLts);
+      sqVersions.add(sonarVersionModel);
     }
 
     sqVersions.sort(SONAR_VERSION_MODEL_COMPARATOR);
 
     for (org.sonar.updatecenter.common.Plugin plugin : pluginList) {
-      PluginModel pluginModel = new PluginModel(plugin, center.getSonar());
-      Map<String, Object> dataModel = new HashMap<>();
-      dataModel.put("pluginHeader", pluginModel);
-
       CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl());
       plugins.add(matrixPlugin);
 
-      for (Release sq : center.getSonar().getMajorReleases()) {
-        Release lastCompatible = plugin.getLastCompatible(sq.getVersion());
+      for (Release sq : sonar.getMajorReleases()) {
+        Version version = sq.getVersion();
+        Release lastCompatible = plugin.getLastCompatible(version);
         if (isNotArchived(lastCompatible)) {
-          matrixPlugin.getCompatibleVersionBySqVersion().put(sq.getVersion().toString(), lastCompatible.getVersion().toString());
+          matrixPlugin.getCompatibleVersionBySqVersion().put(version.toString(), lastCompatible.getVersion().toString());
         }
       }
     }

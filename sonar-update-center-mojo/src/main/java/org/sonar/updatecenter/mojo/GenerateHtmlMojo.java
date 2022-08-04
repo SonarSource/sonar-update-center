@@ -48,7 +48,7 @@ public class GenerateHtmlMojo extends AbstractMojo {
   private boolean ignoreErrors = false;
 
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public void execute() throws MojoExecutionException {
     try {
       Configuration configuration = new Configuration(outputDir, inputFile, false, ignoreErrors, false, false, getLog());
       new Generator(configuration, getLog()).generateHtml();

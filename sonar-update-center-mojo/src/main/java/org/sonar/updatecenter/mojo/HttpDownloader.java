@@ -20,14 +20,12 @@
 package org.sonar.updatecenter.mojo;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.logging.Log;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 class HttpDownloader {
 
@@ -41,7 +39,7 @@ class HttpDownloader {
     this.log = log;
   }
 
-  public File download(String url, boolean force) throws IOException, URISyntaxException {
+  public File download(String url, boolean force) throws IOException {
     FileUtils.forceMkdir(outputDir);
 
     String filename = StringUtils.substringAfterLast(url, "/");
@@ -57,7 +55,7 @@ class HttpDownloader {
     return output;
   }
 
-  File downloadFile(URL fileURL, File toFile) {
+  void downloadFile(URL fileURL, File toFile) {
     log.info(String.format("Download %s in %s", fileURL, toFile));
     try {
       if ("file".equals(fileURL.getProtocol())) {
@@ -75,7 +73,6 @@ class HttpDownloader {
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException(String.format("Fail to download %s to %s", fileURL, toFile), e);
     }
-    return toFile;
   }
 
 

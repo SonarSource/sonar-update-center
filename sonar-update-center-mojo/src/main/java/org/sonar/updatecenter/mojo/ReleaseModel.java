@@ -121,8 +121,8 @@ public class ReleaseModel {
   }
 
   public static class LabeledUrl {
-    private String label;
-    private String url;
+    private final String label;
+    private final String url;
 
     public LabeledUrl(@Nullable String label, String url) {
       this.label = label;

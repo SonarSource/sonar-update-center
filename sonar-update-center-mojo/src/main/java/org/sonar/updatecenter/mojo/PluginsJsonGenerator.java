@@ -58,7 +58,6 @@ class PluginsJsonGenerator extends JsonGenerator {
   }
 
   void generateJsonFiles() throws IOException {
-
     List<Plugin> plugins = center.getUpdateCenterPluginReferential().getPlugins();
 
     for (Plugin plugin : plugins) {
