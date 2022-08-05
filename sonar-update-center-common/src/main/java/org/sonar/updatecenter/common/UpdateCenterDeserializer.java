@@ -472,11 +472,11 @@ public final class UpdateCenterDeserializer {
   private static List<String> split(String requiredSonarVersions) {
     List<String> splitted = new ArrayList<>();
     int skipCommas = 0;
-    String s = "";
+    StringBuilder s = new StringBuilder();
     for (char c : requiredSonarVersions.toCharArray()) {
       if (c == ',' && skipCommas == 0) {
-        splitted.add(s);
-        s = "";
+        splitted.add(s.toString());
+        s = new StringBuilder();
       } else {
         if (c == '[') {
           skipCommas++;
@@ -484,11 +484,11 @@ public final class UpdateCenterDeserializer {
         if (c == ']') {
           skipCommas--;
         }
-        s += Character.toString(c);
+        s.append(c);
       }
     }
-    if (StringUtils.isNotBlank(s)) {
-      splitted.add(s);
+    if (StringUtils.isNotBlank(s.toString())) {
+      splitted.add(s.toString());
     }
     return splitted;
   }

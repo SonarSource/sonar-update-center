@@ -94,7 +94,7 @@ public class UpdateCenterDeserializerTest {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     List<Scanner> scanners = center.getScanners();
-    assertThat(scanners.size()).isEqualTo(1);
+    assertThat(scanners).hasSize(1);
     Scanner scanner = scanners.get(0);
     assertThat(scanner.getLicense()).isEqualTo("GNU LGPL 3");
   }
@@ -142,14 +142,14 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(6);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.7.1");
+      assertThat(requiredSonarVersion.first()).hasToString("2.3");
+      assertThat(requiredSonarVersion.last()).hasToString("2.7.1");
 
       Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
       requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(6);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.2");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+      assertThat(requiredSonarVersion.first()).hasToString("2.2");
+      assertThat(requiredSonarVersion.last()).hasToString("2.8");
       assertThat(requiredSonarVersion).doesNotContain(Version.create("2.7"));
     }
   }
@@ -193,14 +193,14 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(7);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+      assertThat(requiredSonarVersion.first()).hasToString("2.3");
+      assertThat(requiredSonarVersion.last()).hasToString("2.8");
 
       Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
       requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(4);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("2.8");
+      assertThat(requiredSonarVersion.first()).hasToString("2.4");
+      assertThat(requiredSonarVersion.last()).hasToString("2.8");
     }
   }
 
@@ -215,14 +215,14 @@ public class UpdateCenterDeserializerTest {
       Plugin clirr = pluginReferential.getUpdateCenterPluginReferential().findPlugin("clirr");
       SortedSet<Version> requiredSonarVersion = clirr.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(8);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.3");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
+      assertThat(requiredSonarVersion.first()).hasToString("2.3");
+      assertThat(requiredSonarVersion.last()).hasToString("3.0");
 
       Plugin motionchart = pluginReferential.getUpdateCenterPluginReferential().findPlugin("motionchart");
       requiredSonarVersion = motionchart.getRelease(Version.create("1.1")).getRequiredSonarVersions();
       assertThat(requiredSonarVersion).hasSize(4);
-      assertThat(requiredSonarVersion.first().toString()).isEqualTo("2.4");
-      assertThat(requiredSonarVersion.last().toString()).isEqualTo("3.0");
+      assertThat(requiredSonarVersion.first()).hasToString("2.4");
+      assertThat(requiredSonarVersion.last()).hasToString("3.0");
     }
   }
 
@@ -317,13 +317,13 @@ public class UpdateCenterDeserializerTest {
     assertThat(ssqvPlugin.getPublicVersions()).extracting(Version::getName).containsOnly("1.0", "1.1");
     SortedSet<Version> requiredSonarVersion10 = ssqvPlugin.getRelease(Version.create("1.0")).getRequiredSonarVersions();
     assertThat(requiredSonarVersion10).hasSize(1);
-    assertThat(requiredSonarVersion10.first().toString()).isEqualTo("3.7");
-    assertThat(requiredSonarVersion10.last().toString()).isEqualTo("3.7");
+    assertThat(requiredSonarVersion10.first()).hasToString("3.7");
+    assertThat(requiredSonarVersion10.last()).hasToString("3.7");
 
     SortedSet<Version> requiredSonarVersion11 = ssqvPlugin.getRelease(Version.create("1.1")).getRequiredSonarVersions();
     assertThat(requiredSonarVersion11).hasSize(1);
-    assertThat(requiredSonarVersion11.first().toString()).isEqualTo("4.0");
-    assertThat(requiredSonarVersion11.last().toString()).isEqualTo("4.0");
+    assertThat(requiredSonarVersion11.first()).hasToString("4.0");
+    assertThat(requiredSonarVersion11.last()).hasToString("4.0");
 
   }
 

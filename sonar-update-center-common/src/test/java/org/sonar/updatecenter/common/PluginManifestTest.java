@@ -27,6 +27,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,7 @@ public class PluginManifestTest {
     assertThat(manifest.getRequirePlugins()).hasSize(2);
     assertThat(manifest.getSonarVersion()).isEqualTo("newSonarVersion");
     assertThat(manifest.getMainClass()).isEqualTo("newMainClass");
-    assertThat(manifest.getBuildDate().equals(macBirthDate)).isTrue();
+    assertThat(Objects.equals(manifest.getBuildDate(), macBirthDate)).isTrue();
     assertThat(manifest.isUseChildFirstClassLoader()).isFalse();
     assertThat(manifest.isSonarLintSupported()).isTrue();
     assertThat(manifest.getBasePlugin()).isEqualTo("newBasePlugin");

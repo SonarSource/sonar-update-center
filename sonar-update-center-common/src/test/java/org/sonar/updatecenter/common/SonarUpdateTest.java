@@ -50,9 +50,10 @@ public class SonarUpdateTest {
     SonarUpdate update1 = new SonarUpdate(new Release(new Sonar(), "2.2"));
     SonarUpdate update2 = new SonarUpdate(new Release(new Sonar(), "2.3"));
 
-    assertThat(update1).isEqualTo(update1);
-    assertThat(update1).isEqualTo(new SonarUpdate(new Release(new Sonar(), "2.2")));
-    assertThat(update1).isNotEqualTo(update2);
+    assertThat(update1)
+      .isEqualTo(update1)
+      .isEqualTo(new SonarUpdate(new Release(new Sonar(), "2.2")))
+      .isNotEqualTo(update2);
   }
 
 }

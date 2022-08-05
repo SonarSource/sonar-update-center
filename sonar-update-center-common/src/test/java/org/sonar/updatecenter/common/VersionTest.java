@@ -42,7 +42,7 @@ public class VersionTest {
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("0");
     assertThat(version.getPatch2()).isEqualTo("0");
-    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getQualifier()).isEmpty();
   }
 
   @Test
@@ -53,7 +53,7 @@ public class VersionTest {
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("0");
     assertThat(version.getPatch2()).isEqualTo("0");
-    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getQualifier()).isEmpty();
     assertThat(version.getFromString()).isEqualTo("1.2");
 
     Version versionWFromString = Version.create("1.2", "LATEST");
@@ -61,11 +61,11 @@ public class VersionTest {
     assertThat(versionWFromString.getMinor()).isEqualTo("2");
     assertThat(versionWFromString.getPatch()).isEqualTo("0");
     assertThat(versionWFromString.getPatch2()).isEqualTo("0");
-    assertThat(versionWFromString.getQualifier()).isEqualTo("");
+    assertThat(versionWFromString.getQualifier()).isEmpty();
     assertThat(versionWFromString.getFromString()).isEqualTo("LATEST");
 
     Version copiedVersion = Version.create(versionWFromString, "COPY");
-    copiedVersion.equals(versionWFromString);
+    assertThat(copiedVersion).isEqualTo(versionWFromString);
     assertThat(copiedVersion.getFromString()).isEqualTo("COPY");
   }
 
@@ -74,9 +74,8 @@ public class VersionTest {
     Version version12 = Version.create("1.2");
     Version version121 = Version.create("1.2.1");
 
-    assertThat(version12.toString()).isEqualTo("1.2");
-    assertThat(version12.compareTo(version12)).isEqualTo(0);
-    assertThat(version121.compareTo(version121)).isEqualTo(0);
+    assertThat(version12).hasToString("1.2").isEqualByComparingTo(version12);
+    assertThat(version121).isEqualByComparingTo(version121);
 
     assertThat(version121.compareTo(version12) > 0).isTrue();
     assertThat(version12.compareTo(version121) < 0).isTrue();
@@ -89,10 +88,10 @@ public class VersionTest {
     Version version121Snapshot = Version.create("1.2.1-SNAPSHOT");
     Version version12RC = Version.create("1.2-RC1");
 
-    assertThat(version12.compareTo(version12Snapshot)).isGreaterThan(0);
-    assertThat(version12Snapshot.compareTo(version12Snapshot)).isEqualTo(0);
-    assertThat(version121Snapshot.compareTo(version12Snapshot)).isGreaterThan(0);
-    assertThat(version12Snapshot.compareTo(version12RC)).isGreaterThan(0);
+    assertThat(version12).isGreaterThan(version12Snapshot);
+    assertThat(version12Snapshot).isEqualByComparingTo(version12Snapshot);
+    assertThat(version121Snapshot).isGreaterThan(version12Snapshot);
+    assertThat(version12Snapshot).isGreaterThan(version12RC);
   }
 
   @Test
@@ -102,11 +101,10 @@ public class VersionTest {
     Version version12RC1 = Version.create("1.2-RC1");
     Version version12RC2 = Version.create("1.2-RC2");
 
-    assertThat(version12RC1.compareTo(version12Snapshot)).isLessThan(0);
-    assertThat(version12RC1.compareTo(version12RC1)).isEqualTo(0);
-    assertThat(version12RC1.compareTo(version12RC2)).isLessThan(0);
-    assertThat(version12RC1.compareTo(version12)).isLessThan(0);
-
+    assertThat(version12RC1).isLessThan(version12Snapshot)
+      .isEqualByComparingTo(version12RC1)
+      .isLessThan(version12RC2)
+      .isLessThan(version12);
   }
 
   @Test
@@ -114,7 +112,7 @@ public class VersionTest {
     Version version12 = Version.create("   1.2  ");
 
     assertThat(version12.getName()).isEqualTo("1.2");
-    assertThat(version12.equals(Version.create("1.2"))).isTrue();
+    assertThat(version12).isEqualTo(Version.create("1.2"));
   }
 
   @Test
@@ -122,8 +120,8 @@ public class VersionTest {
     Version version12 = Version.create("1.2");
     Version version120 = Version.create("1.2.0");
 
-    assertThat(version12.equals(version120)).isTrue();
-    assertThat(version120.equals(version12)).isTrue();
+    assertThat(version12).isEqualTo(version120);
+    assertThat(version120).isEqualTo(version12);
   }
 
   @Test
@@ -141,7 +139,7 @@ public class VersionTest {
     Version version = Version.create("1.10.2");
 
     assertThat(version.getName()).isEqualTo("1.10.2");
-    assertThat(version.toString()).isEqualTo("1.10.2");
+    assertThat(version).hasToString("1.10.2");
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("10");
     assertThat(version.getPatch()).isEqualTo("2");
@@ -156,8 +154,7 @@ public class VersionTest {
     assertThat(version.getPatch2()).isEqualTo("4");
 
     assertThat(version.equals(version)).isTrue();
-    assertThat(version.equals(Version.create("1.2.3.4"))).isTrue();
-    assertThat(version.equals(Version.create("1.2.3.5"))).isFalse();
+    assertThat(version).isEqualTo(Version.create("1.2.3.4")).isNotEqualTo(Version.create("1.2.3.5"));
   }
 
   @Test
@@ -167,6 +164,6 @@ public class VersionTest {
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("3");
-    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getQualifier()).isEmpty();
   }
 }

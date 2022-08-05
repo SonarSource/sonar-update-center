@@ -19,13 +19,11 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
-import java.io.File;
 
 @Mojo(name = "generate-json", requiresProject = false, threadSafe = true)
 public class GenerateJsonMojo extends AbstractMojo {

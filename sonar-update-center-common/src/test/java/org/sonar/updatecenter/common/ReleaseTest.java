@@ -95,9 +95,7 @@ public class ReleaseTest {
 
     Release bar10 = new Release(Plugin.factory("bar"), "1.0");
 
-    assertThat(squid10).isEqualTo(squid10bis);
-    assertThat(squid10).isNotEqualTo(squid20);
-    assertThat(squid10).isNotEqualTo(bar10);
+    assertThat(squid10).isEqualTo(squid10bis).isNotEqualTo(squid20).isNotEqualTo(bar10);
   }
 
   @Test
@@ -105,7 +103,7 @@ public class ReleaseTest {
     Release release = new Release(Plugin.factory("squid"), "1.0");
     release.addRequiredSonarVersions("2.1", "1.9", "2.0");
     assertThat(release.getRequiredSonarVersions()).hasSize(3);
-    assertThat(release.getSonarVersionFromString("mystring")).hasSize(0);
+    assertThat(release.getSonarVersionFromString("mystring")).isEmpty();
 
     release.addRequiredSonarVersions(Version.create("3.0", "mystring"));
     Version[] sqVersions = release.getSonarVersionFromString("mystring");

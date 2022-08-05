@@ -224,8 +224,8 @@ public class UpdateCenter {
           searchCompatiblePluginUpgrade(sonarRelease, update, installedRelease, plugin);
         }
       } catch (NoSuchElementException e) {
-        LOG.info("The plugin '" + installedRelease.getArtifact().getKey() +
-          "' version : " + installedRelease.getVersion().getName() + " has not been found on the update center.");
+        LOG.info("The plugin '{}' version : {} has not been found on the update center.",
+          installedRelease.getArtifact().getKey(), installedRelease.getVersion().getName());
       }
     }
     return update;

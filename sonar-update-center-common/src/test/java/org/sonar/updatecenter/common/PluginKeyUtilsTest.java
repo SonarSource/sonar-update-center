@@ -40,19 +40,19 @@ public class PluginKeyUtilsTest {
 
   @Test
   public void shouldBeValid() {
-    assertThat(PluginKeyUtils.isValid("foo")).isEqualTo(true);
-    assertThat(PluginKeyUtils.isValid("sonarfooplugin")).isEqualTo(true);
-    assertThat(PluginKeyUtils.isValid("foo6")).isEqualTo(true);
-    assertThat(PluginKeyUtils.isValid("FOO6")).isEqualTo(true);
+    assertThat(PluginKeyUtils.isValid("foo")).isTrue();
+    assertThat(PluginKeyUtils.isValid("sonarfooplugin")).isTrue();
+    assertThat(PluginKeyUtils.isValid("foo6")).isTrue();
+    assertThat(PluginKeyUtils.isValid("FOO6")).isTrue();
   }
 
   @Test
   public void shouldNotBeValid() {
-    assertThat(PluginKeyUtils.isValid(null)).isEqualTo(false);
-    assertThat(PluginKeyUtils.isValid("")).isEqualTo(false);
-    assertThat(PluginKeyUtils.isValid("sonar-foo-plugin")).isEqualTo(false);
-    assertThat(PluginKeyUtils.isValid("foo.bar")).isEqualTo(false);
-    assertThat(PluginKeyUtils.isValid("  nowhitespaces   ")).isEqualTo(false);
-    assertThat(PluginKeyUtils.isValid("no whitespaces")).isEqualTo(false);
+    assertThat(PluginKeyUtils.isValid(null)).isFalse();
+    assertThat(PluginKeyUtils.isValid("")).isFalse();
+    assertThat(PluginKeyUtils.isValid("sonar-foo-plugin")).isFalse();
+    assertThat(PluginKeyUtils.isValid("foo.bar")).isFalse();
+    assertThat(PluginKeyUtils.isValid("  nowhitespaces   ")).isFalse();
+    assertThat(PluginKeyUtils.isValid("no whitespaces")).isFalse();
   }
 }

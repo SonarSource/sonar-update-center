@@ -28,11 +28,11 @@ public class ComponentTest {
   public void should_return_string() {
     Plugin plugin = Plugin.factory("squid");
 
-    assertThat(plugin.toString()).isEqualTo("squid");
+    assertThat(plugin).hasToString("squid");
 
     Scanner scanner = Scanner.factory("squid");
 
-    assertThat(scanner.toString()).isEqualTo("squid");
+    assertThat(scanner).hasToString("squid");
   }
 
 }

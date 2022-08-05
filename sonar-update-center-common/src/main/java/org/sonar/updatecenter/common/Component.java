@@ -145,8 +145,6 @@ public abstract class Component extends Artifact {
 
   @Override
   public String toString() {
-    return new StringBuilder()
-      .append(key)
-      .toString();
+    return key;
   }
 }
