@@ -39,9 +39,6 @@
         ${plugin.name}
         </#if>
         </strong>
-        <#if plugin.isSupportedBySonarSource()>
-        <img class="emoticon" alt="(Supported by SonarSource)" src="onde-sonar-16.png" />
-        </#if>
         </td>
         <#list matrix.sqVersions as sqVersion>
         <td${sqVersion.isLts()?string(' class="lts"', '')}>
