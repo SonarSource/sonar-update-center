@@ -3,7 +3,6 @@
   "title": "Plugin Data",
   "type": "object",
   "required": [
-    "isSonarSourceCommercial",
     "name"
   ],
   "properties": {
@@ -13,9 +12,6 @@
     },
     "key": {
       "type": "string"
-    },
-    "isSonarSourceCommercial": {
-      "type": "boolean"
     },
     "organization": {
       "type": "object",

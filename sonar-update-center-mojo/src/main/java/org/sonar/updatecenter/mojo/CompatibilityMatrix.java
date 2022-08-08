@@ -56,7 +56,6 @@ public class CompatibilityMatrix {
     }
     FileUtils.copyURLToFile(getClass().getResource("/styles.css"), new File(outputDirectory, "styles.css"));
     FileUtils.copyURLToFile(getClass().getResource("/error.png"), new File(outputDirectory, "error.png"));
-    FileUtils.copyURLToFile(getClass().getResource("/onde-sonar-16.png"), new File(outputDirectory, "onde-sonar-16.png"));
   }
 
   public void generateHtml() throws IOException {
@@ -78,7 +77,7 @@ public class CompatibilityMatrix {
       Map<String, Object> dataModel = new HashMap<>();
       dataModel.put("pluginHeader", pluginModel);
 
-      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl(), plugin.isSupportedBySonarSource());
+      CompatibilityMatrix.Plugin matrixPlugin = new CompatibilityMatrix.Plugin(plugin.getName(), plugin.getHomepageUrl());
       plugins.add(matrixPlugin);
 
       for (Release sq : center.getSonar().getMajorReleases()) {
@@ -118,12 +117,10 @@ public class CompatibilityMatrix {
     private final String homepageUrl;
     private final Map<String, String> compatibleVersionBySqVersion = new HashMap<>();
 
-    private final boolean isSupportedBySonarSource;
 
-    public Plugin(String name, String homepageUrl, boolean isSupportedBySonarSource) {
+    public Plugin(String name, String homepageUrl) {
       this.name = name;
       this.homepageUrl = homepageUrl;
-      this.isSupportedBySonarSource = isSupportedBySonarSource;
     }
 
     public String getName() {
@@ -146,9 +143,6 @@ public class CompatibilityMatrix {
       return compatibleVersionBySqVersion.get(sqVersion);
     }
 
-    public boolean isSupportedBySonarSource() {
-      return isSupportedBySonarSource;
-    }
 
   }
 

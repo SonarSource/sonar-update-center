@@ -89,8 +89,8 @@ public class CompatibilityMatrixTest {
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
     prepareMocks();
     matrix.generateHtml();
-    assertThat(outputFolder.list()).hasSize(3);
-    assertThat(outputFolder.list()).containsOnly("styles.css", "error.png", "onde-sonar-16.png");
+    assertThat(outputFolder.list()).hasSize(2);
+    assertThat(outputFolder.list()).containsOnly("styles.css", "error.png");
   }
 
   @Test
@@ -103,7 +103,6 @@ public class CompatibilityMatrixTest {
     releaseFoo.addRequiredSonarVersions("3.0");
     pluginFoo.addRelease(releaseFoo);
     pluginFoo.setName("foo");
-    pluginFoo.setSupportedBySonarSource(true);
 
     Plugin pluginBar = Plugin.factory("bar");
     Version versionBar = Version.create("2.0");
@@ -123,17 +122,15 @@ public class CompatibilityMatrixTest {
     releaseAbap.setArchived(true);
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
-    pluginAbap.setSupportedBySonarSource(true);
 
     prepareMocks(pluginFoo, pluginBar, pluginAbap);
     matrix.generateHtml();
 
-    // 4 files:
+    // 3 files:
     // - styles.css
     // - error.png
-    // - onde-sonar-16.png
     // - compatibility-matrix.html
-    assertThat(outputFolder.list()).hasSize(4);
+    assertThat(outputFolder.list()).hasSize(3);
 
     File file = outputFolder.listFiles(new FilenameFilterForCompatibilityMatrixGeneratedHtml())[0];
     String flattenFile = flatHtmlFile(file);

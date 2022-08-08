@@ -27,8 +27,6 @@ import java.util.Arrays;
 public class Plugin extends Component {
 
 
-  private boolean supportedBySonarSource = false;
-
 
   private Plugin(String key) {
     super(key);
@@ -42,10 +40,6 @@ public class Plugin extends Component {
     } else {
       throw new IllegalArgumentException("plugin key must be alphanumeric, strictly");
     }
-  }
-
-  public boolean isSupportedBySonarSource() {
-    return supportedBySonarSource;
   }
 
   @Override
@@ -114,11 +108,6 @@ public class Plugin extends Component {
   }
 
 
-  public Plugin setSupportedBySonarSource(boolean supportedBySonarSource) {
-    this.supportedBySonarSource = supportedBySonarSource;
-    return this;
-  }
-
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       // from the manifest
@@ -137,8 +126,7 @@ public class Plugin extends Component {
       homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
       sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
 
-      // from the properties file
-      // supportedBySonarSource
+
     }
     return this;
   }

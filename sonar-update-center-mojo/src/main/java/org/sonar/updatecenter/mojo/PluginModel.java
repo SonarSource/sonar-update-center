@@ -84,11 +84,4 @@ public class PluginModel {
     return result;
   }
 
-  public boolean isSupportedBySonarSource() {
-    return plugin.isSupportedBySonarSource();
-  }
-
-  public boolean isSonarSourceCommercialPlugin() {
-    return isSupportedBySonarSource() && StringUtils.isNotEmpty(plugin.getTermsConditionsUrl());
-  }
 }

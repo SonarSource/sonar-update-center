@@ -51,7 +51,6 @@ public class GenerateHtmlMojoTest {
 
     assertThat(new File(outputDir, "html/styles.css")).exists().isFile();
     assertThat(new File(outputDir, "html/error.png")).exists().isFile();
-    assertThat(new File(outputDir, "html/onde-sonar-16.png")).exists().isFile();
   }
 
   private File resource(String filename) {
