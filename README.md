@@ -28,6 +28,7 @@ You will need the update center properties, which you can find [here](https://gi
 mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metadata \
     -DinputFile=../sonar-update-center-properties/update-center-source.properties \
     -DoutputDir=output
+```
 
 ### To generate html
 
@@ -49,6 +50,6 @@ mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-json 
 
 ### License
 
-Copyright 2010-2022 SonarSource.
+Copyright 2010-2023 SonarSource.
 
 Licensed under the [GNU Lesser General Public License, Version 3.0](http://www.gnu.org/licenses/lgpl.txt)
