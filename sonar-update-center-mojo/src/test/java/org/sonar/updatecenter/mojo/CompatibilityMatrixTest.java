@@ -68,6 +68,7 @@ public class CompatibilityMatrixTest {
     sonar.addRelease("3.7.2");
     sonar.addRelease("3.7.4");
     sonar.addRelease("4.0");
+    sonar.addRelease("10.0");
 
     sonar.setLtsRelease("3.7.4");
   }

@@ -32,10 +32,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.UpdateCenter;
+import org.sonar.updatecenter.common.Version;
 
 public class CompatibilityMatrix {
   private static final Comparator<SonarVersionModel> SONAR_VERSION_MODEL_COMPARATOR =
-    Comparator.comparing(SonarVersionModel::isLts).thenComparing(SonarVersionModel::getRealVersion).reversed();
+    Comparator.comparing(SonarVersionModel::isLts).thenComparing(svm -> Version.create(svm.getRealVersion())).reversed();
 
   private final File outputDirectory;
   private final UpdateCenter center;
