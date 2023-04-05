@@ -9,8 +9,8 @@ on:
 jobs:
   release:
     permissions:
-      contents: read
       id-token: write
+      contents: write
     uses: SonarSource/gh-action_release/.github/workflows/main.yaml@v5
     with:
       publishToBinaries: true
