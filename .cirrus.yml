@@ -28,6 +28,7 @@ env:
     org.sonarsource.update-center:sonar-update-center:jar,\
     org.sonarsource.update-center:sonar-update-center-common:jar,\
     org.sonarsource.update-center:sonar-update-center-mojo:jar"
+  NIGHTLY_CRON: 'nightly'
 
 #
 # RE-USABLE CONFIGS
@@ -40,6 +41,9 @@ container_definition: &CONTAINER_DEFINITION
 
 only_sonarsource_qa: &ONLY_SONARSOURCE_QA
   only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
+
+except_nightly_cron: &EXCEPT_ON_NIGHTLY_CRON
+  only_if: $CIRRUS_CRON != $NIGHTLY_CRON
 
 #
 # TASKS
@@ -68,6 +72,7 @@ promote_task:
   depends_on:
     - build
   <<: *ONLY_SONARSOURCE_QA
+  <<: *EXCEPT_ON_NIGHTLY_CRON
   eks_container:
     <<: *CONTAINER_DEFINITION
     cpu: 0.5
