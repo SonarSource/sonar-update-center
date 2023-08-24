@@ -87,6 +87,11 @@ public final class PluginManifest {
    */
   public static final String DISPLAY_VERSION = "Plugin-Display-Version";
 
+  /**
+   * @since 1.31
+   */
+  public static final String REQUIRED_FOR_LANGUAGES = "Plugin-RequiredForLanguages";
+
   private String key;
   private String name;
   private String mainClass;
@@ -109,6 +114,7 @@ public final class PluginManifest {
   private String[] developers;
   private String[] requirePlugins;
   private boolean sonarlintSupported;
+  private String[] requiredForLanguages;
 
   /**
    * Load the manifest from a JAR file.
@@ -175,6 +181,9 @@ public final class PluginManifest {
 
     String requires = attributes.getValue(REQUIRE_PLUGINS);
     this.requirePlugins = StringUtils.split(StringUtils.defaultString(requires), ',');
+
+    String languages = attributes.getValue(REQUIRED_FOR_LANGUAGES);
+    this.requiredForLanguages = StringUtils.split(StringUtils.defaultString(languages), ',');
   }
 
   public String getKey() {
@@ -414,6 +423,22 @@ public final class PluginManifest {
    */
   public PluginManifest setDevelopers(String[] developers) {
     this.developers = developers;
+    return this;
+  }
+
+  /**
+   * @since 1.31
+   */
+  public String[] getRequiredForLanguages() {
+    return requiredForLanguages;
+  }
+
+  /**
+   *
+   * @since 1.31
+   */
+  public PluginManifest setRequiredForLanguages(String[] requiredForLanguages) {
+    this.requiredForLanguages = requiredForLanguages;
     return this;
   }
 

@@ -54,6 +54,7 @@ public class PluginManifestTest {
     assertThat(manifest.getDependencies()).hasSize(2);
     assertThat(manifest.getDependencies()).containsOnly("META-INF/lib/antlr-2.7.7.jar", "META-INF/lib/checkstyle-5.5.jar");
     assertThat(manifest.getImplementationBuild()).isEqualTo("b9283404030db9ce1529b1fadfb98331686b116d");
+    assertThat(manifest.getRequiredForLanguages()).isEmpty();
   }
 
   @Test
@@ -76,6 +77,7 @@ public class PluginManifestTest {
     manifest.setSonarLintSupported(true);
     manifest.setBasePlugin("newBasePlugin");
     manifest.setImplementationBuild("newImplementationBuild");
+    manifest.setRequiredForLanguages(new String[] {"lang1", "lang2"});
 
     assertThat(manifest.getName()).isEqualTo("newName");
     assertThat(manifest.getRequirePlugins()).hasSize(2);
@@ -86,6 +88,7 @@ public class PluginManifestTest {
     assertThat(manifest.isSonarLintSupported()).isTrue();
     assertThat(manifest.getBasePlugin()).isEqualTo("newBasePlugin");
     assertThat(manifest.getImplementationBuild()).isEqualTo("newImplementationBuild");
+    assertThat(manifest.getRequiredForLanguages()).hasSize(2);
   }
 
   @Test
@@ -132,5 +135,16 @@ public class PluginManifestTest {
     assertThat(manifest.getRequirePlugins()).hasSize(2);
     assertThat(manifest.getRequirePlugins()[0]).isEqualTo("scm:1.0");
     assertThat(manifest.getRequirePlugins()[1]).isEqualTo("fake:1.1");
+  }
+
+  @Test
+  public void should_add_languages() throws URISyntaxException, IOException {
+    URL jar = getClass().getResource("/org/sonar/updatecenter/common/PluginManifestTest/plugin-with-require-for-languages.jar");
+
+    PluginManifest manifest = new PluginManifest(new File(jar.toURI()));
+
+    assertThat(manifest.getRequiredForLanguages()).hasSize(2);
+    assertThat(manifest.getRequiredForLanguages()[0]).isEqualTo("java");
+    assertThat(manifest.getRequiredForLanguages()[1]).isEqualTo("xml");
   }
 }
