@@ -77,6 +77,8 @@ promote_task:
     <<: *CONTAINER_DEFINITION
     cpu: 0.5
     memory: 500M
+  env:
+    GITHUB_TOKEN: VAULT[development/github/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promotion token]
   maven_cache:
     folder: $CIRRUS_WORKING_DIR/.m2/repository
   script:
