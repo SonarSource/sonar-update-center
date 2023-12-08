@@ -13,9 +13,6 @@ env:
 
   CIRRUS_CLONE_DEPTH: 50
 
-  GCF_ACCESS_TOKEN: VAULT[development/kv/data/promote data.token]
-  PROMOTE_URL: VAULT[development/kv/data/promote data.url]
-
   GITHUB_TOKEN: VAULT[development/github/token/licenses-ro token]
 
   BURGR_URL: VAULT[development/kv/data/burgr data.url]
