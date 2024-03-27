@@ -38,6 +38,6 @@ public class SonarVersionModelTest {
     assertThat(model.getDisplayVersion()).isEqualTo("6.7");
     assertThat(model.getRealVersion()).isEqualTo("6.7.1");
     assertThat(model.getReleaseDate()).isEqualTo("Nov 2017");
-    assertThat(model.isLts()).isTrue();
+    assertThat(model.isLta()).isTrue();
   }
 }

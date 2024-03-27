@@ -16,8 +16,8 @@
         <#list matrix.sqVersions as sqVersion>
         <th>
           ${sqVersion.displayVersion}
-          <#if sqVersion.isLts() >
-          <br/> <strong>(LTS)</strong>
+          <#if sqVersion.isLta() >
+          <br/> <strong>(LTA)</strong>
           </#if>
         </th>
         </#list>
@@ -25,7 +25,7 @@
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
         <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLts()?string(' class="lts"', '')}>${(sqVersion.releaseDate)!}</td>
+        <td${sqVersion.isLta()?string(' class="lta"', '')}>${(sqVersion.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>
@@ -41,7 +41,7 @@
         </strong>
         </td>
         <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLts()?string(' class="lts"', '')}>
+        <td${sqVersion.isLta()?string(' class="lta"', '')}>
           <#if plugin.supports(sqVersion.realVersion) >
           ${plugin.supportedVersion(sqVersion.realVersion)}
           <#else>
