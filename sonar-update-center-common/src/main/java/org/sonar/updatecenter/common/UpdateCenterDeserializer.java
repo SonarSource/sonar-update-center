@@ -19,12 +19,6 @@
  */
 package org.sonar.updatecenter.common;
 
-import java.util.Optional;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,11 +31,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.updatecenter.common.exception.SonarVersionRangeException;
 
 import static java.util.Arrays.asList;
 import static org.sonar.updatecenter.common.FormatUtils.toDate;
@@ -68,10 +67,12 @@ public final class UpdateCenterDeserializer {
   private static final String DEV_VERSION = "devVersion";
   private static final String LATEST_KEYWORD = "LATEST";
   private static final String FLAVORS_PREFIX = "flavors";
+  private static final String LTA_VERSION = "ltaVersion";
+  private static final String PAST_LTA_VERSION = "pastLtaVersion";
   private static final Logger LOGGER = LoggerFactory.getLogger(UpdateCenterDeserializer.class);
-  private Mode mode;
-  private boolean ignoreError;
-  private boolean includeArchives;
+  private final Mode mode;
+  private final boolean ignoreError;
+  private final boolean includeArchives;
 
   public UpdateCenterDeserializer(Mode mode, boolean ignoreError) {
     this(mode, ignoreError, false);
@@ -152,7 +153,8 @@ public final class UpdateCenterDeserializer {
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
       for (Release release : plugin.getAllReleases()) {
-        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(), release.getVersion().getName() + ".requirePlugins", false), ""), ",");
+        String[] requiredReleases = StringUtils.split(StringUtils.defaultIfEmpty(get(p, plugin.getKey(),
+          release.getVersion().getName() + ".requirePlugins", false), ""), ",");
         for (String requiresPluginKey : requiredReleases) {
           String[] split = requiresPluginKey.split(":");
           String requiredPluginReleaseKey = split[0];
@@ -315,11 +317,11 @@ public final class UpdateCenterDeserializer {
       release.setDisplayVersion(getOrDefault(p, pluginKey, pluginVersion, DISPLAY_VERSION_SUFFIX, false));
       release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
       release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
-      if(component.needArtifact()) {
+      if (component.needArtifact()) {
         release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
         release.setArtifactId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_ARTIFACTID_SUFFIX, true));
       }
-      if(component.needSqVersion()) {
+      if (component.needSqVersion()) {
         Version[] requiredSonarVersions = getRequiredSonarVersions(p, pluginKey, pluginVersion, sonar, isArchivedRelease);
         if (!isArchivedRelease && requiredSonarVersions.length == 0) {
           reportError("Plugin " + pluginName(component) + " version " + pluginVersion
@@ -363,7 +365,8 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private void parseDevVersions(Properties p, Sonar sonar, String pluginKey, Component component, HashMap<String, Map.Entry<String, Integer>> flavosLabel) {
+  private void parseDevVersions(Properties p, Sonar sonar, String pluginKey, Component component, HashMap<String, Map.Entry<String,
+    Integer>> flavosLabel) {
     String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
       Release release = parseRelease(p, sonar, pluginKey, component, false, false, devVersion, flavosLabel);
@@ -377,6 +380,7 @@ public final class UpdateCenterDeserializer {
       parseSonarDevVersions(p, sonar);
     }
     parseSonarLtsVersion(p, sonar);
+    parseLtaVersions(p, sonar);
   }
 
   private void parseSonarDevVersions(Properties p, Sonar sonar) {
@@ -388,8 +392,22 @@ public final class UpdateCenterDeserializer {
   private void parseSonarLtsVersion(Properties p, Sonar sonar) {
     String ltsVersion = get(p, "ltsVersion", true);
     sonar.setLtsRelease(ltsVersion);
-    if (!sonar.getReleases().contains(sonar.getLtsRelease())) {
-      reportError("ltsVersion seems wrong as it is not listed in SonarQube versions");
+    verifyVersion(sonar, sonar.getLtsRelease(), "ltsVersion");
+  }
+
+  private void parseLtaVersions(Properties properties, Sonar sonar) {
+    String ltaVersion = get(properties, LTA_VERSION, true);
+    String pastLtaVersion = get(properties, PAST_LTA_VERSION, true);
+
+    sonar.setLtaVersion(ltaVersion);
+    sonar.setPastLtaVersion(pastLtaVersion);
+
+    verifyVersion(sonar, sonar.getLtaVersion(), LTA_VERSION);
+  }
+
+  private void verifyVersion(Sonar sonar, Release release, String versionType) {
+    if (!sonar.getReleases().contains(release)) {
+      reportError(versionType + " seems wrong as it is not listed in SonarQube versions");
     }
   }
 
@@ -418,7 +436,8 @@ public final class UpdateCenterDeserializer {
     release.setDisplayVersion(getOrDefault(p, sonarVersion, DISPLAY_VERSION_SUFFIX, false));
     release.setDescription(getOrDefault(p, sonarVersion, DESCRIPTION_SUFFIX, isPublicRelease));
     for (Release.Edition edition : Release.Edition.values()) {
-      String downloadUrl = getOrDefault(p, sonarVersion, getDownloadUrlSuffix(edition), edition == Release.Edition.COMMUNITY && isPublicRelease);
+      String downloadUrl = getOrDefault(p, sonarVersion, getDownloadUrlSuffix(edition),
+        edition == Release.Edition.COMMUNITY && isPublicRelease);
       if (downloadUrl != null) {
         release.setDownloadUrl(downloadUrl, edition);
       }

@@ -71,6 +71,8 @@ public class CompatibilityMatrixTest {
     sonar.addRelease("10.0");
 
     sonar.setLtsRelease("3.7.4");
+    sonar.setLtaVersion("3.7.4");
+    sonar.setPastLtaVersion("2.9.10");
   }
 
   private void prepareMocks(Plugin... plugins) {
