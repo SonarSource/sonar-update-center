@@ -21,7 +21,14 @@ package org.sonar.updatecenter.common;
 
 public class Sonar extends Artifact {
 
+  /**
+   * @deprecated use {@link Release ltaVersion} instead
+   */
+  @Deprecated
   private Release ltsVersion;
+
+  private Release ltaVersion;
+  private Release pastLtaVersion;
 
   public Sonar() {
     super("sonar");
@@ -57,5 +64,21 @@ public class Sonar extends Artifact {
       return getLtsRelease();
     }
     return super.getRelease(versionOrAliases);
+  }
+
+  public Release getLtaVersion() {
+    return ltaVersion;
+  }
+
+  public void setLtaVersion(String version) {
+    this.ltaVersion = new Release(this, Version.create(version));
+  }
+
+  public Release getPastLtaVersion() {
+    return pastLtaVersion;
+  }
+
+  public void setPastLtaVersion(String version) {
+    this.pastLtaVersion = new Release(this, Version.create(version));
   }
 }
