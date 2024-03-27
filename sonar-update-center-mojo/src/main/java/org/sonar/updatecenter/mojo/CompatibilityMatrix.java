@@ -36,7 +36,7 @@ import org.sonar.updatecenter.common.Version;
 
 public class CompatibilityMatrix {
   private static final Comparator<SonarVersionModel> SONAR_VERSION_MODEL_COMPARATOR =
-    Comparator.comparing(SonarVersionModel::isLts).thenComparing(svm -> Version.create(svm.getRealVersion())).reversed();
+    Comparator.comparing(SonarVersionModel::isLta).thenComparing(svm -> Version.create(svm.getRealVersion())).reversed();
 
   private final File outputDirectory;
   private final UpdateCenter center;
@@ -67,8 +67,8 @@ public class CompatibilityMatrix {
     for (Release sq : center.getSonar().getMajorReleases()) {
       String displayVersion = sq.getVersion().getMajor() + "." + sq.getVersion().getMinor();
       Date releaseDate = sq.getDate();
-      boolean isLts = center.getSonar().getLtsRelease().equals(sq);
-      sqVersions.add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLts));
+      boolean isLta = center.getSonar().getLtaVersion().equals(sq);
+      sqVersions.add(new SonarVersionModel(sq.getVersion().toString(), displayVersion, releaseDate, isLta));
     }
 
     sqVersions.sort(SONAR_VERSION_MODEL_COMPARATOR);

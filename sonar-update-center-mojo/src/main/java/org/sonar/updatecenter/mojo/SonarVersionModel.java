@@ -27,13 +27,13 @@ import javax.annotation.Nullable;
 public class SonarVersionModel {
   private final String realVersion;
   private final String displayVersion;
-  private final boolean isLts;
+  private final boolean isLta;
   @Nullable
   private final Date releaseDate;
 
-  public SonarVersionModel(String realVersion, String displayVersion, @Nullable Date releaseDate, boolean isLts) {
+  public SonarVersionModel(String realVersion, String displayVersion, @Nullable Date releaseDate, boolean isLta) {
     this.realVersion = realVersion;
-    this.isLts = isLts;
+    this.isLta = isLta;
     this.displayVersion = displayVersion;
     this.releaseDate = releaseDate;
   }
@@ -52,8 +52,8 @@ public class SonarVersionModel {
     return realVersion;
   }
 
-  public boolean isLts() {
-    return isLts;
+  public boolean isLta() {
+    return isLta;
   }
 
   public String getReleaseDate() {
