@@ -22,7 +22,7 @@ package org.sonar.updatecenter.common;
 public class Sonar extends Artifact {
 
   /**
-   * @deprecated use {@link Release ltaVersion} instead
+   * @deprecated use {@link Sonar#ltaVersion} instead
    */
   @Deprecated
   private Release ltsVersion;
@@ -34,11 +34,19 @@ public class Sonar extends Artifact {
     super("sonar");
   }
 
+  /**
+   * @deprecated use {@link Sonar#setLtaVersion(String)} instead
+   */
+  @Deprecated
   public Sonar setLtsRelease(String ltsVersion) {
     this.ltsVersion = new Release(this, Version.create(ltsVersion));
     return this;
   }
 
+  /**
+   * @deprecated use {@link Sonar#getLtaVersion()} instead
+   */
+  @Deprecated
   public Release getLtsRelease() {
     return ltsVersion;
   }
@@ -54,11 +62,12 @@ public class Sonar extends Artifact {
   }
 
   /**
-   * 
+   * @deprecated Tag "LTS"
    * @param versionOrAliases Any version or keywords "DEV", "LTS" or "LATEST_RELEASE"
    * @throws java.util.NoSuchElementException if release could not be found
    */
   @Override
+  @Deprecated
   public Release getRelease(String versionOrAliases) {
     if ("LTS".equals(versionOrAliases)) {
       return getLtsRelease();

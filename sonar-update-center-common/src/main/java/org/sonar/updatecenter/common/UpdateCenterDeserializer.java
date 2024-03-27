@@ -70,9 +70,9 @@ public final class UpdateCenterDeserializer {
   private static final String LTA_VERSION = "ltaVersion";
   private static final String PAST_LTA_VERSION = "pastLtaVersion";
   private static final Logger LOGGER = LoggerFactory.getLogger(UpdateCenterDeserializer.class);
-  private Mode mode;
-  private boolean ignoreError;
-  private boolean includeArchives;
+  private final Mode mode;
+  private final boolean ignoreError;
+  private final boolean includeArchives;
 
   public UpdateCenterDeserializer(Mode mode, boolean ignoreError) {
     this(mode, ignoreError, false);
@@ -392,16 +392,23 @@ public final class UpdateCenterDeserializer {
   private void parseSonarLtsVersion(Properties p, Sonar sonar) {
     String ltsVersion = get(p, "ltsVersion", true);
     sonar.setLtsRelease(ltsVersion);
-    if (!sonar.getReleases().contains(sonar.getLtsRelease())) {
-      reportError("ltsVersion seems wrong as it is not listed in SonarQube versions");
-    }
+    verifyVersion(sonar, sonar.getLtsRelease(), "ltsVersion");
   }
 
   private void parseLtaVersions(Properties properties, Sonar sonar) {
     String ltaVersion = get(properties, LTA_VERSION, true);
     String pastLtaVersion = get(properties, PAST_LTA_VERSION, true);
+
     sonar.setLtaVersion(ltaVersion);
     sonar.setPastLtaVersion(pastLtaVersion);
+
+    verifyVersion(sonar, sonar.getLtaVersion(), LTA_VERSION);
+  }
+
+  private void verifyVersion(Sonar sonar, Release release, String versionType) {
+    if (!sonar.getReleases().contains(release)) {
+      reportError(versionType + " seems wrong as it is not listed in SonarQube versions");
+    }
   }
 
   private void parseSonarVersions(Properties p, Sonar sonar) {
