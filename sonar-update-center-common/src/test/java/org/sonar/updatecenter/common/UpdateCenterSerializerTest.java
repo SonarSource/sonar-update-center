@@ -42,6 +42,8 @@ public class UpdateCenterSerializerTest {
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-enterprise-2.1.zip", Release.Edition.ENTERPRISE)
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-datacenter-2.1.zip", Release.Edition.DATACENTER);
     sonar.setLtsRelease("2.0");
+    sonar.setLtaVersion("2.0");
+    sonar.setPastLtaVersion("1.0");
 
     Plugin foo = Plugin.factory("foo");
 
@@ -78,6 +80,8 @@ public class UpdateCenterSerializerTest {
     assertProperty(properties, "2.1.downloadEnterpriseUrl", "http://dist.sonar.codehaus.org/sonar-enterprise-2.1.zip");
     assertProperty(properties, "2.1.downloadDatacenterUrl", "http://dist.sonar.codehaus.org/sonar-datacenter-2.1.zip");
     assertProperty(properties, "ltsVersion", "2.0");
+    assertProperty(properties, "ltaVersion", "2.0");
+    assertProperty(properties, "pastLtaVersion", "1.0");
     assertProperty(properties, "plugins", "bar,foo");
     assertProperty(properties, "foo.name", "Foo");
     assertProperty(properties, "foo.organizationUrl", "http://www.sonarsource.org");
