@@ -84,7 +84,12 @@ public final class UpdateCenterSerializer {
     if (center.getSonar().getLtsRelease() != null) {
       set(p, "ltsVersion", center.getSonar().getLtsRelease().getVersion().toString());
     }
-
+    if (center.getSonar().getLtaVersion() != null) {
+      set(p, "ltaVersion", center.getSonar().getLtaVersion().getVersion().toString());
+    }
+    if (center.getSonar().getPastLtaVersion() != null) {
+      set(p, "pastLtaVersion", center.getSonar().getPastLtaVersion().getVersion().toString());
+    }
     for (Release sonarRelease : center.getSonar().getAllReleases()) {
       set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
       set(p, sonarRelease.getVersion() + DISPLAY_VERSION_SUFFIX, sonarRelease.getDisplayVersion());
