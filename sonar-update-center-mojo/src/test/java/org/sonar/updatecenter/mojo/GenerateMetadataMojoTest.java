@@ -164,9 +164,10 @@ public class GenerateMetadataMojoTest {
 
     thrown.expect(IllegalStateException.class);
     thrown.expectMessage(String.format(
-      "Fail to download %s to %s/csharp-plugin-1.0.jar",
+      "Fail to download %s to %s%scsharp-plugin-1.0.jar",
       incorrectUrl,
-      outputDir.toPath()
+      outputDir.toPath(),
+      File.separator
     ));
     new Generator(configuration, new SystemStreamLog()).generateMetadata();
   }

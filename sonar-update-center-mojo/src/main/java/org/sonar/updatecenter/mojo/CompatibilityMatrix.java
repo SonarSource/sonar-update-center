@@ -104,6 +104,9 @@ public class CompatibilityMatrix {
     return lastCompatible != null && !lastCompatible.isArchived();
   }
 
+  /**
+   * Used by HTML templating framework. Do not remove it.
+   */
   public List<SonarVersionModel> getSqVersions() {
     return sqVersions;
   }
