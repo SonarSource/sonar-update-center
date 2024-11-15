@@ -29,6 +29,7 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.sonar.updatecenter.common.PluginReferential;
+import org.sonar.updatecenter.common.Product;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
@@ -85,7 +86,7 @@ public class PluginsJsonGeneratorTest {
     twoZero.setDate(new Date(Instant.parse("1986-04-14T12:00:00Z").toEpochMilli()));
     twoZero.setDescription("Version with more RAM");
     twoZero.setDownloadUrl("http://foo.bar/2.0");
-    twoZero.addRequiredSonarVersions("4.2");
+    twoZero.addRequiredSonarVersions(Product.OLD_SONARQUBE, "4.2");
 
     maximumPlugin.addRelease(oneZero);
     maximumPlugin.addRelease(twoZero);

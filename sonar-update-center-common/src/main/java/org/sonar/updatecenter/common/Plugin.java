@@ -26,12 +26,9 @@ import java.util.Arrays;
 
 public class Plugin extends Component {
 
-
-
   private Plugin(String key) {
     super(key);
   }
-
 
   public static Plugin factory(String key) {
     // in accordance with https://github.com/SonarSource/sonar-packaging-maven-plugin/blob/master/src/main/java/org/sonarsource/pluginpackaging/PluginKeyUtils.java#L44
@@ -107,7 +104,6 @@ public class Plugin extends Component {
     return true;
   }
 
-
   public Plugin merge(PluginManifest manifest) {
     if (StringUtils.equals(key, manifest.getKey())) {
       // from the manifest
@@ -125,17 +121,8 @@ public class Plugin extends Component {
       issueTrackerUrl = StringUtils.defaultIfEmpty(issueTrackerUrl, manifest.getIssueTrackerUrl());
       homepageUrl = StringUtils.defaultIfEmpty(homepageUrl, manifest.getHomepage());
       sourcesUrl = StringUtils.defaultIfEmpty(sourcesUrl, manifest.getSourcesUrl());
-
-
     }
     return this;
-  }
-
-  public Release getReleaseForSonarVersion(String alias, Version sonarVersion) {
-    if ("OLDEST_COMPATIBLE".equals(alias)) {
-      return getFirstCompatible(sonarVersion);
-    }
-    throw new UnsupportedOperationException(alias + " is not a supported alias for plugin");
   }
 
 }

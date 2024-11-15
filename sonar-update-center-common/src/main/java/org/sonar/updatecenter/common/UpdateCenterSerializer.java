@@ -133,7 +133,9 @@ public final class UpdateCenterSerializer {
     set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
 
     for (Release release : plugin.getAllReleases()) {
-      set(p, plugin, release.getVersion() + ".sqVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
+      set(p, plugin, release.getVersion() + "." + Product.OLD_SONARQUBE.getSuffix(), StringUtils.join(release.getRequiredSonarVersions(), ","));
+      set(p, plugin, release.getVersion() + "." + Product.SONARQUBE_COMMUNITY_BUILD.getSuffix(), StringUtils.join(release.getRequiredCommunitySonarVersions(), ","));
+      set(p, plugin, release.getVersion() + "." + Product.SONARQUBE_SERVER.getSuffix(), StringUtils.join(release.getRequiredPaidSonarVersions(), ","));
       // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
 

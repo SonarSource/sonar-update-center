@@ -58,16 +58,20 @@ public class Release implements Comparable<Release> {
   private String groupId;
   private String artifactId;
 
-  private EnumMap<Edition, URL> downloadUrl;
-  private HashMap<String, Integer> scannerDownloadUrlOrder;
-  private HashMap<String, URL> scannerDownloadUrl;
-  private HashMap<String, String> scannerDownloadFlavor;
-  private Set<Release> outgoingDependencies;
-  private Set<Release> incomingDependencies;
+  private final EnumMap<Edition, URL> downloadUrl;
+  private Product product;
+
+  private final HashMap<String, Integer> scannerDownloadUrlOrder;
+  private final HashMap<String, URL> scannerDownloadUrl;
+  private final HashMap<String, String> scannerDownloadFlavor;
+  private final Set<Release> outgoingDependencies;
+  private final Set<Release> incomingDependencies;
   /**
    * from oldest to newest sonar versions
    */
-  private SortedSet<Version> compatibleSqVersions;
+  private final SortedSet<Version> compatibleSqVersions;
+  private final SortedSet<Version> compatiblePaidSqVersions;
+  private final SortedSet<Version> compatibleCommunitySqVersions;
   private Date date;
 
   public Release(Artifact artifact, Version version) {
@@ -78,6 +82,8 @@ public class Release implements Comparable<Release> {
 
     this.downloadUrl = new EnumMap<>(Edition.class);
     this.compatibleSqVersions = new TreeSet<>();
+    this.compatibleCommunitySqVersions = new TreeSet<>();
+    this.compatiblePaidSqVersions = new TreeSet<>();
     this.outgoingDependencies = new HashSet<>();
     this.incomingDependencies = new HashSet<>();
     this.scannerDownloadFlavor = new HashMap<>();
@@ -184,54 +190,73 @@ public class Release implements Comparable<Release> {
     return compatibleSqVersions;
   }
 
-  public boolean supportSonarVersion(Version providedSqVersion) {
-    // Compare versions without qualifier
-    for (Version sqVersion : compatibleSqVersions) {
-      if (sqVersion.isCompatibleWith(providedSqVersion)) {
+  public SortedSet<Version> getRequiredPaidSonarVersions() {
+    return compatiblePaidSqVersions;
+  }
+
+  public SortedSet<Version> getRequiredCommunitySonarVersions() {
+    return compatibleCommunitySqVersions;
+  }
+
+  public boolean supportSonarVersion(Version providedSqVersion, Product product) {
+    for (Version releaseVersion : productToVersions(product)) {
+      if (releaseVersion.isCompatibleWith(providedSqVersion)) {
         return true;
       }
     }
     return false;
   }
 
-  public Release addRequiredSonarVersions(@Nullable Version... versions) {
+  public Release addRequiredSonarVersions(Product product, @Nullable Version... versions) {
     if (versions != null) {
-      compatibleSqVersions.addAll(Arrays.asList(versions));
+      productToVersions(product).addAll(Arrays.asList(versions));
     }
     return this;
   }
 
-  public Release addRequiredSonarVersions(@Nullable String... versions) {
+  public Release addRequiredSonarVersions(Product product, @Nullable String... versions) {
     if (versions != null) {
       for (String v : versions) {
-        compatibleSqVersions.add(Version.create(v));
+        productToVersions(product).add(Version.create(v));
       }
     }
     return this;
   }
 
-  public Version getLastRequiredSonarVersion() {
-    if (!compatibleSqVersions.isEmpty()) {
-      return compatibleSqVersions.last();
+  public Version getLastRequiredSonarVersion(Product product) {
+    SortedSet<Version> versionsSet = productToVersions(product);
+    if (!versionsSet.isEmpty()) {
+      return versionsSet.last();
     }
     return null;
   }
 
-  public Version getMinimumRequiredSonarVersion() {
-    if (!compatibleSqVersions.isEmpty()) {
-      return compatibleSqVersions.first();
+  public Version getMinimumRequiredSonarVersion(Product product) {
+    SortedSet<Version> versionsSet = productToVersions(product);
+    if (!versionsSet.isEmpty()) {
+      return versionsSet.first();
     }
     return null;
   }
 
-  public Version[] getSonarVersionFromString(final String fromString) {
+  public Collection<Version> getSonarVersionFromString(Product product, final String fromString) {
+    SortedSet<Version> versionsSet = productToVersions(product);
 
-    Collection<Version> versionsWGivenFromString = compatibleSqVersions.stream()
+    return versionsSet.stream()
       .filter(Objects::nonNull)
       .filter(sqVersion -> fromString.equals(sqVersion.getFromString()))
       .collect(Collectors.toSet());
+  }
 
-    return versionsWGivenFromString.toArray(new Version[versionsWGivenFromString.size()]);
+  private SortedSet<Version> productToVersions(Product product) {
+    if (product == Product.OLD_SONARQUBE) {
+      return compatibleSqVersions;
+    } else if (product == Product.SONARQUBE_COMMUNITY_BUILD) {
+      return compatibleCommunitySqVersions;
+    } else if (product == Product.SONARQUBE_SERVER) {
+      return compatiblePaidSqVersions;
+    }
+    throw new IllegalArgumentException("Unsupported product: " + product);
   }
 
   @CheckForNull
@@ -346,6 +371,10 @@ public class Release implements Comparable<Release> {
     return artifact.equals(release.artifact) && version.equals(release.version);
   }
 
+  public void setProduct(Product product) {
+    this.product = product;
+  }
+
   @Override
   public int hashCode() {
     int result = artifact.hashCode();
@@ -366,6 +395,10 @@ public class Release implements Comparable<Release> {
   @Override
   public int compareTo(Release o) {
     return getVersion().compareTo(o.getVersion());
+  }
+
+  public Product getProduct() {
+    return product;
   }
 
   public enum Edition {

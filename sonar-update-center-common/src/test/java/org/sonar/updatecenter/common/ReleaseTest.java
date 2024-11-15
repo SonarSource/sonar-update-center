@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.Collection;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,34 +58,34 @@ public class ReleaseTest {
   @Test
   public void should_add_required_sonar_versions() {
     Release release = new Release(Plugin.factory("squid"), "1.0");
-    release.addRequiredSonarVersions("2.0");
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.0");
     assertThat(release.getRequiredSonarVersions()).containsOnly(Version.create("2.0"));
 
-    release.addRequiredSonarVersions((String[]) null);
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, (String[]) null);
     assertThat(release.getRequiredSonarVersions()).hasSize(1);
 
-    release.addRequiredSonarVersions((Version[]) null);
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, (Version[]) null);
     assertThat(release.getRequiredSonarVersions()).hasSize(1);
   }
 
   @Test
   public void should_return_last_required_sonar_version() {
     Release release = new Release(Plugin.factory("squid"), "1.0");
-    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
-    assertThat(release.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.1"));
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1", "1.9", "2.0");
+    assertThat(release.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("2.1"));
 
     Release squid10 = new Release(Plugin.factory("squid"), "1.0");
-    assertThat(squid10.getLastRequiredSonarVersion()).isNull();
+    assertThat(squid10.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
   }
 
   @Test
   public void should_return_minimum_required_sonar_version() {
     Release release = new Release(Plugin.factory("squid"), "1.0");
-    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
-    assertThat(release.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("1.9"));
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1", "1.9", "2.0");
+    assertThat(release.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("1.9"));
 
     Release squid10 = new Release(Plugin.factory("squid"), "1.0");
-    assertThat(squid10.getMinimumRequiredSonarVersion()).isNull();
+    assertThat(squid10.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
   }
 
   @Test
@@ -103,14 +104,14 @@ public class ReleaseTest {
   @Test
   public void should_have_version_from_string() {
     Release release = new Release(Plugin.factory("squid"), "1.0");
-    release.addRequiredSonarVersions("2.1", "1.9", "2.0");
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1", "1.9", "2.0");
     assertThat(release.getRequiredSonarVersions()).hasSize(3);
-    assertThat(release.getSonarVersionFromString("mystring")).hasSize(0);
+    assertThat(release.getSonarVersionFromString(Product.OLD_SONARQUBE, "mystring")).isEmpty();
 
-    release.addRequiredSonarVersions(Version.create("3.0", "mystring"));
-    Version[] sqVersions = release.getSonarVersionFromString("mystring");
+    release.addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create("3.0", "mystring"));
+    Collection<Version> sqVersions = release.getSonarVersionFromString(Product.OLD_SONARQUBE, "mystring");
     assertThat(sqVersions).hasSize(1);
-    assertThat(sqVersions[0]).isEqualTo(Version.create("3.0"));
+    assertThat(sqVersions.iterator().next()).isEqualTo(Version.create("3.0"));
   }
 
   @Test

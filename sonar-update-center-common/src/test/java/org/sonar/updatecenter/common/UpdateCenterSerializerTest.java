@@ -20,7 +20,6 @@
 package org.sonar.updatecenter.common;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
@@ -31,11 +30,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UpdateCenterSerializerTest {
 
   @Test
-  public void test_to_properties() throws IOException, URISyntaxException {
+  public void test_to_properties() throws IOException {
     Sonar sonar = new Sonar();
-    sonar.addRelease("2.0").setDisplayVersion("2.0");
+    sonar.addRelease(new Release(sonar, Version.create("2.0")).setDisplayVersion("2.0"));
     sonar
-      .addRelease("2.1")
+      .addRelease(new Release(sonar, Version.create("2.1")))
       .setDisplayVersion("2.1 (build 42)")
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-2.1.zip")
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-developer-2.1.zip", Release.Edition.DEVELOPER)
@@ -51,8 +50,8 @@ public class UpdateCenterSerializerTest {
       .setOrganizationUrl("http://www.sonarsource.org");
     foo.addRelease(
       new Release(foo, Version.create("1.2"))
-        .addRequiredSonarVersions(Version.create("2.0"))
-        .addRequiredSonarVersions(Version.create("2.1"))
+        .addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create("2.0"))
+        .addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create("2.1"))
         .setDisplayVersion("1.2 (build 42)")
       );
 
@@ -61,13 +60,13 @@ public class UpdateCenterSerializerTest {
       .setDevelopers(Arrays.asList("dev1", "dev2"));
     bar.addRelease(
       new Release(bar, Version.create("1.2"))
-        .addRequiredSonarVersions(Version.create("2.0"))
-        .addRequiredSonarVersions(Version.create("2.1"))
+        .addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create("2.0"))
+        .addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create("2.1"))
         .setDisplayVersion("1.2")
       );
     PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo, bar));
 
-    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
@@ -99,26 +98,26 @@ public class UpdateCenterSerializerTest {
   @Test
   public void should_return_required_releases() throws IOException {
     Sonar sonar = new Sonar();
-    sonar.addRelease(Version.create("2.0"));
-    sonar.addRelease(Version.create("2.1"));
+    addReleaseToSonarObject("2.0", sonar);
+    addReleaseToSonarObject("2.1", sonar);
 
     Plugin foo = Plugin.factory("foo");
-    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    Release foo12 = new Release(foo, "1.2").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     foo.addRelease(foo12);
 
     Plugin test = Plugin.factory("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     test.addRelease(test10);
 
     Plugin bar = Plugin.factory("bar");
-    Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions("2.0").addRequiredSonarVersions("2.1");
+    Release bar12 = new Release(bar, "1.2").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     bar.addRelease(bar12);
 
     PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo, bar, test));
     pluginReferential.addOutgoingDependency(bar12, "foo", "1.2");
     pluginReferential.addOutgoingDependency(bar12, "test", "1.0");
 
-    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
     Properties properties = UpdateCenterSerializer.toProperties(center);
     properties.store(System.out, null);
 
@@ -132,5 +131,11 @@ public class UpdateCenterSerializerTest {
 
   private void assertProperty(Properties props, String key, String value) {
     assertThat(props.getProperty(key)).isEqualTo(value);
+  }
+
+  private void addReleaseToSonarObject(String version, Sonar sonar) {
+    Release release = new Release(sonar, Version.create(version));
+    release.setProduct(Product.OLD_SONARQUBE);
+    sonar.addRelease(release);
   }
 }

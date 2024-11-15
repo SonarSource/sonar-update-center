@@ -35,7 +35,7 @@ public class Version implements Comparable<Version> {
   private String name;
   private String fromString;
 
-  private Version(String version, String fromString) {
+  protected Version(String version, String fromString) {
     this.name = StringUtils.trimToEmpty(version);
     this.qualifier = StringUtils.substringAfter(this.name, "-");
     String numbers = StringUtils.substringBefore(this.name, "-");

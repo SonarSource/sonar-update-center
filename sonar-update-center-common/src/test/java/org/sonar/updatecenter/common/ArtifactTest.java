@@ -43,9 +43,9 @@ public class ArtifactTest {
   @Test
   public void getReleases_orders_releases_by_version() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("1.5"));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("1.5")));
 
     assertThat(artifact.getReleases())
       .extracting(Release::getVersion)
@@ -64,11 +64,11 @@ public class ArtifactTest {
   @Test
   public void test_getReleasesGreaterThan() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("1.5"));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("1.5")));
 
-    assertThat(artifact.getReleasesGreaterThan("1.2"))
+    assertThat(artifact.getReleasesGreaterThan("1.2", null))
       .extracting(Release::getVersion)
       .extracting(Version::getName)
       .containsExactly("1.5", "2.0");
@@ -77,9 +77,9 @@ public class ArtifactTest {
   @Test
   public void getMinimalRelease_returns_the_first_version_greater_than_specified_version() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("1.5"));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("1.5")));
 
     assertThat(artifact.getMinimalRelease(Version.create("1.2")).getVersion().getName()).isEqualTo("1.5");
   }
@@ -87,9 +87,9 @@ public class ArtifactTest {
   @Test
   public void getLastRelease_returns_the_highest_public_release() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("1.5"));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("1.5")));
     artifact.setDevRelease(new Release(artifact, "2.1-SNAPSHOT"));
 
     assertThat(artifact.getLastRelease().getVersion()).isEqualTo(Version.create("2.0"));
@@ -98,9 +98,9 @@ public class ArtifactTest {
   @Test
   public void getAllReleases_includes_dev_version() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("1.5"));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("1.5")));
     artifact.setDevRelease(new Release(artifact, "2.1-SNAPSHOT"));
 
     assertThat(artifact.getAllReleases())
@@ -112,11 +112,11 @@ public class ArtifactTest {
   @Test
   public void getMajorReleases() {
     FakeArtifact artifact = new FakeArtifact("fake");
-    artifact.addRelease(Version.create("1.1"));
-    artifact.addRelease(Version.create("1.1.2"));
-    artifact.addRelease(Version.create("2.0"));
-    artifact.addRelease(Version.create("2.0.1"));
-    artifact.addRelease(Version.create("2.0.2"));
+    artifact.addRelease(new Release(artifact, Version.create("1.1")));
+    artifact.addRelease(new Release(artifact, Version.create("1.1.2")));
+    artifact.addRelease(new Release(artifact, Version.create("2.0")));
+    artifact.addRelease(new Release(artifact, Version.create("2.0.1")));
+    artifact.addRelease(new Release(artifact, Version.create("2.0.2")));
 
     assertThat(artifact.getMajorReleases())
       .extracting(Release::getVersion)
