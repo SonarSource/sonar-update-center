@@ -19,16 +19,20 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.junit.Test;
+public enum Product {
 
-import static org.assertj.core.api.Assertions.assertThat;
+  SONARQUBE_COMMUNITY_BUILD("sqcb"),
+  SONARQUBE_SERVER("sqs"),
+  //10.7 and before
+  OLD_SONARQUBE("sqVersions");
 
-public class ScannerTest {
+  private final String suffix;
 
-  @Test
-  public void should_return_correct_flags() {
-    Scanner scanner = Scanner.factory("test");
-    assertThat(scanner.needArtifact()).isFalse();
-    assertThat(scanner.needSqVersion()).isFalse();
+  Product(String suffix) {
+    this.suffix = suffix;
+  }
+
+  public String getSuffix() {
+    return suffix;
   }
 }

@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginReferential;
+import org.sonar.updatecenter.common.Product;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class CompatibilityMatrixTest {
+
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -62,22 +64,29 @@ public class CompatibilityMatrixTest {
   public void before() throws Exception {
     outputFolder = temporaryFolder.newFolder();
     sonar = new Sonar();
-    sonar.addRelease("3.0");
-    sonar.addRelease("3.7");
-    sonar.addRelease("3.7.1");
-    sonar.addRelease("3.7.2");
-    sonar.addRelease("3.7.4");
-    sonar.addRelease("4.0");
-    sonar.addRelease("10.0");
+    addReleaseToSonarObject("3.0", sonar);
+    addReleaseToSonarObject("3.0", sonar);
+    addReleaseToSonarObject("3.7", sonar);
+    addReleaseToSonarObject("3.7.1", sonar);
+    addReleaseToSonarObject("3.7.2", sonar);
+    addReleaseToSonarObject("3.7.4", sonar);
+    addReleaseToSonarObject("4.0", sonar);
+    addReleaseToSonarObject("10.0", sonar);
 
     sonar.setLtsRelease("3.7.4");
     sonar.setLtaVersion("3.7.4");
     sonar.setPastLtaVersion("2.9.10");
   }
 
+  private void addReleaseToSonarObject(String version, Sonar sonar) {
+    Release release = new Release(sonar, Version.create(version));
+    release.setProduct(Product.OLD_SONARQUBE);
+    sonar.addRelease(release);
+  }
+
   private void prepareMocks(Plugin... plugins) {
     pluginReferential = plugins.length > 0 ? PluginReferential.create(asList(plugins)) : PluginReferential.createEmpty();
-    center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
+    center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.OLD_SONARQUBE);
     matrix = new CompatibilityMatrix(center, outputFolder, mock(Log.class));
   }
 
@@ -85,13 +94,13 @@ public class CompatibilityMatrixTest {
   public void shouldThrowExceptionIfNoOutputDir() throws IOException {
     File folder = new File("/doesnt/exist/");
     CompatibilityMatrix m = new CompatibilityMatrix(center, folder, mock(Log.class));
-    m.generateHtml();
+    m.generateHtmls();
   }
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
     prepareMocks();
-    matrix.generateHtml();
+    matrix.generateHtmls();
     assertThat(outputFolder.list()).hasSize(2);
     assertThat(outputFolder.list()).containsOnly("styles.css", "error.png");
   }
@@ -103,7 +112,7 @@ public class CompatibilityMatrixTest {
     Release releaseFoo = new Release(pluginFoo, versionFoo);
     releaseFoo.setDate(getDate());
     releaseFoo.setDownloadUrl("http://valid.download.url");
-    releaseFoo.addRequiredSonarVersions("3.0");
+    releaseFoo.addRequiredSonarVersions(Product.OLD_SONARQUBE, "3.0");
     pluginFoo.addRelease(releaseFoo);
     pluginFoo.setName("foo");
 
@@ -112,7 +121,7 @@ public class CompatibilityMatrixTest {
     Release releaseBar = new Release(pluginBar, versionBar);
     releaseBar.setDate(getDate());
     releaseBar.setDownloadUrl("http://other.download.url");
-    releaseBar.addRequiredSonarVersions("4.0");
+    releaseBar.addRequiredSonarVersions(Product.OLD_SONARQUBE, "4.0");
     pluginBar.addRelease(releaseBar);
     pluginBar.setName("bar");
 
@@ -121,13 +130,13 @@ public class CompatibilityMatrixTest {
     Release releaseAbap = new Release(pluginAbap, versionAbap);
     releaseAbap.setDate(getDate());
     releaseAbap.setDownloadUrl("http://abap.download.url");
-    releaseAbap.addRequiredSonarVersions("3.0");
+    releaseAbap.addRequiredSonarVersions(Product.OLD_SONARQUBE, "3.0");
     releaseAbap.setArchived(true);
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
 
     prepareMocks(pluginFoo, pluginBar, pluginAbap);
-    matrix.generateHtml();
+    matrix.generateHtmls();
 
     // 3 files:
     // - styles.css

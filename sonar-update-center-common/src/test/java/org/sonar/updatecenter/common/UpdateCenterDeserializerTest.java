@@ -46,13 +46,13 @@ public class UpdateCenterDeserializerTest {
       UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
       assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DEVELOPER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.ENTERPRISE)).isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DATACENTER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDisplayVersion()).isEqualTo("2.2");
-      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDisplayVersion()).isEqualTo("2.3 (build 42)");
-      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDownloadUrl(Release.Edition.DATACENTER)).isNullOrEmpty();
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DEVELOPER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.ENTERPRISE)).isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DATACENTER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDisplayVersion()).isEqualTo("2.2");
+      assertThat(center.getSonar().getRelease(Version.create("2.3"), Product.OLD_SONARQUBE).getDisplayVersion()).isEqualTo("2.3 (build 42)");
+      assertThat(center.getSonar().getRelease(Version.create("2.3"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DATACENTER)).isNullOrEmpty();
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
@@ -66,8 +66,8 @@ public class UpdateCenterDeserializerTest {
       Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
       assertThat(clirr1_0.getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
       assertThat(clirr1_0.getDisplayVersion()).isEqualTo("1.0");
-      assertThat(clirr1_0.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
-      assertThat(clirr1_0.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      assertThat(clirr1_0.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("2.2"));
+      assertThat(clirr1_0.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("2.2"));
 
       assertThat(clirr.getRelease(Version.create("1.1")).getDisplayVersion()).isEqualTo("1.1 (build 42)");
 
@@ -378,8 +378,8 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
-      Release sonar2_2 = updateCenter.getSonar().getRelease("2.2");
-      Release sonar2_3 = updateCenter.getSonar().getRelease("2.3");
+      Release sonar2_2 = updateCenter.getSonar().getRelease("2.2", Product.OLD_SONARQUBE);
+      Release sonar2_3 = updateCenter.getSonar().getRelease("2.3", Product.OLD_SONARQUBE);
       assertThat(sonar2_2.getChangelogUrl()).isEqualTo("http://changelog");
       assertThat(sonar2_3.getChangelogUrl()).isEqualTo("http://changelog2.3");
 
@@ -402,7 +402,6 @@ public class UpdateCenterDeserializerTest {
       assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
         .withMessage("Duplicate version for SonarQube: 2.8");
-
     }
   }
 

@@ -19,16 +19,10 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.junit.Test;
+public class SonarRelease extends Release {
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class ScannerTest {
-
-  @Test
-  public void should_return_correct_flags() {
-    Scanner scanner = Scanner.factory("test");
-    assertThat(scanner.needArtifact()).isFalse();
-    assertThat(scanner.needSqVersion()).isFalse();
+  public SonarRelease(Artifact artifact, Version version, Product product) {
+    super(artifact, version);
+    this.setProduct(product);
   }
 }

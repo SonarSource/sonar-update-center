@@ -33,6 +33,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * TODO https://sonarsource.atlassian.net/browse/UPC-145
+ */
 class PluginsJsonGenerator extends JsonGenerator {
 
   private PluginsJsonGenerator(
