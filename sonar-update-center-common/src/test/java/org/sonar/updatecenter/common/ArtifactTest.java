@@ -68,7 +68,7 @@ public class ArtifactTest {
     artifact.addRelease(Version.create("1.1"));
     artifact.addRelease(Version.create("1.5"));
 
-    assertThat(artifact.getReleasesGreaterThan("1.2"))
+    assertThat(artifact.getReleasesGreaterThan("1.2", null))
       .extracting(Release::getVersion)
       .extracting(Version::getName)
       .containsExactly("1.5", "2.0");
@@ -128,6 +128,12 @@ public class ArtifactTest {
 
     private FakeArtifact(String key) {
       super(key);
+    }
+
+    Release addRelease(Version version) {
+      Release release = new Release(this, version);
+      releases.add(release);
+      return release;
     }
   }
 

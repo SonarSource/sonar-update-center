@@ -37,13 +37,12 @@ public final class PluginUpdate {
     return update;
   }
 
-  public static PluginUpdate createForPluginRelease(Release pluginRelease, Version sonarVersion) {
+  public static PluginUpdate createForPluginRelease(Release pluginRelease, Version sonarVersion, Product product) {
     PluginUpdate update = new PluginUpdate();
     update.setRelease(pluginRelease);
 
-    if (pluginRelease.supportSonarVersion(sonarVersion)) {
+    if (pluginRelease.supportSonarVersion(sonarVersion, product)) {
       update.setStatus(Status.COMPATIBLE);
-
     } else {
       for (Version requiredSonarVersion : pluginRelease.getRequiredSonarVersions()) {
         if (requiredSonarVersion.compareTo(sonarVersion) > 0) {

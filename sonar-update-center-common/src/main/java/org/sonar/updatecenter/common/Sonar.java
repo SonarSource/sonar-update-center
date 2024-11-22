@@ -52,27 +52,13 @@ public class Sonar extends Artifact {
   }
 
   /**
-   * shortcut only for sonar, no need to have other fields than version
+   * shortcut only for tests, no need to have other fields than version
    */
   public Sonar setReleases(String[] versions) {
     for (String version : versions) {
       addRelease(new Release(this, Version.create(version)));
     }
     return this;
-  }
-
-  /**
-   * @param versionOrAliases Any version or keywords "DEV", "LTS" or "LATEST_RELEASE"
-   * @throws java.util.NoSuchElementException if release could not be found
-   * @deprecated since 1.32 Tag "LTS"
-   */
-  @Override
-  @Deprecated
-  public Release getRelease(String versionOrAliases) {
-    if ("LTS".equals(versionOrAliases)) {
-      return getLtsRelease();
-    }
-    return super.getRelease(versionOrAliases);
   }
 
   public Release getLtaVersion() {

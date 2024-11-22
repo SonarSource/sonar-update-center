@@ -24,10 +24,10 @@ import java.util.List;
 
 public final class SonarUpdate implements Comparable<SonarUpdate> {
 
-  private Release release;
-  private List<Plugin> compatiblePlugins = new ArrayList<>();
-  private List<Plugin> incompatiblePlugins = new ArrayList<>();
-  private List<Release> pluginsToUpgrade = new ArrayList<>();
+  private final Release release;
+  private final List<Plugin> compatiblePlugins = new ArrayList<>();
+  private final List<Plugin> incompatiblePlugins = new ArrayList<>();
+  private final List<Release> pluginsToUpgrade = new ArrayList<>();
 
   public SonarUpdate(Release release) {
     this.release = release;

@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import org.sonar.updatecenter.common.Product;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.Version;
@@ -91,6 +92,9 @@ public class ReleaseModel {
     return release.isArchived();
   }
 
+  /**
+   * TODO https://sonarsource.atlassian.net/browse/UPC-145
+   */
   @CheckForNull
   public String getSonarVersionRange() {
     Version latest = null;
@@ -103,17 +107,17 @@ public class ReleaseModel {
       // pathological case but still valid, where no more SQ version for this plugin
       return null;
     } else {
-      Version min = release.getMinimumRequiredSonarVersion();
-      Version max = release.getLastRequiredSonarVersion();
+      Version min = release.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE);
+      Version max = release.getLastRequiredSonarVersion(Product.OLD_SONARQUBE);
 
       StringBuilder sb = new StringBuilder();
       sb.append(min.toString());
       if (max.equals(latest)) {
         sb.append("+");
       } else if (!max.equals(min)) {
-        sb.append(" - ").append(max.toString());
+        sb.append(" - ").append(max);
       }
-      if (release.supportSonarVersion(sonar.getLtsRelease().getVersion())) {
+      if (release.supportSonarVersion(sonar.getLtsRelease().getVersion(), Product.OLD_SONARQUBE)) {
         sb.append(" (Compatible with LTS)");
       }
       return sb.toString();

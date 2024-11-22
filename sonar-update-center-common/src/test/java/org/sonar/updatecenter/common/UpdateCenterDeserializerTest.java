@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -45,14 +46,15 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
-      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"));
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DEVELOPER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.ENTERPRISE)).isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDownloadUrl(Release.Edition.DATACENTER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-2.2.zip");
-      assertThat(center.getSonar().getRelease(Version.create("2.2")).getDisplayVersion()).isEqualTo("2.2");
-      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDisplayVersion()).isEqualTo("2.3 (build 42)");
-      assertThat(center.getSonar().getRelease(Version.create("2.3")).getDownloadUrl(Release.Edition.DATACENTER)).isNullOrEmpty();
+      assertThat(center.getSonar().getVersions()).contains(Version.create("2.2"), Version.create("2.3"), Version.create("2039.11"),
+        Version.create("2039.12"), Version.create("39.11"), Version.create("39.12"));
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DEVELOPER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.ENTERPRISE)).isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DATACENTER)).isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-2.2.zip");
+      assertThat(center.getSonar().getRelease(Version.create("2.2"), Product.OLD_SONARQUBE).getDisplayVersion()).isEqualTo("2.2");
+      assertThat(center.getSonar().getRelease(Version.create("2.3"), Product.OLD_SONARQUBE).getDisplayVersion()).isEqualTo("2.3 (build 42)");
+      assertThat(center.getSonar().getRelease(Version.create("2.3"), Product.OLD_SONARQUBE).getDownloadUrl(Release.Edition.DATACENTER)).isNullOrEmpty();
 
       Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
       assertThat(clirr.getName()).isEqualTo("Clirr");
@@ -66,13 +68,49 @@ public class UpdateCenterDeserializerTest {
       Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
       assertThat(clirr1_0.getDownloadUrl()).isEqualTo("http://dist.sonar-plugins.codehaus.org/clirr-1.0.jar");
       assertThat(clirr1_0.getDisplayVersion()).isEqualTo("1.0");
-      assertThat(clirr1_0.getMinimumRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
-      assertThat(clirr1_0.getLastRequiredSonarVersion()).isEqualTo(Version.create("2.2"));
+      assertThat(clirr1_0.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("2.2"));
+      assertThat(clirr1_0.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isEqualTo(Version.create("2.2"));
 
       assertThat(clirr.getRelease(Version.create("1.1")).getDisplayVersion()).isEqualTo("1.1 (build 42)");
 
       Plugin motionchart = center.getUpdateCenterPluginReferential().findPlugin("motionchart");
       assertThat(motionchart.getRelease(Version.create("1.7")).getDisplayVersion()).isNull();
+
+      Version paidSonarQubeVersion = Version.create("2039.11");
+      assertThat(center.getSonar().getRelease(paidSonarQubeVersion, Product.SONARQUBE_SERVER).getDownloadUrl()).isNull();
+      assertThat(center.getSonar().getRelease(paidSonarQubeVersion, Product.SONARQUBE_SERVER).getDownloadUrl(Release.Edition.DEVELOPER))
+        .isEqualTo("http://dist.sonar.codehaus.org/sonar-developer-11.zip");
+      assertThat(center.getSonar().getRelease(paidSonarQubeVersion, Product.SONARQUBE_SERVER).getDownloadUrl(Release.Edition.ENTERPRISE))
+        .isEqualTo("http://dist.sonar.codehaus.org/sonar-enterprise-11.zip");
+      assertThat(center.getSonar().getRelease(paidSonarQubeVersion, Product.SONARQUBE_SERVER).getDownloadUrl(Release.Edition.DATACENTER))
+        .isEqualTo("http://dist.sonar.codehaus.org/sonar-datacenter-11.zip");
+      assertThat(center.getSonar().getRelease(paidSonarQubeVersion, Product.SONARQUBE_SERVER).getDisplayVersion()).isEqualTo("2039.11");
+
+      Version communityBuildVersion = Version.create("39.11");
+      assertThat(center.getSonar().getRelease(communityBuildVersion, Product.SONARQUBE_COMMUNITY_BUILD).getDownloadUrl()).isEqualTo("http://dist.sonar.codehaus.org/sonar-3911.zip");
+      assertThat(center.getSonar().getRelease(communityBuildVersion, Product.SONARQUBE_COMMUNITY_BUILD).getDownloadUrl(Release.Edition.DEVELOPER)).isNull();
+      assertThat(center.getSonar().getRelease(communityBuildVersion, Product.SONARQUBE_COMMUNITY_BUILD).getDownloadUrl(Release.Edition.ENTERPRISE)).isNull();
+      assertThat(center.getSonar().getRelease(communityBuildVersion, Product.SONARQUBE_COMMUNITY_BUILD).getDownloadUrl(Release.Edition.DATACENTER)).isNull();
+      assertThat(center.getSonar().getRelease(communityBuildVersion, Product.SONARQUBE_COMMUNITY_BUILD).getDisplayVersion()).isEqualTo("39.11");
+
+      Plugin bestPlugin = center.getUpdateCenterPluginReferential().findPlugin("bestplugin");
+      Release bestPlugin10 = bestPlugin.getRelease(Version.create("1.0"));
+      assertThat(bestPlugin10.getDownloadUrl()).isEqualTo("http://best-plugin.org/best-plugin-1.0.jar");
+      assertThat(bestPlugin10.getDisplayVersion()).isEqualTo("1.0");
+      assertThat(bestPlugin10.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
+      assertThat(bestPlugin10.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
+      assertThat(bestPlugin10.getMinimumRequiredSonarVersion(Product.SONARQUBE_COMMUNITY_BUILD)).isEqualTo(Version.create("39.11"));
+      assertThat(bestPlugin10.getLastRequiredSonarVersion(Product.SONARQUBE_COMMUNITY_BUILD)).isEqualTo(Version.create("39.11"));
+
+      Release bestPlugin11 = bestPlugin.getRelease(Version.create("1.1"));
+      assertThat(bestPlugin11.getDownloadUrl()).isEqualTo("http://best-plugin.org/best-plugin-1.1.jar");
+      assertThat(bestPlugin11.getDisplayVersion()).isEqualTo("1.1 (build 42)");
+      assertThat(bestPlugin11.getMinimumRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
+      assertThat(bestPlugin11.getLastRequiredSonarVersion(Product.OLD_SONARQUBE)).isNull();
+      assertThat(bestPlugin11.getMinimumRequiredSonarVersion(Product.SONARQUBE_SERVER)).isEqualTo(Version.create("2039.12"));
+      assertThat(bestPlugin11.getLastRequiredSonarVersion(Product.SONARQUBE_SERVER)).isEqualTo(Version.create("2039.12"));
+
+      assertThat(clirr.getRelease(Version.create("1.1")).getDisplayVersion()).isEqualTo("1.1 (build 42)");
     }
   }
 
@@ -201,6 +239,20 @@ public class UpdateCenterDeserializerTest {
       assertThat(requiredSonarVersion).hasSize(4);
       assertThat(requiredSonarVersion.first()).hasToString("2.4");
       assertThat(requiredSonarVersion.last()).hasToString("2.8");
+
+      Plugin bestPlugin = pluginReferential.getUpdateCenterPluginReferential().findPlugin("bestplugin");
+      requiredSonarVersion = bestPlugin.getRelease(Version.create("1.0")).getRequiredSonarVersions();
+      SortedSet<Version> communitySonarVersions = bestPlugin.getRelease(Version.create("1.0")).getRequiredCommunitySonarVersions();
+      assertThat(requiredSonarVersion).isEmpty();
+      assertThat(communitySonarVersions.first()).hasToString("39.11");
+      assertThat(communitySonarVersions.last()).hasToString("39.12");
+
+      Plugin worstPlugin = pluginReferential.getUpdateCenterPluginReferential().findPlugin("worstplugin");
+      requiredSonarVersion = worstPlugin.getRelease(Version.create("1.1")).getRequiredSonarVersions();
+      SortedSet<Version> paidSonarVersions = worstPlugin.getRelease(Version.create("1.1")).getRequiredPaidSonarVersions();
+      assertThat(requiredSonarVersion).isEmpty();
+      assertThat(paidSonarVersions.first()).hasToString("2039.1");
+      assertThat(paidSonarVersions.last()).hasToString("2039.2");
     }
   }
 
@@ -279,7 +331,7 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void should_throw_when_LATEST_is_another_plugin_version_then_latest() throws IOException, URISyntaxException {
+  public void should_throw_when_LATEST_is_another_plugin_version_then_latest() throws URISyntaxException {
     URL url = getClass().getResource(
       "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/LATEST_is_another_plugin_version_then_latest/update-center.properties");
 
@@ -378,16 +430,18 @@ public class UpdateCenterDeserializerTest {
       props.load(input);
       UpdateCenter updateCenter = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
 
-      Release sonar2_2 = updateCenter.getSonar().getRelease("2.2");
-      Release sonar2_3 = updateCenter.getSonar().getRelease("2.3");
-      assertThat(sonar2_2.getChangelogUrl()).isEqualTo("http://changelog");
-      assertThat(sonar2_3.getChangelogUrl()).isEqualTo("http://changelog2.3");
+      Release sonar22 = updateCenter.getSonar().getRelease("2.2", Product.OLD_SONARQUBE);
+      Release sonar23 = updateCenter.getSonar().getRelease("2.3", Product.OLD_SONARQUBE);
+      Release paidSonarQube = updateCenter.getSonar().getRelease("2050.3", Product.SONARQUBE_SERVER);
+      assertThat(sonar22.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(sonar23.getChangelogUrl()).isEqualTo("http://changelog2.3");
+      assertThat(paidSonarQube.getChangelogUrl()).isEqualTo("http://changelog2050");
 
       Plugin clirr = updateCenter.getUpdateCenterPluginReferential().findPlugin("clirr");
-      Release clirr1_0 = clirr.getRelease(Version.create("1.0"));
-      Release clirr1_1 = clirr.getRelease(Version.create("1.1"));
-      assertThat(clirr1_0.getChangelogUrl()).isEqualTo("http://changelog");
-      assertThat(clirr1_1.getChangelogUrl()).isEqualTo("http://changelog1.1");
+      Release clirr10 = clirr.getRelease(Version.create("1.0"));
+      Release clirr11 = clirr.getRelease(Version.create("1.1"));
+      assertThat(clirr10.getChangelogUrl()).isEqualTo("http://changelog");
+      assertThat(clirr11.getChangelogUrl()).isEqualTo("http://changelog1.1");
     }
   }
 
@@ -402,7 +456,6 @@ public class UpdateCenterDeserializerTest {
       assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
         .withMessage("Duplicate version for SonarQube: 2.8");
-
     }
   }
 

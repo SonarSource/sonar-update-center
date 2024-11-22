@@ -135,7 +135,7 @@ class Generator {
   private void generateHtmlMatrix(UpdateCenter center) throws IOException {
     File htmlOutputDir = ensureDirectory(configuration.getOutputDir(), HTML_HEADER_DIR);
     CompatibilityMatrix matrix = new CompatibilityMatrix(center, htmlOutputDir, log);
-    matrix.generateHtml();
+    matrix.generateHtmls();
   }
 
   private void prepareDirectoryAndOutputJson(UpdateCenter center) throws IOException {

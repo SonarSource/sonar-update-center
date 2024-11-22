@@ -12,11 +12,11 @@
 <table cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-        <th><strong>SonarQube version</strong></th>
-        <#list matrix.sqVersions as sqVersion>
+        <th><strong>SonarQube Server version</strong></th>
+        <#list matrix.sonarqubeServerVersions as sonarqubeServerVersion>
         <th>
-          ${sqVersion.displayVersion}
-          <#if sqVersion.isLta() >
+          ${sonarqubeServerVersion.displayVersion}
+          <#if sonarqubeServerVersion.isLta() >
           <br/> <strong>(LTA)</strong>
           </#if>
         </th>
@@ -24,13 +24,13 @@
     </tr>
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
-        <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLta()?string(' class="lta"', '')}>${(sqVersion.releaseDate)!}</td>
+        <#list matrix.sonarqubeServerVersions as sonarqubeServerVersion>
+        <td${sonarqubeServerVersion.isLta()?string(' class="lta"', '')}>${(sonarqubeServerVersion.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>
   <tbody>
-    <#list matrix.pluginsForOldSonarQube as plugin>
+    <#list matrix.pluginsForSonarQubeServer as plugin>
     <tr>
         <td><strong>
         <#if plugin.homepageUrl?? >
@@ -40,10 +40,10 @@
         </#if>
         </strong>
         </td>
-        <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLta()?string(' class="lta"', '')}>
-          <#if plugin.supports(sqVersion.realVersion) >
-          ${plugin.supportedVersion(sqVersion.realVersion)}
+        <#list matrix.sonarqubeServerVersions as sonarqubeServerVersion>
+        <td${sonarqubeServerVersion.isLta()?string(' class="lta"', '')}>
+          <#if plugin.supports(sonarqubeServerVersion.realVersion) >
+          ${plugin.supportedVersion(sonarqubeServerVersion.realVersion)}
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png" />
           </#if>

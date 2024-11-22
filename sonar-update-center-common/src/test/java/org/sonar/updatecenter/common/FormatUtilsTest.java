@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FormatUtilsTest {
 
   @Test
-  public void test_to_date() throws ParseException {
+  public void test_to_date() {
     assertThat(FormatUtils.toDate("2010-05-18", false).getDate()).isEqualTo(18);
   }
 
@@ -52,7 +52,7 @@ public class FormatUtilsTest {
   }
 
   @Test
-  public void should_return_null__if_no_date() throws ParseException {
+  public void should_return_null__if_no_date() {
     assertThat(FormatUtils.toString(null, false)).isNull();
   }
 

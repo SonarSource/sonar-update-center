@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginReferential;
+import org.sonar.updatecenter.common.Product;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
 import org.sonar.updatecenter.common.UpdateCenter;
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class CompatibilityMatrixTest {
+
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -62,22 +64,39 @@ public class CompatibilityMatrixTest {
   public void before() throws Exception {
     outputFolder = temporaryFolder.newFolder();
     sonar = new Sonar();
-    sonar.addRelease("3.0");
-    sonar.addRelease("3.7");
-    sonar.addRelease("3.7.1");
-    sonar.addRelease("3.7.2");
-    sonar.addRelease("3.7.4");
-    sonar.addRelease("4.0");
-    sonar.addRelease("10.0");
+    addReleaseToSonarObject("3.0", sonar);
+    addReleaseToSonarObject("3.0", sonar);
+    addReleaseToSonarObject("3.7", sonar);
+    addReleaseToSonarObject("3.7.1", sonar);
+    addReleaseToSonarObject("3.7.2", sonar);
+    addReleaseToSonarObject("3.7.4", sonar);
+    addReleaseToSonarObject("4.0", sonar);
+    addReleaseToSonarObject("10.0", sonar);
+
+    addReleaseToSonarObject("24.12", sonar, Product.SONARQUBE_COMMUNITY_BUILD);
+    addReleaseToSonarObject("25.1", sonar, Product.SONARQUBE_COMMUNITY_BUILD);
+
+    addReleaseToSonarObject("2025.1", sonar, Product.SONARQUBE_SERVER);
+    addReleaseToSonarObject("2025.2", sonar, Product.SONARQUBE_SERVER);
 
     sonar.setLtsRelease("3.7.4");
     sonar.setLtaVersion("3.7.4");
     sonar.setPastLtaVersion("2.9.10");
   }
 
+  private void addReleaseToSonarObject(String version, Sonar sonar) {
+    addReleaseToSonarObject(version, sonar, Product.OLD_SONARQUBE);
+  }
+
+  private void addReleaseToSonarObject(String version, Sonar sonar, Product product) {
+    Release release = new Release(sonar, Version.create(version));
+    release.setProduct(product);
+    sonar.addRelease(release);
+  }
+
   private void prepareMocks(Plugin... plugins) {
     pluginReferential = plugins.length > 0 ? PluginReferential.create(asList(plugins)) : PluginReferential.createEmpty();
-    center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar);
+    center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.OLD_SONARQUBE);
     matrix = new CompatibilityMatrix(center, outputFolder, mock(Log.class));
   }
 
@@ -85,25 +104,27 @@ public class CompatibilityMatrixTest {
   public void shouldThrowExceptionIfNoOutputDir() throws IOException {
     File folder = new File("/doesnt/exist/");
     CompatibilityMatrix m = new CompatibilityMatrix(center, folder, mock(Log.class));
-    m.generateHtml();
+    m.generateHtmls();
   }
 
   @Test
   public void shouldReturnOnlyCssFileIfNoPlugin() throws Exception {
     prepareMocks();
-    matrix.generateHtml();
+    matrix.generateHtmls();
     assertThat(outputFolder.list()).hasSize(2);
     assertThat(outputFolder.list()).containsOnly("styles.css", "error.png");
   }
 
   @Test
-  public void shouldGenerateHtml() throws Exception {
+  public void shouldGenerate3Htmls() throws Exception {
     Plugin pluginFoo = Plugin.factory("foo");
     Version versionFoo = Version.create("1.0");
     Release releaseFoo = new Release(pluginFoo, versionFoo);
     releaseFoo.setDate(getDate());
     releaseFoo.setDownloadUrl("http://valid.download.url");
-    releaseFoo.addRequiredSonarVersions("3.0");
+    releaseFoo.addRequiredSonarVersions(Product.OLD_SONARQUBE, "3.0");
+    releaseFoo.addRequiredSonarVersions(Product.SONARQUBE_SERVER, "2025.1");
+    releaseFoo.addRequiredSonarVersions(Product.SONARQUBE_COMMUNITY_BUILD, "24.12");
     pluginFoo.addRelease(releaseFoo);
     pluginFoo.setName("foo");
 
@@ -112,7 +133,9 @@ public class CompatibilityMatrixTest {
     Release releaseBar = new Release(pluginBar, versionBar);
     releaseBar.setDate(getDate());
     releaseBar.setDownloadUrl("http://other.download.url");
-    releaseBar.addRequiredSonarVersions("4.0");
+    releaseBar.addRequiredSonarVersions(Product.OLD_SONARQUBE, "4.0");
+    releaseBar.addRequiredSonarVersions(Product.SONARQUBE_COMMUNITY_BUILD, "25.1");
+    releaseBar.addRequiredSonarVersions(Product.SONARQUBE_SERVER, "2025.2");
     pluginBar.addRelease(releaseBar);
     pluginBar.setName("bar");
 
@@ -121,23 +144,24 @@ public class CompatibilityMatrixTest {
     Release releaseAbap = new Release(pluginAbap, versionAbap);
     releaseAbap.setDate(getDate());
     releaseAbap.setDownloadUrl("http://abap.download.url");
-    releaseAbap.addRequiredSonarVersions("3.0");
+    releaseAbap.addRequiredSonarVersions(Product.OLD_SONARQUBE, "3.0");
     releaseAbap.setArchived(true);
     pluginAbap.addRelease(releaseAbap);
     pluginAbap.setName("abap");
 
     prepareMocks(pluginFoo, pluginBar, pluginAbap);
-    matrix.generateHtml();
+    matrix.generateHtmls();
 
-    // 3 files:
-    // - styles.css
-    // - error.png
-    // - compatibility-matrix.html
-    assertThat(outputFolder.list()).hasSize(3);
+    assertThat(outputFolder.list()).hasSize(5);
+    assertHtmlForProduct(Product.OLD_SONARQUBE, "compatibility-matrix.html");
+    assertHtmlForProduct(Product.SONARQUBE_COMMUNITY_BUILD, "compatibility-matrix-sqcb.html");
+    assertHtmlForProduct(Product.SONARQUBE_SERVER, "compatibility-matrix-sqs.html");
+  }
 
-    File file = outputFolder.listFiles(new FilenameFilterForCompatibilityMatrixGeneratedHtml())[0];
+  private void assertHtmlForProduct(Product product, String fileName) throws IOException {
+    File file = outputFolder.listFiles(new FilenameFilterForCompatibilityMatrixGeneratedHtml(product))[0];
     String flattenFile = flatHtmlFile(file);
-    String flattenExpectedFile = flatHtmlFile(getExpectedFile("compatibility-matrix.html"));
+    String flattenExpectedFile = flatHtmlFile(getExpectedFile(fileName));
     assertThat(flattenFile).isEqualTo(flattenExpectedFile);
   }
 
@@ -154,8 +178,20 @@ public class CompatibilityMatrixTest {
   }
 
   class FilenameFilterForCompatibilityMatrixGeneratedHtml implements FilenameFilter {
+
+    private final String filename;
+
+    public FilenameFilterForCompatibilityMatrixGeneratedHtml(Product product) {
+      switch (product) {
+        case OLD_SONARQUBE: this.filename = "compatibility-matrix.html"; break;
+        case SONARQUBE_SERVER: this.filename = "compatibility-matrix-sqs.html"; break;
+        case SONARQUBE_COMMUNITY_BUILD: this.filename = "compatibility-matrix-sqcb.html"; break;
+        default: throw new IllegalArgumentException("Unsupported product: " + product);
+      }
+
+    }
     public boolean accept(File file, String s) {
-      return "compatibility-matrix.html".equals(s);
+      return filename.equals(s);
     }
   }
 

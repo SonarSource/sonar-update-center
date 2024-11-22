@@ -45,6 +45,21 @@ public class SonarTest {
   }
 
   @Test
+  public void getReleaseWithProduct_shouldReturnReleaseByProduct() {
+    Sonar sonar = new Sonar();
+    SonarRelease paidRelease = new SonarRelease(sonar, Version.create("3.0"), Product.SONARQUBE_SERVER);
+    SonarRelease communityRelease = new SonarRelease(sonar, Version.create("4.0"), Product.SONARQUBE_COMMUNITY_BUILD);
+    SonarRelease oldRelease = new SonarRelease(sonar, Version.create("5.0"), Product.OLD_SONARQUBE);
+    sonar.addRelease(paidRelease);
+    sonar.addRelease(communityRelease);
+    sonar.addRelease(oldRelease);
+
+    assertThat(sonar.getRelease(Version.create("3.0"), Product.SONARQUBE_SERVER)).isEqualTo(paidRelease);
+    assertThat(sonar.getRelease(Version.create("4.0"), Product.SONARQUBE_COMMUNITY_BUILD)).isEqualTo(communityRelease);
+    assertThat(sonar.getRelease(Version.create("5.0"), Product.OLD_SONARQUBE)).isEqualTo(oldRelease);
+  }
+
+  @Test
   public void sonar_key() {
     assertThat(new Sonar().getKey()).isEqualTo("sonar");
   }
