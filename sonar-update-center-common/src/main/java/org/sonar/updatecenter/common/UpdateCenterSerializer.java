@@ -72,7 +72,10 @@ public final class UpdateCenterSerializer {
   public static Properties toProperties(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
-    set(p, "publicVersions", center.getSonar().getPublicVersions());
+    set(p, "publicVersions", center.getSonar().getPublicVersions(Product.OLD_SONARQUBE));
+    
+    set(p, Product.SONARQUBE_COMMUNITY_BUILD.getSuffix(), center.getSonar().getPublicVersions(Product.SONARQUBE_COMMUNITY_BUILD));
+    set(p, Product.SONARQUBE_SERVER.getSuffix(), center.getSonar().getPublicVersions(Product.SONARQUBE_SERVER));
     if (!center.getSonar().getPrivateVersions().isEmpty()) {
       set(p, "privateVersions", center.getSonar().getPrivateVersions());
     }
@@ -90,25 +93,10 @@ public final class UpdateCenterSerializer {
     if (center.getSonar().getPastLtaVersion() != null) {
       set(p, "pastLtaVersion", center.getSonar().getPastLtaVersion().getVersion().toString());
     }
-    for (Release sonarRelease : center.getSonar().getAllReleases()) {
-      set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
-      set(p, sonarRelease.getVersion() + DISPLAY_VERSION_SUFFIX, sonarRelease.getDisplayVersion());
-      set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
-      set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
-
-      for (Release.Edition edition: Release.Edition.values()) {
-        String downloadUrl = sonarRelease.getDownloadUrl(edition);
-        if (downloadUrl != null) {
-          set(p, sonarRelease.getVersion() + getDownloadUrlSuffix(edition), downloadUrl);
-        }
-      }
-
-      // For backward compatibility
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
-      set(p, SONAR_PREFIX + sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
+    for (Product product : Product.values()) {
+      setProductProperties(center, p, product);
     }
+
 
     List<String> pluginKeys = new ArrayList<>();
     for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
@@ -116,6 +104,30 @@ public final class UpdateCenterSerializer {
     }
     set(p, "plugins", pluginKeys);
     return p;
+  }
+
+  private static void setProductProperties(UpdateCenter center, Properties p, Product product) {
+    for (Release sonarRelease : center.getSonar().getAllReleases(product)) {
+      set(p, sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
+      set(p, sonarRelease.getVersion() + DISPLAY_VERSION_SUFFIX, sonarRelease.getDisplayVersion());
+      set(p, sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
+      set(p, sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
+
+      for (Release.Edition edition : Release.Edition.values()) {
+        String downloadUrl = sonarRelease.getDownloadUrl(edition);
+        if (downloadUrl != null) {
+          set(p, sonarRelease.getVersion() + getDownloadUrlSuffix(edition), downloadUrl);
+        }
+      }
+
+      if (product == Product.OLD_SONARQUBE) {
+        // For backward compatibility
+        set(p, SONAR_PREFIX + sonarRelease.getVersion() + DOWNLOAD_URL_SUFFIX, sonarRelease.getDownloadUrl());
+        set(p, SONAR_PREFIX + sonarRelease.getVersion() + CHANGELOG_URL_SUFFIX, sonarRelease.getChangelogUrl());
+        set(p, SONAR_PREFIX + sonarRelease.getVersion() + DESCRIPTION_SUFFIX, sonarRelease.getDescription());
+        set(p, SONAR_PREFIX + sonarRelease.getVersion() + DATE_SUFFIX, FormatUtils.toString(sonarRelease.getDate(), false));
+      }
+    }
   }
 
   private static void addPlugin(Plugin plugin, List<String> pluginKeys, Properties p) {
@@ -133,7 +145,12 @@ public final class UpdateCenterSerializer {
     set(p, plugin, "developers", StringUtils.join(plugin.getDevelopers(), ","));
 
     for (Release release : plugin.getAllReleases()) {
-      set(p, plugin, release.getVersion() + ".sqVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
+      set(p, plugin, release.getVersion() + "." + Product.OLD_SONARQUBE.getSuffix(), StringUtils.join(release.getRequiredSonarVersions(),
+        ","));
+      set(p, plugin, release.getVersion() + "." + Product.SONARQUBE_COMMUNITY_BUILD.getSuffix(),
+        StringUtils.join(release.getRequiredCommunitySonarVersions(), ","));
+      set(p, plugin, release.getVersion() + "." + Product.SONARQUBE_SERVER.getSuffix(),
+        StringUtils.join(release.getRequiredPaidSonarVersions(), ","));
       // For backward compatibility
       set(p, plugin, release.getVersion() + ".requiredSonarVersions", StringUtils.join(release.getRequiredSonarVersions(), ","));
 
@@ -175,6 +192,6 @@ public final class UpdateCenterSerializer {
     for (Release requiredRelease : release.getOutgoingDependencies()) {
       requiredStringList.add(requiredRelease.getArtifact().getKey() + ":" + requiredRelease.getVersion().getName());
     }
-    return requiredStringList.toArray(new String[] {});
+    return requiredStringList.toArray(new String[]{});
   }
 }

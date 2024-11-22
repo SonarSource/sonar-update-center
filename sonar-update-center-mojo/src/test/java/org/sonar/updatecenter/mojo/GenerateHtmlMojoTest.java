@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.mojo;
 
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,13 +45,19 @@ public class GenerateHtmlMojoTest {
     File inputFile = resource("update-center-template/update-center.properties");
     new GenerateHtmlMojo().setInputFile(inputFile).setOutputDir(outputDir).execute();
 
-    File compatibilityMatrix = new File(outputDir, "html/compatibility-matrix.html");
-    assertThat(compatibilityMatrix).exists().isFile();
-    String html = FileUtils.readFileToString(compatibilityMatrix, StandardCharsets.UTF_8);
-    assertThat(html).contains("Artifact Size");
+    assertCompatibilityMatrixExist(outputDir, "compatibility-matrix.html");
+    assertCompatibilityMatrixExist(outputDir, "compatibility-matrix-sqs.html");
+    assertCompatibilityMatrixExist(outputDir, "compatibility-matrix-sqcb.html");
 
     assertThat(new File(outputDir, "html/styles.css")).exists().isFile();
     assertThat(new File(outputDir, "html/error.png")).exists().isFile();
+  }
+
+  private void assertCompatibilityMatrixExist(File outputDir, String fileName) throws IOException {
+    File compatibilityMatrix = new File(outputDir, "html/" + fileName);
+    assertThat(compatibilityMatrix).exists().isFile();
+    String html = FileUtils.readFileToString(compatibilityMatrix, StandardCharsets.UTF_8);
+    assertThat(html).contains("Artifact Size");
   }
 
   private File resource(String filename) {

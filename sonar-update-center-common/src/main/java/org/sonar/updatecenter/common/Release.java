@@ -19,18 +19,12 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
@@ -43,6 +37,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import static java.util.Collections.unmodifiableSet;
 
@@ -57,17 +55,20 @@ public class Release implements Comparable<Release> {
   private boolean isArchived;
   private String groupId;
   private String artifactId;
+  private Product product;
 
-  private EnumMap<Edition, URL> downloadUrl;
-  private HashMap<String, Integer> scannerDownloadUrlOrder;
-  private HashMap<String, URL> scannerDownloadUrl;
-  private HashMap<String, String> scannerDownloadFlavor;
-  private Set<Release> outgoingDependencies;
-  private Set<Release> incomingDependencies;
+  private final EnumMap<Edition, URL> downloadUrl;
+  private final HashMap<String, Integer> scannerDownloadUrlOrder;
+  private final HashMap<String, URL> scannerDownloadUrl;
+  private final HashMap<String, String> scannerDownloadFlavor;
+  private final Set<Release> outgoingDependencies;
+  private final Set<Release> incomingDependencies;
   /**
    * from oldest to newest sonar versions
    */
-  private SortedSet<Version> compatibleSqVersions;
+  private final SortedSet<Version> compatibleSqVersions;
+  private final SortedSet<Version> compatiblePaidSqVersions;
+  private final SortedSet<Version> compatibleCommunitySqVersions;
   private Date date;
 
   public Release(Artifact artifact, Version version) {
@@ -78,6 +79,8 @@ public class Release implements Comparable<Release> {
 
     this.downloadUrl = new EnumMap<>(Edition.class);
     this.compatibleSqVersions = new TreeSet<>();
+    this.compatibleCommunitySqVersions = new TreeSet<>();
+    this.compatiblePaidSqVersions = new TreeSet<>();
     this.outgoingDependencies = new HashSet<>();
     this.incomingDependencies = new HashSet<>();
     this.scannerDownloadFlavor = new HashMap<>();
@@ -184,54 +187,75 @@ public class Release implements Comparable<Release> {
     return compatibleSqVersions;
   }
 
-  public boolean supportSonarVersion(Version providedSqVersion) {
-    // Compare versions without qualifier
-    for (Version sqVersion : compatibleSqVersions) {
-      if (sqVersion.isCompatibleWith(providedSqVersion)) {
+  public SortedSet<Version> getRequiredPaidSonarVersions() {
+    return compatiblePaidSqVersions;
+  }
+
+  public SortedSet<Version> getRequiredCommunitySonarVersions() {
+    return compatibleCommunitySqVersions;
+  }
+
+  public boolean supportSonarVersion(Version providedSqVersion, Product product) {
+    for (Version releaseVersion : productToVersions(product)) {
+      if (releaseVersion.isCompatibleWith(providedSqVersion)) {
         return true;
       }
     }
     return false;
   }
 
-  public Release addRequiredSonarVersions(@Nullable Version... versions) {
+  public Release addRequiredSonarVersions(Product product, @Nullable Version... versions) {
     if (versions != null) {
-      compatibleSqVersions.addAll(Arrays.asList(versions));
+      productToVersions(product).addAll(Arrays.asList(versions));
     }
     return this;
   }
 
-  public Release addRequiredSonarVersions(@Nullable String... versions) {
+  public Release addRequiredSonarVersions(Product product, @Nullable String... versions) {
     if (versions != null) {
       for (String v : versions) {
-        compatibleSqVersions.add(Version.create(v));
+        productToVersions(product).add(Version.create(v));
       }
     }
     return this;
   }
 
-  public Version getLastRequiredSonarVersion() {
-    if (!compatibleSqVersions.isEmpty()) {
-      return compatibleSqVersions.last();
+  public Version getLastRequiredSonarVersion(Product product) {
+    SortedSet<Version> versionsSet = productToVersions(product);
+    if (!versionsSet.isEmpty()) {
+      return versionsSet.last();
     }
     return null;
   }
 
-  public Version getMinimumRequiredSonarVersion() {
-    if (!compatibleSqVersions.isEmpty()) {
-      return compatibleSqVersions.first();
+  public Version getMinimumRequiredSonarVersion(Product product) {
+    SortedSet<Version> versionsSet = productToVersions(product);
+    if (!versionsSet.isEmpty()) {
+      return versionsSet.first();
     }
     return null;
   }
 
-  public Version[] getSonarVersionFromString(final String fromString) {
+  public Set<Version> getSonarVersionFromString(Product product, final String fromString) {
+    SortedSet<Version> versionsSet = productToVersions(product);
 
-    Collection<Version> versionsWGivenFromString = compatibleSqVersions.stream()
+    return versionsSet.stream()
       .filter(Objects::nonNull)
       .filter(sqVersion -> fromString.equals(sqVersion.getFromString()))
       .collect(Collectors.toSet());
+  }
 
-    return versionsWGivenFromString.toArray(new Version[versionsWGivenFromString.size()]);
+  private SortedSet<Version> productToVersions(Product product) {
+    switch (product) {
+      case OLD_SONARQUBE:
+        return compatibleSqVersions;
+      case SONARQUBE_COMMUNITY_BUILD:
+        return compatibleCommunitySqVersions;
+      case SONARQUBE_SERVER:
+        return compatiblePaidSqVersions;
+      default:
+        throw new IllegalArgumentException("Unsupported product: " + product);
+    }
   }
 
   @CheckForNull
@@ -343,13 +367,18 @@ public class Release implements Comparable<Release> {
 
     Release release = (Release) o;
 
-    return artifact.equals(release.artifact) && version.equals(release.version);
+    return artifact.equals(release.artifact) && version.equals(release.version) && Objects.equals(product, release.product);
+  }
+
+  public void setProduct(Product product) {
+    this.product = product;
   }
 
   @Override
   public int hashCode() {
     int result = artifact.hashCode();
     result = 31 * result + version.hashCode();
+    result = product == null ? result : (31 * result + product.hashCode());
     return result;
   }
 
@@ -360,12 +389,17 @@ public class Release implements Comparable<Release> {
       .append("downloadUrl", downloadUrl)
       .append("changelogUrl", changelogUrl)
       .append("description", description)
+      .append("product", product)
       .toString();
   }
 
   @Override
   public int compareTo(Release o) {
     return getVersion().compareTo(o.getVersion());
+  }
+
+  public Product getProduct() {
+    return product;
   }
 
   public enum Edition {

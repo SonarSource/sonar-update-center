@@ -19,14 +19,11 @@
  */
 package org.sonar.updatecenter.common;
 
-import java.io.CharArrayReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.junit.Test;
 import org.sonar.updatecenter.common.exception.DependencyCycleException;
 import org.sonar.updatecenter.common.exception.IncompatiblePluginVersionException;
@@ -40,16 +37,14 @@ import static org.sonar.updatecenter.common.PluginReferential.PLUGINS_BUNDLED_IN
 
 public class PluginReferentialTest {
 
-  private static final String PLUGIN_LICENSE_KEY = "license";
-
   @Test
   public void get_and_set_plugins() {
     Plugin foo = Plugin.factory("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     foo.addRelease(foo10);
 
     Plugin bar = Plugin.factory("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     bar.addRelease(bar10);
 
     PluginReferential pluginReferential = PluginReferential.create(asList(foo, bar));
@@ -69,24 +64,24 @@ public class PluginReferentialTest {
   public void should_return_releases_keys_to_remove() {
     // Standalone plugin
     Plugin test = Plugin.factory("test");
-    Release test10 = new Release(test, "1.0").addRequiredSonarVersions("2.1");
+    Release test10 = new Release(test, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     test.addRelease(test10);
 
     Plugin foo = Plugin.factory("foo");
-    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions("2.1");
+    Release foo10 = new Release(foo, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     foo.addRelease(foo10);
 
     // foobis depends upon foo
     Plugin foobis = Plugin.factory("foobis");
-    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions("2.1");
+    Release foobis10 = new Release(foobis, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     foobis.addRelease(foobis10);
 
     // bar has one child and depends upon foobis
     Plugin bar = Plugin.factory("bar");
-    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions("2.1");
+    Release bar10 = new Release(bar, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     bar.addRelease(bar10);
     Plugin barbis = Plugin.factory("barbis");
-    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions("2.1");
+    Release barbis10 = new Release(barbis, "1.0").addRequiredSonarVersions(Product.OLD_SONARQUBE, "2.1");
     barbis.addRelease(barbis10);
 
     PluginReferential pluginReferential = PluginReferential.create(asList(foo, foobis, bar, test));

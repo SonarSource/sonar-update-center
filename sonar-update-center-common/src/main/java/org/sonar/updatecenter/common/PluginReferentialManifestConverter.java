@@ -36,7 +36,9 @@ public class PluginReferentialManifestConverter {
       plugin.merge(pluginManifest);
 
       Release release = new Release(plugin, pluginManifest.getVersion());
-      release.addRequiredSonarVersions(Version.create(pluginManifest.getSonarVersion()));
+      release.addRequiredSonarVersions(Product.OLD_SONARQUBE, Version.create(pluginManifest.getSonarVersion()));
+      release.addRequiredSonarVersions(Product.SONARQUBE_COMMUNITY_BUILD, Version.create(pluginManifest.getSonarVersion()));
+      release.addRequiredSonarVersions(Product.SONARQUBE_SERVER, Version.create(pluginManifest.getSonarVersion()));
       release.setDisplayVersion(pluginManifest.getDisplayVersion());
       plugin.addRelease(release);
       plugins.add(plugin);

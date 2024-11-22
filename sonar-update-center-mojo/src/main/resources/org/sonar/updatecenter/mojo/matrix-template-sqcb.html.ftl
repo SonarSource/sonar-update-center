@@ -12,11 +12,11 @@
 <table cellpadding="0" cellspacing="0">
   <thead>
     <tr>
-        <th><strong>SonarQube version</strong></th>
-        <#list matrix.sqVersions as sqVersion>
+        <th><strong>SonarQube Community Build version</strong></th>
+        <#list matrix.communityBuildVersions as sonarqubeCommunityBuild>
         <th>
-          ${sqVersion.displayVersion}
-          <#if sqVersion.isLta() >
+          ${sonarqubeCommunityBuild.displayVersion}
+          <#if sonarqubeCommunityBuild.isLta() >
           <br/> <strong>(LTA)</strong>
           </#if>
         </th>
@@ -24,13 +24,13 @@
     </tr>
     <tr>
         <td style="white-space:nowrap"><strong>Plugin / Release Date</strong></td>
-        <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLta()?string(' class="lta"', '')}>${(sqVersion.releaseDate)!}</td>
+        <#list matrix.communityBuildVersions as sonarqubeCommunityBuild>
+        <td${sonarqubeCommunityBuild.isLta()?string(' class="lta"', '')}>${(sonarqubeCommunityBuild.releaseDate)!}</td>
         </#list>
     </tr>
   </thead>
   <tbody>
-    <#list matrix.pluginsForOldSonarQube as plugin>
+    <#list matrix.pluginsForCommunityBuild as plugin>
     <tr>
         <td><strong>
         <#if plugin.homepageUrl?? >
@@ -40,10 +40,10 @@
         </#if>
         </strong>
         </td>
-        <#list matrix.sqVersions as sqVersion>
-        <td${sqVersion.isLta()?string(' class="lta"', '')}>
-          <#if plugin.supports(sqVersion.realVersion) >
-          ${plugin.supportedVersion(sqVersion.realVersion)}
+        <#list matrix.communityBuildVersions as sonarqubeCommunityBuild>
+        <td${sonarqubeCommunityBuild.isLta()?string(' class="lta"', '')}>
+          <#if plugin.supports(sonarqubeCommunityBuild.realVersion) >
+          ${plugin.supportedVersion(sonarqubeCommunityBuild.realVersion)}
           <#else>
           <img class="emoticon" alt="(not compatible)" src="error.png" />
           </#if>

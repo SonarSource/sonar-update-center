@@ -23,12 +23,12 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ScannerTest {
+public class SonarReleaseTest {
 
   @Test
-  public void should_return_correct_flags() {
-    Scanner scanner = Scanner.factory("test");
-    assertThat(scanner.needArtifact()).isFalse();
-    assertThat(scanner.needSqVersion()).isFalse();
+  public void constructor_productIsSet() {
+    SonarRelease sonarRelease = new SonarRelease(new Sonar(), Version.create("2025.1"), Product.SONARQUBE_SERVER);
+
+    assertThat(sonarRelease.getProduct()).isEqualTo(Product.SONARQUBE_SERVER);
   }
 }
