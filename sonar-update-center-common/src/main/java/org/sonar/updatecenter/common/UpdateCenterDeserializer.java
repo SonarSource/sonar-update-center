@@ -430,6 +430,12 @@ public final class UpdateCenterDeserializer {
   private void parseSonarVersions(Properties p, Sonar sonar, String key, Product product, boolean isPublicRelease) {
     for (String sonarVersion : getArray(p, key)) {
       Release release = parseSonarVersion(p, sonar, isPublicRelease, sonarVersion, product);
+      boolean is108or20251 = (release.getVersion().equals(Version.create("10.8")) || release.getVersion().equals(Version.create("2025.1")));
+      if (product == Product.OLD_SONARQUBE && is108or20251) {
+        // We don't want to add 10.8 and 2025.1. These releases are added to the publicVersions field only for 10.7 SQs and below to display
+        // marketing banner.
+        continue;
+      }
       if (!sonar.getAllReleases(product).contains(release)) {
         sonar.addRelease(release);
       } else {
@@ -479,7 +485,8 @@ public final class UpdateCenterDeserializer {
     return result.toArray(new Version[0]);
   }
 
-  private static void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high, Product product) {
+  private static void resolveRangeOfRequiredSQVersion(Sonar sonar, List<Version> result, final Version low, final Version high,
+    Product product) {
     sonar.getAllReleases(product).stream()
       .filter(Objects::nonNull)
       .map(Release::getVersion)

@@ -91,6 +91,10 @@ public class Version implements Comparable<Version> {
     return fromString;
   }
 
+  public boolean isPatchVersion() {
+    return !patch.equals("0");
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
