@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 
@@ -72,7 +75,8 @@ public final class UpdateCenterSerializer {
   public static Properties toProperties(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toString(center.getDate(), true));
-    set(p, "publicVersions", center.getSonar().getPublicVersions(Product.OLD_SONARQUBE));
+    SortedSet<Version> publicVersions = determinePublicVersionsField(center);
+    set(p, "publicVersions", publicVersions);
     
     set(p, Product.SONARQUBE_COMMUNITY_BUILD.getSuffix(), center.getSonar().getPublicVersions(Product.SONARQUBE_COMMUNITY_BUILD));
     set(p, Product.SONARQUBE_SERVER.getSuffix(), center.getSonar().getPublicVersions(Product.SONARQUBE_SERVER));
@@ -104,6 +108,20 @@ public final class UpdateCenterSerializer {
     }
     set(p, "plugins", pluginKeys);
     return p;
+  }
+
+  /**
+   * This publicVersions field is not used by SonarQubes 10.8+ and 24.12+. However, it is still used by "old" SonarQubes.
+   * When running them we still want to suggest upgrade to SonarQubes 10.8 and 2025.1 (but only to these two exact versions).
+   * It is a business requirement.
+   */
+  private static SortedSet<Version> determinePublicVersionsField(UpdateCenter center) {
+    SortedSet<Version> publicVersions = center.getSonar().getPublicVersions(Product.OLD_SONARQUBE);
+    Set<Version> newSonarQubes = center.getSonar().getPublicVersions(Product.SONARQUBE_SERVER).stream()
+      .filter(version -> version.equals(Version.create("10.8")) || version.equals(Version.create("2025.1")))
+      .collect(Collectors.toSet());
+    publicVersions.addAll(newSonarQubes);
+    return publicVersions;
   }
 
   private static void setProductProperties(UpdateCenter center, Properties p, Product product) {

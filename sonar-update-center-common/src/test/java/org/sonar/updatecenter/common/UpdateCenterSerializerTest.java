@@ -30,6 +30,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UpdateCenterSerializerTest {
 
   @Test
+  public void toProperties_when108and20251released_includeThemInPublicVersions() {
+    Sonar sonar = new Sonar();
+    addReleaseToSonarObject("10.8", sonar, Product.SONARQUBE_SERVER);
+    addReleaseToSonarObject("2025.1", sonar, Product.SONARQUBE_SERVER);
+
+    PluginReferential pluginReferential = PluginReferential.create(new ArrayList<>());
+
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
+    Properties properties = UpdateCenterSerializer.toProperties(center);
+
+    assertProperty(properties, "sonar.versions", "10.8,2025.1");
+    assertProperty(properties, "publicVersions", "10.8,2025.1");
+    assertProperty(properties, "sqs", "10.8,2025.1");
+  }
+
+  @Test
   public void test_to_properties() throws IOException {
     Sonar sonar = new Sonar();
     Release release = new Release(sonar, Version.create("2.0"));
@@ -170,8 +186,12 @@ public class UpdateCenterSerializerTest {
   }
 
   private void addReleaseToSonarObject(String version, Sonar sonar) {
+    addReleaseToSonarObject(version, sonar, Product.OLD_SONARQUBE);
+  }
+
+  private void addReleaseToSonarObject(String version, Sonar sonar, Product product) {
     Release release = new Release(sonar, Version.create(version));
-    release.setProduct(Product.OLD_SONARQUBE);
+    release.setProduct(product);
     sonar.addRelease(release);
   }
 }

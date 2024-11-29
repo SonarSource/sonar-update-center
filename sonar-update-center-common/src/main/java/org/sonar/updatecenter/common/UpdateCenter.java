@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.Nullable;
@@ -52,7 +53,8 @@ public class UpdateCenter {
     this.installedSonarProduct = product;
   }
 
-  public static UpdateCenter create(PluginReferential updateCenterPluginReferential, List<Scanner> scanners, Sonar sonar, @Nullable Product product) {
+  public static UpdateCenter create(PluginReferential updateCenterPluginReferential, List<Scanner> scanners, Sonar sonar,
+    @Nullable Product product) {
     return new UpdateCenter(updateCenterPluginReferential, scanners, sonar, product);
   }
 
@@ -209,10 +211,41 @@ public class UpdateCenter {
   public List<SonarUpdate> findSonarUpdates() {
     List<SonarUpdate> updates = new ArrayList<>();
     SortedSet<Release> releases = sonar.getReleasesGreaterThan(installedSonarVersion, installedSonarProduct);
+    if (installedSonarProduct == Product.SONARQUBE_COMMUNITY_BUILD) {
+      findPaidReleaseToUpdateTo().ifPresent(releases::add);
+    }
     for (Release release : releases) {
       updates.add(createSonarUpdate(release));
     }
     return updates;
+  }
+
+  private Optional<Release> findPaidReleaseToUpdateTo() {
+    SortedSet<Release> sonarQubeServerReleases = sonar.getReleases(Product.SONARQUBE_SERVER);
+    SortedSet<Release> sonarQubeCommunityBuildReleases = sonar.getReleases(Product.SONARQUBE_COMMUNITY_BUILD);
+
+    if (!sonarQubeServerReleases.isEmpty()) {
+      Release latest = sonarQubeServerReleases.last();
+      if (latest.getVersion().isPatchVersion()) {
+        return Optional.empty();
+      }
+      if (!sonarQubeCommunityBuildReleases.isEmpty()) {
+        Optional<Release> currentCommunityBuild = sonarQubeCommunityBuildReleases.stream()
+          .filter(release -> release.getVersion().equals(installedSonarVersion))
+          .findFirst();
+        if (!currentCommunityBuild.isPresent() || currentCommunityBuild.get().getDate().compareTo(latest.getDate()) <= 0) {
+          return Optional.of(latest);
+        } else {
+          // the user is running a community build that is more recent than the latest sonarqube server release
+          return Optional.empty();
+        }
+      }
+      // the user is running community build so old that it disappeared from update center
+      return Optional.of(latest);
+    } else {
+      // edge case - no sonarqube server releases at all, only needed for November 2024
+      return Optional.empty();
+    }
   }
 
   private SonarUpdate createSonarUpdate(Release sonarRelease) {

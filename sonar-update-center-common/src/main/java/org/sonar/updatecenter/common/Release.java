@@ -370,8 +370,9 @@ public class Release implements Comparable<Release> {
     return artifact.equals(release.artifact) && version.equals(release.version) && Objects.equals(product, release.product);
   }
 
-  public void setProduct(Product product) {
+  public Release setProduct(Product product) {
     this.product = product;
+    return this;
   }
 
   @Override

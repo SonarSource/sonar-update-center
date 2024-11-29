@@ -161,6 +161,24 @@ public class VersionTest {
   }
 
   @Test
+  public void isPatchVersion_whenIsPatchVersion_returnTrue() {
+    Version version = Version.create("1.2.3.4");
+
+    boolean patchVersion = version.isPatchVersion();
+
+    assertThat(patchVersion).isTrue();
+  }
+
+  @Test
+  public void isPatchVersion_whenIsNotPatchVersion_returnFalse() {
+    Version version = Version.create("1.2.0.0");
+
+    boolean patchVersion = version.isPatchVersion();
+
+    assertThat(patchVersion).isFalse();
+  }
+
+  @Test
   public void removeQualifier() {
     Version version = Version.create("1.2.3-SNAPSHOT").removeQualifier();
 

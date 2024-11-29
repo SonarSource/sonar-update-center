@@ -19,7 +19,10 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import org.junit.Before;
@@ -673,12 +676,86 @@ public class UpdateCenterTest {
     assertThat(updates.get(1).hasWarnings()).isFalse();
   }
 
+  @Test
+  public void findSonarUpdatesForCommunityBuild_whenNoSonarQubeServerReleasesAndNewCommunityBuild_returnIt() {
+    addReleaseToSonarObject("1", sonar, Product.SONARQUBE_COMMUNITY_BUILD);
+    addReleaseToSonarObject("2", sonar, Product.SONARQUBE_COMMUNITY_BUILD);
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.SONARQUBE_COMMUNITY_BUILD).setInstalledSonarVersion(Version.create("1"));
+
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    assertThat(updates).hasSize(1);
+    assertThat(updates.get(0).getRelease().getVersion()).isEqualTo(Version.create("2"));
+  }
+
+  @Test
+  public void findSonarUpdatesForCommunityBuild_whenOldSonarQubeServerAndNewCommunityBuild_returnIt() {
+    addReleaseToSonarObject("1", sonar, Product.SONARQUBE_COMMUNITY_BUILD, "01-21");
+    addReleaseToSonarObject("2", sonar, Product.SONARQUBE_COMMUNITY_BUILD, "01-22");
+    addReleaseToSonarObject("10", sonar, Product.SONARQUBE_SERVER, "01-20");
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.SONARQUBE_COMMUNITY_BUILD).setInstalledSonarVersion(Version.create("1"));
+
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    assertThat(updates).hasSize(1);
+    assertThat(updates.get(0).getRelease().getVersion()).isEqualTo(Version.create("2"));
+  }
+
+  @Test
+  public void findSonarUpdatesForCommunityBuild_whenSonarQubeServerAndCommunityReleasedOnTheSameDay_returnIt() {
+    addReleaseToSonarObject("1", sonar, Product.SONARQUBE_COMMUNITY_BUILD, "01-21");
+    addReleaseToSonarObject("10", sonar, Product.SONARQUBE_SERVER, "01-21");
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.SONARQUBE_COMMUNITY_BUILD)
+      .setInstalledSonarVersion(Version.create("1"));
+
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    assertThat(updates).hasSize(1);
+    assertThat(updates.get(0).getRelease().getVersion()).isEqualTo(Version.create("10"));
+  }
+
+  @Test
+  public void findSonarUpdatesForCommunityBuild_whenCommunityBuildNoLongerInTheUpdateCenter_returnLatestSonarQubeServer() {
+    addReleaseToSonarObject("10", sonar, Product.SONARQUBE_SERVER, "01-21");
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.SONARQUBE_COMMUNITY_BUILD)
+      .setInstalledSonarVersion(Version.create("1"));
+
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    assertThat(updates).hasSize(1);
+    assertThat(updates.get(0).getRelease().getVersion()).isEqualTo(Version.create("10"));
+  }
+
+  @Test
+  public void findSonarUpdatesForCommunityBuild_whenSQSPatchVersionReleased_returnNothing() {
+    addReleaseToSonarObject("10.0.1", sonar, Product.SONARQUBE_SERVER, "01-21");
+
+    UpdateCenter updateCenter = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, Product.SONARQUBE_COMMUNITY_BUILD)
+      .setInstalledSonarVersion(Version.create("1"));
+
+    List<SonarUpdate> updates = updateCenter.findSonarUpdates();
+
+    assertThat(updates).isEmpty();
+  }
+
   private void addReleaseToSonarObject(String version, Sonar sonar) {
     addReleaseToSonarObject(version, sonar, Product.OLD_SONARQUBE);
   }
 
   private void addReleaseToSonarObject(String version, Sonar sonar, Product product) {
+    addReleaseToSonarObject(version, sonar, product, "01-01");
+  }
+
+  private void addReleaseToSonarObject(String version, Sonar sonar, Product product, String dayAndMonth) {
+    LocalDate localDate = LocalDate.of(2025, Integer.parseInt(dayAndMonth.split("-")[0]), Integer.parseInt(dayAndMonth.split("-")[1]));
+    Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
     Release release = new Release(sonar, Version.create(version));
+    release.setDate(date);
     release.setProduct(product);
     sonar.addRelease(release);
   }
