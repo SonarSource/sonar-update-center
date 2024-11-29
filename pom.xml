@@ -51,8 +51,9 @@
   <properties>
     <maven.compiler.release>8</maven.compiler.release>
     <gitRepositoryName>sonar-update-center</gitRepositoryName>
-     <artifactsToDownload>${project.groupId}:sonar-update-center-common:jar,${project.groupId}:sonar-update-center-mojo:jar</artifactsToDownload>
-     <doclint>none</doclint>
+    <artifactsToDownload>${project.groupId}:sonar-update-center-common:jar,${project.groupId}:sonar-update-center-mojo:jar</artifactsToDownload>
+    <doclint>none</doclint>
+    <license.name>GNU LGPL v3</license.name>
   </properties>
 
   <modules>
