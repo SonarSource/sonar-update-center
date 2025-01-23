@@ -340,7 +340,22 @@ public class UpdateCenterDeserializerTest {
 
     assertThatExceptionOfType(IllegalStateException.class)
       .isThrownBy(() -> updateCenterDeserializer.fromManyFiles(mainFile))
-      .withMessage("Only the latest release of plugin foo may depend on LATEST SonarQube");
+      .withMessage("Only the latest release of plugin foo for product SONARQUBE_COMMUNITY_BUILD may depend on the LATEST SonarQube");
+  }
+
+  @Test
+  public void fromManyFiles_whenLATESTKeywordUsedTwiceOnTwoProducts_dontThrowException() throws URISyntaxException, IOException {
+    URL url = getClass().getResource(
+      "/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/fromManyFiles_whenLATESTKeywordUsedTwiceOnTwoProducts_dontThrowException/update-center.properties");
+
+    UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+    File mainFile = new File(url.toURI());
+
+    UpdateCenter updateCenter = updateCenterDeserializer.fromManyFiles(mainFile);
+
+    List<Plugin> allCompatiblePlugins = updateCenter.getUpdateCenterPluginReferential().getPlugins();
+    assertThat(allCompatiblePlugins).hasSize(1);
+    assertThat(allCompatiblePlugins.get(0).getAllReleases()).hasSize(3);
   }
 
   // UPC-29
