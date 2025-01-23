@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -151,7 +149,8 @@ public final class UpdateCenterDeserializer {
 
     validatePublicPluginSQVersionOverlap(plugins);
 
-    validateLATESTonLatestPluginVersion(plugins);
+    validateLATESTonLatestPluginVersion(plugins, Product.SONARQUBE_SERVER);
+    validateLATESTonLatestPluginVersion(plugins, Product.SONARQUBE_COMMUNITY_BUILD);
 
     PluginReferential pluginReferential = PluginReferential.create(plugins);
     for (Plugin plugin : pluginReferential.getPlugins()) {
@@ -197,20 +196,28 @@ public final class UpdateCenterDeserializer {
     }
   }
 
-  private void validateLATESTonLatestPluginVersion(List<Plugin> plugins) {
+  /**
+   * We don't want to allow for the situation where the plugin's not-the-latest release for a given product
+   * is compatible with the LATEST version of that product.
+   * Therefore, for each plugin we iterate over its releases (from the latest to the oldest) and in case
+   * some old version of plugin uses LATEST keyword we throw an error.
+   */
+  private void validateLATESTonLatestPluginVersion(List<Plugin> plugins, Product product) {
     for (Plugin plugin : plugins) {
-      SortedSet<Release> publicAndArchivedReleases = new TreeSet<>(plugin.getPublicReleases());
+      TreeSet<Release> publicAndArchivedReleases = new TreeSet<>(plugin.getPublicReleases());
       publicAndArchivedReleases.addAll(plugin.getArchivedReleases());
 
-      for (Release r : publicAndArchivedReleases) {
-        Collection<Version> oldVersionsWithLatest = r.getSonarVersionFromString(Product.OLD_SONARQUBE, LATEST_KEYWORD);
-        Collection<Version> communityVersionsWLatest = r.getSonarVersionFromString(Product.SONARQUBE_COMMUNITY_BUILD, LATEST_KEYWORD);
-        Collection<Version> paidVersionsWLatest = r.getSonarVersionFromString(Product.SONARQUBE_SERVER, LATEST_KEYWORD);
-        // only latest release may depend on LATEST SQ
-        if (!r.equals(publicAndArchivedReleases.last()) && (!oldVersionsWithLatest.isEmpty() || !communityVersionsWLatest.isEmpty() ||
-          !paidVersionsWLatest.isEmpty())) {
-          reportError("Only the latest release of plugin " + pluginName(plugin) + " may depend on " + LATEST_KEYWORD + " SonarQube");
+      boolean latestReleaseForProductAlreadyFound = false;
+
+      for (Release r : publicAndArchivedReleases.descendingSet()) {
+        if (!r.productToVersions(product).isEmpty()) {
+          if (latestReleaseForProductAlreadyFound && !r.getSonarVersionFromString(product, LATEST_KEYWORD).isEmpty()) {
+            reportError("Only the latest release of plugin " + pluginName(plugin) + " for product " + product +
+              " may depend on the " + LATEST_KEYWORD + " SonarQube");
+          }
+          latestReleaseForProductAlreadyFound = true;
         }
+
       }
     }
   }

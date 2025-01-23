@@ -245,7 +245,7 @@ public class Release implements Comparable<Release> {
       .collect(Collectors.toSet());
   }
 
-  private SortedSet<Version> productToVersions(Product product) {
+  public SortedSet<Version> productToVersions(Product product) {
     switch (product) {
       case OLD_SONARQUBE:
         return compatibleSqVersions;
