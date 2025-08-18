@@ -50,6 +50,6 @@ mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-json 
 
 ### License
 
-Copyright 2010-2024 SonarSource.
+Copyright 2010-2025 SonarSource.
 
 Licensed under the [GNU Lesser General Public License, Version 3.0](http://www.gnu.org/licenses/lgpl.txt)
