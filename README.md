@@ -1,4 +1,5 @@
-# Sonar Update Center [![Build Status](https://api.cirrus-ci.com/github/SonarSource/sonar-update-center.svg)](https://cirrus-ci.com/github/SonarSource/sonar-update-center) [![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.update-center%3Asonar-update-center&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.update-center%3Asonar-update-center)
+# Sonar Update Center [![Build Status](https://github.com/SonarSource/sonar-update-center/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/SonarSource/sonar-update-center/actions/workflows/build.yml)
+[![Quality Gate Status](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.update-center%3Asonar-update-center&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.update-center%3Asonar-update-center)
 
 ## Use as a library
 
