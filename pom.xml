@@ -54,6 +54,9 @@
     <artifactsToDownload>${project.groupId}:sonar-update-center-common:jar,${project.groupId}:sonar-update-center-mojo:jar</artifactsToDownload>
     <doclint>none</doclint>
     <license.name>GNU LGPL v3</license.name>
+    <sonarVersion>5.1</sonarVersion>
+    <sonar.organization>sonarsource</sonar.organization>
+    <sonar.projectKey>org.sonarsource.update-center:sonar-update-center</sonar.projectKey>
   </properties>
 
   <modules>
