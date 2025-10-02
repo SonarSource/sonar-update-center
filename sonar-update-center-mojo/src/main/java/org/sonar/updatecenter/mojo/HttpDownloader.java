@@ -21,7 +21,7 @@ package org.sonar.updatecenter.mojo;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
@@ -41,7 +41,7 @@ class HttpDownloader {
     this.log = log;
   }
 
-  public File download(String url, boolean force) throws IOException, URISyntaxException {
+  public File download(String url, boolean force) throws IOException {
     FileUtils.forceMkdir(outputDir);
 
     String filename = StringUtils.substringAfterLast(url, "/");
