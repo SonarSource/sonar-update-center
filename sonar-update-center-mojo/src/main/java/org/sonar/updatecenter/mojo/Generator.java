@@ -19,7 +19,7 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.PluginManifest;
@@ -84,25 +84,25 @@ class Generator {
     return outputDir;
   }
 
-  void generateHtml() throws IOException, URISyntaxException {
+  void generateHtml() throws IOException {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateHtmlMatrix(center);
   }
 
-  void generateMetadata() throws IOException, URISyntaxException {
+  void generateMetadata() throws IOException {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     generateMetadata(center);
   }
 
-  void generateJson() throws IOException, URISyntaxException {
+  void generateJson() throws IOException {
     UpdateCenter center = configuration.getUpdateCenter();
     downloadReleases(center);
     prepareDirectoryAndOutputJson(center);
   }
 
-  private void downloadReleases(UpdateCenter center) throws IOException, URISyntaxException {
+  private void downloadReleases(UpdateCenter center) throws IOException {
     HttpDownloader downloader = new HttpDownloader(configuration.getOutputDir(), configuration.mustCheckDownloadUrls(), log);
     PluginReferential pluginReferential = center.getUpdateCenterPluginReferential();
     for (Plugin plugin : pluginReferential.getPlugins()) {

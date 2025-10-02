@@ -19,7 +19,6 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import org.apache.maven.plugin.logging.Log;
@@ -151,10 +150,9 @@ public class ScannerJsonGenerator extends JsonGenerator{
           becomeAJsonOutputVersion.description = scannerHeaderVersion.getDescription();
           becomeAJsonOutputVersion.archived = scannerHeaderVersion.isArchived();
           becomeAJsonOutputVersion.compatibility = scannerHeaderVersion.getSonarVersionRange();
-          becomeAJsonOutputVersion.downloadURL = Lists.transform(
-            scannerHeaderVersion.getScannerDownloadUrl(),
-            url -> new JsonFlavoredUrl(url.getLabel(), safeCreateURLFromString(url.getUrl()))
-          );
+          becomeAJsonOutputVersion.downloadURL = scannerHeaderVersion.getScannerDownloadUrl().stream()
+            .map(url -> new JsonFlavoredUrl(url.getLabel(), safeCreateURLFromString(url.getUrl())))
+            .collect(Collectors.toList());
           if (becomeAJsonOutputVersion.downloadURL.isEmpty()) {
             becomeAJsonOutputVersion.downloadURL  = new ArrayList<>();
             becomeAJsonOutputVersion.downloadURL.add(new JsonFlavoredUrl(null, safeCreateURLFromString(scannerHeaderVersion.getDownloadUrl())));

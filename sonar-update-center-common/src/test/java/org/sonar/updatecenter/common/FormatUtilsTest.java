@@ -19,7 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 
 import java.text.ParseException;
