@@ -51,9 +51,9 @@
       <artifactId>gson</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.github.kevinsawicki</groupId>
-      <artifactId>http-request</artifactId>
-      <version>5.1</version>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.14</version>
     </dependency>
     <dependency>
       <groupId>com.github.erosb</groupId>
@@ -80,6 +80,12 @@
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-jre8</artifactId>
+      <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
