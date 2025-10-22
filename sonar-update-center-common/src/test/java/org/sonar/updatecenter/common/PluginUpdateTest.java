@@ -21,8 +21,7 @@ package org.sonar.updatecenter.common;
 
 import org.junit.Test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PluginUpdateTest {
 
@@ -34,10 +33,10 @@ public class PluginUpdateTest {
 
     PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion, Product.OLD_SONARQUBE);
 
-    assertThat(update.getRelease(), is(pluginRelease));
-    assertThat(update.isCompatible(), is(true));
-    assertThat(update.isIncompatible(), is(false));
-    assertThat(update.requiresSonarUpgrade(), is(false));
+    assertThat(update.getRelease()).isEqualTo(pluginRelease);
+    assertThat(update.isCompatible()).isTrue();
+    assertThat(update.isIncompatible()).isFalse();
+    assertThat(update.requiresSonarUpgrade()).isFalse();
   }
 
   @Test
@@ -48,10 +47,10 @@ public class PluginUpdateTest {
 
     PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion, Product.OLD_SONARQUBE);
 
-    assertThat(update.getRelease(), is(pluginRelease));
-    assertThat(update.isCompatible(), is(false));
-    assertThat(update.isIncompatible(), is(false));
-    assertThat(update.requiresSonarUpgrade(), is(true));
+    assertThat(update.getRelease()).isEqualTo(pluginRelease);
+    assertThat(update.isCompatible()).isFalse();
+    assertThat(update.isIncompatible()).isFalse();
+    assertThat(update.requiresSonarUpgrade()).isTrue();
   }
 
   @Test
@@ -63,9 +62,9 @@ public class PluginUpdateTest {
     // the plugin is only compatible with older versions of sonar
     PluginUpdate update = PluginUpdate.createForPluginRelease(pluginRelease, sonarVersion, Product.OLD_SONARQUBE);
 
-    assertThat(update.getRelease(), is(pluginRelease));
-    assertThat(update.isCompatible(), is(false));
-    assertThat(update.isIncompatible(), is(true));
-    assertThat(update.requiresSonarUpgrade(), is(false));
+    assertThat(update.getRelease()).isEqualTo(pluginRelease);
+    assertThat(update.isCompatible()).isFalse();
+    assertThat(update.isIncompatible()).isTrue();
+    assertThat(update.requiresSonarUpgrade()).isFalse();
   }
 }

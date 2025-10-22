@@ -284,7 +284,7 @@ public class UpdateCenterDeserializerTest {
       Properties props = new Properties();
       props.load(input);
       UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
-      assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("2.3"));
+      assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("2.3"));
     }
   }
 
@@ -363,7 +363,7 @@ public class UpdateCenterDeserializerTest {
   public void should_load_split_format_in_dev_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
-    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+    assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("3.7.1"));
 
     Plugin abapPlugin = center.getUpdateCenterPluginReferential().findPlugin("abap");
     assertThat(abapPlugin.getDevRelease().getVersion()).isEqualTo(Version.create("2.2.1-SNAPSHOT"));
@@ -386,7 +386,7 @@ public class UpdateCenterDeserializerTest {
   public void should_load_split_format_in_prod_mode() throws IOException, URISyntaxException {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromManyFiles(new File(url.toURI()));
-    assertThat(center.getSonar().getLtsRelease().getVersion()).isEqualTo(Version.create("3.7.1"));
+    assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("3.7.1"));
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("abap").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("php").getDevRelease()).isNull();
     assertThat(center.getUpdateCenterPluginReferential().findPlugin("ssqv").getDevRelease()).isNull();

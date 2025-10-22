@@ -79,7 +79,6 @@ public class CompatibilityMatrixTest {
     addReleaseToSonarObject("2025.1", sonar, Product.SONARQUBE_SERVER);
     addReleaseToSonarObject("2025.2", sonar, Product.SONARQUBE_SERVER);
 
-    sonar.setLtsRelease("3.7.4");
     sonar.setLtaVersion("3.7.4");
     sonar.setPastLtaVersion("2.9.10");
   }

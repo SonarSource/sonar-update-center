@@ -35,23 +35,40 @@ public final class FormatUtils {
     // only static methods
   }
 
-  public static Date toDate(String s, boolean includeTime) {
-    String pattern = includeTime ? DATETIME_PATTERN : DATE_PATTERN;
+  public static Date toDate(String s) {
     try {
       if (StringUtils.isNotBlank(s)) {
-        return new SimpleDateFormat(pattern).parse(s);
+        return new SimpleDateFormat(DATE_PATTERN).parse(s);
       }
       return null;
-
     } catch (ParseException e) {
-      throw new IllegalArgumentException("The following value does not respect the date pattern " + pattern + ": " + s, e);
+      throw new IllegalArgumentException("The following value does not respect the date pattern " + DATE_PATTERN + ": " + s, e);
+    }
+  }
+
+  public static Date toDateTime(String s) {
+    try {
+      if (StringUtils.isNotBlank(s)) {
+        return new SimpleDateFormat(DATETIME_PATTERN).parse(s);
+      }
+      return null;
+    } catch (ParseException e) {
+      throw new IllegalArgumentException("The following value does not respect the date pattern " + DATETIME_PATTERN + ": " + s, e);
     }
   }
 
   @CheckForNull
-  public static String toString(@Nullable Date d, boolean includeTime) {
+  public static String toDateString(@Nullable Date d) {
     if (d != null) {
-      return new SimpleDateFormat(includeTime ? DATETIME_PATTERN : DATE_PATTERN).format(d);
+      return new SimpleDateFormat(DATE_PATTERN).format(d);
+    }
+    return null;
+  }
+
+  @CheckForNull
+  public static String toDateTimeString(@Nullable Date d) {
+    if (d != null) {
+      return new SimpleDateFormat(DATETIME_PATTERN).format(d);
     }
     return null;
   }

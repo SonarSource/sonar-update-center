@@ -117,7 +117,7 @@ public class ReleaseModel {
       } else if (!max.equals(min)) {
         sb.append(" - ").append(max);
       }
-      if (release.supportSonarVersion(sonar.getLtsRelease().getVersion(), Product.OLD_SONARQUBE)) {
+      if (release.supportSonarVersion(sonar.getLtaVersion().getVersion(), Product.OLD_SONARQUBE)) {
         sb.append(" (Compatible with LTS)");
       }
       return sb.toString();

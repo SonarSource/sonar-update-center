@@ -19,6 +19,7 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.Calendar;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 
@@ -31,29 +32,60 @@ public class FormatUtilsTest {
 
   @Test
   public void test_to_date() {
-    assertThat(FormatUtils.toDate("2010-05-18", false).getDate()).isEqualTo(18);
+    Date date = FormatUtils.toDate("2010-05-18");
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+
+    assertThat(cal.get(Calendar.DAY_OF_MONTH)).isEqualTo(18);
+  }
+
+  @Test
+  public void test_to_date_time() {
+    Date date = FormatUtils.toDateTime("2010-05-18T10:30:00+0000");
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+
+    assertThat(cal.get(Calendar.DAY_OF_MONTH)).isEqualTo(18);
   }
 
   @Test
   public void ignore_null_and_empty_date() {
-    assertThat(FormatUtils.toDate(null, true)).isNull();
-    assertThat(FormatUtils.toDate("", true)).isNull();
+    assertThat(FormatUtils.toDate(null)).isNull();
+    assertThat(FormatUtils.toDate("")).isNull();
+  }
+
+  @Test
+  public void ignore_null_and_empty_date_time() {
+    assertThat(FormatUtils.toDateTime(null)).isNull();
+    assertThat(FormatUtils.toDateTime("")).isNull();
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void should_throw_exception_on_invalid_format() {
-    assertThat(FormatUtils.toDate("2010", true)).isNull();
+  public void should_throw_exception_on_invalid_date_format() {
+    FormatUtils.toDate("2010");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void should_throw_exception_on_invalid_date_time_format() {
+    FormatUtils.toDateTime("2010");
   }
 
   @Test
-  public void test_to_string() throws ParseException {
-    Date date = DateUtils.parseDate("2010-05-18", new String []{"yyyy-MM-dd"});
-    assertThat(FormatUtils.toString(date, false)).isNotNull();
+  public void test_to_date_string() throws ParseException {
+    Date date = DateUtils.parseDate("2010-05-18", "yyyy-MM-dd");
+    assertThat(FormatUtils.toDateString(date)).isEqualTo("2010-05-18");
   }
 
   @Test
-  public void should_return_null__if_no_date() {
-    assertThat(FormatUtils.toString(null, false)).isNull();
+  public void test_to_date_time_string() throws ParseException {
+    Date date = DateUtils.parseDate("2010-05-18 10:30:00", "yyyy-MM-dd HH:mm:ss");
+    assertThat(FormatUtils.toDateTimeString(date)).isNotNull();
+  }
+
+  @Test
+  public void should_return_null_if_no_date() {
+    assertThat(FormatUtils.toDateString(null)).isNull();
+    assertThat(FormatUtils.toDateTimeString(null)).isNull();
   }
 
 }

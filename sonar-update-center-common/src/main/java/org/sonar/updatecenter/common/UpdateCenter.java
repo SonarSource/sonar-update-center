@@ -198,7 +198,7 @@ public class UpdateCenter {
     }
   }
 
-  private boolean contain(final String pluginKey, Set<Release> installablePlugins) {
+  private static boolean contain(final String pluginKey, Set<Release> installablePlugins) {
     return installablePlugins.stream().anyMatch(input -> input.getKey().equals(pluginKey));
   }
 

@@ -135,7 +135,7 @@ public class PluginReferential {
     }
   }
 
-  private void checkDependencyCycle(Release release) {
+  private static void checkDependencyCycle(Release release) {
     List<Release> releases = new ArrayList<>();
     try {
       checkDependencyCycle(release, releases);

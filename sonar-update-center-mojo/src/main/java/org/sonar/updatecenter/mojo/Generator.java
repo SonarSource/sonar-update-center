@@ -31,7 +31,6 @@ import org.sonar.updatecenter.common.UpdateCenterSerializer;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.apache.commons.io.FileUtils.forceMkdir;
 
