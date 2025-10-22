@@ -30,7 +30,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import javax.annotation.Nullable;
 
-import static org.sonar.updatecenter.common.FormatUtils.toDate;
+import static org.sonar.updatecenter.common.FormatUtils.toDateTime;
 
 /**
  * This class loads Sonar plugin metadata from JAR manifest.
@@ -121,20 +121,15 @@ public final class PluginManifest {
    */
   public PluginManifest(File file) throws IOException {
     this();
-    JarFile jar = null;
-    try {
-      jar = new JarFile(file);
+    try (JarFile jar = new JarFile(file)) {
       if (jar.getManifest() != null) {
         loadManifest(jar.getManifest());
       }
     } catch (Exception e) {
       throw new IllegalStateException("Unable to read plugin manifest from jar : " + file.getAbsolutePath(), e);
-    } finally {
-      if (jar != null) {
-        jar.close();
-      }
     }
   }
+
 
   /**
    * @param manifest can not be null
@@ -166,9 +161,9 @@ public final class PluginManifest {
     this.termsConditionsUrl = attributes.getValue(TERMS_CONDITIONS_URL);
     this.sonarVersion = attributes.getValue(SONAR_VERSION);
     this.issueTrackerUrl = attributes.getValue(ISSUE_TRACKER_URL);
-    this.buildDate = toDate(attributes.getValue(BUILD_DATE), true);
-    this.useChildFirstClassLoader = StringUtils.equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER), "true");
-    this.sonarlintSupported = StringUtils.equalsIgnoreCase(attributes.getValue(SONARLINT_SUPPORTED), "true");
+    this.buildDate = toDateTime(attributes.getValue(BUILD_DATE));
+    this.useChildFirstClassLoader = "true".equalsIgnoreCase(attributes.getValue(USE_CHILD_FIRST_CLASSLOADER));
+    this.sonarlintSupported = "true".equalsIgnoreCase(attributes.getValue(SONARLINT_SUPPORTED));
     this.basePlugin = attributes.getValue(BASE_PLUGIN);
     this.implementationBuild = attributes.getValue(IMPLEMENTATION_BUILD);
     this.sourcesUrl = attributes.getValue(SOURCES_URL);

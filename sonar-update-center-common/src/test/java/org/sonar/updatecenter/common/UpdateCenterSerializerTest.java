@@ -75,7 +75,7 @@ public class UpdateCenterSerializerTest {
       .setDownloadUrl("http://dist.sonar.codehaus.org/sonar-developer-39.1.zip")
       .setProduct(Product.SONARQUBE_COMMUNITY_BUILD);
 
-    sonar.setLtsRelease("2.0");
+    sonar.setLtaVersion("2.0");
     sonar.setLtaVersion("2.0");
     sonar.setPastLtaVersion("1.0");
 

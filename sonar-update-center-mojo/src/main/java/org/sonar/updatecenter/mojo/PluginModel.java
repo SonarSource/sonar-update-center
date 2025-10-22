@@ -19,24 +19,16 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.sonar.updatecenter.common.Plugin;
 import org.sonar.updatecenter.common.Release;
 import org.sonar.updatecenter.common.Sonar;
-import org.sonar.updatecenter.common.Version;
 
 public class PluginModel {
 
-  private Plugin plugin;
-  private Sonar sonar;
+  private final Plugin plugin;
+  private final Sonar sonar;
 
   public PluginModel(Plugin plugin, Sonar sonar) {
     this.plugin = plugin;

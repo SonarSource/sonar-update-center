@@ -138,7 +138,7 @@ public final class UpdateCenterDeserializer {
 
   public UpdateCenter fromProperties(Properties p) {
     Sonar sonar = new Sonar();
-    Date date = FormatUtils.toDate(p.getProperty("date"), true);
+    Date date = FormatUtils.toDateTime(p.getProperty("date"));
     List<Plugin> plugins = new ArrayList<>();
     List<Scanner> scanners = new ArrayList<>();
 
@@ -326,7 +326,7 @@ public final class UpdateCenterDeserializer {
       parseDownloadUrl(p, pluginKey, pluginVersion, isPublicRelease, flavorLabel, release);
       release.setChangelogUrl(getOrDefault(p, pluginKey, pluginVersion, CHANGELOG_URL_SUFFIX, false));
       release.setDisplayVersion(getOrDefault(p, pluginKey, pluginVersion, DISPLAY_VERSION_SUFFIX, false));
-      release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease), false));
+      release.setDate(toDate(getOrDefault(p, pluginKey, pluginVersion, DATE_SUFFIX, isPublicRelease)));
       release.setDescription(getOrDefault(p, pluginKey, pluginVersion, DESCRIPTION_SUFFIX, isPublicRelease));
       if (component.needArtifact()) {
         release.setGroupId(getOrDefault(p, pluginKey, pluginVersion, MAVEN_GROUPID_SUFFIX, true));
@@ -405,8 +405,8 @@ public final class UpdateCenterDeserializer {
 
   private void parseSonarLtsVersion(Properties p, Sonar sonar) {
     String ltsVersion = get(p, "ltsVersion", true);
-    sonar.setLtsRelease(ltsVersion);
-    verifyVersion(sonar, sonar.getLtsRelease(), "ltsVersion");
+    sonar.setLtaVersion(ltsVersion);
+    verifyVersion(sonar, sonar.getLtaVersion(), "ltsVersion");
   }
 
   private void parseLtaVersions(Properties properties, Sonar sonar) {
@@ -464,7 +464,7 @@ public final class UpdateCenterDeserializer {
         release.setDownloadUrl(downloadUrl, edition);
       }
     }
-    release.setDate(FormatUtils.toDate(getOrDefault(p, sonarVersion, DATE_SUFFIX, isPublicRelease), false));
+    release.setDate(FormatUtils.toDate(getOrDefault(p, sonarVersion, DATE_SUFFIX, isPublicRelease)));
     return release;
   }
 
@@ -515,11 +515,11 @@ public final class UpdateCenterDeserializer {
   private static List<String> split(String requiredSonarVersions) {
     List<String> splitted = new ArrayList<>();
     int skipCommas = 0;
-    String s = "";
+    StringBuilder s = new StringBuilder();
     for (char c : requiredSonarVersions.toCharArray()) {
       if (c == ',' && skipCommas == 0) {
-        splitted.add(s);
-        s = "";
+        splitted.add(s.toString());
+        s = new StringBuilder();
       } else {
         if (c == '[') {
           skipCommas++;
@@ -527,11 +527,11 @@ public final class UpdateCenterDeserializer {
         if (c == ']') {
           skipCommas--;
         }
-        s += Character.toString(c);
+        s.append(c);
       }
     }
-    if (StringUtils.isNotBlank(s)) {
-      splitted.add(s);
+    if (StringUtils.isNotBlank(s.toString())) {
+      splitted.add(s.toString());
     }
     return splitted;
   }

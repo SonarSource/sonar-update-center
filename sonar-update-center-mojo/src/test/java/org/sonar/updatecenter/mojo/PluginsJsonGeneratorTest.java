@@ -62,7 +62,7 @@ public class PluginsJsonGeneratorTest {
 
     // Sonar.getLastRelease is final, can't mock
     Sonar stubbedSonar = new Sonar();
-    stubbedSonar.setLtsRelease("4.2");
+    stubbedSonar.setLtaVersion("4.2");
     String[] sonarVersions = {"4.2", "6.6.6"};
     stubbedSonar.setReleases(sonarVersions);
 
@@ -155,7 +155,7 @@ public class PluginsJsonGeneratorTest {
 
     // Sonar.getLastRelease is final, can't mock
     Sonar stubbedSonar = new Sonar();
-    stubbedSonar.setLtsRelease("1.0");
+    stubbedSonar.setLtaVersion("1.0");
     String[] sonarVersions = {"1.0"};
     stubbedSonar.setReleases(sonarVersions);
 
@@ -168,7 +168,7 @@ public class PluginsJsonGeneratorTest {
 
     PluginsJsonGenerator underTest = PluginsJsonGenerator.create(mockUpc, outputDir, mockLog);
 
-    assertThatThrownBy( () ->    underTest.generateJsonFiles()).isInstanceOf(ValidationException.class);
+    assertThatThrownBy(underTest::generateJsonFiles).isInstanceOf(ValidationException.class);
     File nonExpectedFile = new File(outputDir, "bad.json");
     assertThat(nonExpectedFile).doesNotExist();
 

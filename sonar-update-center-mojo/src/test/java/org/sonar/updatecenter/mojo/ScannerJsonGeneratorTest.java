@@ -56,7 +56,7 @@ public class ScannerJsonGeneratorTest {
 
     // Sonar.getLastRelease is final, can't mock
     Sonar stubbedSonar = new Sonar();
-    stubbedSonar.setLtsRelease("4.2");
+    stubbedSonar.setLtaVersion("4.2");
     String[] sonarVersions = {"4.2", "6.6.6"};
     stubbedSonar.setReleases(sonarVersions);
 
