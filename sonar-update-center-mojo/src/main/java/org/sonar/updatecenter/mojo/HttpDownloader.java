@@ -19,15 +19,23 @@
  */
 package org.sonar.updatecenter.mojo;
 
-import com.github.kevinsawicki.http.HttpRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 class HttpDownloader {
 
@@ -57,27 +65,39 @@ class HttpDownloader {
     return output;
   }
 
-  File downloadFile(URL fileURL, File toFile) {
+  protected void downloadFile(URL fileURL, File toFile) {
     log.info(String.format("Download %s in %s", fileURL, toFile));
     try {
       if ("file".equals(fileURL.getProtocol())) {
         File src = new File(fileURL.toURI());
         FileUtils.copyFile(src, toFile);
       } else {
-        HttpRequest request = HttpRequest.get(fileURL).followRedirects(true);
-        addAuthorizationHeader(request, fileURL);
+        try (CloseableHttpClient httpClient = createHttpClient()) {
+          HttpGet httpGet = new HttpGet(fileURL.toString());
+          addAuthorizationHeader(httpGet, fileURL);
 
-        if (!request.receive(toFile).ok()) {
-          throw new IllegalStateException(request.message());
+          try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode < 200 || statusCode >= 300) {
+              throw new IllegalStateException("HTTP error: " + response.getStatusLine().getReasonPhrase());
+            }
+
+            try (InputStream inputStream = response.getEntity().getContent();
+                 FileOutputStream outputStream = new FileOutputStream(toFile)) {
+              byte[] buffer = new byte[8192];
+              int bytesRead;
+              while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+              }
+            }
+          }
         }
       }
     } catch (Exception e) {
       FileUtils.deleteQuietly(toFile);
       throw new IllegalStateException(String.format("Fail to download %s to %s", fileURL, toFile), e);
     }
-    return toFile;
   }
-
 
   boolean verifyDownloadUrl(URL fileURL) {
     log.debug(String.format("Verify download URL (%s) is still valid", fileURL));
@@ -86,24 +106,32 @@ class HttpDownloader {
         File src = new File(fileURL.toURI());
         return src.exists();
       } else {
-        HttpRequest request = HttpRequest.head(fileURL).followRedirects(true);
-        addAuthorizationHeader(request, fileURL);
+        try (CloseableHttpClient httpClient = createHttpClient()) {
+          HttpHead httpHead = new HttpHead(fileURL.toString());
+          addAuthorizationHeader(httpHead, fileURL);
 
-        if (request.ok()) {
-          return true;
-        } else {
-          // Some services refuse HEAD requests. Try a GET instead.
-          log.debug(String.format("Download URL (%s) failed with a HEAD request. Double check using GET...", fileURL));
+          try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 200 && statusCode < 300) {
+              return true;
+            } else {
+              // Some services refuse HEAD requests. Try a GET instead.
+              log.debug(String.format("Download URL (%s) failed with a HEAD request. Double check using GET...", fileURL));
 
-          request = HttpRequest.get(fileURL).followRedirects(true);
-          addAuthorizationHeader(request, fileURL);
+              HttpGet httpGet = new HttpGet(fileURL.toString());
+              addAuthorizationHeader(httpGet, fileURL);
 
-          if (request.ok()) {
-            log.debug(String.format("Download URL (%s) is still valid", fileURL));
-            return true;
-          } else {
-            log.error(String.format("Download URL (%s) is no longer valid (HTTP status: %d)", fileURL, request.code()));
-            return false;
+              try (CloseableHttpResponse getResponse = httpClient.execute(httpGet)) {
+                statusCode = getResponse.getStatusLine().getStatusCode();
+                if (statusCode >= 200 && statusCode < 300) {
+                  log.debug(String.format("Download URL (%s) is still valid", fileURL));
+                  return true;
+                } else {
+                  log.error(String.format("Download URL (%s) is no longer valid (HTTP status: %d)", fileURL, statusCode));
+                  return false;
+                }
+              }
+            }
           }
         }
       }
@@ -112,9 +140,30 @@ class HttpDownloader {
     }
   }
 
-  private static void addAuthorizationHeader(HttpRequest request, URL fileURL) {
+  private static CloseableHttpClient createHttpClient() {
+    RequestConfig config = RequestConfig.custom()
+      .setRedirectsEnabled(true)
+      .setMaxRedirects(10)
+      .setConnectTimeout(30000)
+      .setSocketTimeout(30000)
+      .build();
+
+    return HttpClients.custom()
+      .setDefaultRequestConfig(config)
+      .build();
+  }
+
+  private static void addAuthorizationHeader(HttpGet request, URL fileURL) {
     if (fileURL.getUserInfo() != null) {
-      request.header("Authorization", "Basic " + HttpRequest.Base64.encode(fileURL.getUserInfo()));
+      String encodedAuth = Base64.getEncoder().encodeToString(fileURL.getUserInfo().getBytes(StandardCharsets.UTF_8));
+      request.setHeader("Authorization", "Basic " + encodedAuth);
+    }
+  }
+
+  private static void addAuthorizationHeader(HttpHead request, URL fileURL) {
+    if (fileURL.getUserInfo() != null) {
+      String encodedAuth = Base64.getEncoder().encodeToString(fileURL.getUserInfo().getBytes(StandardCharsets.UTF_8));
+      request.setHeader("Authorization", "Basic " + encodedAuth);
     }
   }
 
