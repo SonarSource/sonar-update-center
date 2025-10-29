@@ -90,28 +90,29 @@ public class ScannerJsonGeneratorTest {
     File expectedFooFile = new File(outputDir, "foo.json");
     assertThat(expectedFooFile).exists().isFile();
     String fooFileContent = FileUtils.readFileToString(expectedFooFile, StandardCharsets.UTF_8);
-    JSONAssert.assertEquals("{\n" +
-      "  \"key\": \"foo\",\n" +
-      "  \"name\": \"foo\",\n" +
-      "  \"organization\": {\n" +
-      "    \"name\": \"Black Magicians Corp\",\n" +
-      "    \"url\": \"https://blackmagicians.com\"\n" +
-      "  },\n" +
-      "  \"category\": \"black magic\",\n" +
-      "  \"license\": \"Magic v6\",\n" +
-      "  \"sourcesURL\": \"http://foo.bar\",\n" +
-      "  \"issueTrackerURL\": \"https://jira.blackmagicians.com/browse/magic\",\n" +
-      "  \"versions\": [\n" +
-      "    {\n" +
-      "      \"version\": \"2.0\",\n" +
-      "      \"description\": \"Version with more RAM\",\n" +
-      "      \"archived\": false,\n" +
-      "      \"date\": \"1986-04-14\",\n" +
-      "      \"changeLogUrl\": \"https://jira.blackmagicians.com/releaseNotes/2.0\"," +
-      "      \"downloadURL\": [{\"url\":\"http://foo.bar/2.0\"}]" +
-      "    }\n" +
-      "  ]\n" +
-      "}", fooFileContent, true);
+    JSONAssert.assertEquals("""
+      {
+        "key": "foo",
+        "name": "foo",
+        "organization": {
+          "name": "Black Magicians Corp",
+          "url": "https://blackmagicians.com"
+        },
+        "category": "black magic",
+        "license": "Magic v6",
+        "sourcesURL": "http://foo.bar",
+        "issueTrackerURL": "https://jira.blackmagicians.com/browse/magic",
+        "versions": [
+          {
+            "version": "2.0",
+            "description": "Version with more RAM",
+            "archived": false,
+            "date": "1986-04-14",
+            "changeLogUrl": "https://jira.blackmagicians.com/releaseNotes/2.0",
+            "downloadURL": [{"url":"http://foo.bar/2.0"}]
+          }
+        ]
+      }""", fooFileContent, true);
 
 
     assertThat(new File(outputDir, "scanner-schema.json")).exists().isFile();
