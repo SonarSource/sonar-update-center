@@ -104,42 +104,44 @@ public class PluginsJsonGeneratorTest {
     File expectedFooFile = new File(outputDir, "foo.json");
     assertThat(expectedFooFile).exists().isFile();
     String fooFileContent = FileUtils.readFileToString(expectedFooFile, StandardCharsets.UTF_8);
-    JSONAssert.assertEquals("{\n" +
-      "  \"key\": \"foo\",\n" +
-      "  \"name\": \"Foo\",\n" +
-      "  \"organization\": {\n" +
-      "    \"name\": \"Black Magicians Corp\",\n" +
-      "    \"url\": \"https://blackmagicians.com\"\n" +
-      "  },\n" +
-      "  \"category\": \"black magic\",\n" +
-      "  \"license\": \"Magic v6\",\n" +
-      "  \"sourcesURL\": \"http://foo.bar\",\n" +
-      "  \"issueTrackerURL\": \"https://jira.blackmagicians.com/browse/magic\",\n" +
-      "  \"versions\": [\n" +
-      "    {\n" +
-      "      \"version\": \"2.0\",\n" +
-      "      \"description\": \"Version with more RAM\",\n" +
-      "      \"archived\": false,\n" +
-      "      \"date\": \"1986-04-14\",\n" +
-      "      \"changeLogUrl\": \"https://jira.blackmagicians.com/releaseNotes/2.0\"," +
-      "      \"downloadURL\": \"http://foo.bar/2.0\","+
-      "      \"compatibility\": \"4.2 (Compatible with LTS)\" "+
-      "    },\n" +
-      "    {\n" +
-      "      \"version\": \"1.0\",\n" +
-      "      \"archived\": false\n" +
-      "    }\n" +
-      "  ]\n" +
-      "}", fooFileContent, true);
+    JSONAssert.assertEquals("""
+      {
+        "key": "foo",
+        "name": "Foo",
+        "organization": {
+          "name": "Black Magicians Corp",
+          "url": "https://blackmagicians.com"
+        },
+        "category": "black magic",
+        "license": "Magic v6",
+        "sourcesURL": "http://foo.bar",
+        "issueTrackerURL": "https://jira.blackmagicians.com/browse/magic",
+        "versions": [
+          {
+            "version": "2.0",
+            "description": "Version with more RAM",
+            "archived": false,
+            "date": "1986-04-14",
+            "changeLogUrl": "https://jira.blackmagicians.com/releaseNotes/2.0",
+            "downloadURL": "http://foo.bar/2.0",
+            "compatibility": "4.2 (Compatible with LTS)"
+          },
+          {
+            "version": "1.0",
+            "archived": false
+          }
+        ]
+      }""", fooFileContent, true);
 
     File expectedBarFile = new File(outputDir, "bar.json");
     assertThat(expectedBarFile).exists().isFile();
     String barFileContent = FileUtils.readFileToString(expectedBarFile, StandardCharsets.UTF_8);
-    JSONAssert.assertEquals("{\n" +
-      "  \"key\": \"bar\",\n" +
-      "  \"name\": \"Bar\",\n" +
-      "  \"versions\": [] \n" +
-      "}", barFileContent, true);
+    JSONAssert.assertEquals("""
+      {
+        "key": "bar",
+        "name": "Bar",
+        "versions": []
+      }""", barFileContent, true);
 
     assertThat(new File(outputDir, "plugin-schema.json")).exists().isFile();
   }

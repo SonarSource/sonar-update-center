@@ -21,17 +21,15 @@ package org.sonar.updatecenter.mojo;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
-import org.apache.maven.plugin.logging.Log;
-import org.everit.json.schema.Schema;
-import org.sonar.updatecenter.common.Plugin;
-import org.sonar.updatecenter.common.UpdateCenter;
-
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.apache.maven.plugin.logging.Log;
+import org.everit.json.schema.Schema;
+import org.sonar.updatecenter.common.Plugin;
+import org.sonar.updatecenter.common.UpdateCenter;
 
 /**
  * TODO https://sonarsource.atlassian.net/browse/UPC-145
@@ -146,7 +144,7 @@ class PluginsJsonGenerator extends JsonGenerator {
           becomeAJsonOutputVersion.downloadURL = safeCreateURLFromString(pluginHeaderVersion.getDownloadUrl());
           becomeAJsonOutputVersion.changeLogUrl = safeCreateURLFromString(pluginHeaderVersion.getChangelogUrl());
           return becomeAJsonOutputVersion;
-        }).collect(Collectors.toList());
+        }).toList();
 
       return returned;
     }

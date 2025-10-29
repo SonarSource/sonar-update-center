@@ -60,7 +60,7 @@ public class PluginReferential {
   public List<Plugin> getLastMasterReleasePlugins() {
     return plugins.stream()
       .filter(plugin -> plugin.getLastRelease() != null)
-      .collect(Collectors.toList());
+      .toList();
   }
 
   public List<Plugin> getPlugins() {

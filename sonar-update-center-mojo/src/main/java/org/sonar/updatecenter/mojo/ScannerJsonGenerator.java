@@ -21,18 +21,16 @@ package org.sonar.updatecenter.mojo;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
-import org.apache.maven.plugin.logging.Log;
-import org.everit.json.schema.Schema;
-import org.sonar.updatecenter.common.Scanner;
-import org.sonar.updatecenter.common.UpdateCenter;
-
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.apache.maven.plugin.logging.Log;
+import org.everit.json.schema.Schema;
+import org.sonar.updatecenter.common.Scanner;
+import org.sonar.updatecenter.common.UpdateCenter;
 
 public class ScannerJsonGenerator extends JsonGenerator{
 
@@ -152,14 +150,14 @@ public class ScannerJsonGenerator extends JsonGenerator{
           becomeAJsonOutputVersion.compatibility = scannerHeaderVersion.getSonarVersionRange();
           becomeAJsonOutputVersion.downloadURL = scannerHeaderVersion.getScannerDownloadUrl().stream()
             .map(url -> new JsonFlavoredUrl(url.getLabel(), safeCreateURLFromString(url.getUrl())))
-            .collect(Collectors.toList());
+            .toList();
           if (becomeAJsonOutputVersion.downloadURL.isEmpty()) {
             becomeAJsonOutputVersion.downloadURL  = new ArrayList<>();
             becomeAJsonOutputVersion.downloadURL.add(new JsonFlavoredUrl(null, safeCreateURLFromString(scannerHeaderVersion.getDownloadUrl())));
           }
           becomeAJsonOutputVersion.changeLogUrl = safeCreateURLFromString(scannerHeaderVersion.getChangelogUrl());
           return becomeAJsonOutputVersion;
-        }).collect(Collectors.toList());
+        }).toList();
 
       return returned;
     }

@@ -24,7 +24,7 @@ public class Sonar extends Artifact {
   /**
    * @deprecated since 1.32 in favor of {@link Sonar#ltaVersion}
    */
-  @Deprecated
+  @Deprecated(since = "1.32", forRemoval = true)
   private Release ltsVersion;
 
   private Release ltaVersion;
@@ -37,7 +37,7 @@ public class Sonar extends Artifact {
   /**
    * @deprecated since 1.32 in favor of {@link Sonar#setLtaVersion(String)}
    */
-  @Deprecated
+  @Deprecated(since = "1.32", forRemoval = true)
   public Sonar setLtsRelease(String ltsVersion) {
     this.ltsVersion = new Release(this, Version.create(ltsVersion));
     return this;
@@ -46,7 +46,7 @@ public class Sonar extends Artifact {
   /**
    * @deprecated since 1.32 in favor of {@link Sonar#getLtaVersion()}
    */
-  @Deprecated
+  @Deprecated(since = "1.32", forRemoval = true)
   public Release getLtsRelease() {
     return ltsVersion;
   }
