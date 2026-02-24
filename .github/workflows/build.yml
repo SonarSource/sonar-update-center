@@ -22,11 +22,11 @@ jobs:
       id-token: write  # Required for Vault OIDC authentication
       contents: write  # Required for repository access and tagging
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
           version: 2025.7.12
-      - uses: SonarSource/ci-github-actions/build-maven@v1
+      - uses: SonarSource/ci-github-actions/build-maven@4ef2061ff3c9dc144a66f8a6e480d04d2d79e3bb # v1.3.25
         with:
           deploy-pull-request: true
           artifactory-reader-role: private-reader
@@ -43,12 +43,12 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
           cache_save: false
           version: 2025.7.12
-      - uses: SonarSource/ci-github-actions/promote@v1
+      - uses: SonarSource/ci-github-actions/promote@4ef2061ff3c9dc144a66f8a6e480d04d2d79e3bb # v1.3.25
         with:
           promote-pull-request: true
           artifactory-reader-role: private-reader
