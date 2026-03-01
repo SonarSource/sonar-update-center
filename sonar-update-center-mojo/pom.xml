@@ -80,7 +80,7 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
-      <version>5.2.1</version>
+      <version>5.3.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -90,7 +90,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.15.2</version>
         <configuration>
           <!-- see https://issues.apache.org/jira/browse/MNG-5346 -->
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
