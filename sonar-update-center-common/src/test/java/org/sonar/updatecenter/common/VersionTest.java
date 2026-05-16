@@ -122,8 +122,8 @@ public class VersionTest {
     Version version12 = Version.create("1.2");
     Version version120 = Version.create("1.2.0");
 
-    assertThat(version12.equals(version120)).isTrue();
-    assertThat(version120.equals(version12)).isTrue();
+    assertThat(version12).isEqualTo(version120);
+    assertThat(version120).isEqualTo(version12);
   }
 
   @Test
@@ -132,8 +132,9 @@ public class VersionTest {
     Version version1dot1 = Version.create("1.1");
     Version version1dot9 = Version.create("1.9");
 
-    assertThat(version1dot10.compareTo(version1dot1) > 0).isTrue();
-    assertThat(version1dot10.compareTo(version1dot9) > 0).isTrue();
+    assertThat(version1dot10)
+      .isGreaterThan(version1dot1)
+      .isGreaterThan(version1dot9);
   }
 
   @Test
@@ -141,7 +142,7 @@ public class VersionTest {
     Version version = Version.create("1.10.2");
 
     assertThat(version.getName()).isEqualTo("1.10.2");
-    assertThat(version.toString()).isEqualTo("1.10.2");
+    assertThat(version).hasToString("1.10.2");
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("10");
     assertThat(version.getPatch()).isEqualTo("2");
