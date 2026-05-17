@@ -42,7 +42,7 @@ public class VersionTest {
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("0");
     assertThat(version.getPatch2()).isEqualTo("0");
-    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getQualifier()).isEmpty();
   }
 
   @Test
@@ -155,9 +155,9 @@ public class VersionTest {
     assertThat(version.getPatch()).isEqualTo("3");
     assertThat(version.getPatch2()).isEqualTo("4");
 
-    assertThat(version.equals(version)).isTrue();
-    assertThat(version.equals(Version.create("1.2.3.4"))).isTrue();
-    assertThat(version.equals(Version.create("1.2.3.5"))).isFalse();
+    assertThat(version)
+      .isEqualTo(Version.create("1.2.3.4"))
+      .isNotEqualTo(Version.create("1.2.3.5"));
   }
 
   @Test
@@ -185,6 +185,6 @@ public class VersionTest {
     assertThat(version.getMajor()).isEqualTo("1");
     assertThat(version.getMinor()).isEqualTo("2");
     assertThat(version.getPatch()).isEqualTo("3");
-    assertThat(version.getQualifier()).isEqualTo("");
+    assertThat(version.getQualifier()).isEmpty();
   }
 }
