@@ -1,6 +1,6 @@
 /*
  * SonarSource :: Update Center :: Common
- * Copyright (C) 2010-2025 SonarSource Sàrl
+ * Copyright (C) SonarSource Sàrl
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
