@@ -122,7 +122,7 @@ public class Release implements Comparable<Release> {
     return displayVersion;
   }
 
-  public Release setDisplayVersion(String displayVersion) {
+  public Release setDisplayVersion(@Nullable String displayVersion) {
     this.displayVersion = displayVersion;
     return this;
   }
