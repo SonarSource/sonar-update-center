@@ -124,6 +124,13 @@ public class ReleaseTest {
   }
 
   @Test
+  public void should_allow_missing_display_version() {
+    Release release = new Release(Plugin.factory("squid"), "1.0");
+
+    assertThat(release.setDisplayVersion(null).getDisplayVersion()).isNull();
+  }
+
+  @Test
   public void supportSonarVersion_whenPaidSonarQubeSupported_shouldReturnTrue() {
     Release release = new Release(Plugin.factory("squid"), "1.0");
 
