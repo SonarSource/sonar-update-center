@@ -70,6 +70,7 @@ public class Release implements Comparable<Release> {
   private final SortedSet<Version> compatiblePaidSqVersions;
   private final SortedSet<Version> compatibleCommunitySqVersions;
   private Date date;
+  private Date eolDate;
 
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
@@ -265,6 +266,16 @@ public class Release implements Comparable<Release> {
 
   public Release setDate(@Nullable Date date) {
     this.date = date != null ? new Date(date.getTime()) : null;
+    return this;
+  }
+
+  @CheckForNull
+  public Date getEolDate() {
+    return eolDate != null ? new Date(eolDate.getTime()) : null;
+  }
+
+  public Release setEolDate(@Nullable Date eolDate) {
+    this.eolDate = eolDate != null ? new Date(eolDate.getTime()) : null;
     return this;
   }
 

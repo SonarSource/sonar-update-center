@@ -19,6 +19,10 @@
  */
 package org.sonar.updatecenter.common;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public class Sonar extends Artifact {
 
   /**
@@ -29,6 +33,13 @@ public class Sonar extends Artifact {
 
   private Release ltaVersion;
   private Release pastLtaVersion;
+
+  /**
+   * Ordered from oldest to newest. Supersedes {@link #ltaVersion}/{@link #pastLtaVersion} to support more than
+   * one concurrently supported LTA line; those two fields are still kept in sync (latest / second-latest of this
+   * list) for consumers that haven't migrated yet.
+   */
+  private final List<Release> ltaVersions = new ArrayList<>();
 
   public Sonar() {
     super("sonar");
@@ -75,5 +86,16 @@ public class Sonar extends Artifact {
 
   public void setPastLtaVersion(String version) {
     this.pastLtaVersion = new Release(this, Version.create(version));
+  }
+
+  public List<Release> getLtaVersions() {
+    return List.copyOf(ltaVersions);
+  }
+
+  public Sonar setLtaVersions(List<Release> ltaVersions) {
+    this.ltaVersions.clear();
+    this.ltaVersions.addAll(ltaVersions);
+    this.ltaVersions.sort(Comparator.naturalOrder());
+    return this;
   }
 }

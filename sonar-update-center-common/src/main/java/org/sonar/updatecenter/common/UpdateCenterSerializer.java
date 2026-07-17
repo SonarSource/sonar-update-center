@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.CHANGELOG_URL_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DATE_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DESCRIPTION_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.EOL_DATE_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DISPLAY_VERSION_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_URL_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
@@ -97,6 +98,15 @@ public final class UpdateCenterSerializer {
     if (center.getSonar().getPastLtaVersion() != null) {
       set(p, "pastLtaVersion", center.getSonar().getPastLtaVersion().getVersion().toString());
     }
+    List<Release> ltaVersions = center.getSonar().getLtaVersions();
+    if (!ltaVersions.isEmpty()) {
+      set(p, "ltaVersions", ltaVersions.stream().map(UpdateCenterSerializer::toMajorMinor).toList());
+      for (Release ltaRelease : ltaVersions) {
+        if (ltaRelease.getEolDate() != null) {
+          set(p, toMajorMinor(ltaRelease) + EOL_DATE_SUFFIX, FormatUtils.toDateString(ltaRelease.getEolDate()));
+        }
+      }
+    }
     for (Product product : Product.values()) {
       setProductProperties(center, p, product);
     }
@@ -108,6 +118,10 @@ public final class UpdateCenterSerializer {
     }
     set(p, "plugins", pluginKeys);
     return p;
+  }
+
+  private static String toMajorMinor(Release release) {
+    return release.getVersion().getMajor() + "." + release.getVersion().getMinor();
   }
 
   /**

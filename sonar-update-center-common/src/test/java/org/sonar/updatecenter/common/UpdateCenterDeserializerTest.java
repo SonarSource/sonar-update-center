@@ -289,17 +289,6 @@ public class UpdateCenterDeserializerTest {
   }
 
   @Test
-  public void fromProperties_shouldParseLtaVersions() throws IOException {
-    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts.properties")) {
-      Properties props = new Properties();
-      props.load(input);
-      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
-      assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("2.3"));
-      assertThat(center.getSonar().getPastLtaVersion().getVersion()).isEqualTo(Version.create("1.9.8"));
-    }
-  }
-
-  @Test
   public void should_throw_if_lts_invalid() throws IOException {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lts-invalid.properties")) {
       Properties props = new Properties();
@@ -308,6 +297,36 @@ public class UpdateCenterDeserializerTest {
       assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
         .withMessage("ltsVersion seems wrong as it is not listed in SonarQube versions");
+    }
+  }
+
+  @Test
+  public void fromProperties_shouldParseLtaVersions() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lta-versions.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, false).fromProperties(props);
+
+      List<Release> ltaVersions = center.getSonar().getLtaVersions();
+      assertThat(ltaVersions).extracting(release -> release.getVersion().toString()).containsExactly("2025.4", "2026.1.1");
+      assertThat(ltaVersions.get(0).getEolDate()).isEqualTo(FormatUtils.toDate("2026-08-01"));
+      assertThat(ltaVersions.get(1).getEolDate()).isEqualTo(FormatUtils.toDate("2027-07-01"));
+
+      // legacy scalar fields are kept in sync with the list for consumers that haven't migrated yet
+      assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("2026.1.1"));
+      assertThat(center.getSonar().getPastLtaVersion().getVersion()).isEqualTo(Version.create("2025.4"));
+    }
+  }
+
+  @Test
+  public void fromProperties_shouldThrow_whenLtaVersionsListReferencesUnknownLine() throws IOException {
+    try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/sonar-lta-versions-invalid.properties")) {
+      Properties props = new Properties();
+      props.load(input);
+      UpdateCenterDeserializer updateCenterDeserializer = new UpdateCenterDeserializer(Mode.PROD, false);
+      assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> updateCenterDeserializer.fromProperties(props))
+        .withMessage("ltaVersions seems wrong as 2099.1 is not listed in SonarQube versions");
     }
   }
 
