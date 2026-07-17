@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,6 +37,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,7 @@ import static org.sonar.updatecenter.common.FormatUtils.toDate;
 public final class UpdateCenterDeserializer {
 
   public static final String DATE_SUFFIX = ".date";
+  public static final String EOL_DATE_SUFFIX = ".eolDate";
   public static final String DESCRIPTION_SUFFIX = ".description";
   public static final String MAVEN_GROUPID_SUFFIX = ".mavenGroupId";
   public static final String MAVEN_ARTIFACTID_SUFFIX = ".mavenArtifactId";
@@ -68,8 +71,7 @@ public final class UpdateCenterDeserializer {
   private static final String DEV_VERSION = "devVersion";
   private static final String LATEST_KEYWORD = "LATEST";
   private static final String FLAVORS_PREFIX = "flavors";
-  private static final String LTA_VERSION = "ltaVersion";
-  private static final String PAST_LTA_VERSION = "pastLtaVersion";
+  private static final String LTA_VERSIONS = "ltaVersions";
   private static final Logger LOGGER = LoggerFactory.getLogger(UpdateCenterDeserializer.class);
   private final Mode mode;
   private final boolean ignoreError;
@@ -410,13 +412,34 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parseLtaVersions(Properties properties, Sonar sonar) {
-    String ltaVersion = get(properties, LTA_VERSION, true);
-    String pastLtaVersion = get(properties, PAST_LTA_VERSION, true);
+    List<Release> ltaVersions = new ArrayList<>();
+    for (String majorMinor : getArray(properties, LTA_VERSIONS)) {
+      Release release = findLatestReleaseForMajorMinor(sonar, majorMinor);
+      if (release == null) {
+        reportError(LTA_VERSIONS + " seems wrong as " + majorMinor + " is not listed in SonarQube versions");
+        continue;
+      }
+      release.setEolDate(toDate(getOrDefault(properties, majorMinor, EOL_DATE_SUFFIX, false)));
+      ltaVersions.add(release);
+    }
+    sonar.setLtaVersions(ltaVersions);
 
-    sonar.setLtaVersion(ltaVersion);
-    sonar.setPastLtaVersion(pastLtaVersion);
+    if (!ltaVersions.isEmpty()) {
+      List<Release> sorted = sonar.getLtaVersions();
+      sonar.setLtaVersion(sorted.get(sorted.size() - 1).getVersion().toString());
+      if (sorted.size() > 1) {
+        sonar.setPastLtaVersion(sorted.get(sorted.size() - 2).getVersion().toString());
+      }
+    }
+  }
 
-    verifyVersion(sonar, sonar.getLtaVersion(), LTA_VERSION);
+  @CheckForNull
+  private static Release findLatestReleaseForMajorMinor(Sonar sonar, String majorMinor) {
+    Version majorMinorVersion = Version.create(majorMinor);
+    return sonar.getReleases().stream()
+      .filter(r -> r.getVersion().getMajor().equals(majorMinorVersion.getMajor()) && r.getVersion().getMinor().equals(majorMinorVersion.getMinor()))
+      .max(Comparator.naturalOrder())
+      .orElse(null);
   }
 
   private void verifyVersion(Sonar sonar, Release release, String versionType) {

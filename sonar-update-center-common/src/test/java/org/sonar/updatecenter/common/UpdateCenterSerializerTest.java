@@ -143,6 +143,33 @@ public class UpdateCenterSerializerTest {
   }
 
   @Test
+  public void toProperties_shouldWriteLtaVersionsAndEolDates_whenLtaVersionsListIsSet() {
+    Sonar sonar = new Sonar();
+    Release pastLtaRelease = new Release(sonar, Version.create("2025.4.7"));
+    pastLtaRelease.setProduct(Product.OLD_SONARQUBE);
+    sonar.addRelease(pastLtaRelease);
+
+    Release currentLtaRelease = new Release(sonar, Version.create("2026.1.3"));
+    currentLtaRelease.setProduct(Product.OLD_SONARQUBE);
+    sonar.addRelease(currentLtaRelease);
+
+    pastLtaRelease.setEolDate(FormatUtils.toDate("2026-08-01"));
+    currentLtaRelease.setEolDate(FormatUtils.toDate("2027-07-01"));
+    sonar.setLtaVersions(Arrays.asList(pastLtaRelease, currentLtaRelease));
+
+    PluginReferential pluginReferential = PluginReferential.create(new ArrayList<>());
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
+    Properties properties = UpdateCenterSerializer.toProperties(center);
+
+    assertProperty(properties, "ltaVersions", "2025.4,2026.1");
+    assertProperty(properties, "2025.4.eolDate", "2026-08-01");
+    assertProperty(properties, "2026.1.eolDate", "2027-07-01");
+    // legacy scalar fields are kept in sync by the deserializer, not the serializer;
+    // the serializer only writes whatever is set on Sonar#getLtaVersion()/getPastLtaVersion()
+    assertThat(properties.getProperty("ltaVersion")).isNull();
+  }
+
+  @Test
   public void should_return_required_releases() throws IOException {
     Sonar sonar = new Sonar();
     addReleaseToSonarObject("2.0", sonar);
