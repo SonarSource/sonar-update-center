@@ -104,6 +104,7 @@ public final class UpdateCenterSerializer {
       set(p, "ltaVersions", ltaVersions.stream().map(UpdateCenterSerializer::toMajorMinor).toList());
       ltaVersions.forEach(ltaRelease -> setLtaEolDates(p, ltaRelease));
     }
+    validateNoPremiumEolDateOnNonLtaReleases(center, ltaVersions);
     for (Product product : Product.values()) {
       setProductProperties(center, p, product);
     }
@@ -124,6 +125,20 @@ public final class UpdateCenterSerializer {
     if (ltaRelease.getPremiumEolDate() != null) {
       set(p, toMajorMinor(ltaRelease) + PREMIUM_EOL_DATE_SUFFIX, FormatUtils.toDateString(ltaRelease.getPremiumEolDate()));
     }
+  }
+
+  private static void validateNoPremiumEolDateOnNonLtaReleases(UpdateCenter center, List<Release> ltaVersions) {
+    Set<String> ltaMajorMinors = ltaVersions.stream()
+      .map(UpdateCenterSerializer::toMajorMinor)
+      .collect(Collectors.toSet());
+    center.getSonar().getReleases().stream()
+      .filter(release -> release.getPremiumEolDate() != null)
+      .filter(release -> !ltaMajorMinors.contains(toMajorMinor(release)))
+      .findFirst()
+      .ifPresent(release -> {
+        throw new IllegalStateException(
+          "premiumEolDate is only supported for LTA versions, but was set on non-LTA release: " + release.getVersion());
+      });
   }
 
   private static String toMajorMinor(Release release) {

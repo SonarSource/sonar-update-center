@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class UpdateCenterSerializerTest {
 
@@ -170,6 +171,30 @@ public class UpdateCenterSerializerTest {
     // legacy scalar fields are kept in sync by the deserializer, not the serializer;
     // the serializer only writes whatever is set on Sonar#getLtaVersion()/getPastLtaVersion()
     assertThat(properties.getProperty("ltaVersion")).isNull();
+  }
+
+  @Test
+  public void toProperties_shouldThrowException_whenPremiumEolDateIsSetOnNonLtaRelease() {
+    Sonar sonar = new Sonar();
+    Release ltaRelease = new Release(sonar, Version.create("2026.1.3"));
+    ltaRelease.setProduct(Product.OLD_SONARQUBE);
+    ltaRelease.setEolDate(FormatUtils.toDate("2027-01-27"));
+    ltaRelease.setPremiumEolDate(FormatUtils.toDate("2027-08-01"));
+    sonar.addRelease(ltaRelease);
+    sonar.setLtaVersions(Arrays.asList(ltaRelease));
+
+    Release nonLtaRelease = new Release(sonar, Version.create("2026.3.0"));
+    nonLtaRelease.setProduct(Product.OLD_SONARQUBE);
+    nonLtaRelease.setPremiumEolDate(FormatUtils.toDate("2027-01-01"));
+    sonar.addRelease(nonLtaRelease);
+
+    PluginReferential pluginReferential = PluginReferential.create(new ArrayList<>());
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
+
+    assertThatThrownBy(() -> UpdateCenterSerializer.toProperties(center))
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("premiumEolDate is only supported for LTA versions")
+      .hasMessageContaining("2026.3.0");
   }
 
   @Test
