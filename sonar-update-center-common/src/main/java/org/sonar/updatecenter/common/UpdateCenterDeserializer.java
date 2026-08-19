@@ -50,6 +50,7 @@ public final class UpdateCenterDeserializer {
 
   public static final String DATE_SUFFIX = ".date";
   public static final String EOL_DATE_SUFFIX = ".eolDate";
+  public static final String PREMIUM_EOL_DATE_SUFFIX = ".premiumEolDate";
   public static final String DESCRIPTION_SUFFIX = ".description";
   public static final String MAVEN_GROUPID_SUFFIX = ".mavenGroupId";
   public static final String MAVEN_ARTIFACTID_SUFFIX = ".mavenArtifactId";
@@ -420,6 +421,7 @@ public final class UpdateCenterDeserializer {
         continue;
       }
       release.setEolDate(toDate(getOrDefault(properties, majorMinor, EOL_DATE_SUFFIX, false)));
+      release.setPremiumEolDate(toDate(getOrDefault(properties, majorMinor, PREMIUM_EOL_DATE_SUFFIX, false)));
       ltaVersions.add(release);
     }
     sonar.setLtaVersions(ltaVersions);

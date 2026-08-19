@@ -154,7 +154,8 @@ public class UpdateCenterSerializerTest {
     sonar.addRelease(currentLtaRelease);
 
     pastLtaRelease.setEolDate(FormatUtils.toDate("2026-08-01"));
-    currentLtaRelease.setEolDate(FormatUtils.toDate("2027-07-01"));
+    currentLtaRelease.setEolDate(FormatUtils.toDate("2027-01-27"));
+    currentLtaRelease.setPremiumEolDate(FormatUtils.toDate("2027-08-01"));
     sonar.setLtaVersions(Arrays.asList(pastLtaRelease, currentLtaRelease));
 
     PluginReferential pluginReferential = PluginReferential.create(new ArrayList<>());
@@ -163,7 +164,9 @@ public class UpdateCenterSerializerTest {
 
     assertProperty(properties, "ltaVersions", "2025.4,2026.1");
     assertProperty(properties, "2025.4.eolDate", "2026-08-01");
-    assertProperty(properties, "2026.1.eolDate", "2027-07-01");
+    assertThat(properties.getProperty("2025.4.premiumEolDate")).isNull();
+    assertProperty(properties, "2026.1.eolDate", "2027-01-27");
+    assertProperty(properties, "2026.1.premiumEolDate", "2027-08-01");
     // legacy scalar fields are kept in sync by the deserializer, not the serializer;
     // the serializer only writes whatever is set on Sonar#getLtaVersion()/getPastLtaVersion()
     assertThat(properties.getProperty("ltaVersion")).isNull();

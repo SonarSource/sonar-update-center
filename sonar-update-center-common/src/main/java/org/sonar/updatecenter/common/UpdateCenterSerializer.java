@@ -37,6 +37,7 @@ import static org.sonar.updatecenter.common.UpdateCenterDeserializer.CHANGELOG_U
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DATE_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DESCRIPTION_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.EOL_DATE_SUFFIX;
+import static org.sonar.updatecenter.common.UpdateCenterDeserializer.PREMIUM_EOL_DATE_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DISPLAY_VERSION_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.DOWNLOAD_URL_SUFFIX;
 import static org.sonar.updatecenter.common.UpdateCenterDeserializer.MAVEN_ARTIFACTID_SUFFIX;
@@ -101,11 +102,7 @@ public final class UpdateCenterSerializer {
     List<Release> ltaVersions = center.getSonar().getLtaVersions();
     if (!ltaVersions.isEmpty()) {
       set(p, "ltaVersions", ltaVersions.stream().map(UpdateCenterSerializer::toMajorMinor).toList());
-      for (Release ltaRelease : ltaVersions) {
-        if (ltaRelease.getEolDate() != null) {
-          set(p, toMajorMinor(ltaRelease) + EOL_DATE_SUFFIX, FormatUtils.toDateString(ltaRelease.getEolDate()));
-        }
-      }
+      ltaVersions.forEach(ltaRelease -> setLtaEolDates(p, ltaRelease));
     }
     for (Product product : Product.values()) {
       setProductProperties(center, p, product);
@@ -118,6 +115,15 @@ public final class UpdateCenterSerializer {
     }
     set(p, "plugins", pluginKeys);
     return p;
+  }
+
+  private static void setLtaEolDates(Properties p, Release ltaRelease) {
+    if (ltaRelease.getEolDate() != null) {
+      set(p, toMajorMinor(ltaRelease) + EOL_DATE_SUFFIX, FormatUtils.toDateString(ltaRelease.getEolDate()));
+    }
+    if (ltaRelease.getPremiumEolDate() != null) {
+      set(p, toMajorMinor(ltaRelease) + PREMIUM_EOL_DATE_SUFFIX, FormatUtils.toDateString(ltaRelease.getPremiumEolDate()));
+    }
   }
 
   private static String toMajorMinor(Release release) {
