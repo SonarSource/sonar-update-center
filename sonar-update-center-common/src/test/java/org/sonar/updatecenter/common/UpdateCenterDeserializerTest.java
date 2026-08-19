@@ -310,7 +310,9 @@ public class UpdateCenterDeserializerTest {
       List<Release> ltaVersions = center.getSonar().getLtaVersions();
       assertThat(ltaVersions).extracting(release -> release.getVersion().toString()).containsExactly("2025.4", "2026.1.1");
       assertThat(ltaVersions.get(0).getEolDate()).isEqualTo(FormatUtils.toDate("2026-08-01"));
-      assertThat(ltaVersions.get(1).getEolDate()).isEqualTo(FormatUtils.toDate("2027-07-01"));
+      assertThat(ltaVersions.get(0).getPremiumEolDate()).isNull();
+      assertThat(ltaVersions.get(1).getEolDate()).isEqualTo(FormatUtils.toDate("2027-01-27"));
+      assertThat(ltaVersions.get(1).getPremiumEolDate()).isEqualTo(FormatUtils.toDate("2027-08-01"));
 
       // legacy scalar fields are kept in sync with the list for consumers that haven't migrated yet
       assertThat(center.getSonar().getLtaVersion().getVersion()).isEqualTo(Version.create("2026.1.1"));

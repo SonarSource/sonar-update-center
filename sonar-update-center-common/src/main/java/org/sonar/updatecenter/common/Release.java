@@ -71,6 +71,7 @@ public class Release implements Comparable<Release> {
   private final SortedSet<Version> compatibleCommunitySqVersions;
   private Date date;
   private Date eolDate;
+  private Date premiumEolDate;
 
   public Release(Artifact artifact, Version version) {
     this.artifact = artifact;
@@ -276,6 +277,16 @@ public class Release implements Comparable<Release> {
 
   public Release setEolDate(@Nullable Date eolDate) {
     this.eolDate = eolDate != null ? new Date(eolDate.getTime()) : null;
+    return this;
+  }
+
+  @CheckForNull
+  public Date getPremiumEolDate() {
+    return premiumEolDate != null ? new Date(premiumEolDate.getTime()) : null;
+  }
+
+  public Release setPremiumEolDate(@Nullable Date premiumEolDate) {
+    this.premiumEolDate = premiumEolDate != null ? new Date(premiumEolDate.getTime()) : null;
     return this;
   }
 
