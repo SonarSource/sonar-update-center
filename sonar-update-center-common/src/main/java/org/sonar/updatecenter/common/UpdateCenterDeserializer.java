@@ -109,6 +109,12 @@ public final class UpdateCenterDeserializer {
     DEV
   }
 
+  private enum ReleaseVisibility {
+    PUBLIC,
+    ARCHIVED,
+    DEFAULT
+  }
+
   /**
    * Load configuration with one file for each plugin
    */
@@ -259,17 +265,17 @@ public final class UpdateCenterDeserializer {
     HashMap<String, Map.Entry<String, Integer>> flavorsLabel = new HashMap<>();
     parseFlavors(p, key, flavorsLabel);
 
-    parseReleases(p, sonar, key, c, PUBLIC_VERSIONS, flavorsLabel, true, false);
+    parseReleases(p, sonar, key, c, PUBLIC_VERSIONS, flavorsLabel, ReleaseVisibility.PUBLIC);
     if (mode == Mode.DEV) {
-      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, false, false);
+      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, ReleaseVisibility.DEFAULT);
       parseDevVersions(p, sonar, key, c, flavorsLabel);
     }
 
     if (includeArchives) {
-      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, false, false);
-      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, false, false);
+      parseReleases(p, sonar, key, c, PRIVATE_VERSIONS, flavorsLabel, ReleaseVisibility.DEFAULT);
+      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, ReleaseVisibility.DEFAULT);
     } else {
-      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, false, true);
+      parseReleases(p, sonar, key, c, ARCHIVED_VERSIONS, flavorsLabel, ReleaseVisibility.ARCHIVED);
     }
   }
 
@@ -295,10 +301,10 @@ public final class UpdateCenterDeserializer {
   }
 
   private void parseReleases(Properties p, Sonar sonar, String pluginKey, Component component, String key,
-    HashMap<String, Map.Entry<String, Integer>> flavorLabel, boolean isPublicRelease, boolean isArchivedRelease) {
+    HashMap<String, Map.Entry<String, Integer>> flavorLabel, ReleaseVisibility visibility) {
     String[] pluginPublicReleases = getArray(p, pluginKey, key);
     for (String pluginVersion : pluginPublicReleases) {
-      Release releaseToAdd = parseRelease(p, sonar, pluginKey, component, isPublicRelease, isArchivedRelease, pluginVersion, flavorLabel);
+      Release releaseToAdd = parseRelease(p, sonar, pluginKey, component, visibility, pluginVersion, flavorLabel);
       Optional<Release> alreadyExistingRelease = component.getAllReleases().stream()
         .filter(r -> r.getArtifact().equals(releaseToAdd.getArtifact()))
         .filter(r -> r.getVersion().equals(releaseToAdd.getVersion()))
@@ -320,7 +326,9 @@ public final class UpdateCenterDeserializer {
   }
 
   private Release parseRelease(Properties p, Sonar sonar, String pluginKey, Component component,
-    boolean isPublicRelease, boolean isArchivedRelease, String pluginVersion, HashMap<String, Map.Entry<String, Integer>> flavorLabel) {
+    ReleaseVisibility visibility, String pluginVersion, HashMap<String, Map.Entry<String, Integer>> flavorLabel) {
+    boolean isPublicRelease = visibility == ReleaseVisibility.PUBLIC;
+    boolean isArchivedRelease = visibility == ReleaseVisibility.ARCHIVED;
 
     Release release = new Release(component, pluginVersion);
     try {
@@ -386,7 +394,7 @@ public final class UpdateCenterDeserializer {
     Integer>> flavorLabel) {
     String devVersion = get(p, pluginKey, DEV_VERSION, false);
     if (StringUtils.isNotBlank(devVersion)) {
-      Release release = parseRelease(p, sonar, pluginKey, component, false, false, devVersion, flavorLabel);
+      Release release = parseRelease(p, sonar, pluginKey, component, ReleaseVisibility.DEFAULT, devVersion, flavorLabel);
       component.setDevRelease(release);
     }
   }
@@ -499,10 +507,12 @@ public final class UpdateCenterDeserializer {
     String sqVersions = get(p, pluginKey, pluginVersion + "." + product.getSuffix(), false);
     List<String> patterns = split(StringUtils.defaultIfEmpty(sqVersions, ""));
     List<Version> result = new LinkedList<>();
+    Pattern multipleEltPattern = Pattern.compile("\\[(.*),(.*)\\]");
+    Pattern simpleEltPattern = Pattern.compile("\\[(.*)\\]");
     for (String pattern : patterns) {
       if (pattern != null) {
-        Matcher multipleEltMatcher = Pattern.compile("\\[(.*),(.*)\\]").matcher(pattern);
-        Matcher simpleEltMatcher = Pattern.compile("\\[(.*)\\]").matcher(pattern);
+        Matcher multipleEltMatcher = multipleEltPattern.matcher(pattern);
+        Matcher simpleEltMatcher = simpleEltPattern.matcher(pattern);
         if (multipleEltMatcher.matches()) {
           final Version low = resolveLowVersion(multipleEltMatcher.group(1), pattern, pluginKey);
           final Version high = resolveKeywordAndStar(multipleEltMatcher.group(2), sonar, pluginKey, product);
