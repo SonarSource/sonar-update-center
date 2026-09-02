@@ -64,11 +64,9 @@ public class Release implements Comparable<Release> {
   private final Set<Release> outgoingDependencies;
   private final Set<Release> incomingDependencies;
   /**
-   * from oldest to newest sonar versions
+   * from oldest to newest sonar versions, keyed by product
    */
-  private final SortedSet<Version> compatibleSqVersions;
-  private final SortedSet<Version> compatiblePaidSqVersions;
-  private final SortedSet<Version> compatibleCommunitySqVersions;
+  private final EnumMap<Product, SortedSet<Version>> compatibleVersionsByProduct;
   private Date date;
   private Date eolDate;
   private Date premiumEolDate;
@@ -80,9 +78,10 @@ public class Release implements Comparable<Release> {
     this.isArchived = false;
 
     this.downloadUrl = new EnumMap<>(Edition.class);
-    this.compatibleSqVersions = new TreeSet<>();
-    this.compatibleCommunitySqVersions = new TreeSet<>();
-    this.compatiblePaidSqVersions = new TreeSet<>();
+    this.compatibleVersionsByProduct = new EnumMap<>(Product.class);
+    this.compatibleVersionsByProduct.put(Product.OLD_SONARQUBE, new TreeSet<>());
+    this.compatibleVersionsByProduct.put(Product.SONARQUBE_COMMUNITY_BUILD, new TreeSet<>());
+    this.compatibleVersionsByProduct.put(Product.SONARQUBE_SERVER, new TreeSet<>());
     this.outgoingDependencies = new HashSet<>();
     this.incomingDependencies = new HashSet<>();
     this.scannerDownloadFlavor = new HashMap<>();
@@ -186,15 +185,15 @@ public class Release implements Comparable<Release> {
   }
 
   public SortedSet<Version> getRequiredSonarVersions() {
-    return compatibleSqVersions;
+    return compatibleVersionsByProduct.get(Product.OLD_SONARQUBE);
   }
 
   public SortedSet<Version> getRequiredPaidSonarVersions() {
-    return compatiblePaidSqVersions;
+    return compatibleVersionsByProduct.get(Product.SONARQUBE_SERVER);
   }
 
   public SortedSet<Version> getRequiredCommunitySonarVersions() {
-    return compatibleCommunitySqVersions;
+    return compatibleVersionsByProduct.get(Product.SONARQUBE_COMMUNITY_BUILD);
   }
 
   public boolean supportSonarVersion(Version providedSqVersion, Product product) {
@@ -248,16 +247,11 @@ public class Release implements Comparable<Release> {
   }
 
   public SortedSet<Version> productToVersions(Product product) {
-    switch (product) {
-      case OLD_SONARQUBE:
-        return compatibleSqVersions;
-      case SONARQUBE_COMMUNITY_BUILD:
-        return compatibleCommunitySqVersions;
-      case SONARQUBE_SERVER:
-        return compatiblePaidSqVersions;
-      default:
-        throw new IllegalArgumentException("Unsupported product: " + product);
+    SortedSet<Version> versions = compatibleVersionsByProduct.get(product);
+    if (versions == null) {
+      throw new IllegalArgumentException("Unsupported product: " + product);
     }
+    return versions;
   }
 
   @CheckForNull
