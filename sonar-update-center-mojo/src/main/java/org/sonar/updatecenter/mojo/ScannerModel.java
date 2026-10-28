@@ -27,8 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ScannerModel {
-  private Scanner scanner;
-  private Sonar sonar;
+  private final Scanner scanner;
+  private final Sonar sonar;
 
   public ScannerModel(Scanner scanner, Sonar sonar) {
     this.scanner = scanner;
