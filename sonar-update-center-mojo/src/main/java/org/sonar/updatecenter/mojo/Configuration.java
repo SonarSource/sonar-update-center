@@ -32,7 +32,7 @@ class Configuration {
   private File outputDir;
   private File inputFile;
   private UpdateCenter updateCenter;
-  private boolean checkDownloadUrls;
+  private final boolean checkDownloadUrls;
 
   Configuration(File outputDir, File inputFile, boolean devMode, boolean ignoreErrors, boolean includeArchives, boolean checkDownloadUrls, Log log) {
     if (!inputFile.exists() || !inputFile.isFile()) {
