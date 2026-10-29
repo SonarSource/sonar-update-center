@@ -37,13 +37,13 @@ import org.sonar.updatecenter.common.exception.PluginNotFoundException;
 public class UpdateCenter {
 
   private static final Logger LOG = LoggerFactory.getLogger(UpdateCenter.class);
-  private PluginReferential updateCenterPluginReferential;
+  private final PluginReferential updateCenterPluginReferential;
   private PluginReferential installedPluginReferential;
   private Version installedSonarVersion;
   private Product installedSonarProduct;
   private Date date;
-  private Sonar sonar;
-  private List<Scanner> scanners;
+  private final Sonar sonar;
+  private final List<Scanner> scanners;
 
   private UpdateCenter(PluginReferential updateCenterPluginReferential, List<Scanner> scanners, Sonar sonar, @Nullable Product product) {
     this.updateCenterPluginReferential = updateCenterPluginReferential;
