@@ -29,8 +29,8 @@ import org.sonar.updatecenter.common.UpdateCenterDeserializer.Mode;
 
 class Configuration {
 
-  private File outputDir;
-  private File inputFile;
+  private final File outputDir;
+  private final File inputFile;
   private UpdateCenter updateCenter;
   private boolean checkDownloadUrls;
 
