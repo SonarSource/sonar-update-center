@@ -31,9 +31,9 @@ public class Version implements Comparable<Version> {
   private String minor = "0";
   private String patch = "0";
   private String patch2 = "0";
-  private String qualifier;
-  private String name;
-  private String fromString;
+  private final String qualifier;
+  private final String name;
+  private final String fromString;
 
   protected Version(String version, String fromString) {
     this.name = StringUtils.trimToEmpty(version);

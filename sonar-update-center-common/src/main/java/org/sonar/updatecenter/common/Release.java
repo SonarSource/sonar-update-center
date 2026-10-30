@@ -46,7 +46,7 @@ import static java.util.Collections.unmodifiableSet;
 
 public class Release implements Comparable<Release> {
 
-  private Artifact artifact;
+  private final Artifact artifact;
   private Version version;
   private String displayVersion;
   private String description;
