@@ -455,7 +455,8 @@ public class UpdateCenterDeserializerTest {
       Properties props = new Properties();
       props.load(input);
       UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, true).fromProperties(props);
-      assertThat(center).isNotNull();
+      Plugin clirr = center.getUpdateCenterPluginReferential().findPlugin("clirr");
+      assertThat(clirr.getVersions()).contains(Version.create("1.0"), Version.create("1.1"));
     }
   }
 
