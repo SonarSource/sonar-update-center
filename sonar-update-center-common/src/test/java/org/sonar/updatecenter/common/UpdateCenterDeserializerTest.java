@@ -454,7 +454,8 @@ public class UpdateCenterDeserializerTest {
     try (InputStream input = getClass().getResourceAsStream("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/updates-with-overlap-sqVersion.properties")) {
       Properties props = new Properties();
       props.load(input);
-      new UpdateCenterDeserializer(Mode.PROD, true).fromProperties(props);
+      UpdateCenter center = new UpdateCenterDeserializer(Mode.PROD, true).fromProperties(props);
+      assertThat(center).isNotNull();
     }
   }
 
