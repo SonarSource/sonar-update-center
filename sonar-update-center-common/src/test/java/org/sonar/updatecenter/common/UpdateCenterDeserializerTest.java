@@ -132,7 +132,7 @@ public class UpdateCenterDeserializerTest {
     URL url = getClass().getResource("/org/sonar/updatecenter/common/UpdateCenterDeserializerTest/splitFileFormat/nominal/update-center.properties");
     UpdateCenter center = new UpdateCenterDeserializer(Mode.DEV, false).fromManyFiles(new File(url.toURI()));
     List<Scanner> scanners = center.getScanners();
-    assertThat(scanners.size()).isEqualTo(1);
+    assertThat(scanners).hasSize(1);
     Scanner scanner = scanners.get(0);
     assertThat(scanner.getLicense()).isEqualTo("GNU LGPL 3");
   }
