@@ -31,6 +31,16 @@ mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metad
     -DoutputDir=output
 ```
 
+To quickly check the properties related to SonarQube releases, use the degraded mode (`-Ddegraded=true`). This
+does not download any plugin, and writes the output file without plugin properties:
+
+```bash
+mvn org.sonarsource.update-center:sonar-update-center-mojo:LATEST:generate-metadata \
+    -DinputFile=../sonar-update-center-properties/update-center-source.properties \
+    -DoutputDir=output \
+    -Ddegraded=true
+```
+
 ### To generate html
 
 This will generate html snippets for every plugins plus the compatability matrix

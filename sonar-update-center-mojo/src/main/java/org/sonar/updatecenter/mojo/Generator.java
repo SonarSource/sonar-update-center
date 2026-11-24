@@ -126,9 +126,23 @@ class Generator {
     }
   }
 
+  /**
+   * Degraded mode: generates the output file without plugin properties, so that no plugin needs to be downloaded.
+   * Useful to quickly verify the properties related to SonarQube releases.
+   */
+  void generateMetadataWithoutPlugins() {
+    UpdateCenter center = configuration.getUpdateCenter();
+    log.warn("Degraded mode: plugins are not downloaded and plugin properties are not included in the output file");
+    generateMetadata(center, false);
+  }
+
   private void generateMetadata(UpdateCenter center) {
+    generateMetadata(center, true);
+  }
+
+  private void generateMetadata(UpdateCenter center, boolean includePlugins) {
     log.info("Generate output: " + configuration.getOutputFile());
-    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
+    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile(), includePlugins);
   }
 
   private void generateHtmlMatrix(UpdateCenter center) throws IOException {

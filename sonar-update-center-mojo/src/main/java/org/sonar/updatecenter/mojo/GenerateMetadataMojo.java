@@ -71,6 +71,13 @@ public class GenerateMetadataMojo extends AbstractMojo {
   @Parameter(property = "validateOnly")
   boolean validateOnly = false;
 
+  /**
+   * Degraded mode: generate the output file without plugin properties. Plugins are not downloaded,
+   * which allows to quickly verify the properties related to SonarQube releases.
+   */
+  @Parameter(property = "degraded")
+  boolean degraded = false;
+
   @Override
   public void execute() throws MojoExecutionException {
     try {
@@ -82,7 +89,12 @@ public class GenerateMetadataMojo extends AbstractMojo {
       }
 
       // generate properties
-      new Generator(configuration, getLog()).generateMetadata();
+      Generator generator = new Generator(configuration, getLog());
+      if (degraded) {
+        generator.generateMetadataWithoutPlugins();
+      } else {
+        generator.generateMetadata();
+      }
 
     } catch (Exception e) {
       throw new MojoExecutionException("Fail to execute mojo", e);
