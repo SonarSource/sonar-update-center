@@ -75,6 +75,14 @@ public final class UpdateCenterSerializer {
   }
 
   public static Properties toProperties(UpdateCenter center) {
+    return toProperties(center, true);
+  }
+
+  /**
+   * @param includePlugins when {@code false}, plugin properties (including the {@code plugins} key) are omitted. Useful to verify
+   *                       SonarQube release properties without having to download all plugin artifacts.
+   */
+  public static Properties toProperties(UpdateCenter center, boolean includePlugins) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toDateTimeString(center.getDate()));
     SortedSet<Version> publicVersions = determinePublicVersionsField(center);
@@ -109,13 +117,18 @@ public final class UpdateCenterSerializer {
       setProductProperties(center, p, product);
     }
 
+    if (includePlugins) {
+      addPlugins(center, p);
+    }
+    return p;
+  }
 
+  private static void addPlugins(UpdateCenter center, Properties p) {
     List<String> pluginKeys = new ArrayList<>();
     for (Plugin plugin : center.getUpdateCenterPluginReferential().getPlugins()) {
       addPlugin(plugin, pluginKeys, p);
     }
     set(p, "plugins", pluginKeys);
-    return p;
   }
 
   private static void setLtaEolDates(Properties p, Release ltaRelease) {
@@ -232,8 +245,12 @@ public final class UpdateCenterSerializer {
   }
 
   public static void toProperties(UpdateCenter sonar, File toFile) {
+    toProperties(sonar, toFile, true);
+  }
+
+  public static void toProperties(UpdateCenter sonar, File toFile, boolean includePlugins) {
     try (OutputStream output = Files.newOutputStream(toFile.toPath())) {
-      toProperties(sonar).store(output, "Generated file");
+      toProperties(sonar, includePlugins).store(output, "Generated file");
 
     } catch (IOException e) {
       throw new IllegalStateException("Fail to store update center properties to: " + toFile.getAbsolutePath(), e);

@@ -240,6 +240,29 @@ public class UpdateCenterSerializerTest {
     assertThat(props.getProperty(key)).isEqualTo(value);
   }
 
+  @Test
+  public void toProperties_whenPluginsExcluded_shouldOnlyWriteSonarProperties() {
+    Sonar sonar = new Sonar();
+    addReleaseToSonarObject("2025.1", sonar, Product.SONARQUBE_SERVER);
+    addReleaseToSonarObject("25.1", sonar, Product.SONARQUBE_COMMUNITY_BUILD);
+
+    Plugin foo = Plugin.factory("foo");
+    foo.setName("Foo");
+    foo.addRelease(new Release(foo, Version.create("1.2"))
+      .addRequiredSonarVersions(Product.SONARQUBE_SERVER, Version.create("2025.1")));
+    PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo));
+
+    UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
+    Properties properties = UpdateCenterSerializer.toProperties(center, false);
+
+    assertProperty(properties, "sqs", "2025.1");
+    assertProperty(properties, "sqcb", "25.1");
+    assertThat(properties.getProperty("plugins")).isNull();
+    assertThat(properties.stringPropertyNames()).noneMatch(key -> key.startsWith("foo."));
+
+    assertProperty(UpdateCenterSerializer.toProperties(center, true), "plugins", "foo");
+  }
+
   private void addReleaseToSonarObject(String version, Sonar sonar) {
     addReleaseToSonarObject(version, sonar, Product.OLD_SONARQUBE);
   }

@@ -108,6 +108,33 @@ public class GenerateMetadataMojoTest {
   }
 
   @Test
+  public void degraded_mode_should_generate_properties_without_plugins_and_without_downloading() throws Exception {
+    File outputDir = temp.newFolder();
+
+    // plugins are NOT cached in outputDir: in degraded mode nothing must be downloaded
+    File inputFile = resource("update-center-template-for-requires-and-parent/update-center.properties");
+    GenerateMetadataMojo underTest = new GenerateMetadataMojo();
+    underTest.inputFile = inputFile;
+    underTest.outputDir = outputDir;
+    underTest.checkDownloadUrls = false;
+    underTest.degraded = true;
+    underTest.execute();
+
+    File outputFile = new File(outputDir, "sonar-updates.properties");
+    assertThat(outputFile).exists().isFile();
+    assertThat(outputDir.listFiles()).containsExactly(outputFile);
+    String output = FileUtils.readFileToString(outputFile, StandardCharsets.UTF_8);
+
+    assertThat(output)
+      .contains("ltaVersion=3.0")
+      .contains("3.0.downloadUrl=")
+      .doesNotContain("plugins=")
+      .doesNotContain("csharp.")
+      .doesNotContain("dotnet.")
+      .doesNotContain("fxcop.");
+  }
+
+  @Test
   public void generate_properties_with_requires_plugins_dev_mode() throws Exception {
     File outputDir = temp.newFolder();
 
