@@ -253,14 +253,14 @@ public class UpdateCenterSerializerTest {
     PluginReferential pluginReferential = PluginReferential.create(Arrays.asList(foo));
 
     UpdateCenter center = UpdateCenter.create(pluginReferential, new ArrayList<>(), sonar, null);
-    Properties properties = UpdateCenterSerializer.toProperties(center, false);
+    Properties properties = UpdateCenterSerializer.toPropertiesWithoutPlugins(center);
 
     assertProperty(properties, "sqs", "2025.1");
     assertProperty(properties, "sqcb", "25.1");
     assertThat(properties.getProperty("plugins")).isNull();
     assertThat(properties.stringPropertyNames()).noneMatch(key -> key.startsWith("foo."));
 
-    assertProperty(UpdateCenterSerializer.toProperties(center, true), "plugins", "foo");
+    assertProperty(UpdateCenterSerializer.toProperties(center), "plugins", "foo");
   }
 
   private void addReleaseToSonarObject(String version, Sonar sonar) {

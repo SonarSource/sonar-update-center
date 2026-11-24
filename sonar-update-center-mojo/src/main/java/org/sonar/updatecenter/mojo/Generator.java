@@ -133,16 +133,13 @@ class Generator {
   void generateMetadataWithoutPlugins() {
     UpdateCenter center = configuration.getUpdateCenter();
     log.warn("Degraded mode: plugins are not downloaded and plugin properties are not included in the output file");
-    generateMetadata(center, false);
+    log.info("Generate output: " + configuration.getOutputFile());
+    UpdateCenterSerializer.toPropertiesWithoutPlugins(center, configuration.getOutputFile());
   }
 
   private void generateMetadata(UpdateCenter center) {
-    generateMetadata(center, true);
-  }
-
-  private void generateMetadata(UpdateCenter center, boolean includePlugins) {
     log.info("Generate output: " + configuration.getOutputFile());
-    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile(), includePlugins);
+    UpdateCenterSerializer.toProperties(center, configuration.getOutputFile());
   }
 
   private void generateHtmlMatrix(UpdateCenter center) throws IOException {

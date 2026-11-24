@@ -75,14 +75,16 @@ public final class UpdateCenterSerializer {
   }
 
   public static Properties toProperties(UpdateCenter center) {
-    return toProperties(center, true);
+    Properties p = toPropertiesWithoutPlugins(center);
+    addPlugins(center, p);
+    return p;
   }
 
   /**
-   * @param includePlugins when {@code false}, plugin properties (including the {@code plugins} key) are omitted. Useful to verify
-   *                       SonarQube release properties without having to download all plugin artifacts.
+   * Same as {@link #toProperties(UpdateCenter)} but plugin properties (including the {@code plugins} key) are omitted.
+   * Useful to verify SonarQube release properties without having to download all plugin artifacts.
    */
-  public static Properties toProperties(UpdateCenter center, boolean includePlugins) {
+  public static Properties toPropertiesWithoutPlugins(UpdateCenter center) {
     Properties p = new Properties();
     set(p, "date", FormatUtils.toDateTimeString(center.getDate()));
     SortedSet<Version> publicVersions = determinePublicVersionsField(center);
@@ -115,10 +117,6 @@ public final class UpdateCenterSerializer {
     validateNoPremiumEolDateOnNonLtaReleases(center, ltaVersions);
     for (Product product : Product.values()) {
       setProductProperties(center, p, product);
-    }
-
-    if (includePlugins) {
-      addPlugins(center, p);
     }
     return p;
   }
@@ -245,12 +243,16 @@ public final class UpdateCenterSerializer {
   }
 
   public static void toProperties(UpdateCenter sonar, File toFile) {
-    toProperties(sonar, toFile, true);
+    store(toProperties(sonar), toFile);
   }
 
-  public static void toProperties(UpdateCenter sonar, File toFile, boolean includePlugins) {
+  public static void toPropertiesWithoutPlugins(UpdateCenter sonar, File toFile) {
+    store(toPropertiesWithoutPlugins(sonar), toFile);
+  }
+
+  private static void store(Properties properties, File toFile) {
     try (OutputStream output = Files.newOutputStream(toFile.toPath())) {
-      toProperties(sonar, includePlugins).store(output, "Generated file");
+      properties.store(output, "Generated file");
 
     } catch (IOException e) {
       throw new IllegalStateException("Fail to store update center properties to: " + toFile.getAbsolutePath(), e);
